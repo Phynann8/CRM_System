@@ -1,0 +1,96 @@
+<?php 
+$tr = Application_Form_FrmLanguages::getCurrentlanguage ();
+?>
+<title><?php echo $tr->translate('EXCHANGE_RATE_INFO');?></title>
+<div class="card pb-10 pt-10 pl-10 pr-10">
+	<div class="card-content collapse show">
+		<div class="card-box">
+               	<div class="col-sm-12 border-botom">
+		    		<div class="col-sm-8 pd-0">
+		    			<h4 class="m-b-0"><i class="fa fa-money" aria-hidden="true"></i>&nbsp;&nbsp;&nbsp;<?php echo $tr->translate('EXCHANGE_RATE_INFO');?></h4>
+    			</div>
+    			<div class="col-sm-4 text-right">
+    			</div>
+    		</div>
+    	</div>
+		<div class="card-box">
+			<form id="exchangerate" dojoType="dijit.form.Form" method="post">
+				<div class="form-group head-exch">
+					<div class="col-md-4 col-sm-4 col-xs-12">
+			    		<div class=" hearback text-center">
+			               	<h3><?php echo $tr->translate('CURRENCY');?></h3>
+			             </div>
+			         </div>
+			         <div class="col-md-4 col-sm-4 col-xs-12">
+			    		<div class="form-group hearback text-center">
+			                <h3><?php echo $tr->translate('DOLLAR');?></h3>
+			             </div>
+			         </div>
+			         <div class="col-md-4 col-sm-4 col-xs-12">
+			    		<div class="form-group hearback text-center">
+			                <h3><?php echo $tr->translate('RIEL');?></h3>
+			             </div>
+			         </div>
+			         <div class="clearfix"></div>
+			     </div>
+			     <div class="form-group exchange-conte">
+					<div class="col-md-4 col-sm-4 col-xs-12">
+			             <div class="form-group text-center mb-0">
+			             	<?php echo $tr->translate('DOLLAR_TO_RIEL');?>
+			             	<input type="hidden" name="id" id="id" dojotype="dijit.form.TextBox" type="text" value="<?php echo $this->rs['id'];?>"/>
+			             </div>
+			         </div>
+			         <div class="col-md-4 col-sm-4 col-xs-12 content-border-left">
+			            <div class="form-group">
+			               <input readonly="readonly" class="fullside" tabindex="5" dojotype="dijit.form.TextBox" id="dollar" name="dollar" value="<?php echo $this->rs['dollar'];?>" type="text" />
+			            </div>
+			         </div>
+			         <div class="col-md-4 col-sm-4 col-xs-12 content-border-left">
+			               <div class="form-group">
+			               <input class="fullside" tabindex="6" dojotype="dijit.form.TextBox" id="riel" name="riel" value="<?php echo $this->rs['reil'];?>" type="text" />
+			             </div>
+			         </div>
+			         <div class="clearfix"></div>
+			     </div>
+				<div class="clearfix"></div>
+		       	<div class="card-box mt-20 ">
+		      	 	<div class="col-md-12 col-sm-12 col-xs-12 border-top mt-20 ptb-10 text-center">
+						<input type="submit" value="<?php echo $tr->translate('SAVE');?>" id="save" name="save"  label="<?php echo $tr->translate('SAVE');?>" dojotype="dijit.form.Button" 
+						class="button-class button-primary" iconClass="glyphicon glyphicon-search" />
+	             	</div>
+	            </div>
+			</form>
+		</div>
+	</div>
+</div>
+
+
+<style type="text/css">
+.form-group.head-exch {
+    background: #ddd;
+    margin-bottom: 0;
+    border-bottom: solid 2px #000;
+}
+.form-group.exchange-conte {
+    background: #014563;
+    color: #fff;
+    border: none;
+    font-size: 16px;
+        margin: 0;
+}
+.form-group.exchange-conte .fullside {
+    background: #014563;
+    color: #fff;
+    border: none;
+    font-size: 16px;
+}
+.content-border-left .form-group {
+    margin: 0;
+    padding: 0;
+    padding: 18px;
+}
+.content-border-left {
+    border-left: solid 2px #000;
+    margin: 0;
+}
+</style>

@@ -1,0 +1,254 @@
+<?php
+$tr = Application_Form_FrmLanguages::getCurrentlanguage();
+$frm = $this->frm_callteral;
+ 
+echo $this->headTitle($tr->translate("ADD_BROKEN_BOOK"));
+$baseurl = $this->baseUrl();
+?>
+<script src="<?php echo $baseurl;?>/js/help.js"></script>
+<div class="card">
+	<div class="card-content collapse show">
+		<div class="card-box">
+             <div class="col-sm-12 border-botom">
+		    		<div class="col-sm-8 pd-0">
+		    			<h4 class="m-b-0"><i class="fa fa-exchange" aria-hidden="true"></i>&nbsp;<?php echo $tr->translate('ADD_BROKEN_BOOK');?></h4>
+    			</div>
+    			<div class="col-sm-4 text-right">
+    			</div>
+    		</div>
+    	</div>
+		<form id='frm_add_tran' action="<?php echo $this->url(array('module'=>'library','controller'=>'brokenbook','action'=>'add')); ?>" 
+		dojoType="dijit.form.Form" method="post" enctype="application/x-www-form-urlencoded">
+			<script type="dojo/method" event="onSubmit">			
+				if(this.validate()) {
+					var rowId = $('#identity').val();
+					if(rowId==''){
+						alert('Please add Book !');
+						dijit.byId('barcode').focus();
+						return false;
+					}			
+					loading();
+					return true;
+				}else {
+					return false;
+				}
+			</script>
+			<div class="card-box">
+				<div class="col-md-4 col-sm-4 col-xs-12">
+					<div class="card-blogform">
+							<div class="card-body"> 
+									<div class="row"> 
+										<div class="col-md-12 col-sm-12 col-xs-12">
+											<div class="d-flex "> 
+													<div class="settings-main-icon ">
+														<i class="glyphicon glyphicon-book" aria-hidden="true"></i>
+													</div> 
+													<div class="col-md-10 col-sm-10 col-xs-12"> 
+														<p class="tx-20 font-weight-semibold d-flex "><?php echo $tr->translate("BOOK_INFORMATION");?></p>
+													</div> 
+												</div>
+
+												<div class="form-group">
+												<label class="control-label  col-md-5 col-sm-5 col-xs-12" ><?php echo $tr->translate("Broken_No");?>
+												</label>
+												<div class="col-md-7 col-sm-7 col-xs-12">
+														<input class="fullside"  dojoType="dijit.form.TextBox" id="broken_no" name="broken_no" type="text"  value="<?php echo $this->bro_no;?>" readonly="readonly">
+												</div>
+												</div>
+												<div class="form-group">
+												<label class="control-label  col-md-5 col-sm-5 col-xs-12" ><?php echo $tr->translate("DATE");?>
+												</label>
+												<div class="col-md-7 col-sm-7 col-xs-12">
+														<input class="fullside" dojoType="dijit.form.DateTextBox" id="broken_date" constraints="{datePattern:'dd/MM/yyyy'}" name="broken_date" type="text"  value="<?php echo date('Y-m-d');?>" >
+												</div>
+												</div>
+												<div class="form-group">
+												<label class="control-label  col-md-5 col-sm-5 col-xs-12" ><?php echo $tr->translate("NOTE");?>
+												</label>
+												<div class="col-md-7 col-sm-7 col-xs-12">
+														<textarea class="fullside" id="note" rows="2" name="note" dojoType="dijit.form.Textarea" style="min-height:60px;"></textarea>
+												</div>
+												</div>
+										</div>
+									</div>
+							</div>
+					</div>
+		
+
+	             </div>
+				 
+	             <div class="col-md-8 col-sm-8 col-xs-12">
+					 <div class="card-blogform">
+							<div class="card-body"> 
+									<div class="row"> 
+										<div class="col-md-12 col-sm-12 col-xs-12">
+											<div class="d-flex "> 
+														<div class="settings-main-icon ">
+															<i class="glyphicon glyphicon-alert" aria-hidden="true"></i>
+														</div> 
+														<div class="col-md-10 col-sm-10 col-xs-12"> 
+															<p class="tx-20 font-weight-semibold d-flex "><?php echo $tr->translate("DETAIL_INFORMATION");?></p>
+														</div> 
+													</div>
+													<div class="col-md-12 col-sm-12 col-xs-12">
+														&nbsp;
+
+											</div>
+
+											<div class="form-group">
+												<div class="col-md-5 col-sm-12 col-xs-12">
+													<select name="book" id="book" dojoType="dijit.form.FilteringSelect"  queryExpr="*${0}*" autoComplete="false" class="fullside" onchange="getBookDetail();" >
+														<?php if(!empty($this->book_title)){echo $this->book_title;} ?>
+													</select>
+												</div>
+												<div class="col-md-7 col-sm-12 col-xs-12">
+													<input id="book_detail" />
+												</div>
+											</div>
+											<div class="form-group">
+												<div class="col-md-12 col-sm-12 col-xs-12">
+													<table id="table_row" width="100%" border="1" style="border-collapse: collapse; border:1px solid #ccc;">
+														<tr id="head-title" class="head-td" align="right"></tr>
+													</table>
+												</div>
+												<input type="hidden" name="identity" id="identity"  />
+											</div>
+
+										</div>
+									</div>
+							</div>
+					</div>
+			
+
+					
+
+	        	</div>
+			</div>
+			<div class="clearfix"></div>
+		    <div class="card-box">
+               	<div class="col-sm-12 border-top mt-20 ptb-10 text-center">
+               		<input class="button-class button-danger" iconClass="glyphicon glyphicon-erase"  type="reset" value="សំអាត" label="<?php echo $tr->translate('CLEAR');?>" dojoType="dijit.form.Button"/>
+					<input class="button-class button-primary" iconClass="glyphicon glyphicon-floppy-saved" type="submit" value="save_close" name="save_close" id="save_close"  label="<?php echo $tr->translate('SAVE_CLOSE');?>" dojoType="dijit.form.Button" 
+						 />
+					<input class="button-class button-primary" iconClass="glyphicon glyphicon-floppy-open" type="submit" value="save_new" name="save_new" id="save_new" label="<?php echo $tr->translate('SAVE_NEW');?>" dojoType="dijit.form.Button" 
+						 />
+	    		</div>
+	    	</div>
+		</form>
+	</div>
+</div>
+
+<script type="text/javascript">
+	dojo.require("dojo.NodeList-manipulate");
+	dojo.require("dojo.data.ObjectStore");
+	dojo.require("dojo.data.ItemFileWriteStore");  
+	dojo.require("dijit.form.DateTextBox");
+	dojo.require("dijit.form.Textarea");
+
+	var book_detail_store  = getDataStorefromJSON('id','name', <?php print_r(Zend_Json::encode($this->book_detail));?> );
+	dojo.ready(function(){
+		new dijit.form.FilteringSelect({
+			store: book_detail_store,
+			autoComplete: false,
+			queryExpr: "*${0}*",                     
+			id: "book_detail",
+			name: "book_detail",  
+			style:'',         
+			class: 'fullside',  
+			required:false,
+			placeHolder:"Select Book",          
+			onChange: function() {  
+				addRow();
+			}
+		}, "book_detail");
+		getBookDetail();
+	});
+
+	var col = 0;
+	var no = 0;
+	var title = 0;
+	var tmp = '';
+	var temp='';
+	var template = '';
+
+	function addRow() { 
+		book_detail=dijit.byId("book_detail").get("value");
+		if(book_detail==''){return false;}
+		
+		identity = $('#identity').val();
+		if(identity!=''){
+			arrays = identity.split(',');
+			for(var i=0;i<arrays.length;i++) {
+				book = dijit.byId('book_id'+arrays[i]).get('value');
+				if(book_detail==book){
+					alert("Already select !!! ");
+					return false;
+				}
+			}
+		}
+		
+		label_book_detail = dijit.byId("book_detail").attr('displayedValue');
+		col++;no++;
+		template='';
+		if(title!=1){    
+			temp+='<th><?php echo $tr->translate("DEL");?></th>';
+			temp+='<th><?php echo $tr->translate("N_O");?></th>';
+			temp+='<th><?php echo $tr->translate("BOOK");?></th>';
+			dojo.query("#head-title").append(temp);
+			title=1;
+		}
+			template+='<td width="10%"align="center"><img onclick="deleteRecord('+col+')" src="<?php echo $this->baseUrl();?>/images/Delete_16.png"></td>';
+			template+='<td width="10%" align="center">'+no+'</td>';
+			template+='<td width="80%">&nbsp;'+label_book_detail+'<input type="hidden" dojoType="dijit.form.TextBox" required="true" id="book_id'+col+'" name="book_id'+col+'" value="'+book_detail+'" /></td>';
+		tmp='<tr id="row'+col+'">';
+		tmp+="</tr>";
+		dojo.query("#table_row").append(tmp);
+
+		if($("#identity").val()!="") {
+			var identity = $("#identity").val();
+			$("#identity").val(identity+','+col);
+		} else {$("#identity").val(col);}
+		dojo.html.set(dojo.byId("row"+col),template , {
+			 parseContent: true,
+		});
+		dijit.byId('book_detail').set('value','');
+	}
+	function deleteRecord(index) {
+		var identity = $('#identity').val();
+		var arrays = identity.split(',');
+		for(var i=0;i<arrays.length;i++) {
+		if(arrays[i] == index) arrays.splice(i,1);
+		}
+		var strings = arrays.join(',');
+		$('#identity').val(strings);
+		dojo.query("#row"+index).remove();
+	}
+	var url_get_book_detail = '<?php echo $this->url(array('module'=>'library','controller'=>'borrowbook','action'=>'get-bookdetail')); ?>';
+	function getBookDetail(){
+		book_id = dijit.byId('book').get('value');
+		dojo.xhrPost({
+			url:url_get_book_detail,
+			content:{
+				'book_id':book_id,
+				'type'	 :2	// all book
+				},
+			handleAs:"json",
+			load: function(data) {
+				book_detail_store  = getDataStorefromJSON('id','name', data);
+				dijit.byId('book_detail').set('store',book_detail_store);  
+			},
+			error: function(err) {
+				alert(err);
+			}
+		});
+	}
+	function loading(){
+		document.getElementsByClassName("overlay")[0].style.display="block";
+	}
+</script>
+<div class="overlay">
+	<div class="overlay-load">
+		<div class="overlay-msg">
+		</div>
+	</div>
+</div>

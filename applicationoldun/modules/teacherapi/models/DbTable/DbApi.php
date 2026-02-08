@@ -1,0 +1,4955 @@
+<?php
+
+class Teacherapi_Model_DbTable_DbApi extends Zend_Db_Table_Abstract
+{
+	function getTeacherLogin($_data){
+		$db = $this->getAdapter();
+		$_data['userName']=trim($_data['userName']);
+		$_data['password']=trim($_data['password']);
+		try{
+			$sql =" SELECT
+				t.*
+			FROM
+				rms_teacher AS t
+			WHERE t.status = 1 AND t.staff_type =1 ";
+			$sql.= " AND ".$db->quoteInto('t.user_name=?', $_data['userName']);
+			$sql.= " AND ".$db->quoteInto('t.password=?', md5($_data['password']));
+			$row = $db->fetchRow($sql);
+			
+			$result = array(
+					'status' =>true,
+					'value' =>$row,
+			);
+			return $result;
+	
+		}catch(Exception $e){
+			Application_Model_DbTable_DbUserLog::writeMessageError($e->getMessage());
+			$result = array(
+					'status' =>false,
+					'value' =>$e->getMessage(),
+			);
+			return $result;
+		}
+	}
+	function getTeacherInformation($_data){
+		$_db = $this->getAdapter();
+		try{
+			
+			$currentLang = empty($_data['currentLang'])?1:$_data['currentLang'];
+			$userId = empty($_data['userId'])?0:$_data['userId'];
+			$colunmname='title_en';
+			$lbView="name_en";
+			$branch = "branch_nameen";
+			$schoolName = "school_nameen";
+	
+			$province = "province_en_name";
+			$commune = "commune_name";
+			$district = "district_name";
+			$vill = 'village_name';
+			$occuTitle='occu_enname';
+			$teacherName='teacher_name_en';
+			if ($currentLang==1){
+				$colunmname='title';
+				$lbView="name_kh";
+				$branch = "branch_namekh";
+				$schoolName = "school_namekh";
+		   
+				$province = "province_kh_name";
+				$commune = "commune_namekh";
+				$district = "district_namekh";
+				$vill = 'village_namekh';
+				$occuTitle = 'occu_name';
+				$teacherName='teacher_name_kh';
+			}
+			$sql ="SELECT
+						t.*
+						,t.id AS teacherId
+						,t.teacher_code AS teacherCode
+						,t.$teacherName AS teacherName
+						,t.teacher_name_kh AS teacherNameKh
+						,t.teacher_name_en AS teacherNameEng
+						
+						,t.branch_id AS branchId
+						,(SELECT $lbView from rms_view where type=2 and key_code=t.sex LIMIT 1) as genderTitle
+						,(SELECT $lbView FROM rms_view where type=21 and key_code=t.nationality LIMIT 1) AS nationality
+						 
+						,(SELECT $province FROM rms_province AS p WHERE p.province_id=t.province_id LIMIT 1) AS provinceTitle
+						,(SELECT $district FROM ln_district AS p WHERE p.dis_id=t.district_name LIMIT 1) AS districtTitle
+						,(SELECT $commune FROM ln_commune AS p WHERE p.com_id=t.commune_name LIMIT 1) AS communeTitle
+						,(SELECT $vill FROM `ln_village` AS v WHERE v.vill_id = t.village_name LIMIT 1) AS villageTitle
+						,CASE 
+							WHEN g.id IS NOT NULL THEN '1'
+							ELSE '0'
+						END AS isMainTeacher
+						
+			FROM
+				rms_teacher AS t 
+				LEFT JOIN `rms_group` AS g ON g.`teacher_id` = t.`id` AND g.status =1 AND g.is_pass =2 AND g.`is_use` =1
+			WHERE
+				t.staff_type=1 
+				AND t.id=$userId 
+			";//g.is_pass =2  active group
+			$sql.=" GROUP BY t.id ";
+			$sql.=" LIMIT 1";
+			$row = $_db->fetchAll($sql);
+			$row = empty($row) ? array() : $row;
+			$result = array(
+					'status' =>true,
+					'value' =>$row,
+			);
+			return $result;
+	
+		}catch(Exception $e){
+			Application_Model_DbTable_DbUserLog::writeMessageError($e->getMessage());
+			$result = array(
+					'status' =>false,
+					'value' =>$e->getMessage(),
+			);
+			return $result;
+		}
+	}
+    
+    function generateToken($row){
+    	$db = $this->getAdapter();
+    	try{
+			
+			$token = $row['mobileToken'];
+    		$this->_name = "mobile_mobile_token";
+			if(!empty($row['mobileToken'])){
+				$token = $row['mobileToken'];
+				$sql="SELECT id FROM mobile_mobile_token WHERE token='".$token."' LIMIT 1";
+				$rsid = $db->fetchOne($sql);
+				if(!empty($rsid)){
+					$row['id'] = empty($row['id']) ? 0 : $row['id'];
+					$row['deviceType'] = empty($row['deviceType']) ? 0 : $row['deviceType'];
+					$row['tokenType'] = empty($row['tokenType']) ? 0 : $row['tokenType'];
+					$_arr =array(
+    					'stu_id' 		=> $row['id'],
+    					'device_type' 	=> $row['deviceType'],
+    					'tokenType' 	=> $row['tokenType'],
+					);
+					//$where ='id= '.$rsid;
+					$where ="token= '".$token."'";
+					$this->update($_arr, $where);
+				}else{
+					$row['id'] = empty($row['id']) ? 0 : $row['id'];
+					$row['deviceType'] = empty($row['deviceType']) ? 0 : $row['deviceType'];
+					$row['tokenType'] = empty($row['tokenType']) ? 0 : $row['tokenType'];
+					$_arr =array(
+    					'stu_id' 		=> $row['id'],
+    					'device_type' 	=> $row['deviceType'],
+    					'tokenType' 	=> $row['tokenType'],
+					);
+					
+					$_arr['date'] = date("Y-m-d H:i:s");
+					$this->_name = "mobile_mobile_token";
+					$this->insert($_arr);
+				}
+			}
+			
+			/*
+    		$this->_name = "mobile_mobile_token";
+    		$token = $row['mobileToken'];
+    		$sql="SELECT id FROM mobile_mobile_token WHERE token='".$token."' AND stu_id=0 LIMIT 1";
+    		$rsid = $db->fetchOne($sql);
+    		if(!empty($rsid)){
+    			$_arr =array(
+    					'stu_id' 		=> $row['id'],
+    					'device_type' 	=> $row['deviceType'],
+    					'tokenType' 	=> $row['tokenType'],
+    					'device_model' 	=> "",
+    			);
+    			$where ='id= '.$rsid;
+    			$this->update($_arr, $where);
+    		}else{
+				
+	    		$sql="SELECT id FROM mobile_mobile_token WHERE stu_id=".$row['id']." AND token='".$token."' LIMIT 1";
+	    		$rs = $db->fetchOne($sql);
+	    		if(empty($rs)){
+					$_arr =array(
+	    				'stu_id' 	=> $row['id'],
+	    				'token' 	=> $token,
+	    				'device_type' => $row['deviceType'],
+						'tokenType' => $row['tokenType'],
+	    				'device_model' => "",
+	    			);
+					
+					$tokenType = $row['tokenType'];
+					$currentUserCheck = 0;
+					if($row['currentUserId']>0){
+						$sql="SELECT id FROM mobile_mobile_token WHERE stu_id=".$row['currentUserId']." AND token='".$token."' AND tokenType='".$tokenType."' LIMIT 1";
+						$currentUserCheck = $db->fetchOne($sql);
+					}
+					if($currentUserCheck >0){
+						$this->_name = "mobile_mobile_token";
+						$where=" id = $currentUserCheck ";
+						$this->update($_arr,$where);
+					}else{
+						$_arr['date'] = date("Y-m-d H:i:s");
+						$this->_name = "mobile_mobile_token";
+						$this->insert($_arr);
+					}
+					
+	    		}
+    		}*/
+    		
+    		return $token;
+    	}catch (Exception $e){
+    		Application_Model_DbTable_DbUserLog::writeMessageError($e->getMessage());
+    		return null;
+    	}
+    }
+	
+	function checkChangePassword($_data){
+		$db = $this->getAdapter();
+		try{
+	
+			$sql ="
+			SELECT
+				t.id AS id
+				,t.teacher_code AS teacherCode
+				,t.teacher_name_kh AS teaccherNameKh
+				,t.teacher_name_en AS teaccherNameEng
+				,t.photo
+			FROM
+				rms_teacher AS t
+			WHERE t.status = 1 ";
+			$sql.= " AND ".$db->quoteInto('t.id=?', $_data['userId']);
+			$sql.= " AND ".$db->quoteInto('t.password=?', md5($_data['oldPassword']));
+			$row = $db->fetchRow($sql);
+			if (empty($row)){
+				return false;
+			}
+			return true;
+		}catch(Exception $e){
+			Application_Model_DbTable_DbUserLog::writeMessageError($e->getMessage());
+			return false;
+		}
+	}
+	
+	function changePassword($_data){
+		$db = $this->getAdapter();
+		try{
+			$_arr=array(
+					'password'	  	=> md5($_data['newPassword']),
+			);
+			$this->_name = "rms_teacher";
+			$where = $this->getAdapter()->quoteInto("id=?",$_data['userId']);
+			$this->update($_arr, $where);
+			return true;
+		}catch(Exception $e){
+			Application_Model_DbTable_DbUserLog::writeMessageError($e->getMessage());
+			return false;
+		}
+	}
+	
+	
+	function getTeachingSchedule($_data){
+		$_db = $this->getAdapter();
+		try{
+			
+			
+			$currentLang = empty($_data['currentLang'])?1:$_data['currentLang'];
+			$userId = empty($_data['userId'])?0:$_data['userId'];
+			$forDay = empty($_data['forDay'])?0:$_data['forDay'];
+			$day = 0;
+			
+			$date = new DateTime();
+			$dayofweek = $date->format('w');
+			$currentDay=$dayofweek;
+			$nextDay=$dayofweek+1;
+			if($dayofweek==0){
+				$currentDay=7;
+			}
+			if($forDay==1){ // today
+				$day = $currentDay;
+			}else if($forDay==2){ // tomorrow
+				$day = $nextDay;
+			}
+			if(empty($_data['newVersion'])){
+				$label = "name_en";
+				$grade = "rms_itemsdetail.title_en";
+				$degree = "rms_items.title_en";
+				$branchName = "branch_nameen";
+				$subjectTitle = "subject_titleen";
+				$timeTitle = "title_en";
+				if ($currentLang==1){
+					$timeTitle = "title";
+					$subjectTitle = "subject_titlekh";
+					$branchName = "branch_namekh";
+					$label = "name_kh";
+					$grade = "rms_itemsdetail.title";
+					$degree = "rms_items.title";
+				}
+				$sql ="
+				SELECT 
+					(SELECT sj.subject_titlekh FROM `rms_subject` AS sj WHERE sj.id = schDetail.subject_id LIMIT 1) AS subjectTitleKh
+					,(SELECT sj.subject_titleen FROM `rms_subject` AS sj WHERE sj.id = schDetail.subject_id LIMIT 1) AS subjectTitleEng
+					,(SELECT sj.subject_lang FROM `rms_subject` AS sj WHERE sj.id = schDetail.subject_id LIMIT 1) AS subjectLang
+					,(SELECT CASE 
+								WHEN sj.subject_lang =1 THEN sj.subject_titlekh
+								ELSE sj.subject_titleen
+							END FROM `rms_subject` AS sj WHERE sj.id = schDetail.subject_id LIMIT 1) AS subjectTitle
+					,(SELECT v.".$label." FROM rms_view AS v WHERE v.key_code=schDetail.day_id AND v.type=18 LIMIT 1)AS daysTitle
+					,(SELECT t.$timeTitle FROM rms_timeseting AS t WHERE t.value =schDetail.from_hour LIMIT 1) AS fromHourTitle
+					,(SELECT t.$timeTitle FROM rms_timeseting AS t WHERE t.value =schDetail.to_hour LIMIT 1) AS toHourTitle
+					
+					,(SELECT b.".$branchName." FROM rms_branch as b WHERE b.br_id=g.branch_id LIMIT 1) AS branchName
+					,(SELECT br.branch_namekh FROM `rms_branch` AS br  WHERE br.br_id = g.branch_id LIMIT 1) AS branchNameKh
+					,(SELECT br.branch_nameen FROM `rms_branch` AS br  WHERE br.br_id = g.branch_id LIMIT 1) AS branchNameEn
+					,(SELECT b.school_nameen FROM rms_branch as b WHERE b.br_id=g.branch_id LIMIT 1) AS schoolNameen
+					,(SELECT b.photo FROM rms_branch as b WHERE b.br_id=g.branch_id LIMIT 1) AS branchLogo
+					
+					,(SELECT CONCAT(COALESCE(ac.fromYear,''),'-',COALESCE(ac.toYear,'')) FROM `rms_academicyear` AS ac WHERE ac.id = g.academic_year LIMIT 1) AS academicYear
+					,`g`.`group_code` AS groupCode
+					,`g`.`degree` AS degree_id
+					,`g`.`grade` AS gradeId
+					,COALESCE((SELECT `r`.`room_name` FROM `rms_room` `r` WHERE (`r`.`room_id` = `g`.`room_id`) LIMIT 1),'N/A') AS `roomName`
+					,(SELECT $degree FROM `rms_items`	WHERE (`rms_items`.`id`=`g`.`degree`) AND (`rms_items`.`type`=1)  LIMIT 1) as degreeTitle
+					,(SELECT $grade FROM `rms_itemsdetail` WHERE (`rms_itemsdetail`.`id`=`g`.`grade`) AND (`rms_itemsdetail`.`items_type`=1) LIMIT 1) as gradeTitle	
+					,schDetail.*
+				FROM 
+					rms_group_reschedule AS schDetail
+					,rms_group_schedule AS sch
+					,rms_group AS g
+				WHERE 
+					sch.id =schDetail.main_schedule_id
+					AND sch.status = 1
+					AND g.id =sch.group_id
+					AND g.is_use =1
+					AND g.is_pass =2 
+				";
+				$sql.=" AND schDetail.techer_id=".$userId;
+				if(!empty($day)){
+					$sql.=" AND schDetail.day_id=".$day;
+				}
+				$sql.=" ORDER BY schDetail.day_id ASC ,schDetail.from_hour ASC ";
+
+				$row = $_db->fetchAll($sql);
+			}else{
+				$branchName = "branch_nameen";
+				if ($currentLang==1){
+					$branchName = "branch_namekh";
+				}
+				$jsonData = "
+				CONCAT('['
+					,GROUP_CONCAT(
+						'{',
+						'\"dayId\":','\"',sch.`dayId`,'\"'
+						',\"dayT\":','\"',sch.`daysTitle`,'\"'
+						',\"dayTKH\":','\"',sch.`daysTitleKh`,'\"'
+						',\"fT\":','\"',sch.`fromHourTitle`,'\"'
+						',\"fTKh\":','\"',sch.`fromHourTitleKh`,'\"'
+						',\"tT\":','\"',sch.`toHourTitle`,'\"'
+						',\"tTKh\":','\"',sch.`toHourTitleKh`,'\"'
+						',\"subjT\":','\"',sch.`subjectTitle`,'\"'
+						',\"subjLang\":','\"',sch.`subjectLang`,'\"'
+						',\"subjShort\":','\"',sch.`subjectShortcut`,'\"'
+						',\"subjTEN\":','\"',sch.`subjectTitleEng`,'\"'
+						',\"subjTKH\":','\"',sch.`subjectTitleKh`,'\"'
+						',\"groupCode\":','\"',sch.`groupCode`,'\"'
+						',\"room\":','\"',sch.`roomName`,'\"'
+						',\"hrTchName\":','\"',sch.`homeroomTeacher`,'\"'
+						',\"hrTchNameKh\":','\"',sch.`homeroomTeacherKh`,'\"'
+						,'}'
+						ORDER BY sch.`dayId` ASC, sch.`fromHourVal` ASC
+					)
+					,']'
+				) AS academicSchedule
+				";
+				$sql ="
+				SELECT 
+					b.$branchName AS branhcName
+					,sch.`academicYearId`
+					,CONCAT(COALESCE(ac.fromYear,''),'-',COALESCE(ac.toYear,'')) AS academicYear
+					,$jsonData
+				";
+				$sql.="
+				FROM `vapi_teaching_schedule` AS sch 
+					LEFT JOIN `rms_academicyear` AS ac ON ac.id = sch.`academicYearId`
+					LEFT JOIN rms_branch AS b ON b.br_id=sch.`branchId`
+				WHERE 
+					1
+					AND sch.`teacherId` = $userId 
+				";
+				$sql.=" GROUP BY sch.`branchId`,sch.`academicYearId` ";
+				$row = $_db->fetchAll($sql);
+			}
+			
+			$result = array(
+					'status' =>true,
+					'value' =>$row,
+			);
+			return $result;
+	
+		}catch(Exception $e){
+			Application_Model_DbTable_DbUserLog::writeMessageError($e->getMessage());
+			$result = array(
+					'status' =>false,
+					'value' =>$e->getMessage(),
+			);
+			return $result;
+		}
+	}
+	function getIssueScoreListByClass($_data){
+		$_db = $this->getAdapter();
+		try{
+			$currentLang = empty($_data['currentLang'])?1:$_data['currentLang'];
+			$userId = empty($_data['userId'])?0:$_data['userId'];
+			
+			$annual='Annual';
+			$colunmname='title_en';
+			$label = 'name_en';
+			$branch = "branch_nameen";
+			$month = "month_en";
+			$subjectTitle='subject_titleen';
+			if ($currentLang==1){
+				$annual='ប្រចាំឆ្នាំ';
+				$colunmname='title';
+				$label = 'name_kh';
+				$branch = "branch_namekh";
+				$month = "month_kh";
+				$subjectTitle='subject_titlekh';
+			}
+			
+			$sqlSelect="
+				SELECT 
+					grd.*
+					,CONCAT(grd.academicYear,IF(COALESCE(grd.settingEntryId,0) > 9,  COALESCE(grd.settingEntryId,0), CONCAT('0',COALESCE(grd.settingEntryId,0))) ,COALESCE(grd.examType,0),COALESCE(grd.forSemester,0),IF(COALESCE(grd.forMonth,0) > 9,  COALESCE(grd.forMonth,0), CONCAT('0',COALESCE(grd.forMonth,0))) ) AS rowMonthlyScore
+					,(SELECT br.$branch FROM `rms_branch` AS br WHERE br.br_id=grd.branchId LIMIT 1) As branchName
+					,(SELECT br.branch_namekh FROM `rms_branch` AS br  WHERE br.br_id = grd.branchId LIMIT 1) AS branchNameKh
+					,(SELECT br.branch_nameen FROM `rms_branch` AS br  WHERE br.br_id = grd.branchId LIMIT 1) AS branchNameEn
+					,(SELECT $label FROM `rms_view` WHERE TYPE=19 AND key_code =grd.examType LIMIT 1) as examTypeTitle
+					,CASE
+						WHEN grd.examType = 2 THEN grd.forSemester
+						WHEN grd.examType = 3 THEN '".$annual."'
+						ELSE (SELECT $month FROM `rms_month` WHERE id=grd.forMonth  LIMIT 1) 
+					END AS forMonthTitle
+					,g.group_code AS  groupCode
+					,(SELECT
+						CASE
+							WHEN sj.`subject_lang` = 2 THEN sj.`subject_titleen`
+							ELSE sj.subject_titlekh
+						END  FROM `rms_subject` AS sj WHERE sj.id = grd.subjectId LIMIT 1
+					) AS subjectTitle
+					,(SELECT CONCAT(acad.fromYear,'-',acad.toYear) FROM rms_academicyear AS acad WHERE acad.id=g.academic_year LIMIT 1) AS academicYear
+					,(SELECT rms_items.$colunmname FROM `rms_items` WHERE rms_items.`id`=`g`.`degree` AND rms_items.type=1 LIMIT 1) AS degreeTitle
+					,(SELECT rms_itemsdetail.$colunmname FROM `rms_itemsdetail` WHERE rms_itemsdetail.`id`=`g`.`grade` AND rms_itemsdetail.items_type=1 LIMIT 1) AS gradeTitle
+					,(SELECT $label FROM rms_view WHERE `type`=4 AND rms_view.key_code= `g`.`session` LIMIT 1) AS sessionTitle
+					,COALESCE((SELECT `r`.`room_name`	FROM `rms_room` `r`	WHERE (`r`.`room_id` = `g`.`room_id`) LIMIT 1),'N/A') AS roomName
+					,(SELECT sEtStt.title FROM rms_score_entry_setting AS sEtStt WHERE sEtStt.id = grd.settingEntryId LIMIT 1) titleScoreFor
+					
+					,g.totalStudent AS totalStudent
+					,g.maleStudent AS maleStudent
+					,g.femaleStudent AS femaleStudent
+					
+					,(SELECT COUNT( IF( grdT.totalAverage >= (grdT.maxScore/2), grdT.id, NULL))  FROM `rms_grading_total` AS grdT WHERE grdT.gradingId = grd.id AND grdT.maxScore >0 LIMIT 1 ) AS aboveAverage
+					,(SELECT COUNT( IF( grdT.totalAverage >= (grdT.maxScore/2) AND s.sex = '1', grdT.id, NULL))  FROM `rms_grading_total` AS grdT,rms_student AS s WHERE s.stu_id=grdT.studentId AND grdT.gradingId = grd.id AND grdT.maxScore >0 LIMIT 1 ) AS aboveAverageMale
+					,(SELECT COUNT( IF( grdT.totalAverage < (grdT.maxScore/2), grdT.id, NULL))  FROM `rms_grading_total` AS grdT WHERE grdT.gradingId = grd.id AND grdT.maxScore >0 LIMIT 1 ) AS belowAverage
+					,(SELECT COUNT( IF( grdT.totalAverage < (grdT.maxScore/2) AND s.sex = '1', grdT.id, NULL))  FROM `rms_grading_total` AS grdT,rms_student AS s WHERE s.stu_id=grdT.studentId AND grdT.gradingId = grd.id AND grdT.maxScore >0 LIMIT 1 ) AS belowAverageMale
+			";
+			
+			$sqlFrom=" 
+				FROM 
+					rms_grading AS grd JOIN vapi_group_info AS g ON grd.groupId=g.id AND grd.inputOption=2
+				 ";
+			$sqlWhere=' WHERE   1 ';
+			$sqlWhere.=' AND grd.teacherId='.$userId;
+			if(!empty($_data['academicYear'])){
+				$sqlWhere.=" AND g.academic_year =".$_data['academicYear'];
+			}
+			if(!empty($_data['degree'])){
+				$sqlWhere.=" AND g.degree =".$_data['degree'];
+			}
+			if(!empty($_data['groupId'])){
+				$sqlWhere.=" AND g.id =".$_data['groupId'];
+			}
+			if(!empty($_data['subjectId'])){
+				$sqlWhere.=" AND grd.subjectId =".$_data['subjectId'];
+			}
+			$sqlOrder=" ORDER BY grd.id DESC ";
+			
+			if(!empty($_data['LimitStart'])){
+				$sqlOrder.=" LIMIT ".$_data['LimitStart'].",".$_data['limitRecord'];
+			}else if(!empty($_data['limitRecord'])){
+				$sqlOrder.=" LIMIT ".$_data['limitRecord'];
+			}
+			$sql = $sqlSelect.$sqlFrom.$sqlWhere.$sqlOrder;
+			$row = $_db->fetchAll($sql);
+			
+			$sqlCount="SELECT  COUNT(grd.id) AS totalRecord ";
+			$sqlCount.=$sqlFrom;
+			$sqlCount.=$sqlWhere;
+			$totalRecord = $_db->fetchOne($sqlCount);
+			$totalRecord = empty($totalRecord) ? 0 : $totalRecord;
+			
+			$result = array(
+					'status' =>true,
+					'value' =>$row,
+					'totalRecord' =>$totalRecord,
+			);
+			return $result;
+			
+			
+		}catch(Exception $e){
+			Application_Model_DbTable_DbUserLog::writeMessageError($e->getMessage());
+			$result = array(
+					'status' =>false,
+					'value' =>$e->getMessage(),
+			);
+			return $result;
+		}
+	}
+	
+	
+	
+	/*
+	function getSubjectOfClassAvailableForIssue($_data){
+		$_db = $this->getAdapter();
+		try{
+			$currentLang = empty($_data['currentLang'])?1:$_data['currentLang'];
+			$userId = empty($_data['userId'])?0:$_data['userId'];
+			$forSettingType = empty($_data['forSettingType'])?0:$_data['forSettingType'];
+			
+			$colunmName='title_en';
+			$label = 'name_en';
+			$branch = "branch_nameen";
+			$subjectTitle='subject_titleen';
+			if ($currentLang==1){
+				$colunmName='title';
+				$label = 'name_kh';
+				$branch = "branch_namekh";
+				$subjectTitle='subject_titlekh';
+			}
+			
+			$sql="
+				SELECT 
+					sett.id AS settingEntryId
+					,sett.branchId AS branchId
+					,sett.title AS settingTitle
+					,sett.fromDate AS startDateCriteria
+					,sett.endDate AS endDateCriteria
+					,sett.examFromDate AS startDateExam
+					,CASE 
+							WHEN aTs.endDate IS NOT NULL
+							THEN aTs.endDate
+							ELSE sett.examEndDate
+						END AS endDateExam
+					,sett.examType AS examType
+					,sett.forMonth AS forMonth
+					,sett.forSemester AS forSemester
+					
+					,g.id AS groupId
+					,g.group_code AS groupCode
+					,g.gradingId AS gradingSettingId
+					,g.academic_year AS academicYearId
+					,(SELECT CONCAT(COALESCE(ac.fromYear,''),'-',COALESCE(ac.toYear,'')) FROM `rms_academicyear` AS ac WHERE ac.id = g.academic_year LIMIT 1) AS academicYear
+					,(SELECT i.$colunmName FROM `rms_items` AS i WHERE i.type=1 AND i.id = `g`.`degree` LIMIT 1) AS degreeTitle
+					,(SELECT id.$colunmName FROM `rms_itemsdetail` AS id WHERE id.id = `g`.`grade` LIMIT 1) AS gradeTitle
+					,COALESCE((SELECT `r`.`room_name` FROM `rms_room` AS `r` WHERE `r`.`room_id` = `g`.`room_id` LIMIT 1),'N/A') AS `roomName`
+					
+					
+					,(SELECT subj.$subjectTitle FROM `rms_subject` AS subj WHERE subj.id = gsjb.subject_id  LIMIT 1) AS subjectTitle
+					,(SELECT subj.subject_titleen FROM `rms_subject` AS subj WHERE subj.id = gsjb.subject_id  LIMIT 1) AS subjectTitleEng
+					,(SELECT subj.subject_titlekh FROM `rms_subject` AS subj WHERE subj.id = gsjb.subject_id  LIMIT 1) AS subjectTitleKh
+					,(SELECT subj.shortcut FROM `rms_subject` AS subj WHERE subj.id = gsjb.subject_id  LIMIT 1) AS shortcut
+					,(SELECT subj.subject_lang FROM `rms_subject` AS subj WHERE subj.id = gsjb.subject_id  LIMIT 1) AS subjectLang
+					
+					,gsjb.subject_id AS subjectId
+					
+					,COUNT(IF(gds.stu_id !=0 AND gds.stop_type = '0', gds.stu_id, NULL)) AS totalStudent
+					,COUNT(IF(s.sex = '1' AND gds.stop_type = '0'  , s.sex, NULL)) AS maleStudent
+					,COUNT(IF(s.sex = '2' AND gds.stop_type = '0'  , s.sex, NULL)) AS femaleStudent
+					,CASE 
+						WHEN tmp.criteriaId IS NOT NULL
+						THEN '1'
+						ELSE '0'
+					END AS isIssuedMonthly
+					,COALESCE(tmp.id,'0') AS gradingTmpId
+					,if(COALESCE(tmp.id,'0')>0, (SELECT gr.isLock FROM rms_grading AS gr WHERE gr.gradingTmpId = COALESCE(tmp.id,'0') LIMIT 1 ),0) AS isLockGrading
+					
+					,COALESCE((SELECT vSt.`keyValue` FROM `rms_setting` AS vSt WHERE vSt.`keyName`='criteriaLimitation' LIMIT 1),0) AS criteriaLimitSetting
+			";
+			
+			$sql.=" FROM 
+						`rms_group_subject_detail` AS gsjb
+						JOIN `rms_group` AS g ON g.id = gsjb.group_id AND g.is_use=1 AND g.is_pass=2
+						JOIN `rms_score_entry_setting` AS sett ON FIND_IN_SET(g.degree,sett.degreeId) AND sett.status = 1 AND sett.academicYear = g.academic_year
+							LEFT JOIN (rms_student AS s JOIN `rms_group_detail_student` AS gds ON  gds.stu_id = s.stu_id AND s.status = 1 AND s.customer_type=1 AND gds.stop_type = 0) ON  gds.group_id = g.id
+							LEFT JOIN (`rms_grading_tmp` AS tmp JOIN `rms_exametypeeng` AS cri ON cri.id = tmp.criteriaId AND cri.criteriaType=2 ) ON tmp.settingEntryId = sett.id AND tmp.groupId = gsjb.group_id AND tmp.subjectId = gsjb.subject_id
+							LEFT JOIN `rms_allowed_teacher_score_setting` AS aTs 
+								ON aTs.teacherId = gsjb.teacher AND g.id = aTs.group AND FIND_IN_SET(gsjb.subject_id,(aTs.subjectId))
+									AND aTs.endDate > sett.examEndDate
+				";
+			$sql.=' WHERE gsjb.teacher='.$userId;
+			$sql.=' AND CASE WHEN sett.examType =2 THEN gsjb.amount_subject_sem 
+						ELSE gsjb.amount_subject 
+						END  > 0 
+				'; 
+			$sql.=' AND g.`gradingId` !=0 ';
+			
+			$date = new DateTime();
+			$currentDate = $date->format("Y-m-d");
+			$sql.= " AND sett.fromDate <= '".$currentDate."' 
+					 AND CASE 
+							WHEN aTs.endDate IS NOT NULL
+							THEN aTs.endDate
+							ELSE sett.examEndDate
+						END >='".$currentDate."' 
+					";
+			//if($forSettingType==1){
+			//	$sql.= " AND sett.examFromDate <= '".$currentDate."' AND sett.examEndDate >='".$currentDate."' ";
+			//}else{
+			//	$sql.= " AND sett.fromDate <= '".$currentDate."' AND sett.endDate >='".$currentDate."' ";
+			//}
+			$sql.=" GROUP BY 
+						sett.id,
+						gsjb.group_id,
+						gsjb.subject_id
+				";
+			$sql.="
+				ORDER BY 
+					sett.id DESC
+					,CASE 
+						WHEN tmp.criteriaId IS NOT NULL
+						THEN '1'
+						ELSE '0'
+					END ASC
+					,`g`.`group_code` ASC
+					, gsjb.subject_id ASC
+			";
+			$row = $_db->fetchAll($sql);
+			$row = empty($row) ? array() : $row;
+			$result = array(
+					'status' =>true,
+					'value' =>$row,
+			);
+			return $result;
+			
+			
+		}catch(Exception $e){
+			Application_Model_DbTable_DbUserLog::writeMessageError($e->getMessage());
+			$result = array(
+					'status' =>false,
+					'value' =>$e->getMessage(),
+			);
+			return $result;
+		}
+	}
+	*/
+	
+	
+	function getSubjectOfClassAvailableForIssue($_data){
+		$_db = $this->getAdapter();
+		try{
+			$currentLang = empty($_data['currentLang'])?1:$_data['currentLang'];
+			$userId = empty($_data['userId'])?0:$_data['userId'];
+			$forSettingType = empty($_data['forSettingType'])?0:$_data['forSettingType'];
+			
+			
+			$subLangKh = "(KH)";
+			$subLangEng = "(ENG)";
+		
+			$colunmName='title_en';
+			$label = 'name_en';
+			$branch = "branch_nameen";
+			$subjectTitle='subjectTitleEn';
+			if ($currentLang==1){
+				$colunmName='title';
+				$label = 'name_kh';
+				$branch = "branch_namekh";
+				$subjectTitle='subjectTitleKh';
+				
+				$subLangKh = "(ខ្មែរ)";
+				$subLangEng = "(អង់គ្លេស)";
+			}
+			
+			$sql="
+				SELECT 
+					sett.id AS settingEntryId
+					,sett.branchId AS branchId
+					,sett.title AS settingTitle
+					,sett.fromDate AS startDateCriteria
+					,sett.endDate AS endDateCriteria
+					,sett.examFromDate AS startDateExam
+					,CASE 
+							WHEN aTs.endDate IS NOT NULL
+							THEN aTs.endDate
+							ELSE sett.examEndDate
+						END AS endDateExam
+					,sett.examType AS examType
+					,sett.forMonth AS forMonth
+					,sett.forSemester AS forSemester
+					,COALESCE(sett.forTerm,0) AS forTerm
+					
+					,g.id AS groupId
+					,g.group_code AS groupCode
+					,g.gradingId AS gradingSettingId
+					,g.academic_year AS academicYearId
+					,(SELECT CONCAT(COALESCE(ac.fromYear,''),'-',COALESCE(ac.toYear,'')) FROM `rms_academicyear` AS ac WHERE ac.id = g.academic_year LIMIT 1) AS academicYear
+					,(SELECT i.$colunmName FROM `rms_items` AS i WHERE i.type=1 AND i.id = `g`.`degree` LIMIT 1) AS degreeTitle
+					,(SELECT id.$colunmName FROM `rms_itemsdetail` AS id WHERE id.id = `g`.`grade` LIMIT 1) AS gradeTitle
+					,COALESCE((SELECT `r`.`room_name` FROM `rms_room` AS `r` WHERE `r`.`room_id` = `g`.`room_id` LIMIT 1),'N/A') AS `roomName`
+					
+					
+					
+					,gsjb.subjectTitleEn AS subjectTitleEng
+					,gsjb.subjectTitleKh AS subjectTitleKh
+					,gsjb.subjectShortcut AS shortcut
+					,gsjb.subjectLang AS subjectLang
+					,COALESCE(g.amtLangOfClass,0) AS amtLangOfClass
+					,CASE 
+						WHEN COALESCE(g.amtLangOfClass,0) > 1 THEN 
+							CASE WHEN COALESCE(gsjb.subjectLang,0) =2 
+								 THEN CONCAT('$subLangEng',' ',gsjb.$subjectTitle)
+								 ELSE CONCAT('$subLangKh',' ',gsjb.$subjectTitle)
+							End
+						ELSE gsjb.$subjectTitle
+					End AS subjectTitle
+					
+					,gsjb.subject_id AS subjectId
+					,g.totalStudent AS totalStudent
+					,g.maleStudent AS maleStudent
+					,g.femaleStudent AS femaleStudent
+					
+					
+					,CASE 
+						WHEN tmp.criteriaId IS NOT NULL
+						THEN '1'
+						ELSE '0'
+					END AS isIssuedMonthly
+					,COALESCE(tmp.id,'0') AS gradingTmpId
+					,if(COALESCE(tmp.id,'0')>0, (SELECT gr.isLock FROM rms_grading AS gr WHERE gr.gradingTmpId = COALESCE(tmp.id,'0') LIMIT 1 ),0) AS isLockGrading
+					
+					,COALESCE((SELECT vSt.`keyValue` FROM `rms_setting` AS vSt WHERE vSt.`keyName`='criteriaLimitation' LIMIT 1),0) AS criteriaLimitSetting
+			
+					,CASE 
+						WHEN sett.examType !=1 THEN 1
+						WHEN COALESCE(ccTmp.amtNormalCriInput,0) >= COALESCE(cc.amtCritNormal,0) 
+						THEN 1
+						ELSE 0
+					END AS canEntryExam
+			";
+			
+			$sql.=" FROM 
+						(`vapi_group_subject_info` AS gsjb JOIN `vapi_group_info` AS g ON g.id = gsjb.group_id AND g.is_use=1 AND g.is_pass=2)
+						JOIN `rms_score_entry_setting` AS sett ON FIND_IN_SET(g.degree,sett.degreeId) AND sett.status = 1 AND sett.academicYear = g.academic_year AND sett.branchId = g.branch_id
+							
+							LEFT JOIN vapi_gradingtmp_exam AS tmp ON tmp.settingEntryId = sett.id AND tmp.groupId = gsjb.group_id AND tmp.subjectId = gsjb.subject_id
+							LEFT JOIN `rms_allowed_teacher_score_setting` AS aTs 
+								ON aTs.teacherId = gsjb.teacher AND g.id = aTs.group AND FIND_IN_SET(gsjb.subject_id,(aTs.subjectId))
+									AND aTs.endDate > sett.examEndDate
+									
+							LEFT JOIN  `vapi_couting_cri_normal_setting` AS cc ON cc.gradingSettingId = g.`gradingId`
+							LEFT JOIN `vapi_counting_cri_normal_grdtmp` AS ccTmp ON  ccTmp.`groupId` = gsjb.group_id AND ccTmp.gradingSettingId = g.`gradingId` AND ccTmp.settingEntryId = sett.id AND ccTmp.subjectId = gsjb.subject_id
+				";
+			$sql.=' WHERE gsjb.teacher='.$userId;
+			$sql.=' AND CASE WHEN sett.examType =2 THEN gsjb.amount_subject_sem 
+						ELSE gsjb.amount_subject 
+						END  > 0 
+				'; 
+			$sql.=' AND g.`gradingId` !=0 ';
+			
+			$date = new DateTime();
+			$currentDate = $date->format("Y-m-d");
+			$sql.= " AND sett.fromDate <= '".$currentDate."' 
+					 AND CASE 
+							WHEN aTs.endDate IS NOT NULL
+							THEN aTs.endDate
+							ELSE sett.examEndDate
+						END >='".$currentDate."' 
+					";
+			//if($forSettingType==1){
+			//	$sql.= " AND sett.examFromDate <= '".$currentDate."' AND sett.examEndDate >='".$currentDate."' ";
+			//}else{
+			//	$sql.= " AND sett.fromDate <= '".$currentDate."' AND sett.endDate >='".$currentDate."' ";
+			//}
+			$sql.=" GROUP BY 
+						sett.id,
+						gsjb.group_id,
+						gsjb.subject_id
+				";
+			$sql.="
+				ORDER BY 
+					sett.id DESC
+					,CASE 
+						WHEN tmp.criteriaId IS NOT NULL
+						THEN '1'
+						ELSE '0'
+					END ASC
+					,`g`.`group_code` ASC
+					, gsjb.subject_id ASC
+			";
+			
+			$row = $_db->fetchAll($sql);
+			$row = empty($row) ? array() : $row;
+			$result = array(
+					'status' =>true,
+					'value' =>$row,
+			);
+			return $result;
+			
+			
+		}catch(Exception $e){
+			Application_Model_DbTable_DbUserLog::writeMessageError($e->getMessage());
+			$result = array(
+					'status' =>false,
+					'value' =>$e->getMessage(),
+			);
+			return $result;
+		}
+	}
+	
+	/*
+	function getSubjectCriteriaOfClassByTeacher($_data){
+		$_db = $this->getAdapter();
+		try{
+			$currentLang = empty($_data['currentLang'])?1:$_data['currentLang'];
+			$userId = empty($_data['userId'])?0:$_data['userId'];
+			
+			$colunmName='title_en';
+			$label = 'name_en';
+			$subjectTitle='subject_titleen';
+			if ($currentLang==1){
+				$colunmName='title';
+				$label = 'name_kh';
+				$subjectTitle='subject_titlekh';
+			}
+			
+			$sql="
+				SELECT 
+					sett.id AS settingEntryId
+					,sett.branchId AS branchId
+					,sett.title AS settingTitle
+					,gsjb.group_id AS groupId
+					,gsjb.subject_id as subjectIdValue
+					,CASE WHEN sett.examType = 2
+								THEN gsjb.semester_max_score
+							ELSE gsjb.max_score
+					END AS maxScoreSubject
+					,sttD.criteriaId
+					,sttD.timeInput
+					,sttD.pecentage_score AS percentageScore
+					,COALESCE(sttD.subCriterialTitleKh,'') AS subCriteriaTitleKh
+					,COALESCE(sttD.subCriterialTitleEng,'') AS subCriteriaTitleEng
+					,sttD.subjectId AS subjectIdInCriteriaSetting
+					
+					,(SELECT crit.$colunmName FROM `rms_exametypeeng` AS crit WHERE crit.id = sttD.criteriaId LIMIT 1) AS criteriaTitle
+					,(SELECT crit.title FROM `rms_exametypeeng` AS crit WHERE crit.id = sttD.criteriaId LIMIT 1) AS criteriaTitleKh
+					,(SELECT crit.title_en FROM `rms_exametypeeng` AS crit WHERE crit.id = sttD.criteriaId LIMIT 1) AS criteriaTitleEng
+					,(SELECT crit.criteriaType FROM `rms_exametypeeng` AS crit WHERE crit.id = sttD.criteriaId LIMIT 1) AS criteriaType
+					
+					,g.group_code AS groupCode
+					
+					,(SELECT subj.$subjectTitle FROM `rms_subject` AS subj WHERE subj.id = gsjb.subject_id  LIMIT 1) AS subjectTitle
+					,(SELECT subj.subject_titleen FROM `rms_subject` AS subj WHERE subj.id = gsjb.subject_id  LIMIT 1) AS subjectTitleEng
+					,(SELECT subj.subject_titlekh FROM `rms_subject` AS subj WHERE subj.id = gsjb.subject_id  LIMIT 1) AS subjectTitleKh
+					,(SELECT subj.shortcut FROM `rms_subject` AS subj WHERE subj.id = gsjb.subject_id  LIMIT 1) AS shortcut
+					,(SELECT subj.subject_lang FROM `rms_subject` AS subj WHERE subj.id = gsjb.subject_id  LIMIT 1) AS subjectLang
+					
+					,(SELECT COUNT(tmp.id) FROM `rms_grading_tmp` AS tmp WHERE  tmp.settingEntryId = sett.id AND  tmp.groupId = g.id AND tmp.subjectId = gsjb.subject_id AND tmp.criteriaId = sttD.criteriaId LIMIT 1 ) AS totalInputted
+			";
+			
+			$sql.=" FROM 
+						`rms_group_subject_detail` AS gsjb
+						JOIN `rms_group` AS g ON g.id = gsjb.group_id AND g.is_use=1 
+						JOIN `rms_score_entry_setting` AS sett ON FIND_IN_SET(g.degree,sett.degreeId) AND sett.status = 1
+						
+						LEFT JOIN ( `rms_scoreengsettingdetail` AS sttD JOIN `rms_scoreengsetting` AS stt ON stt.id = sttD.score_setting_id ) ON stt.degreeId = g.degree AND stt.id = g.gradingId AND sttD.forExamType=sett.`examType` 
+							AND (sttD.subjectId =gsjb.subject_id OR sttD.subjectId=0) 
+						LEFT JOIN `rms_allowed_teacher_score_setting` AS aTs ON aTs.teacherId = gsjb.teacher AND g.id = aTs.group AND FIND_IN_SET(gsjb.subject_id,(aTs.subjectId)) AND aTs.endDate > sett.examEndDate
+				";
+			$sql.=' WHERE gsjb.teacher='.$userId;
+			$sql.=' AND g.`gradingId` !=0 AND g.is_pass !=3 '; //មិនស្មើរថ្នាក់ដែលរៀនចប់
+			$sql.=' AND CASE WHEN sett.examType =2 THEN gsjb.amount_subject_sem 
+						ELSE gsjb.amount_subject 
+						END  > 0 
+				'; 
+			
+			$sql.="
+				AND (SELECT crit.criteriaType FROM `rms_exametypeeng` AS crit WHERE crit.id = sttD.criteriaId LIMIT 1) 
+					> CASE 
+						WHEN COALESCE((SELECT sttDi.isNotEnteryCri FROM `rms_scoreengsettingdetail` AS sttDi WHERE sttDi.score_setting_id = g.`gradingId` AND sttDi.subjectId =  gsjb.subject_id ORDER BY sttDi.isNotEnteryCri DESC LIMIT 1 ),'0') =1 
+						THEN '1' 
+						ELSE '0'
+					END 
+				AND sttD.isNotEnteryCri = CASE 
+					WHEN COALESCE((SELECT sttDi.isNotEnteryCri FROM `rms_scoreengsettingdetail` AS sttDi WHERE sttDi.score_setting_id = g.`gradingId` AND sttDi.subjectId =  gsjb.subject_id ORDER BY sttDi.isNotEnteryCri DESC LIMIT 1 ),'0') =1 
+						THEN '1' 
+					ELSE '0'
+					END 
+			";
+			
+			$date = new DateTime();
+			$currentDate = $date->format("Y-m-d");
+			$sql.= " AND sett.fromDate <= '".$currentDate."' 
+					 AND CASE 
+							WHEN aTs.endDate IS NOT NULL
+							THEN aTs.endDate
+							ELSE sett.examEndDate
+						END >='".$currentDate."'  
+					";
+			$sql.=" GROUP BY 
+						sett.id,
+						gsjb.group_id,
+						gsjb.subject_id,
+						sttD.id,
+						sttD.criteriaId 
+				";
+			$sql.=' ORDER BY 
+							sett.id DESC,
+							 g.group_code ASC  
+							,gsjb.subject_id ASC
+							,(SELECT crit.criteriaType FROM `rms_exametypeeng` AS crit WHERE crit.id = sttD.criteriaId LIMIT 1) ASC
+							,sttD.criteriaId ASC
+							,sttD.subjectId DESC
+				';
+			$row = $_db->fetchAll($sql);
+			
+			if(!empty($row)){ 
+				$newArray = array();
+				$criteriaId = "";
+				$groupId = "";
+				$subjectId = "";
+				foreach($row as $criteria){
+					if( ($criteriaId != $criteria["criteriaId"]) OR ($groupId != $criteria["groupId"]) ){
+						array_push($newArray, $criteria);
+					}else if($groupId == $criteria["groupId"]){
+						if(($subjectId != $criteria["subjectIdValue"]) AND ($criteriaId == $criteria["criteriaId"])){
+							array_push($newArray, $criteria);
+						}
+					}
+					$criteriaId = $criteria["criteriaId"];
+					$groupId = $criteria["groupId"];
+					$subjectId = $criteria["subjectIdValue"];
+				}
+				$row = $newArray;
+			}
+			$row = empty($row) ? array() : $row;
+			$result = array(
+					'status' =>true,
+					'value' =>$row,
+			);
+			return $result;
+			
+			
+		}catch(Exception $e){
+			Application_Model_DbTable_DbUserLog::writeMessageError($e->getMessage());
+			$result = array(
+					'status' =>false,
+					'value' =>$e->getMessage(),
+			);
+			return $result;
+		}
+	}
+	*/
+	
+	function getSubjectCriteriaOfClassByTeacher($_data){
+		$_db = $this->getAdapter();
+		try{
+			$currentLang = empty($_data['currentLang'])?1:$_data['currentLang'];
+			$userId = empty($_data['userId'])?0:$_data['userId'];
+			
+			$colunmName='title_en';
+			$label = 'name_en';
+			$subjectTitle='subject_titleen';
+			$criterialTitle='criterialTitleEn';
+			if ($currentLang==1){
+				$colunmName='title';
+				$label = 'name_kh';
+				$subjectTitle='subject_titlekh';
+				$criterialTitle='criterialTitle';
+			}
+			
+			$sql="
+				SELECT 
+					sett.id AS settingEntryId
+					,sett.branchId AS branchId
+					,sett.title AS settingTitle
+					,gsjb.group_id AS groupId
+					,gsjb.subject_id as subjectIdValue
+					,CASE 
+						WHEN sett.examType = 2 THEN gsjb.semester_max_score
+						ELSE gsjb.max_score
+					END AS maxScoreSubject
+					
+					,sttD.criteriaId AS criteriaId
+					,CASE WHEN COALESCE(v.`subjectId`,0)>0 
+						THEN v.`timeInput`
+						ELSE sttD.`timeInput`
+					END AS timeInput
+					,CASE WHEN COALESCE(v.`subjectId`,0)>0 
+						THEN v.`pecentage_score`
+						ELSE sttD.`pecentage_score`
+					END AS percentageScore
+					
+					,CASE WHEN COALESCE(v.`subjectId`,0)>0 
+						THEN v.`subCriteriaTitleKh`
+						ELSE sttD.`subCriteriaTitleKh`
+					END AS subCriteriaTitleKh
+					,CASE WHEN COALESCE(v.`subjectId`,0)>0 
+						THEN v.`subCriteriaTitleEng`
+						ELSE sttD.`subCriteriaTitleEng`
+					END AS subCriteriaTitleEng
+					
+					
+					
+					
+					
+					,COALESCE(v.`subjectId`,0) AS subjectIdInCriteriaSetting
+					,sttD.$criterialTitle AS criteriaTitle
+					,sttD.`criterialTitle` AS criteriaTitleKh
+					,sttD.`criterialTitleEn` AS criteriaTitleEng
+					,sttD.`criteriaType` AS criteriaType
+					
+					,g.group_code AS groupCode
+					
+					,(SELECT subj.$subjectTitle FROM `rms_subject` AS subj WHERE subj.id = gsjb.subject_id  LIMIT 1) AS subjectTitle
+					,(SELECT subj.subject_titleen FROM `rms_subject` AS subj WHERE subj.id = gsjb.subject_id  LIMIT 1) AS subjectTitleEng
+					,(SELECT subj.subject_titlekh FROM `rms_subject` AS subj WHERE subj.id = gsjb.subject_id  LIMIT 1) AS subjectTitleKh
+					,(SELECT subj.shortcut FROM `rms_subject` AS subj WHERE subj.id = gsjb.subject_id  LIMIT 1) AS shortcut
+					,(SELECT subj.subject_lang FROM `rms_subject` AS subj WHERE subj.id = gsjb.subject_id  LIMIT 1) AS subjectLang
+					
+					,(SELECT COUNT(tmp.id) FROM `rms_grading_tmp` AS tmp WHERE  tmp.settingEntryId = sett.id AND  tmp.groupId = g.id AND tmp.subjectId = gsjb.subject_id AND tmp.criteriaId = sttD.criteriaId LIMIT 1 ) AS totalInputted
+					
+			";
+			
+			$sql.=" FROM 
+						`rms_group_subject_detail` AS gsjb JOIN `rms_group` AS g ON g.id = gsjb.group_id AND g.is_use=1 
+						JOIN `rms_score_entry_setting` AS sett ON FIND_IN_SET(g.degree,sett.degreeId) AND sett.status = 1
+						JOIN `vapi_criteria_setting` AS sttD ON FIND_IN_SET(g.degree,sttD.degreeId) AND sttD.`score_setting_id` = g.`gradingId` AND sttD.`forExamType` = sett.examType
+						LEFT JOIN vapi_criteria_subject AS v ON  g.`gradingId` = v.`settingId` AND v.subjectId = COALESCE(gsjb.subject_id,0) AND sett.examType = v.forExamType AND v.`criteriaId` = sttD.`criteriaId`
+						LEFT JOIN `rms_allowed_teacher_score_setting` AS aTs ON aTs.teacherId = gsjb.teacher AND g.id = aTs.group AND FIND_IN_SET(gsjb.subject_id,(aTs.subjectId)) AND aTs.endDate > sett.examEndDate
+				";
+			$sql.=' WHERE gsjb.teacher='.$userId;
+			$sql.=' AND g.`gradingId` !=0 AND g.is_pass !=3 '; //មិនស្មើរថ្នាក់ដែលរៀនចប់
+			$sql.=' AND CASE WHEN sett.examType =2 THEN gsjb.amount_subject_sem 
+						ELSE gsjb.amount_subject 
+						END  > 0 
+				'; 
+			
+			$sql.="
+				AND sttD.`criteriaType` 
+					> CASE 
+						WHEN COALESCE((SELECT sttDi.isNotEnteryCri FROM `rms_scoreengsettingdetail` AS sttDi WHERE sttDi.score_setting_id = g.`gradingId` AND sttDi.subjectId =  gsjb.subject_id ORDER BY sttDi.isNotEnteryCri DESC LIMIT 1 ),'0') =1 
+						THEN '1' 
+						ELSE '0'
+					END 
+					
+				 AND CASE WHEN COALESCE(v.`subjectId`,0)>0 
+						THEN COALESCE(v.`isNotEnteryCri`,0)
+						ELSE COALESCE(sttD.`isNotEnteryCri`,0)
+					END  = (CASE 
+							WHEN COALESCE((SELECT sttDi.isNotEnteryCri FROM `rms_scoreengsettingdetail` AS sttDi WHERE sttDi.score_setting_id = g.`gradingId` AND sttDi.subjectId =  gsjb.subject_id ORDER BY sttDi.isNotEnteryCri DESC LIMIT 1 ),'0') =1 
+								THEN '1' 
+							ELSE '0'
+							END )
+				
+			";
+			
+			$date = new DateTime();
+			$currentDate = $date->format("Y-m-d");
+			$sql.= " AND sett.fromDate <= '".$currentDate."' 
+					 AND CASE 
+							WHEN aTs.endDate IS NOT NULL
+							THEN aTs.endDate
+							ELSE sett.examEndDate
+						END >='".$currentDate."'  
+					";
+			$sql.=" GROUP BY 
+						sett.id,
+						gsjb.group_id,
+						gsjb.subject_id,
+						sttD.criteriaId 
+				";
+			$sql.=' ORDER BY 
+							sett.id DESC,
+							 gsjb.group_id ASC  
+							,gsjb.subject_id ASC
+							,sttD.`criteriaType` ASC
+							,sttD.criteriaId ASC
+							,sttD.subjectId DESC
+				';
+			$row = $_db->fetchAll($sql);
+			$result = array(
+					'status' =>true,
+					'value' =>$row,
+			);
+			return $result;
+			
+			
+		}catch(Exception $e){
+			Application_Model_DbTable_DbUserLog::writeMessageError($e->getMessage());
+			$result = array(
+					'status' =>false,
+					'value' =>$e->getMessage(),
+			);
+			return $result;
+		}
+	}
+	
+	
+	function getStudentList($_data){
+		
+		$_db = $this->getAdapter();
+		try{
+			$currentLang = empty($_data['currentLang'])?1:$_data['currentLang'];
+			$userId = empty($_data['userId'])?0:$_data['userId'];
+			$groupId = empty($_data['groupId'])?0:$_data['groupId'];
+			if($currentLang==1){// khmer
+				$label = "name_kh";
+				$branch = "branch_namekh";
+				$grade = "title";
+				$degree = "title";
+			}else{ // English
+				$label = "name_en";
+				$branch = "branch_nameen";
+				$grade = "title_en";
+				$degree = "title_en";
+			}
+			$sql="SELECT 
+					s.stu_id AS id
+					,s.stu_id AS studentId
+					,s.photo AS photo
+					,COALESCE(s.stu_code,'') AS stuCode
+					,COALESCE(s.stu_khname,'') AS stuNameInKhmer
+					,CONCAT(COALESCE(s.stu_code,''),' ',COALESCE(s.stu_khname,''),' ',COALESCE(s.last_name,''),' ',COALESCE(s.stu_enname,'')) AS `name`
+					,CONCAT(COALESCE(s.last_name,''),' ',COALESCE(s.stu_enname,'')) AS stuNameInLatin
+					,(SELECT v.$label FROM rms_view AS v WHERE v.type=2 and v.key_code=s.sex LIMIT 1 ) as genderTitle
+					,(SELECT $branch FROM `rms_branch` WHERE br_id=s.branch_id LIMIT 1) AS branch_name
+					
+					,g.`academic_year` AS academic_year
+					,g.`degree` AS degree
+					,g.`grade` AS grade
+					,g.`session` AS `session`
+					
+					
+					,(SELECT CONCAT(ac.fromYear,'-',ac.toYear) FROM `rms_academicyear` AS ac WHERE ac.id = gds.academic_year LIMIT 1) AS academicYearTitle
+					,(SELECT v.$label FROM rms_view AS v WHERE v.type=4 AND v.key_code = g.`session` LIMIT 1) AS `sessionName`
+					,(SELECT gr.$grade FROM rms_itemsdetail AS gr WHERE gr.id=g.grade AND gr.items_type=1 LIMIT 1) AS gradeTitle
+					,(SELECT dg.$degree FROM rms_items AS dg WHERE dg.id=g.degree AND dg.type=1 LIMIT 1) AS degreeTitle
+					
+				
+			";
+			$sqlColScoreValue=",'0' AS scoreValue
+								,'0' AS tmpDetailId 
+							";
+			$sqlJoinTable="";
+			if(!empty($_data['gradingTmpId'])){
+				$gradingTmpId = $_data['gradingTmpId'];
+				$sqlColScoreValue = "
+							,(SELECT COALESCE(tmpD.totalGrading,'0') FROM `rms_grading_detail_tmp` AS tmpD WHERE tmpD.studentId = s.stu_id AND tmpD.`gradingId` = $gradingTmpId LIMIT 1 ) AS scoreValue
+							,(SELECT COALESCE(tmpD.id,'0') FROM `rms_grading_detail_tmp` AS tmpD WHERE tmpD.studentId = s.stu_id AND tmpD.`gradingId` = $gradingTmpId LIMIT 1 ) AS tmpDetailId
+					";
+			}else if(!empty($_data['forEvaluationInfo'])){
+				$scoreId = empty($_data['scoreId']) ? "0" : $_data['scoreId'];
+				$sqlColScoreValue="
+					,FIND_IN_SET( 
+						COALESCE(ms.total_score,'0'), 
+						(    
+							SELECT 
+								GROUP_CONCAT( dd.total_score ORDER BY dd.total_score DESC ) 
+							FROM rms_score_monthly AS dd 
+							WHERE  dd.`score_id`= $scoreId
+						)
+					) AS ranking
+					,COALESCE(ms.total_avg,'0') AS totalAverage
+					,COALESCE(ms.total_score,'0') AS totalScore
+					,IF( COALESCE(ms.total_score,'0') >0 AND COALESCE(ms.totalMaxScore,'0') >0, 
+							(SELECT sd.metion_grade AS mention
+							FROM `rms_metionscore_setting_detail` AS sd,
+								`rms_metionscore_setting` AS s
+							WHERE s.id = sd.metion_score_id
+								AND s.academic_year=g.`academic_year`
+								AND degree = g.`degree`
+								AND FORMAT((
+								COALESCE(ms.total_score,'0')
+								/(COALESCE(ms.totalMaxScore,'0')/100)),2) >=sd.max_score
+								ORDER BY sd.max_score DESC
+								LIMIT 1)
+								,NULL 
+						) AS mentionGrade
+				";
+				
+				$sqlJoinTable=" LEFT JOIN  `rms_score_monthly` AS ms ON ms.score_id = $scoreId AND ms.student_id = s.stu_id ";
+				
+				if($_data['forEvaluationInfo']=="1"){//Evaluation
+					$stringWhere = " AND tev.scoreId = $scoreId ";
+					if(!empty($_data['assessmentId'])){
+						$stringWhere = " AND tev.evalueId = ".$_data['assessmentId'];
+					}
+					$sqlColScoreValue.="
+						,COALESCE((SELECT assD.teacherComment FROM vapi_teacher_comment AS assD WHERE assD.scoreId < $scoreId  AND gds.stu_id=assD.studentId AND assD.groupId = gds.group_id ORDER BY assD.teacherComment DESC LIMIT 1),'') AS previousTeacherComment
+						
+						,COALESCE(tev.teacherComment,'') AS teacherComment
+						,COALESCE(tev.evalueId,'0') AS isEvaluated
+					
+					";
+					$sqlJoinTable.=" LEFT JOIN vapi_teacher_comment AS tev ON  gds.stu_id=tev.studentId $stringWhere AND tev.groupId = gds.group_id  ";
+					//AND tev.teacherComment !=''
+				}
+			
+			}else if(!empty($_data['forEnterAtt'])){
+				$sqlColScoreValue="
+					,'1' as attStatus
+					,'' as reason
+					,'0' AS permissionRecordId
+				";
+				
+				$attId = empty($_data['attId']) ? "0" : $_data['attId'];
+				$forSemester = empty($_data['forSemester']) ? "0" : $_data['forSemester'];
+				$subjectId = empty($_data['subjectId']) ? "0" : $_data['subjectId'];
+				$fromHour = empty($_data['fromHour']) ? "0" : $_data['fromHour'];
+				$toHour = empty($_data['toHour']) ? "0" : $_data['toHour'];
+				
+				$thisDate = new DateTime($_data['attendanceDate']);
+				$attendanceDate =  $thisDate->format("Y-m-d");
+				$sqlJoinTable= " LEFT JOIN rms_student_attendence_detail AS attD ON attD.type=2 AND s.stu_id = attD.stu_id AND attD.attendanceDate ='".$attendanceDate."' ";
+				if(!empty($attId)){
+					$sqlColScoreValue="
+						,COALESCE(attD.attendence_status,'1') as attStatus
+						,COALESCE(attD.description,'') as reason
+						,COALESCE(attD.studentRequestId,'0') AS permissionRecordId
+						,COALESCE(attD.id,'0') AS detailIdAtt
+					";
+					$sqlJoinTable= " LEFT JOIN rms_student_attendence_detail AS attD ON attD.type=1 
+						AND s.stu_id = attD.stu_id 
+						AND attD.attendence_id =".$attId."
+						AND attD.subjectId =".$subjectId."
+						AND attD.fromHour =".$fromHour."
+						AND attD.toHour =".$toHour."
+					";
+				}else{
+					$arrCheck = array(
+						'groupId' => $groupId,
+						'attendenceDate' => $attendanceDate,
+						'forSemester' => $forSemester,
+					);
+					$idAttendance = $this->checkingTodayAttendanceMain($arrCheck);
+					if(!empty($idAttendance)){
+						$sqlColScoreValue= "
+							,COALESCE((SELECT attD.`attendence_status` FROM `rms_student_attendence_detail` AS attD WHERE attD.`attendence_id` = $idAttendance AND attD.`stu_id` = s.`stu_id` ORDER BY attD.`fromHour` DESC LIMIT 1),'1') AS attStatus 
+							,COALESCE((SELECT attD.`description` FROM `rms_student_attendence_detail` AS attD WHERE attD.`attendence_id` = $idAttendance AND attD.`stu_id` = s.`stu_id` ORDER BY attD.`fromHour` DESC LIMIT 1),'') AS reason
+							,COALESCE((SELECT attD.`studentRequestId` FROM `rms_student_attendence_detail` AS attD WHERE attD.`attendence_id` = $idAttendance AND attD.`stu_id` = s.`stu_id` ORDER BY attD.`fromHour` DESC LIMIT 1),'0') AS permissionRecordId
+						";
+						$sqlJoinTable= "";
+					}
+					
+				}
+				
+				
+			}
+			$sql.=$sqlColScoreValue;
+			$sql.="
+				FROM 
+					(`rms_group_detail_student` AS gds JOIN rms_student AS s ON  gds.stu_id = s.stu_id AND gds.movedType !=1 )
+					JOIN `rms_group` AS g ON g.`id` = gds.group_id 
+			";
+			$sql.=$sqlJoinTable;
+			
+			
+			$sql.="WHERE 
+					gds.itemType=1 
+					AND s.status = 1 
+					AND s.customer_type=1
+					AND gds.stop_type = 0 ";
+			
+			$where=' ';
+			$where.=' AND gds.group_id='.$groupId;
+			$where.=' GROUP By gds.stu_id ';
+			
+			$order_by = " ORDER BY  ";
+			if(!empty($_data['forEvaluationInfo'])){
+				$scoreId = empty($_data['scoreId']) ? "0" : $_data['scoreId'];
+				$order_by.="
+					COALESCE((SELECT ms.total_score FROM `rms_score_monthly` AS ms WHERE ms.score_id = $scoreId AND ms.student_id = s.stu_id LIMIT 1),0) DESC,
+				";
+			}
+			
+			$order_by.=" s.stu_id ASC ";
+			$row =  $_db->fetchAll($sql.$where.$order_by);
+			
+			$result = array(
+					'status' =>true,
+					'value' =>$row,
+			);
+			return $result;
+			
+			
+		}catch(Exception $e){
+			Application_Model_DbTable_DbUserLog::writeMessageError($e->getMessage());
+			$result = array(
+					'status' =>false,
+					'value' =>$e->getMessage(),
+			);
+			return $result;
+		}
+    }
+	
+	
+	function checkTimeSecondBeforeSubmit($scoreInfo){
+		$db = $this->getAdapter();
+		$settingEntryId = empty($scoreInfo['settingEntryId']) ? 0 : $scoreInfo['settingEntryId'];
+		$academicYearId = empty($scoreInfo['academicYearId']) ? 0 : $scoreInfo['academicYearId'];
+		$groupId		= empty($scoreInfo['groupId']) ? 0 : $scoreInfo['groupId'];
+		$examType 		= empty($scoreInfo['examType']) ? 0 : $scoreInfo['examType'];
+		$forSemester 	= empty($scoreInfo['forSemester']) ? 0 : $scoreInfo['forSemester'];
+		$forMonth 		= empty($scoreInfo['forMonth']) ? 0 : $scoreInfo['forMonth'];
+		$subjectId 		= empty($scoreInfo['subjectId']) ? 0 : $scoreInfo['subjectId'];
+		$criteriaId 	= empty($scoreInfo['criteriaId']) ? 0 : $scoreInfo['criteriaId'];
+		$teacherId 		= empty($scoreInfo['userId']) ? 0 : $scoreInfo['userId'];
+		$sql ="
+			SELECT 
+					gtmp.`createDate`
+			FROM 
+				`rms_grading_tmp` AS gtmp
+			WHERE 1 
+					AND gtmp.`groupId` =$groupId
+					AND gtmp.`settingEntryId`=$settingEntryId
+					AND gtmp.`examType` =$examType
+					AND gtmp.`forMonth`=$forMonth
+					AND gtmp.`criteriaId` =$criteriaId
+					AND gtmp.`subjectId`=$subjectId 
+					AND gtmp.`teacherId`=$teacherId 
+					ORDER BY gtmp.`id` DESC
+				LIMIT 1 ";
+		$row = $db->fetchRow($sql);
+		
+		if(!empty($row)){
+			$secondLimit="10";
+			$createDate = $row["createDate"];
+			$newCreateDate = new DateTime($createDate);
+			$newCreateDate->add(new DateInterval('PT'.$secondLimit.'S')); 
+			$createDateNew = $newCreateDate->format('Y-m-d H:i:s');
+			
+			$todayDate = new DateTime();
+			$timeToday = $todayDate->format('Y-m-d H:i:s');
+			
+			$timeToday = date_create($timeToday);
+			$timeCreateDateNew = date_create($createDateNew);
+			
+			if($timeToday > $timeCreateDateNew){
+				return false;
+			}
+			return true;
+		}
+		return false;
+	}
+	
+	function submitCriteriaScore($_data){
+    	$db = $this->getAdapter();
+		$db->beginTransaction();
+    	try{
+			
+			$_data['userId']	= empty($_data['userId'])?0:$_data['userId'];
+			$scoreSettingEntryPost 	 = empty($_data['scoreSettingEntry'])?null:$_data['scoreSettingEntry'];
+			
+			$scoreInfo = Zend_Json::decode($scoreSettingEntryPost);
+			$scoreInfo["subjectId"] =$_data['subjectId'];
+			$scoreInfo["criteriaId"] =$_data['criteriaId'];
+			$scoreInfo["userId"] = $_data['userId'];
+			
+			
+			$listFromPost 	 = empty($_data['studentScoreListSubmit'])?null:$_data['studentScoreListSubmit'];
+			$studentScoreList 	 = Zend_Json::decode($listFromPost);
+			
+			$checkingSubmitCriterial = $this->checkTimeSecondBeforeSubmit($scoreInfo);
+			if(empty($checkingSubmitCriterial)){
+				$arr = array(
+    				'branchId'			=>$scoreInfo['branchId'],
+    				'settingEntryId'	=>$scoreInfo['settingEntryId'],
+    				'gradingSettingId'	=>$scoreInfo['gradingSettingId'],
+    				'academicYear'		=>$scoreInfo['academicYearId'],
+    				'groupId'			=>$scoreInfo['groupId'],
+    				'examType'			=>$scoreInfo['examType'],
+    				'forSemester'		=>$scoreInfo['forSemester'],
+    				'forMonth'			=>$scoreInfo['forMonth'],
+    				'forTerm'			=>empty($scoreInfo['forTerm']) ? 0 : $scoreInfo['forTerm'],
+    				'subjectId'			=>$_data['subjectId'],
+    				'criteriaId'		=>$_data['criteriaId'],
+    				'inputOption'		=>2,
+										
+    				'status'			=>1,
+    				'dateInput'			=>date("Y-m-d H:i:s"),
+    				'createDate'		=>date("Y-m-d H:i:s"),
+    				'modifyDate'		=>date("Y-m-d H:i:s"),
+    				'teacherId'			=>$_data['userId'],
+				);
+				$this->_name='rms_grading_tmp';
+				$gradinTmpId = $this->insert($arr);
+				
+				if(!empty($studentScoreList)) foreach($studentScoreList AS $row){
+					
+					$arrDetail = array(
+							'gradingId'			=>$gradinTmpId,
+							'studentId'			=>$row['studentId'],
+							'totalGrading'		=>$row['scoreValue'],
+								
+					);
+					$this->_name='rms_grading_detail_tmp';	
+					$this->insert($arrDetail);
+					
+				}
+			}
+			
+    		
+			
+			
+			$db->commit();
+			$result = array(
+					'status' =>true,
+					'value' =>$gradinTmpId,
+			);
+			return $result;
+    	}catch (Exception $e){
+			Application_Model_DbTable_DbUserLog::writeMessageError($e->getMessage());
+			$db->rollBack();
+			$result = array(
+				'status' =>false,
+				'value' =>$e->getMessage(),
+			);
+    		return $result;
+    	}
+    }
+	function submitEditCriteriaScore($_data){
+    	$db = $this->getAdapter();
+		$db->beginTransaction();
+    	try{
+			if(!empty($_data['gradingTmpId'])){
+				$_data['userId'] = empty($_data['userId'])?0:$_data['userId'];
+				$gradinTmpId	 = empty($_data['gradingTmpId'])?0:$_data['gradingTmpId'];
+				$scoreSettingEntryPost 	 = empty($_data['scoreSettingEntry'])?null:$_data['scoreSettingEntry'];
+				
+				$scoreInfo 	 = Zend_Json::decode($scoreSettingEntryPost);
+				
+				$listFromPost 	 = empty($_data['studentScoreListSubmit'])?null:$_data['studentScoreListSubmit'];
+				$studentScoreList 	 = Zend_Json::decode($listFromPost);
+				
+				$arr = array(
+						'examType'			=>$scoreInfo['examType'],
+						'forMonth'			=>$scoreInfo['forMonth'],
+						'forSemester'		=>$scoreInfo['forSemester'],
+						'forTerm'			=>empty($scoreInfo['forTerm']) ? 0 : $scoreInfo['forTerm'],
+						'modifyDate'		=>date("Y-m-d H:i:s"),
+						'teacherId'			=>$_data['userId'],
+					);
+				$this->_name='rms_grading_tmp';
+				$where=" id = ".$gradinTmpId;
+				$this->update($arr, $where);
+				
+				if(!empty($studentScoreList)) foreach($studentScoreList AS $row){
+					
+					if(!empty($row['tmpDetailId'])){
+						$arrDetail = array(
+							'studentId'			=>$row['studentId'],
+							'totalGrading'		=>$row['scoreValue'],
+						);
+						$this->_name='rms_grading_detail_tmp';	
+						$where=" id = ".$row['tmpDetailId']." AND gradingId = ".$gradinTmpId;
+						$this->update($arrDetail, $where);
+					}else{
+						$arrDetail = array(
+							'gradingId'			=>$gradinTmpId,
+							'studentId'			=>$row['studentId'],
+							'totalGrading'		=>$row['scoreValue'],
+						);
+						$this->_name='rms_grading_detail_tmp';	
+						$this->insert($arrDetail);
+					}
+					
+				}
+			
+			}
+			$db->commit();
+    		return true;
+    	}catch (Exception $e){
+			Application_Model_DbTable_DbUserLog::writeMessageError($e->getMessage());
+			$db->rollBack();
+    		return false;
+    	}
+    }
+	
+	function getCriteriaScoreList($_data){
+		$_db = $this->getAdapter();
+		try{
+			$currentLang = empty($_data['currentLang'])?1:$_data['currentLang'];
+			$userId = empty($_data['userId'])?0:$_data['userId'];
+			$_data['groupId'] = empty($_data['groupId'])?0:$_data['groupId'];
+			$_data['settingEntryId'] = empty($_data['settingEntryId'])?0:$_data['settingEntryId'];
+			$_data['subjectId'] = empty($_data['subjectId'])?0:$_data['subjectId'];
+			$_data['criteriaId'] = empty($_data['criteriaId'])?0:$_data['criteriaId'];
+			
+			$colunmName='title_en';
+			$label = 'name_en';
+			$branch = "branch_nameen";
+			$subjectTitle='subject_titleen';
+			if ($currentLang==1){
+				$colunmName='title';
+				$label = 'name_kh';
+				$branch = "branch_namekh";
+				$subjectTitle='subject_titlekh';
+			}
+			
+			$sql="
+				SELECT 
+					gTmp.*
+					,(SELECT sett.title 	FROM rms_score_entry_setting AS sett WHERE sett.`id` = gTmp.`settingEntryId` LIMIT 1) AS settingTitle
+					,(SELECT sett.fromDate 	FROM rms_score_entry_setting AS sett WHERE sett.`id` = gTmp.`settingEntryId` LIMIT 1) AS startDateCriteria
+					,(SELECT sett.endDate 	FROM rms_score_entry_setting AS sett WHERE sett.`id` = gTmp.`settingEntryId` LIMIT 1) AS endDateCriteria
+					,(SELECT sett.examFromDate 	FROM rms_score_entry_setting AS sett WHERE sett.`id` = gTmp.`settingEntryId` LIMIT 1) AS startDateExam
+					,(SELECT sett.examEndDate 	FROM rms_score_entry_setting AS sett WHERE sett.`id` = gTmp.`settingEntryId` LIMIT 1) AS endDateExam
+					
+					,g.id AS groupId
+					,g.group_code AS groupCode
+					,g.gradingId AS gradingSettingId
+					,g.academic_year AS academicYearId
+					,(SELECT CONCAT(COALESCE(ac.fromYear,''),'-',COALESCE(ac.toYear,'')) FROM `rms_academicyear` AS ac WHERE ac.id = g.academic_year LIMIT 1) AS academicYear
+					,(SELECT i.$colunmName FROM `rms_items` AS i WHERE i.type=1 AND i.id = `g`.`degree` LIMIT 1) AS degreeTitle
+					,(SELECT id.$colunmName FROM `rms_itemsdetail` AS id WHERE id.id = `g`.`grade` LIMIT 1) AS gradeTitle
+					,COALESCE((SELECT `r`.`room_name` FROM `rms_room` AS `r` WHERE `r`.`room_id` = `g`.`room_id` LIMIT 1),'N/A') AS `roomName`
+					
+					
+					,(SELECT subj.$subjectTitle 	FROM `rms_subject` AS subj 	WHERE subj.id = gTmp.subjectId   LIMIT 1) AS subjectTitle
+					,(SELECT subj.subject_titleen 	FROM `rms_subject` AS subj	WHERE subj.id = gTmp.subjectId   LIMIT 1) AS subjectTitleEng
+					,(SELECT subj.subject_titlekh 	FROM `rms_subject` AS subj	WHERE subj.id = gTmp.subjectId   LIMIT 1) AS subjectTitleKh
+					,(SELECT subj.shortcut 			FROM `rms_subject` AS subj 	WHERE subj.id = gTmp.subjectId   LIMIT 1) AS subjectShortCut
+					,(SELECT subj.subject_lang 		FROM `rms_subject` AS subj 	WHERE subj.id = gTmp.subjectId   LIMIT 1) AS subjectLang
+					
+					,g.totalStudent AS totalStudent
+					,g.maleStudent AS maleStudent
+					,g.femaleStudent AS femaleStudent
+					
+					,(SELECT COUNT(IF(tmpD.totalGrading > 0  , gTmp.id, NULL))  FROM `rms_grading_detail_tmp` AS tmpD WHERE tmpD.gradingId = gTmp.id LIMIT 1) AS issuedScore
+					,(SELECT COUNT(IF(tmpD.totalGrading <= 0  , gTmp.id, NULL))  FROM `rms_grading_detail_tmp` AS tmpD WHERE tmpD.gradingId = gTmp.id LIMIT 1) AS noScore					
+					
+			";
+			
+			$sql.=" FROM `rms_grading_tmp` AS gTmp
+						JOIN `vapi_group_info` AS g ON g.`id` = gTmp.`groupId`
+				";
+			$sql.=' WHERE gTmp.teacherId='.$userId;
+			if(!empty($_data['settingEntryId'])){
+				$sql.=' AND gTmp.settingEntryId='.$_data['settingEntryId'];
+			}
+			if(!empty($_data['groupId'])){
+				$sql.=' AND gTmp.groupId='.$_data['groupId'];
+			}
+			if(!empty($_data['subjectId'])){
+				$sql.=' AND gTmp.subjectId='.$_data['subjectId'];
+			}
+			if(!empty($_data['criteriaId'])){
+				$sql.=' AND gTmp.criteriaId='.$_data['criteriaId'];
+			}
+			$sql.=" GROUP BY gTmp.id
+				";
+			$sql.=' ORDER BY gTmp.id DESC  ';
+			$row = $_db->fetchAll($sql);
+			$result = array(
+					'status' =>true,
+					'value' =>$row,
+			);
+			return $result;
+			
+			
+		}catch(Exception $e){
+			Application_Model_DbTable_DbUserLog::writeMessageError($e->getMessage());
+			$result = array(
+					'status' =>false,
+					'value' =>$e->getMessage(),
+			);
+			return $result;
+		}
+	}
+	
+	/*
+	function getPolicyInfoForIssueMonthlyScore($_data){
+		$_db = $this->getAdapter();
+		try{
+			$currentLang = empty($_data['currentLang'])?1:$_data['currentLang'];
+			$userId = empty($_data['userId'])?0:$_data['userId'];
+			$groupId = empty($_data['groupId'])?0:$_data['groupId'];
+			if($currentLang==1){// khmer
+				$label = "name_kh";
+				$grade = "rms_itemsdetail.title";
+				$degree = "rms_items.title";
+			}else{ // English
+				$label = "name_en";
+				$grade = "rms_itemsdetail.title_en";
+				$degree = "rms_items.title_en";
+			}
+			$sql="SELECT 
+					s.stu_id AS studentId
+					,s.branch_id AS branch_id
+					,s.stu_code AS stuCode
+					,s.stu_khname AS stuNameInKhmer
+					,CONCAT(COALESCE(s.last_name,''),' ',COALESCE(s.stu_enname,'')) AS stuNameInLatin
+					,(SELECT v.$label FROM rms_view AS v WHERE v.type=2 and v.key_code=s.sex LIMIT 1 ) as genderTitle
+					,gds.academic_year
+					,gds.session
+					,gds.grade
+					,gds.degree
+					
+					,COALESCE(g.`gradingId`,'0') AS gradingId
+					
+					,'0' AS totalAttendanceScore
+					
+				
+			";
+			$sqlColScoreValue="
+					,'' AS subCriteriaTitleKh
+					,'' AS subCriteriaTitleEng
+					,'' AS subCriteriaScore
+					,'0' AS criteriaScoreAvg
+					,'0' AS grandTotalAverageScore
+				";
+			$sqlTmpJoin="";
+			if(!empty($_data['gradingTmpId'])){
+				$gradingTmpId = $_data['gradingTmpId'];
+				$sqlColScoreValue = "
+						,COALESCE((SELECT GROUP_CONCAT(tmpD.subCriterialTitleKh) FROM `rms_grading_detail_tmp` AS tmpD WHERE tmpD.studentId = s.stu_id AND tmpD.`gradingId` =$gradingTmpId LIMIT 1),'') AS subCriteriaTitleKh
+						,COALESCE((SELECT GROUP_CONCAT(tmpD.subCriterialTitleEng) FROM `rms_grading_detail_tmp` AS tmpD WHERE tmpD.studentId = s.stu_id AND tmpD.`gradingId` =$gradingTmpId LIMIT 1),'') AS subCriteriaTitleEng
+						,(SELECT GROUP_CONCAT(tmpD.totalGrading) FROM `rms_grading_detail_tmp` AS tmpD WHERE tmpD.studentId = s.stu_id AND tmpD.`gradingId` =$gradingTmpId ) AS subCriteriaScore
+						,(SELECT  IF(SUM(tmpD.totalGrading) >0, FORMAT((COALESCE(SUM(tmpD.totalGrading),'0') / COUNT(tmpD.id) ),2) ,'0') FROM `rms_grading_detail_tmp` AS tmpD WHERE tmpD.studentId = s.stu_id AND tmpD.`gradingId` =$gradingTmpId) AS criteriaScoreAvg
+						,(SELECT COALESCE(grdT.totalAverage,'0') FROM `rms_grading_total` AS grdT WHERE grdT.studentId = s.stu_id AND grdT.`gradingTmpId` =$gradingTmpId LIMIT 1) AS grandTotalAverageScore
+					";
+			}
+			$sql.=$sqlColScoreValue;
+			
+			$sqlCountAtt="";
+			$sqlCountAttJoin="";
+			
+			$sqlGrSubj="";
+			$sqlGrSubjJoin="";
+			if(!empty($_data['forIssueMonthly'])){
+				$subjectId = empty($_data['subjectId'])?0:$_data['subjectId'];
+				$sqlGrSubj="
+						,COALESCE(subd.`max_score`,0) AS maxSubjectScore
+						,COALESCE(subd.`semester_max_score`,0) AS maxSubjectScoreSemester
+					";
+				$sqlGrSubjJoin=" LEFT JOIN vapi_group_subject_info AS subd ON gds.group_id = subd.`group_id` AND subd.`subject_id` = $subjectId ";
+			
+			
+				$settingEntryId = empty($_data["settingEntryId"]) ? "0" : $_data["settingEntryId"];
+				$sqlGrad="
+					SELECT entSett.*  FROM rms_score_entry_setting AS entSett WHERE  entSett.id = $settingEntryId LIMIT 1
+				";
+				$entrySetting = $_db->fetchRow($sqlGrad);
+				if(!empty($entrySetting)){
+					$attDetailJson = "
+					,CONCAT(
+						'['
+						,COALESCE(GROUP_CONCAT(
+							CONCAT(
+							'{'
+							
+							,'".'"attendanceStatus":'."'
+							,'".'"'."'
+							,attSub.`attendanceStatus`
+							,'".'"'."'
+							
+							,',".'"dateAttendance":'."'
+							,'".'"'."'
+							,attSub.dateAttendance
+							,'".'"'."'
+							
+							,',".'"description":'."'
+							,'".'"'."'
+							,attSub.description
+							,'".'"'."'
+							
+							,'}'
+							)
+						),'')
+						,']'
+					) AS attDetailList
+					";
+					
+					$sqlCountAtt="
+						,COUNT(IF(attSub.`attendanceStatus`=2,attSub.`attendanceStatus`,NULL)) AS totalAbsent
+						,COUNT(IF(attSub.`attendanceStatus`=3,attSub.`attendanceStatus`,NULL)) AS totalPermission
+						,COUNT(IF(attSub.`attendanceStatus`=4,attSub.`attendanceStatus`,NULL)) AS totalLate
+						,COUNT(IF(attSub.`attendanceStatus`=5,attSub.`attendanceStatus`,NULL)) AS totalEalyLeave
+					
+						,CASE WHEN (
+							COALESCE((COUNT(IF(attSub.`attendanceStatus`=2,attSub.`attendanceStatus`,NULL)) * COALESCE(att2.`scoreDeduct`,0)),0)
+							+COALESCE((COUNT(IF(attSub.`attendanceStatus`=3,attSub.`attendanceStatus`,NULL)) * COALESCE(att3.`scoreDeduct`,0)),0)
+							+COALESCE((COUNT(IF(attSub.`attendanceStatus`=4,attSub.`attendanceStatus`,NULL)) * COALESCE(att4.`scoreDeduct`,0)),0)
+							+COALESCE((COUNT(IF(attSub.`attendanceStatus`=5,attSub.`attendanceStatus`,NULL)) * COALESCE(att5.`scoreDeduct`,0)),0)
+							) >= (COALESCE(subd.`max_score`,0))  THEN '0'
+						ELSE (COALESCE(subd.`max_score`,0)
+							- (
+							COALESCE((COUNT(IF(attSub.`attendanceStatus`=2,attSub.`attendanceStatus`,NULL)) * COALESCE(att2.`scoreDeduct`,0)),0)
+							+COALESCE((COUNT(IF(attSub.`attendanceStatus`=3,attSub.`attendanceStatus`,NULL)) * COALESCE(att3.`scoreDeduct`,0)),0)
+							+COALESCE((COUNT(IF(attSub.`attendanceStatus`=4,attSub.`attendanceStatus`,NULL)) * COALESCE(att4.`scoreDeduct`,0)),0)
+							+COALESCE((COUNT(IF(attSub.`attendanceStatus`=5,attSub.`attendanceStatus`,NULL)) * COALESCE(att5.`scoreDeduct`,0)),0)
+							)
+						)
+					END AS totalAttendanceScore
+					";
+					$sqlCountAtt.=$attDetailJson;
+					
+					$sqlCountAttJoin=" LEFT JOIN `vapi_daily_stu_attsubject` AS attSub ON attSub.`studentId` = gds.`stu_id` AND attSub.`subjectId` = $subjectId  ";
+					$sqlCountAttJoin.=" AND attSub.`dateAttendance` >='".$entrySetting["fromDate"]."' AND attSub.`dateAttendance` <= '".$entrySetting["endDate"]."' ";
+					
+					$sqlCountAttJoin.=" LEFT JOIN `vapi_attsetting_policy` AS att2 ON att2.`attendanceType` = 2 AND att2.`gradingId` =COALESCE(g.`gradingId`,'0')
+										LEFT JOIN `vapi_attsetting_policy` AS att3 ON att3.`attendanceType` = 3 AND att3.`gradingId` =COALESCE(g.`gradingId`,'0')
+										LEFT JOIN `vapi_attsetting_policy` AS att4 ON att4.`attendanceType` = 4 AND att4.`gradingId` =COALESCE(g.`gradingId`,'0')
+										LEFT JOIN `vapi_attsetting_policy` AS att5 ON att5.`attendanceType` = 5 AND att5.`gradingId` =COALESCE(g.`gradingId`,'0') 
+									";
+				}
+			}
+			
+			$sql.=$sqlGrSubj;
+			$sql.=$sqlCountAtt;
+			
+			$sql.="
+				FROM  `rms_group_detail_student` AS gds JOIN rms_student AS s ON gds.stu_id = s.stu_id 
+					JOIN `rms_group` AS g ON g.id = gds.group_id
+			";
+			$sql.=$sqlGrSubjJoin;
+			$sql.=$sqlCountAttJoin;
+			$sql.=$sqlTmpJoin;
+			
+			
+			
+			$sql.="WHERE 
+					gds.itemType=1 
+					AND s.status = 1 
+					AND s.customer_type=1
+					AND gds.stop_type = 0 ";
+			
+			$where=' ';
+			$where.=' AND gds.group_id='.$groupId;
+			$where.=' GROUP By gds.stu_id ';
+			
+			$order_by = " ORDER BY s.stu_id ASC ";
+			//echo $sql.$where.$order_by;exit();
+			$row =  $_db->fetchAll($sql.$where.$order_by);
+		
+			
+			
+			/*
+			if(!empty($_data['forIssueMonthly'])){
+				
+				$settingEntryId = empty($_data['settingEntryId'])?0:$_data['settingEntryId'];
+				$subjectId = empty($_data['subjectId'])?0:$_data['subjectId'];
+				$arrAttTypeCount =array(
+					"settingEntryId" => $settingEntryId,
+					"groupId" => $groupId,
+					"subjectId" => $subjectId,
+				);
+				if(!empty($row)){
+					$gradingScoreSettingId = empty($row[0]["gradingId"]) ? 0 : $row[0]["gradingId"];
+					$attScoreSetting = $this->getScoreAttendanceSetting($gradingScoreSettingId);
+					foreach($row as $index => $student){
+						$arrAttTypeCount["studentId"] = $student["studentId"];
+						$arrAttTypeCount["attendenceStatus"] = 2;
+						$totalAbsent = $this->getCountAttendanceByStudent($arrAttTypeCount);
+						
+						$arrAttTypeCount["attendenceStatus"] = 3;
+						$totalPermission = $this->getCountAttendanceByStudent($arrAttTypeCount);
+						
+						$arrAttTypeCount["attendenceStatus"] = 4;
+						$totalLate = $this->getCountAttendanceByStudent($arrAttTypeCount);
+						
+						$arrAttTypeCount["attendenceStatus"] = 5;
+						$totalEalyLeave = $this->getCountAttendanceByStudent($arrAttTypeCount);
+						
+						$row[$index]["totalAbsent"] = $totalAbsent;
+						$row[$index]["totalPermission"] = $totalPermission;
+						$row[$index]["totalLate"] = $totalLate;
+						$row[$index]["totalEalyLeave"] = $totalEalyLeave;
+						
+						$student["totalAbsent"] 	= $totalAbsent;
+						$student["totalPermission"] = $totalPermission;
+						$student["totalLate"] 		= $totalLate;
+						$student["totalEalyLeave"] 	= $totalEalyLeave;
+						
+						$row[$index]["totalAttendanceScore"] = $this->calculatingScoreAttendance($attScoreSetting,$student);
+					}
+				}
+			}
+			
+			*/
+	/*
+			$criteriaInfoList = $this->getCriteriaScoreOfStudent($_data);
+			$criteriaInfoList = empty($criteriaInfoList) ? array() : $criteriaInfoList; 
+			
+			$_data['detailCriteriaStudent'] = 1;
+			$detailCriteriaStudent = $this->getCriteriaScoreOfStudent($_data);
+			$detailCriteriaStudent = empty($detailCriteriaStudent) ? array() : $detailCriteriaStudent;
+			$arrayResult = array(
+				'studentList' 		 =>$row,
+				"criteriaInfoList"   =>$criteriaInfoList,
+				"detailCriteriaStudent"   =>$detailCriteriaStudent
+			);
+			$result = array(
+					'status' =>true,
+					'value' =>$arrayResult,
+			);
+			return $result;
+			
+			
+		}catch(Exception $e){
+			Application_Model_DbTable_DbUserLog::writeMessageError($e->getMessage());
+			$result = array(
+					'status' =>false,
+					'value' =>$e->getMessage(),
+			);
+			return $result;
+		}
+	}
+	*/
+	
+	function getPolicyInfoForIssueMonthlyScore($_data){
+		$_db = $this->getAdapter();
+		try{
+			$currentLang = empty($_data['currentLang'])?1:$_data['currentLang'];
+			$userId = empty($_data['userId'])?0:$_data['userId'];
+			$groupId = empty($_data['groupId'])?0:$_data['groupId'];
+			$examType = empty($_data['examType'])?0:$_data['examType'];
+			
+			
+			
+			if($currentLang==1){// khmer
+				$label = "name_kh";
+				$grade = "rms_itemsdetail.title";
+				$degree = "rms_items.title";
+			}else{ // English
+				$label = "name_en";
+				$grade = "rms_itemsdetail.title_en";
+				$degree = "rms_items.title_en";
+			}
+			$sql="SELECT 
+					s.stu_id AS studentId
+					,s.branch_id AS branch_id
+					,s.stu_code AS stuCode
+					,s.stu_khname AS stuNameInKhmer
+					,CONCAT(COALESCE(s.last_name,''),' ',COALESCE(s.stu_enname,'')) AS stuNameInLatin
+					,(SELECT v.$label FROM rms_view AS v WHERE v.type=2 and v.key_code=s.sex LIMIT 1 ) as genderTitle
+					,gds.academic_year
+					,gds.session
+					,gds.grade
+					,gds.degree
+					
+					,COALESCE(g.`gradingId`,'0') AS gradingId
+					
+				
+			";
+			$sqlColScoreValue="
+					,'' AS subCriteriaTitleKh
+					,'' AS subCriteriaTitleEng
+					,'0' AS subCriteriaScore
+					,'0' AS criteriaScoreAvg
+					,'0' AS grandTotalAverageScore
+				";
+			$sqlTmpJoin="";
+			if(!empty($_data['gradingTmpId'])){
+				$gradingTmpId = $_data['gradingTmpId'];
+				$settingEntryId = empty($_data["settingEntryId"]) ? "0" : $_data["settingEntryId"];
+				$sqlColScoreValue = "
+						,COALESCE((SELECT GROUP_CONCAT(tmpD.subCriterialTitleKh) FROM `rms_grading_detail_tmp` AS tmpD WHERE tmpD.studentId = s.stu_id AND tmpD.`gradingId` =$gradingTmpId LIMIT 1),'') AS subCriteriaTitleKh
+						,COALESCE((SELECT GROUP_CONCAT(tmpD.subCriterialTitleEng) FROM `rms_grading_detail_tmp` AS tmpD WHERE tmpD.studentId = s.stu_id AND tmpD.`gradingId` =$gradingTmpId LIMIT 1),'') AS subCriteriaTitleEng
+						,(SELECT GROUP_CONCAT(tmpD.totalGrading) FROM `rms_grading_detail_tmp` AS tmpD WHERE tmpD.studentId = s.stu_id AND tmpD.`gradingId` =$gradingTmpId ) AS subCriteriaScore
+						,(SELECT  IF(SUM(tmpD.totalGrading) >0, FORMAT((COALESCE(SUM(tmpD.totalGrading),'0') / COUNT(tmpD.id) ),2) ,'0') FROM `rms_grading_detail_tmp` AS tmpD WHERE tmpD.studentId = s.stu_id AND tmpD.`gradingId` =$gradingTmpId) AS criteriaScoreAvg
+						,(SELECT COALESCE(grdT.totalAverage,'0') FROM `rms_grading_total` AS grdT WHERE grdT.studentId = s.stu_id AND grdT.`gradingTmpId` =$gradingTmpId LIMIT 1) AS grandTotalAverageScore
+					";
+			}
+			
+			
+			$sqlCountAtt="";
+			$sqlCountAttJoin="";
+			
+			$sqlGrSubj="";
+			$sqlGrSubjJoin="";
+			if(!empty($_data['forIssueMonthly'])){
+				if($examType==4){//Term
+					if(empty($_data['gradingTmpId'])){
+					}
+				}else{
+					if(empty($_data['gradingTmpId'])){
+						$subjectId = empty($_data['subjectId'])?0:$_data['subjectId'];
+						$settingEntryId = empty($_data["settingEntryId"]) ? "0" : $_data["settingEntryId"];
+					
+						$sqlGetSub = "
+							SELECT 
+								g.gradingId 
+								,stt.subCriterialTitleKh
+								,stt.subCriterialTitleEng
+							FROM `rms_group` AS g 
+								JOIN rms_scoreengsettingdetail as stt on stt.score_setting_id = g.gradingId 
+							WHERE 
+								g.id = ".$groupId." and stt.subjectId = ".$subjectId." 
+								and stt.forExamType = (select sett.examType from rms_score_entry_setting as sett where sett.id = $settingEntryId limit 1)
+							LIMIT 1
+							";
+						$detailSubj = $_db->fetchRow($sqlGetSub);
+
+						$subCriteriaTitleKh = empty($detailSubj["subCriterialTitleKh"]) ? "" : $detailSubj["subCriterialTitleKh"];
+						$subCriterialTitleEng = empty($detailSubj["subCriterialTitleEng"]) ? "" : $detailSubj["subCriterialTitleEng"];
+						$subCriteriaScore="";
+						if(!empty($subCriterialTitleEng)){
+							$epl = explode(",", $subCriterialTitleEng);
+							foreach ($epl as $ss){
+								if(empty($subCriteriaScore)){
+									$subCriteriaScore = "0.00";
+								}else{
+									$subCriteriaScore = $subCriteriaScore.",0.00";
+								}
+							}
+						}
+						$sqlColScoreValue="
+							,'$subCriteriaTitleKh' AS subCriteriaTitleKh
+							,'$subCriterialTitleEng' AS subCriteriaTitleEng
+							,'$subCriteriaScore' AS subCriteriaScore
+							,'0' AS criteriaScoreAvg
+							,'0' AS grandTotalAverageScore
+						";
+					}
+				
+					$subjectId = empty($_data['subjectId'])?0:$_data['subjectId'];
+					$sqlGrSubj="
+							,COALESCE(subd.`max_score`,0) AS maxSubjectScore
+							,COALESCE(subd.`semester_max_score`,0) AS maxSubjectScoreSemester
+						";
+					$sqlGrSubjJoin=" LEFT JOIN vapi_group_subject_info AS subd ON gds.group_id = subd.`group_id` AND subd.`subject_id` = $subjectId ";
+				
+				
+					$settingEntryId = empty($_data["settingEntryId"]) ? "0" : $_data["settingEntryId"];
+					$sqlGrad="
+						SELECT entSett.*  FROM rms_score_entry_setting AS entSett WHERE  entSett.id = $settingEntryId LIMIT 1
+					";
+					$entrySetting = $_db->fetchRow($sqlGrad);
+					if(!empty($entrySetting)){
+						$attDetailJson = "
+						,CONCAT(
+							'['
+							,COALESCE(GROUP_CONCAT(
+								DISTINCT
+								CONCAT(
+								'{'
+								
+								,'".'"attStatus":'."'
+								,'".'"'."'
+								,attSub.`attendanceStatus`
+								,'".'"'."'
+								
+								,',".'"attStatusTitle":'."'
+								,'".'"'."'
+								,attSub.`attendanceStatusTitle`
+								,'".'"'."'
+								
+								,',".'"dateAtt":'."'
+								,'".'"'."'
+								,attSub.dateAttendance
+								,'".'"'."'
+								
+								,',".'"desc":'."'
+								,'".'"'."'
+								,attSub.description
+								,'".'"'."'
+								
+								,'}'
+								)
+							),'')
+							,']'
+						) AS attDetailList
+						";
+						
+						
+						$sqlCountAtt="
+							,COUNT(IF(attSub.`attendanceStatus`=2,attSub.`attendanceStatus`,NULL)) AS totalAbsent
+							,COUNT(IF(attSub.`attendanceStatus`=3,attSub.`attendanceStatus`,NULL)) AS totalPermission
+							,COUNT(IF(attSub.`attendanceStatus`=4,attSub.`attendanceStatus`,NULL)) AS totalLate
+							,COUNT(IF(attSub.`attendanceStatus`=5,attSub.`attendanceStatus`,NULL)) AS totalEalyLeave
+						
+							,CASE WHEN (
+								COALESCE((COUNT(IF(attSub.`attendanceStatus`=2,attSub.`attendanceStatus`,NULL)) * COALESCE(att2.`scoreDeduct`,0)),0)
+								+COALESCE((COUNT(IF(attSub.`attendanceStatus`=3,attSub.`attendanceStatus`,NULL)) * COALESCE(att3.`scoreDeduct`,0)),0)
+								+COALESCE((COUNT(IF(attSub.`attendanceStatus`=4,attSub.`attendanceStatus`,NULL)) * COALESCE(att4.`scoreDeduct`,0)),0)
+								+COALESCE((COUNT(IF(attSub.`attendanceStatus`=5,attSub.`attendanceStatus`,NULL)) * COALESCE(att5.`scoreDeduct`,0)),0)
+								) >= (COALESCE(subd.`max_score`,0))  THEN '0'
+							ELSE (COALESCE(subd.`max_score`,0)
+								- (
+								COALESCE((COUNT(IF(attSub.`attendanceStatus`=2,attSub.`attendanceStatus`,NULL)) * COALESCE(att2.`scoreDeduct`,0)),0)
+								+COALESCE((COUNT(IF(attSub.`attendanceStatus`=3,attSub.`attendanceStatus`,NULL)) * COALESCE(att3.`scoreDeduct`,0)),0)
+								+COALESCE((COUNT(IF(attSub.`attendanceStatus`=4,attSub.`attendanceStatus`,NULL)) * COALESCE(att4.`scoreDeduct`,0)),0)
+								+COALESCE((COUNT(IF(attSub.`attendanceStatus`=5,attSub.`attendanceStatus`,NULL)) * COALESCE(att5.`scoreDeduct`,0)),0)
+								)
+							)
+						END AS totalAttendanceScore
+						";
+						$sqlCountAtt.=$attDetailJson;
+						$sqlCountAtt.=",criD.dataDetailList AS criDetailList";
+						
+						$sqlCountAttJoin=" LEFT JOIN `vapi_daily_stu_attsubject` AS attSub ON attSub.`studentId` = gds.`stu_id` AND attSub.`subjectId` = $subjectId  AND attSub.`groupId` = $groupId";
+						$sqlCountAttJoin.=" AND attSub.`dateAttendance` >='".$entrySetting["fromDate"]."' AND attSub.`dateAttendance` <= '".$entrySetting["endDate"]."' ";
+						
+						$sqlCountAttJoin.=" LEFT JOIN `vapi_attsetting_policy` AS att2 ON att2.`attendanceType` = 2 AND att2.`gradingId` =COALESCE(g.`gradingId`,'0')
+											LEFT JOIN `vapi_attsetting_policy` AS att3 ON att3.`attendanceType` = 3 AND att3.`gradingId` =COALESCE(g.`gradingId`,'0')
+											LEFT JOIN `vapi_attsetting_policy` AS att4 ON att4.`attendanceType` = 4 AND att4.`gradingId` =COALESCE(g.`gradingId`,'0')
+											LEFT JOIN `vapi_attsetting_policy` AS att5 ON att5.`attendanceType` = 5 AND att5.`gradingId` =COALESCE(g.`gradingId`,'0') 
+										";
+						$sqlCountAttJoin.=" LEFT JOIN `vapi_stugrdtmp_subject_cridetail` AS criD ON criD.groupId = g.id AND criD.studentId = gds.`stu_id` 
+												AND criD.settingEntryId = $settingEntryId AND criD.subjectId = $subjectId 
+										";
+					}
+				}
+				
+			}
+			$sql.=$sqlColScoreValue;
+			$sql.=$sqlGrSubj;
+			$sql.=$sqlCountAtt;
+			
+			$sql.="
+				FROM  
+					(
+						(
+							`rms_group_detail_student` AS gds  JOIN rms_student AS s 
+								ON gds.stu_id = s.stu_id AND gds.itemType=1 
+								AND s.status = 1 
+								AND s.customer_type=1
+								AND gds.is_current=1
+								AND gds.stop_type = 0
+						) JOIN `rms_group` AS g ON g.id = gds.group_id 
+					)
+			";
+			$sql.=$sqlGrSubjJoin;
+			$sql.=$sqlCountAttJoin;
+			$sql.=$sqlTmpJoin;
+			
+			
+			
+			$sql.="WHERE 1 ";
+			
+			$where=' ';
+			$where.=' AND gds.group_id='.$groupId;
+			$where.=' GROUP By gds.stu_id ';
+			
+			$order_by = " ORDER BY s.stu_id ASC ";
+			$row =  $_db->fetchAll($sql.$where.$order_by);
+		
+			
+			
+			/*
+			if(!empty($_data['forIssueMonthly'])){
+				
+				$settingEntryId = empty($_data['settingEntryId'])?0:$_data['settingEntryId'];
+				$subjectId = empty($_data['subjectId'])?0:$_data['subjectId'];
+				$arrAttTypeCount =array(
+					"settingEntryId" => $settingEntryId,
+					"groupId" => $groupId,
+					"subjectId" => $subjectId,
+				);
+				if(!empty($row)){
+					$gradingScoreSettingId = empty($row[0]["gradingId"]) ? 0 : $row[0]["gradingId"];
+					$attScoreSetting = $this->getScoreAttendanceSetting($gradingScoreSettingId);
+					foreach($row as $index => $student){
+						$arrAttTypeCount["studentId"] = $student["studentId"];
+						$arrAttTypeCount["attendenceStatus"] = 2;
+						$totalAbsent = $this->getCountAttendanceByStudent($arrAttTypeCount);
+						
+						$arrAttTypeCount["attendenceStatus"] = 3;
+						$totalPermission = $this->getCountAttendanceByStudent($arrAttTypeCount);
+						
+						$arrAttTypeCount["attendenceStatus"] = 4;
+						$totalLate = $this->getCountAttendanceByStudent($arrAttTypeCount);
+						
+						$arrAttTypeCount["attendenceStatus"] = 5;
+						$totalEalyLeave = $this->getCountAttendanceByStudent($arrAttTypeCount);
+						
+						$row[$index]["totalAbsent"] = $totalAbsent;
+						$row[$index]["totalPermission"] = $totalPermission;
+						$row[$index]["totalLate"] = $totalLate;
+						$row[$index]["totalEalyLeave"] = $totalEalyLeave;
+						
+						$student["totalAbsent"] 	= $totalAbsent;
+						$student["totalPermission"] = $totalPermission;
+						$student["totalLate"] 		= $totalLate;
+						$student["totalEalyLeave"] 	= $totalEalyLeave;
+						
+						$row[$index]["totalAttendanceScore"] = $this->calculatingScoreAttendance($attScoreSetting,$student);
+					}
+				}
+			}
+			
+			*/
+			
+			
+			$criteriaList = $this->getCriteriaSettingOfClass($_data);
+			
+			//$criteriaInfoList = $this->getCriteriaScoreOfStudent($_data);
+			$criteriaInfoList = empty($criteriaInfoList) ? array() : $criteriaInfoList; 
+			
+			$_data['detailCriteriaStudent'] = 1;
+			//$detailCriteriaStudent = $this->getCriteriaScoreOfStudent($_data);
+			$detailCriteriaStudent = empty($detailCriteriaStudent) ? array() : $detailCriteriaStudent;
+			$arrayResult = array(
+				'studentList' 		 =>$row,
+				"criteriaInfoList"   =>$criteriaInfoList,
+				"detailCriteriaStudent"   =>$detailCriteriaStudent,
+				"criteriaList"   =>$criteriaList
+			);
+			$result = array(
+					'status' =>true,
+					'value' =>$arrayResult,
+			);
+			return $result;
+			
+			
+		}catch(Exception $e){
+			Application_Model_DbTable_DbUserLog::writeMessageError($e->getMessage());
+			$result = array(
+					'status' =>false,
+					'value' =>$e->getMessage(),
+			);
+			return $result;
+		}
+	}
+	function getCriteriaSettingOfClass($_data){
+		$subjectId = empty($_data['subjectId'])?0:$_data['subjectId'];
+		$groupId = empty($_data['groupId'])?0:$_data['groupId'];
+		
+		$_db = $this->getAdapter();
+		$settingEntryId = empty($_data["settingEntryId"]) ? "0" : $_data["settingEntryId"];
+		$sqlGrad="
+			SELECT entSett.*  FROM rms_score_entry_setting AS entSett WHERE  entSett.id = $settingEntryId LIMIT 1
+		";
+		$entrySetting = $_db->fetchRow($sqlGrad);
+		$examType = empty($entrySetting["examType"]) ? 0 : $entrySetting["examType"];
+		
+		
+		$currentLang = empty($_data['currentLang'])?1:$_data['currentLang'];
+		$criterialTitle = "criterialTitleEn";
+		if($currentLang==1){// khmer
+			$criterialTitle = "criterialTitle";
+		}
+			
+		$sql="
+			SELECT
+				sttD.`settingId` AS gradingId
+				,sttD.criteriaId
+				,sttD.`criteriaType`
+				,sttD.".$criterialTitle." AS criteriaTitle
+				,sttD.`criterialTitle` AS criteriaTitleKh
+				,sttD.`criterialTitleEn` AS criteriaTitleEng
+				,COALESCE(v.subjectId,0) AS criSubjectId
+				,CASE 
+					WHEN COALESCE(v.subjectId,0) > 0  THEN v.`subCriteriaTitleEng`
+					ELSE sttD.subCriteriaTitleEng
+				END AS subCriteriaTitleKh
+				,CASE 
+					WHEN COALESCE(v.subjectId,0) > 0  THEN v.`subCriteriaTitleKh`
+					ELSE sttD.subCriteriaTitleKh
+				END AS subCriteriaTitleKh
+				,CASE 
+					WHEN COALESCE(v.subjectId,0) > 0  THEN v.`pecentage_score`
+					ELSE sttD.pecentage_score
+				END AS percentageScore
+				,'' groupCode
+				,'0' studentId
+				,'$subjectId' subjectId
+				,'$settingEntryId' settingEntryId
+				,'' AS subjectTitleEng
+				,'' AS subjectTitleKh
+				,'' AS subjectShortCut
+				,'1' AS subjectLang
+				,'' AS createDate
+				,'' AS dateInput
+
+				,'0' AS totalCriteriaScore
+				,'0' AS inputTime
+				,'0' AS averageScore
+			FROM `vapi_criteria_setting` AS sttD 
+					JOIN `rms_group` AS g ON g.`gradingId` = sttD.score_setting_id AND g.id = $groupId
+					LEFT JOIN vapi_criteria_subject AS v ON  sttD.`score_setting_id` = v.`settingId` 
+					AND v.subjectId = $subjectId AND sttD.`forExamType` = v.forExamType 
+					AND v.`criteriaId` = sttD.`criteriaId`
+				WHERE sttD.`score_setting_id` = g.`gradingId`
+					AND sttD.`forExamType`=$examType
+				ORDER BY sttD.`criteriaType` ASC, sttD.criteriaId ASC
+		";
+		
+		return $_db->fetchAll($sql);
+	}
+	
+	function getCriteriaScoreOfStudent($_data){
+		$db = $this->getAdapter();
+		$currentLang = empty($_data['currentLang'])?1:$_data['currentLang'];
+		$userId = empty($_data['userId'])?0:$_data['userId'];
+		$groupId = empty($_data['groupId'])?0:$_data['groupId'];
+		$subjectId = empty($_data['subjectId'])?0:$_data['subjectId'];
+		$settingEntryId = empty($_data['settingEntryId'])?0:$_data['settingEntryId'];
+		
+		$sqlGrad="
+			SELECT entSett.*  FROM rms_score_entry_setting AS entSett WHERE  entSett.id = $settingEntryId LIMIT 1
+		";
+		$entrySetting = $db->fetchRow($sqlGrad);
+		$examType = empty($entrySetting["examType"]) ? 0 : $entrySetting["examType"];
+		
+		$colunmName='title_en';
+		if ($currentLang==1){
+			$colunmName='title';
+		}
+		$sql="
+			SELECT 
+				sttD.criteriaId
+				,sttD.pecentage_score AS percentageScore
+				
+				,(SELECT crit.$colunmName 	FROM `rms_exametypeeng` AS crit WHERE crit.id = sttD.criteriaId LIMIT 1) AS criteriaTitle
+				,(SELECT crit.title 		FROM `rms_exametypeeng` AS crit WHERE crit.id = sttD.criteriaId LIMIT 1) AS criteriaTitleKh
+				,(SELECT crit.title_en 		FROM `rms_exametypeeng` AS crit WHERE crit.id = sttD.criteriaId LIMIT 1) AS criteriaTitleEng
+				,(SELECT crit.criteriaType 	FROM `rms_exametypeeng` AS crit WHERE crit.id = sttD.criteriaId LIMIT 1) AS criteriaType
+				
+				,gds.stu_id AS studentId
+				
+				,COALESCE(g.`gradingId`,'0') AS gradingId
+				,g.group_code AS groupCode
+				,tmp.subjectId AS subjectId
+				,tmp.settingEntryId
+				,(SELECT subj.subject_titleen 	FROM `rms_subject` AS subj	WHERE subj.id = tmp.subjectId  LIMIT 1) AS subjectTitleEng
+				,(SELECT subj.subject_titlekh 	FROM `rms_subject` AS subj	WHERE subj.id = tmp.subjectId  LIMIT 1) AS subjectTitleKh
+				,(SELECT subj.shortcut 			FROM `rms_subject` AS subj 	WHERE subj.id = tmp.subjectId  LIMIT 1) AS subjectShortCut
+				,(SELECT subj.subject_lang 		FROM `rms_subject` AS subj 	WHERE subj.id = tmp.subjectId  LIMIT 1) AS subjectLang
+				
+					
+				,tmp.createDate AS createDate
+				,tmp.createDate AS dateInput
+		";
+		$sqlCol = "
+				
+				,COALESCE(SUM(IF(sttD.`criteriaId`  = tmp.`criteriaId`, tmpD.totalGrading, 0)),'0') AS totalCriteriaScore
+				,COALESCE((SELECT COUNT(tmp1.id) FROM `rms_grading_tmp` AS tmp1 WHERE tmp.subjectId = tmp1.subjectId AND tmp1.settingEntryId =".$settingEntryId." AND tmp1.criteriaId = sttD.criteriaId AND g.id = tmp1.groupId LIMIT 1 ),'0') AS inputTime
+	
+				,FORMAT(
+					IF(
+					COALESCE((SELECT COUNT(tmp1.id) FROM `rms_grading_tmp` AS tmp1 WHERE tmp.subjectId = tmp1.subjectId AND tmp1.settingEntryId =".$settingEntryId." AND tmp1.criteriaId = sttD.criteriaId AND g.id = tmp1.groupId LIMIT 1 ),'0')>0 AND COALESCE(SUM(tmpD.totalGrading),'0') >0, 
+					(SUM(IF(sttD.`criteriaId`  = tmp.`criteriaId`, tmpD.totalGrading, 0)) / COALESCE((SELECT COUNT(tmp1.id) FROM `rms_grading_tmp` AS tmp1 WHERE tmp.subjectId = tmp1.subjectId AND tmp1.settingEntryId =".$settingEntryId." AND tmp1.criteriaId = sttD.criteriaId AND g.id = tmp1.groupId LIMIT 1 ),'0')),
+					0)
+					,2) AS averageScore
+		";
+		$sqlGrouby="
+			GROUP BY
+				g.id,
+				tmp.subjectId,
+				sttD.criteriaId,
+				gds.stu_id
+		";
+		$sqlWhereC = "";
+		if(!empty($_data["detailCriteriaStudent"])){
+			$sqlCol = "
+				,tmpD.totalGrading
+			";
+			$sqlWhereC = " AND tmp.`criteriaId` = sttD.`criteriaId` ";
+			$sqlGrouby = "
+				GROUP BY
+					g.id,
+					tmp.subjectId,
+					tmp.id,
+					gds.stu_id
+			";
+		}
+		$sql.=$sqlCol;
+		$sql.="
+		FROM 
+		
+			`rms_scoreengsettingdetail` AS sttD
+			JOIN `rms_group` AS g ON g.`gradingId` = sttD.`score_setting_id`
+				LEFT JOIN `rms_group_detail_student` AS gds ON  gds.group_id = g.id AND gds.stop_type = 0
+				LEFT JOIN (`rms_grading_detail_tmp` AS tmpD JOIN `rms_grading_tmp` AS tmp ON tmp.id =tmpD.gradingId )  ON  tmp.settingEntryId =".$settingEntryId." AND gds.stu_id = tmpD.studentId AND g.id = tmp.groupId
+			
+			";
+		
+		
+		
+		$sql.=" WHERE 1 AND sttD.forExamType=$examType ";
+		$sql.=$sqlWhereC;
+		$sql.="
+				AND (SELECT crit.criteriaType FROM `rms_exametypeeng` AS crit WHERE crit.id = sttD.criteriaId LIMIT 1) 
+					>= CASE 
+						WHEN COALESCE((SELECT sttDi.isNotEnteryCri FROM `rms_scoreengsettingdetail` AS sttDi WHERE sttDi.score_setting_id = g.`gradingId` AND sttDi.subjectId =  ".$subjectId."  ORDER BY sttDi.isNotEnteryCri DESC LIMIT 1 ),'0') =1 
+						THEN '1' 
+						ELSE '0'
+					END 
+				AND sttD.isNotEnteryCri = CASE 
+					WHEN COALESCE((SELECT sttDi.isNotEnteryCri FROM `rms_scoreengsettingdetail` AS sttDi WHERE sttDi.score_setting_id = g.`gradingId` AND sttDi.subjectId =  ".$subjectId."  ORDER BY sttDi.isNotEnteryCri DESC LIMIT 1 ),'0') =1 
+						THEN '1' 
+					ELSE '0'
+					END 
+			";
+		$sql.="
+				
+				AND g.is_use=1 
+				AND g.id = ".$groupId." 
+				AND tmp.subjectId = ".$subjectId."  
+				AND tmp.teacherId=".$userId." 
+				AND (SELECT crit.criteriaType FROM `rms_exametypeeng` AS crit WHERE crit.id = sttD.criteriaId LIMIT 1) !=2
+			";
+		$sql.=$sqlGrouby;
+		$sql.=" ORDER BY 
+					`g`.`group_code` ASC
+					,gds.stu_id ASC
+					,(SELECT crit.criteriaType FROM `rms_exametypeeng` AS crit WHERE crit.id = sttD.criteriaId LIMIT 1) ASC 
+					,sttD.criteriaId ASC
+					,tmpD.id ASC
+				";
+		return $db->fetchAll($sql);
+	}
+	
+	function calculatingScoreAttendance($arrAttSetting,$rowStudentInfo){
+		$totalDeduct = 0;
+		$scoreAttendance=0;
+		$maxAttendance=0;
+		if(!empty($arrAttSetting))foreach($arrAttSetting as $key => $rs){
+			
+			if($rs['attendanceType']==2 AND $rowStudentInfo["totalAbsent"] >0){
+				$totalDeduct =$totalDeduct+($rowStudentInfo['totalAbsent']*$rs['scoreDeduct']);
+			}
+			elseif($rs['attendanceType']==3 AND $rowStudentInfo["totalPermission"] >0){
+				$totalDeduct = $totalDeduct+($rowStudentInfo['totalPermission']*$rs['scoreDeduct']);
+			}
+			elseif($rs['attendanceType']==4 AND $rowStudentInfo["totalLate"] >0){
+				$totalDeduct = $totalDeduct+($rowStudentInfo['totalLate']*$rs['scoreDeduct']);
+			}
+			elseif($rs['attendanceType']==5 AND $rowStudentInfo["totalEalyLeave"] >0){
+				$totalDeduct = $totalDeduct+($rowStudentInfo['totalEalyLeave']*$rs['scoreDeduct']);
+			}
+			//if($key==0){$maxAttendance = $rs["attendanceScore"];}
+			if($key==0){$maxAttendance = empty($rowStudentInfo["maxSubjectScore"]) ? 0 : $rowStudentInfo["maxSubjectScore"];}
+		}
+		$scoreAttendance = $maxAttendance - $totalDeduct;
+		if($scoreAttendance<0){
+			$scoreAttendance = 0;
+		}
+		return $scoreAttendance;
+	}
+	function getScoreAttendanceSetting($gradingScoreSettingId){
+		$db = $this->getAdapter();
+		$sql="
+			SELECT 
+				attS.`score` AS attendanceScore
+				,attSD.attendanceType AS attendanceType
+				,attSD.scoreDeduct AS scoreDeduct
+			FROM `rms_scoreengsetting` AS sSet
+				JOIN (`rms_attendance_score_setting` AS attS JOIN `rms_attendance_score_setting_detail` AS attSD  ON attSD.settingId = attS.id) 
+				ON attS.`id` = sSet.`settingScoreAttId`
+			WHERE sSet.id = $gradingScoreSettingId
+		";
+		return $db->fetchAll($sql);
+	}
+
+	function getCountAttendanceByStudent($_data){
+		$db = $this->getAdapter();
+		$settingEntryId = empty($_data["settingEntryId"]) ? "0" : $_data["settingEntryId"];
+		$sqlGrad="
+			SELECT entSett.*  FROM rms_score_entry_setting AS entSett WHERE  entSett.id = $settingEntryId LIMIT 1
+		";
+		$entrySetting = $db->fetchRow($sqlGrad);
+		
+		$restult = "0";
+		if(!empty($entrySetting)){
+			$studentId = empty($_data["studentId"]) ? "0" : $_data["studentId"];
+			$groupId = empty($_data["groupId"]) ? "0" : $_data["groupId"];
+			$attendenceStatus = empty($_data["attendenceStatus"]) ? "0" : $_data["attendenceStatus"];
+			$subjectId = empty($_data["subjectId"]) ? "0" : $_data["subjectId"];
+			$sql="
+				SELECT 
+					satd.attendence_id,
+					satd.attendence_status
+				FROM 
+					`rms_student_attendence` AS sat ,
+					`rms_student_attendence_detail` AS satd
+						
+				WHERE satd.attendence_status = $attendenceStatus
+					AND sat.`id`= satd.`attendence_id`
+					AND satd.stu_id = $studentId
+					AND sat.group_id = $groupId
+					AND satd.subjectId = $subjectId
+					
+				";
+			$sql.=" AND sat.`date_attendence` >='".$entrySetting["fromDate"]."' AND sat.`date_attendence` <= '".$entrySetting["endDate"]."' ";
+			$sql.="
+					GROUP BY satd.attendence_id,satd.attendence_status
+					ORDER BY satd.attendence_status DESC
+			";
+			$rs = $db->fetchAll($sql);
+			if(!empty($rs)){
+				return $restult = "".COUNT($rs)."";
+			}
+		}
+		return $restult;
+	}
+	
+	function getGradingByTmpGradingId($gradingTmpId){
+		$db = $this->getAdapter();
+		$sql = "
+			SELECT gr.* FROM rms_grading AS gr WHERE gr.gradingTmpId = $gradingTmpId LIMIT 1
+		";
+		return $db->fetchRow($sql);
+	}
+	function submitMonthlyScore($_data){
+    	$db = $this->getAdapter();
+		$db->beginTransaction();
+    	try{
+			
+			$_data['userId']	= empty($_data['userId'])?0:$_data['userId'];
+			$scoreSettingEntryPost 	 = empty($_data['scoreSettingEntry'])?null:$_data['scoreSettingEntry'];
+			$scoreInfo 	 = [];
+			if(!empty($scoreSettingEntryPost)){
+				$scoreInfo 	 = Zend_Json::decode($scoreSettingEntryPost);
+			}
+			
+			$criteriaInfoPost 	 = empty($_data['criteriaInfo'])?null:$_data['criteriaInfo'];
+			$criteriaInfo 	 = [];
+			if(!empty($criteriaInfoPost)){
+				$criteriaInfo 	 = Zend_Json::decode($criteriaInfoPost);
+			}
+			
+			$listFromPost 	 = empty($_data['studentScoreListSubmit'])?null:$_data['studentScoreListSubmit'];
+			$studentScoreList 	 = [];
+			if(!empty($listFromPost)){
+				$studentScoreList 	 = Zend_Json::decode($listFromPost);
+			}
+			
+			$criteriaListOfStudentPost 	 = empty($_data['criteriaListOfStudent'])?null:$_data['criteriaListOfStudent'];
+			$criteriaListOfStudentList 	 = [];
+			if(!empty($criteriaListOfStudentPost)){
+				$criteriaListOfStudentList 	 = Zend_Json::decode($criteriaListOfStudentPost);
+			}
+			$criteriaId = $_data['criteriaId'];
+			$subjectId = $_data['subjectId'];
+			
+			$scoreInfo["criteriaId"] = $criteriaId;
+			$scoreInfo["subjectId"] = $subjectId;
+			$scoreInfo["userId"] = $_data['userId'];
+			$checkingSubmitCriterial = $this->checkTimeSecondBeforeSubmit($scoreInfo);
+			
+			$examType = $scoreInfo["examType"];
+			
+			if(!empty($scoreInfo)){
+				$arr = array(
+					'branchId'			=>$scoreInfo['branchId'],
+					'settingEntryId'	=>$scoreInfo['settingEntryId'],
+					'gradingSettingId'	=>$scoreInfo['gradingSettingId'],
+					'academicYear'		=>$scoreInfo['academicYearId'],
+					'groupId'			=>$scoreInfo['groupId'],
+					'examType'			=>$scoreInfo['examType'],
+					'forSemester'		=>$scoreInfo['forSemester'],
+					'forMonth'			=>$scoreInfo['forMonth'],
+					'forTerm'			=>empty($scoreInfo['forTerm']) ? 0 : $scoreInfo['forTerm'],
+					'subjectId'			=>$subjectId,
+					'criteriaId'		=>$criteriaId,
+					'inputOption'		=>2,
+										
+					'status'			=>1,
+					'modifyDate'		=>date("Y-m-d H:i:s"),
+					'teacherId'			=>$_data['userId'],
+				);
+				$this->_name='rms_grading_tmp';
+				if(!empty($_data['gradingTmpId'])){
+					$gradingTmpId = empty($_data['gradingTmpId']) ? 0 : $_data['gradingTmpId'];
+					$where=" id = ".$gradingTmpId;
+					$this->update($arr, $where);
+				}else{
+					$gradingTmpId = 0;
+					if(empty($checkingSubmitCriterial)){
+						$arr['dateInput'] = date("Y-m-d H:i:s");
+						$arr['createDate'] = date("Y-m-d H:i:s");
+						$gradingTmpId = $this->insert($arr);
+					}
+				}
+				$arrGrading = array(
+						'branchId'			=>$scoreInfo['branchId'],
+						'gradingTmpId'		=>$gradingTmpId,
+						'settingEntryId'	=>$scoreInfo['settingEntryId'],
+						'gradingSettingId'	=>$scoreInfo['gradingSettingId'],
+						'groupId'			=>$scoreInfo['groupId'],
+						'examType'			=>$scoreInfo['examType'],
+						
+						'forMonth'			=>$scoreInfo['forMonth'],
+						'forSemester'		=>$scoreInfo['forSemester'],
+						'academicYear'		=>$scoreInfo['academicYearId'],
+						'forTerm'			=>empty($scoreInfo['forTerm']) ? 0 : $scoreInfo['forTerm'],
+						
+						'subjectId'			=>$subjectId,
+						'inputOption'		=>2, 
+						'status'			=>1,
+						
+						'teacherId'			=>$_data['userId'],
+						'modifyDate'		=>date("Y-m-d H:i:s"),
+				);
+				$this->_name='rms_grading';
+				if(!empty($_data['gradingTmpId'])){
+					if(!empty($criteriaListOfStudentList)) {
+						$gradingRs = $this->getGradingByTmpGradingId($gradingTmpId);
+						$idGrading = empty($gradingRs['id']) ? 0 : $gradingRs['id'];
+						if(!empty($gradingRs)){
+							$whereGrading=" id = ".$idGrading;
+							$this->update($arrGrading, $whereGrading);
+							
+							$where='gradingId='.$gradingTmpId;
+							$this->_name='rms_grading_detail_tmp';
+							$this->delete($where);
+							
+							$where='gradingTmpId='.$gradingTmpId;
+							$this->_name='rms_grading_detail';
+							$this->delete($where);
+							
+							$this->_name='rms_grading_total';
+							$this->delete($where);
+						}
+					}
+				}else{
+					$idGrading = 0;
+					if(empty($checkingSubmitCriterial)){
+						$arrGrading['dateInput'] = date("Y-m-d H:i:s");
+						$arrGrading['createDate'] = date("Y-m-d H:i:s");
+						$idGrading = $this->insert($arrGrading);
+					}
+				}
+				
+				if($examType==4){ // term Score For Kindergaten
+					if(!empty($gradingTmpId) && !empty($idGrading) ){
+						$subCriteriaTitle = empty($criteriaInfo['subCriteriaTitleKh']) ? "" : $criteriaInfo['subCriteriaTitleKh'];
+						$subjectIdInCriteriaSetting = empty($criteriaInfo['subjectIdInCriteriaSetting']) ? "0" : $criteriaInfo['subjectIdInCriteriaSetting'];
+						
+						$subCriteriaTitleList = explode(',', $criteriaInfo['subCriteriaTitleKh']);
+						$subCriteriaAmount = count($subCriteriaTitleList);
+						
+						$maxScoreSubject = empty($criteriaInfo['maxScoreSubject']) ? "" : $criteriaInfo['maxScoreSubject'];
+						$percentageScore = empty($criteriaInfo['percentageScore']) ? "" : $criteriaInfo['percentageScore'];
+						
+						if(!empty($studentScoreList)) foreach($studentScoreList AS $row){
+							if($subCriteriaTitle!="" && $subjectIdInCriteriaSetting !="0"){
+								$subCriteriaScoreExp = explode(',', $row['subCriteriaScore']);
+								$subCriteriaTitleEngExp = explode(',', $row['subCriteriaTitleEng']);
+								foreach ($subCriteriaTitleList as $key => $i){
+									$arrDetail = array(
+											'gradingId'			    =>$gradingTmpId,
+											'studentId'			    =>$row['studentId'],
+											'subCriterialTitleKh'	=>$i,
+											'subCriterialTitleEng'	=>$subCriteriaTitleEngExp[$key],
+											'totalGrading'			=>$subCriteriaScoreExp[$key],
+												
+									);
+									$this->_name='rms_grading_detail_tmp';	
+									$this->insert($arrDetail);
+									
+									$arrGradingDetail=array(
+										'gradingId'				=> $idGrading,
+										'gradingTmpId'			=> $gradingTmpId,
+										'studentId'				=> $row['studentId'],
+										'subjectId'				=> $subjectId,
+										'criteriaId'			=> $criteriaId,
+										'totalGrading'			=> $subCriteriaScoreExp[$key],
+										'criteriaAmount'		=> $subCriteriaAmount,
+										'percentage'			=> $percentageScore,
+										'subCriterialTitleKh'	=> $i,
+										'subCriterialTitleEng'	=> $subCriteriaTitleEngExp[$key],
+										'dateInput'		=>date("Y-m-d H:i:s"),
+										);
+									
+									$this->_name='rms_grading_detail';
+									$this->insert($arrGradingDetail);
+								}
+							}else{
+								$subCriteriaScore = empty($row['subCriteriaScore']) ? "0" : $row['subCriteriaScore'];
+								$arrDetail = array(
+									'gradingId'			=>$gradingTmpId,
+									'studentId'			=>$row['studentId'],
+									'totalGrading'		=>$subCriteriaScore,
+										
+								);
+								$this->_name='rms_grading_detail_tmp';	
+								$this->insert($arrDetail);
+								
+								$arrGradingDetail=array(
+										'gradingId'				=> $idGrading,
+										'gradingTmpId'			=> $gradingTmpId,
+										'studentId'				=> $row['studentId'],
+										'subjectId'				=> $subjectId,
+										'criteriaId'			=> $criteriaId,
+										'totalGrading'			=> $subCriteriaScore,
+										'criteriaAmount'		=> $subCriteriaAmount,
+										'percentage'			=> $percentageScore,
+										'dateInput'		=>date("Y-m-d H:i:s"),
+										);
+									
+								$this->_name='rms_grading_detail';
+								$this->insert($arrGradingDetail);
+							}
+							
+							$arr=array(
+								'gradingId'			=> $idGrading,
+								'gradingTmpId'		=> $gradingTmpId,
+								'studentId'			=> $row['studentId'],
+								'subjectId'			=> $subjectId,
+								'totalAverage'		=> $row['grandTotalAverageScore'],
+								'maxScore'			=> $maxScoreSubject,
+							);
+							$this->_name='rms_grading_total';
+							$this->insert($arr);
+							
+						}
+					}
+				}else{
+					if(!empty($gradingTmpId) && !empty($idGrading) ){
+						$subCriteriaTitle = empty($criteriaInfo['subCriteriaTitleKh']) ? "" : $criteriaInfo['subCriteriaTitleKh'];
+						$subjectIdInCriteriaSetting = empty($criteriaInfo['subjectIdInCriteriaSetting']) ? "0" : $criteriaInfo['subjectIdInCriteriaSetting'];
+						
+						$subCriteriaTitleList = explode(',', $criteriaInfo['subCriteriaTitleKh']);
+						$subCriteriaAmount = count($subCriteriaTitleList);
+						
+						$maxScoreSubject = empty($criteriaInfo['maxScoreSubject']) ? "" : $criteriaInfo['maxScoreSubject'];
+						$percentageScore = empty($criteriaInfo['percentageScore']) ? "" : $criteriaInfo['percentageScore'];
+						
+						if(!empty($studentScoreList)) foreach($studentScoreList AS $row){
+							if($subCriteriaTitle!="" && $subjectIdInCriteriaSetting !="0"){
+								$subCriteriaScoreExp = explode(',', $row['subCriteriaScore']);
+								$subCriteriaTitleEngExp = explode(',', $row['subCriteriaTitleEng']);
+								foreach ($subCriteriaTitleList as $key => $i){
+									$arrDetail = array(
+											'gradingId'			    =>$gradingTmpId,
+											'studentId'			    =>$row['studentId'],
+											'subCriterialTitleKh'	=>$i,
+											'subCriterialTitleEng'	=>$subCriteriaTitleEngExp[$key],
+											'totalGrading'			=>$subCriteriaScoreExp[$key],
+												
+									);
+									$this->_name='rms_grading_detail_tmp';	
+									$this->insert($arrDetail);
+									
+									$arrGradingDetail=array(
+										'gradingId'				=> $idGrading,
+										'gradingTmpId'			=> $gradingTmpId,
+										'studentId'				=> $row['studentId'],
+										'subjectId'				=> $subjectId,
+										'criteriaId'			=> $criteriaId,
+										'totalGrading'			=> $subCriteriaScoreExp[$key],
+										'criteriaAmount'		=> $subCriteriaAmount,
+										'percentage'			=> $percentageScore,
+										'subCriterialTitleKh'	=> $i,
+										'subCriterialTitleEng'	=> $subCriteriaTitleEngExp[$key],
+										'dateInput'		=>date("Y-m-d H:i:s"),
+										);
+									
+									$this->_name='rms_grading_detail';
+									$this->insert($arrGradingDetail);
+								}
+							}else{
+								$subCriteriaScore = empty($row['subCriteriaScore']) ? "0" : $row['subCriteriaScore'];
+								$arrDetail = array(
+									'gradingId'			=>$gradingTmpId,
+									'studentId'			=>$row['studentId'],
+									'totalGrading'		=>$subCriteriaScore,
+										
+								);
+								$this->_name='rms_grading_detail_tmp';	
+								$this->insert($arrDetail);
+								
+								$arrGradingDetail=array(
+										'gradingId'				=> $idGrading,
+										'gradingTmpId'			=> $gradingTmpId,
+										'studentId'				=> $row['studentId'],
+										'subjectId'				=> $subjectId,
+										'criteriaId'			=> $criteriaId,
+										'totalGrading'			=> $subCriteriaScore,
+										'criteriaAmount'		=> $subCriteriaAmount,
+										'percentage'			=> $percentageScore,
+										'dateInput'		=>date("Y-m-d H:i:s"),
+										);
+									
+								$this->_name='rms_grading_detail';
+								$this->insert($arrGradingDetail);
+							}
+							
+							$arr=array(
+								'gradingId'			=> $idGrading,
+								'gradingTmpId'		=> $gradingTmpId,
+								'studentId'			=> $row['studentId'],
+								'subjectId'			=> $subjectId,
+								'totalAverage'		=> $row['grandTotalAverageScore'],
+								'maxScore'			=> $maxScoreSubject,
+							);
+							$this->_name='rms_grading_total';
+							$this->insert($arr);
+							
+						}
+						
+						if(!empty($criteriaListOfStudentList)) {
+							foreach($criteriaListOfStudentList as $criteriaStudent){
+								$tmpRecord = $this->getStudentCriteriaTmpRecord($criteriaStudent);
+								if(COUNT($tmpRecord)>1){
+									foreach($tmpRecord as $indexKey => $tmpInfo){
+										$arrGradingDetail=array(
+											'gradingId'				=> $idGrading,
+											'gradingTmpId'			=> $gradingTmpId,
+											'studentId'				=> $criteriaStudent['studentId'],
+											'subjectId'				=> $subjectId,
+											'criteriaId'			=> $criteriaStudent["criteriaId"],
+											'totalGrading'			=> $tmpInfo["totalGrading"],
+											'dateInput'				=> $tmpInfo["createDate"],
+											'criteriaAmount'		=> ($indexKey+1),
+											'percentage'			=> $criteriaStudent["percentageScore"],
+											);
+										$this->_name='rms_grading_detail';
+										$this->insert($arrGradingDetail);
+									}
+								}else{
+									$arrGradingDetail=array(
+										'gradingId'				=> $idGrading,
+										'gradingTmpId'			=> $gradingTmpId,
+										'studentId'				=> $criteriaStudent['studentId'],
+										'subjectId'				=> $subjectId,
+										'criteriaId'			=> $criteriaStudent["criteriaId"],
+										'totalGrading'			=> $criteriaStudent["averageScore"],
+										'criteriaAmount'		=> 0,
+										'percentage'			=> $criteriaStudent["percentageScore"],
+										);
+									if(!empty($criteriaStudent["createDate"])){
+										$arrGradingDetail['dateInput'] = $criteriaStudent["createDate"];
+									}
+									$this->_name='rms_grading_detail';
+									$this->insert($arrGradingDetail);
+								}
+							}
+						}
+					}
+				}
+			}
+			
+    		
+			$db->commit();
+    		return true;
+    	}catch (Exception $e){
+			Application_Model_DbTable_DbUserLog::writeMessageError($e->getMessage());
+			$db->rollBack();
+    		return false;
+    	}
+    }
+	
+	function getStudentCriteriaTmpRecord($_data){
+		$db = $this->getAdapter();
+		$_data["criteriaId"] = empty($_data["criteriaId"]) ? 0 : $_data["criteriaId"];
+		$_data["studentId"] = empty($_data["studentId"]) ? 0 : $_data["studentId"];
+		$sql="
+			SELECT 
+				tmp.id AS gradingTmpId
+				,tmp.createDate AS createDate
+				,tmp.criteriaId
+				,tmp.`groupId`
+				,tmpD.`studentId`
+				,tmpD.`totalGrading`
+				,tmpD.`subCriterialTitleEng`
+				,tmpD.`subCriterialTitleKh`
+			FROM 
+				`rms_grading_tmp` AS tmp,
+				`rms_grading_detail_tmp` AS tmpD
+			WHERE 
+				tmp.id = tmpD.`gradingId`
+				AND tmp.`criteriaId` = ".$_data["criteriaId"]."
+				AND tmp.`settingEntryId` = ".$_data["settingEntryId"]."
+				AND tmp.`subjectId` = ".$_data["subjectId"]."
+				AND tmpD.`studentId` = ".$_data["studentId"]."
+			ORDER BY tmp.id ASC
+		";
+		return $db->fetchAll($sql);
+	}
+	
+	function getGradingScoreInfomation($_data){
+		$db = $this->getAdapter();
+		$gradingScoreId = empty($_data['gradingId'])?0:$_data['gradingId'];
+		$sql="
+			SELECT 
+				grS.* 
+				,g.`gradingId` AS gradingSettingId
+
+			FROM 
+				`rms_grading` AS grS
+				LEFT JOIN  `rms_group` AS g ON g.id = grS.`groupId`
+			WHERE grs.id =$gradingScoreId
+		";
+		$sql.=" LIMIT 1";
+		return $db->fetchRow($sql);
+	}
+	function getGroupMonthlyScoreDetail($_data){
+		$_db = $this->getAdapter();
+		try{
+			$currentLang = empty($_data['currentLang'])?1:$_data['currentLang'];
+			$userId = empty($_data['userId'])?0:$_data['userId'];
+			$groupId = empty($_data['groupId'])?0:$_data['groupId'];
+			$gradingId = empty($_data['gradingId'])?0:$_data['gradingId'];
+			if($currentLang==1){// khmer
+				$label = "name_kh";
+				$branch = "branch_namekh";
+				$grade = "rms_itemsdetail.title";
+				$degree = "rms_items.title";
+			}else{ // English
+				$label = "name_en";
+				$branch = "branch_nameen";
+				$grade = "rms_itemsdetail.title_en";
+				$degree = "rms_items.title_en";
+			}
+			$sql="SELECT 
+					gds.`stu_id` AS studentId
+					,s.`stu_code` AS stuCode
+					,s.stu_khname AS stuNameInKhmer
+					,CONCAT(COALESCE(s.last_name,''),' ',COALESCE(s.stu_enname,'')) AS stuNameInLatin
+					,(SELECT v.$label FROM rms_view AS v WHERE v.type=2 and v.key_code=s.sex LIMIT 1 ) as genderTitle
+					,(SELECT $branch FROM `rms_branch` WHERE br_id=s.branch_id LIMIT 1) AS branch_name
+					
+					,gds.academic_year
+					,gds.session
+					,(SELECT CONCAT(ac.fromYear,'-',ac.toYear) FROM `rms_academicyear` AS ac WHERE ac.id = gds.academic_year LIMIT 1) AS academicYearTitle
+					,(SELECT $label FROM rms_view WHERE rms_view.type=4 AND rms_view.key_code=gds.session LIMIT 1) AS `sessionName`
+					,gds.grade
+					,gds.degree
+					,(SELECT $grade FROM rms_itemsdetail WHERE rms_itemsdetail.id=gds.grade AND rms_itemsdetail.items_type=1 LIMIT 1) AS gradeTitle
+					,(SELECT $degree FROM rms_items WHERE rms_items.id=gds.degree AND rms_items.type=1 LIMIT 1) AS degreeTitle
+					
+					,grdT.`totalAverage`
+					,grdT.`maxScore`
+					,FIND_IN_SET( 
+						grdT.totalAverage, 
+							(    
+								SELECT 
+									GROUP_CONCAT( dd.totalAverage ORDER BY dd.totalAverage DESC ) 
+								FROM rms_grading_total AS dd 
+								WHERE  dd.`gradingId`= grdT.`gradingId`
+							)
+						) AS ranking
+					,IF(COALESCE(grdT.`totalAverage`,'0') >0 AND COALESCE(grdT.`maxScore`,'0') >0, 
+							(SELECT sd.metion_grade AS mention
+							FROM `rms_metionscore_setting_detail` AS sd,
+								`rms_metionscore_setting` AS s
+							WHERE s.id = sd.metion_score_id
+								AND s.academic_year=g.`academic_year`
+								AND degree = g.`degree`
+								AND FORMAT((COALESCE(grdT.`totalAverage`,'0')/(COALESCE(grdT.`maxScore`,'0')/100)),2) >=sd.max_score
+								ORDER BY sd.max_score DESC
+								LIMIT 1)
+								,NULL 
+					) AS mentionGrade
+				
+			";
+			$attDetailJson = "
+					,CONCAT(
+						'['
+						,COALESCE(GROUP_CONCAT(
+							DISTINCT
+							CONCAT(
+							'{'
+							
+							,'".'"attStatus":'."'
+							,'".'"'."'
+							,attSub.`attendanceStatus`
+							,'".'"'."'
+							
+							,',".'"attStatusTitle":'."'
+							,'".'"'."'
+							,attSub.`attendanceStatusTitle`
+							,'".'"'."'
+							
+							,',".'"dateAtt":'."'
+							,'".'"'."'
+							,attSub.dateAttendance
+							,'".'"'."'
+							
+							,',".'"desc":'."'
+							,'".'"'."'
+							,attSub.description
+							,'".'"'."'
+							
+							,'}'
+							)
+						),'')
+						,']'
+					) AS attDetailList
+					";
+			$sql.=$attDetailJson;
+			$sql.="
+				FROM 
+					`rms_group_detail_student` AS gds 
+					JOIN `rms_student` AS s ON s.`stu_id` = gds.`stu_id`
+					JOIN rms_group AS g ON g.`id` = gds.`group_id`
+					LEFT JOIN `rms_grading_total` AS grdT ON grdT.`studentId` = gds.`stu_id`
+			";
+			
+			$scoreGrading = $this->getGradingScoreInfomation($_data);
+			$settingEntryId = empty($scoreGrading["settingEntryId"]) ? 0 : $scoreGrading["settingEntryId"];
+			$subjectId = empty($scoreGrading["subjectId"]) ? 0 : $scoreGrading["subjectId"];
+			$_data['subjectId'] = $subjectId;
+			
+			$sqlCountAttJoin=" 
+				LEFT JOIN rms_score_entry_setting AS settEnt ON settEnt.id = $settingEntryId
+				LEFT JOIN `vapi_daily_stu_attsubject` AS attSub ON attSub.`studentId` = gds.`stu_id` AND attSub.`subjectId` = $subjectId  AND attSub.`groupId` = $groupId";
+			$sqlCountAttJoin.=" AND attSub.`dateAttendance` >= DATE_FORMAT(settEnt.`fromDate`,'%Y-%m-%d') AND attSub.`dateAttendance` <= DATE_FORMAT(settEnt.`endDate`,'%Y-%m-%d') ";
+					
+			$sql.=$sqlCountAttJoin;
+			
+			$sql.=" WHERE 1 ";
+			
+			$where='';
+			$where.=' AND gds.`group_id`='.$groupId;
+			$where.=' AND grdT.`gradingId`='.$gradingId;
+			$where.=' GROUP By gds.stu_id ';
+			
+			$order_by = " ORDER BY grdT.`totalAverage` DESC,s.`stu_code` ASC ";
+			$row =  $_db->fetchAll($sql.$where.$order_by);
+			
+			$scoreGrading = $this->getGradingScoreInfomation($_data);
+			$_data['subjectId'] = empty($scoreGrading["subjectId"]) ? 0 : $scoreGrading["subjectId"];
+			$_data['gradingSettingId'] = empty($scoreGrading["gradingSettingId"]) ? 0 : $scoreGrading["gradingSettingId"];
+			
+			$gradingSystem = $this->getGradingSystemInfo($_data);
+			$criteriaInfoList = $this->groupGradingDetail($_data);
+			$_data['summaryCriteriaStudent'] = 1;
+			$criteriaSummaryList = $this->groupGradingDetail($_data);
+			$arrayResult = array(
+				'studentList' 		 	=>$row,
+				"criteriaInfoList"   	=>$criteriaInfoList,
+				"criteriaSummaryList"   =>$criteriaSummaryList,
+				"gradingSystem"   		=>$gradingSystem,
+			);
+			
+			$result = array(
+					'status' =>true,
+					'value' =>$arrayResult,
+			);
+			return $result;
+			
+			
+		}catch(Exception $e){
+			Application_Model_DbTable_DbUserLog::writeMessageError($e->getMessage());
+			$result = array(
+					'status' =>false,
+					'value' =>$e->getMessage(),
+			);
+			return $result;
+		}
+	}
+	
+	function groupGradingDetail($_data){
+		$db = $this->getAdapter();
+		$groupId = empty($_data['groupId'])?0:$_data['groupId'];
+		$gradingId = empty($_data['gradingId'])?0:$_data['gradingId'];
+		$currentLang = empty($_data['currentLang'])?1:$_data['currentLang'];
+		$colunmName='title_en';
+		if ($currentLang==1){
+			$colunmName='title';
+		}
+		$sql="
+			SELECT 
+				grdd.`gradingId`
+				,grdd.`dateInput`
+				,gds.`stu_id` AS studentId
+				,grdd.`criteriaId`
+				
+				,(SELECT cri.$colunmName	FROM `rms_exametypeeng` AS cri WHERE cri.id = grdd.`criteriaId` LIMIT 1) AS criteriaTitle
+				,(SELECT cri.title 			FROM `rms_exametypeeng` AS cri WHERE cri.id = grdd.`criteriaId` LIMIT 1) AS criteriaTitleKh
+				,(SELECT cri.title_en 		FROM `rms_exametypeeng` AS cri WHERE cri.id = grdd.`criteriaId` LIMIT 1) AS criteriaTitleEng
+				,(SELECT cri.criteriaType 	FROM `rms_exametypeeng` AS cri WHERE cri.id = grdd.`criteriaId` LIMIT 1) AS criteriaType
+				
+				,grdd.`totalGrading`
+				,grdd.`percentage`
+				,grdd.`subCriterialTitleEng`
+				,grdd.`subCriterialTitleKh`
+			
+		";
+		$sqlCol="";
+		$sqlGroupBy="";
+		if(!empty($_data['summaryCriteriaStudent'])){
+			$sqlCol="
+				,SUM(grdd.`totalGrading`) AS totalGradingScore
+				,COUNT(grdd.`criteriaId`) AS timesInputCriteria
+				,FORMAT(IF(COUNT(grdd.`criteriaId`)>0 AND COALESCE(SUM(grdd.`totalGrading`),'0') >0, (SUM(grdd.totalGrading) / COUNT(grdd.`criteriaId`)),0),2) AS averageScore
+			";
+			$sqlGroupBy="
+				GROUP BY grdd.`criteriaId`,
+						grdd.`studentId`
+			";
+		}
+		$sql.= $sqlCol;
+		$sql.="
+			FROM 
+				`rms_group_detail_student` AS gds 
+				LEFT JOIN `rms_grading_detail` AS grdd ON grdd.`studentId` = gds.`stu_id`
+			WHERE 
+				gds.`group_id` = $groupId 
+				AND grdd.`gradingId` = $gradingId
+		";
+		$sql.= $sqlGroupBy;
+		$sql.="
+			ORDER BY 
+				grdd.`studentId` ASC
+				,(SELECT cri.criteriaType 	FROM `rms_exametypeeng` AS cri WHERE cri.id = grdd.`criteriaId` LIMIT 1) ASC
+				,grdd.`criteriaId` ASC
+				,grdd.`id` ASC
+		";
+		return $db->fetchAll($sql);
+	}
+	
+	function getGradingSystemInfo($_data){
+		$db = $this->getAdapter();
+		$gradingSettingId = empty($_data['gradingSettingId'])?0:$_data['gradingSettingId'];
+		$subjectId = empty($_data['subjectId'])?0:$_data['subjectId'];
+		$currentLang = empty($_data['currentLang'])?1:$_data['currentLang'];
+		$colunmName='title_en';
+		if ($currentLang==1){
+			$colunmName='title';
+		}
+		$sql="
+			SELECT 
+				gSet.id AS gradingSettingId
+				,cri.`title` AS criteriaTitleKh
+				,cri.`title_en` AS criteriaTitleEng
+				,gSetD.`pecentage_score` AS percentageScore
+				,gSetD.`subCriterialTitleEng` AS subCriteriaTitleEng
+				,gSetD.`subCriterialTitleKh` AS subCriteriaTitleKh
+		";
+		$sql.="
+				FROM `rms_scoreengsetting` AS gSet
+					JOIN `rms_scoreengsettingdetail`  AS gSetD ON gSet.`id` = gSetD.`score_setting_id`
+					LEFT JOIN `rms_exametypeeng` AS cri ON cri.id = gSetD.`criteriaId`
+			";
+		$sql.="
+			WHERE gSet.`id` = gSetD.`score_setting_id`
+				AND gSet.id = $gradingSettingId
+				
+			";
+			
+		$sql.="
+				AND cri.`criteriaType`
+					>= CASE 
+						WHEN COALESCE((SELECT sttDi.isNotEnteryCri FROM `rms_scoreengsettingdetail` AS sttDi WHERE sttDi.score_setting_id = gSet.id AND sttDi.subjectId =  ".$subjectId."  ORDER BY sttDi.isNotEnteryCri DESC LIMIT 1 ),'0') =1 
+						THEN '1' 
+						ELSE '0'
+					END 
+				AND gSetD.isNotEnteryCri = CASE 
+					WHEN COALESCE((SELECT sttDi.isNotEnteryCri FROM `rms_scoreengsettingdetail` AS sttDi WHERE sttDi.score_setting_id = gSet.id AND sttDi.subjectId =  ".$subjectId."  ORDER BY sttDi.isNotEnteryCri DESC LIMIT 1 ),'0') =1 
+						THEN '1' 
+					ELSE '0'
+					END 
+			";
+		$sql.="
+			GROUP BY gSetD.`criteriaId` 
+			ORDER BY 
+				cri.`criteriaType` ASC
+				,cri.id ASC
+		";
+		return $db->fetchAll($sql);
+	}
+	
+	public function getViewListByType($search){
+		$db=$this->getAdapter();
+		
+		$currentLang = empty($search['currentLang']) ? 1:$search['currentLang'];
+		$viewType = empty($search['viewType']) ? 0:$search['viewType'];
+		
+		$label = "name_en";
+		if($currentLang==1){// khmer
+			$label = "name_kh";
+		}
+		$sql="
+			SELECT
+				v.key_code as id,
+				v.$label as name
+			FROM
+				rms_view as v
+			WHERE
+				v.status = 1
+				AND v.type = $viewType
+				
+			";
+		if($viewType==9){
+			$sql.=" AND v.key_code NOT IN (0,5,6) ";
+		}
+		$sql.=" ORDER BY v.key_code ASC ";
+		return $db->fetchAll($sql);
+	}
+	public function getFormOptionSelect($_data){
+		$db = $this->getAdapter();
+		try{
+			$currentLang = empty($_data['currentLang'])?1:$_data['currentLang'];
+			$getControlType = empty($_data['getControlType'])?"status":$_data['getControlType'];
+			$_data['userId'] = empty($_data['userId'])?0:$_data['userId'];
+			$_data['branchId'] = empty($_data['branchId'])?0:$_data['branchId'];
+			$row=array();
+			if($getControlType=="status"){
+				$row = array(
+					array("id"=>1,"name"=>$currentLang==1 ? "ប្រើប្រាស់" : "Active"),
+					array("id"=>2,"name"=>$currentLang==1 ? "មិនប្រើប្រាស់" : "Deactive"),
+				);
+			}else if($getControlType=="academicYear"){
+				$row = $this->getAllAcadmicYearByTeacher($_data);
+			}else if($getControlType=="teachingGroup"){
+				$row = $this->getAllTeachingGroupByTeacher($_data);
+			}else if($getControlType=="teachingSubject"){
+				$row = $this->getAllTeachingSubjectByTeacher($_data);
+			}else if($getControlType=="teachingDegree"){
+				$row = $this->getAllTeachingDegreeByTeacher($_data);
+			}else if($getControlType=="ratingOption"){
+				$row = $this->getRatingOption($_data);
+			}else if($getControlType=="groupStatus"){
+				$_data["viewType"] = 9;
+				$row = $this->getViewListByType($_data);
+			}else if($getControlType=="scoreOption"){
+				$row = $this->getScoreResultOfTeacher($_data);
+			}else if($getControlType=="examType"){
+				$row = array(
+					array("id"=>1,"name"=>$currentLang==1 ? "ប្រចាំខែ" : "Monthly"),
+					array("id"=>2,"name"=>$currentLang==1 ? "ប្រចាំឆមាស" : "Semester"),
+					array("id"=>3,"name"=>$currentLang==1 ? "ប្រចាំឆ្នាំ" : "Annual"),
+				);
+			}
+			
+			$result = array(
+				'status' =>true,
+				'value' =>$row,
+			);
+			return $result;
+		}catch(Exception $e){
+			Application_Model_DbTable_DbUserLog::writeMessageError($e->getMessage());
+			$result = array(
+				'status' =>false,
+				'value' =>$e->getMessage(),
+			);
+			return $result;
+		}
+	}
+	function getRatingOption($_data){
+		$db = $this->getAdapter();
+		$userId = empty($_data['userId'])?0:$_data['userId'];
+		$sql="
+			SELECT 
+				rt.id,
+				rt.rating AS name
+			FROM 
+				rms_rating AS rt
+		";
+		$sql.=" WHERE rt.`status` = 1 ";
+		$sql.=" 
+		ORDER BY rt.`id` ASC
+		";
+		return $db->fetchAll($sql);
+	}
+	function getAllAcadmicYearByTeacher($_data){
+		$db = $this->getAdapter();
+		$userId = empty($_data['userId'])?0:$_data['userId'];
+		$sql="
+			SELECT 
+				ac.id
+				,CONCAT(COALESCE(ac.fromYear,''),'-',COALESCE(ac.toYear,'')) AS `name`
+			FROM 
+				rms_group AS g
+				JOIN `rms_group_subject_detail` AS gSubj ON g.`id` = gSubj.`group_id`
+				LEFT JOIN `rms_academicyear` AS ac ON ac.id = g.`academic_year`
+		";
+		$sql.=" WHERE gSubj.`teacher` = $userId ";
+		$sql.=" 
+		GROUP BY ac.id
+		ORDER BY 
+			ac.`fromYear` DESC
+		";
+		return $db->fetchAll($sql);
+	}
+	function getScoreResultOfTeacher($_data){
+		$db = $this->getAdapter();
+		$userId = empty($_data['userId'])?0:$_data['userId'];
+		$sql="
+			SELECT 
+				s.id
+				,s.`title_score` AS `name`
+			FROM 
+				`rms_score` AS s 
+				JOIN `rms_score_detail` AS sd ON sd.`score_id` = s.`id` 
+		";
+		$sql.=" 
+			WHERE 
+				s.`status` =1
+				AND s.isPublic=1
+				AND sd.`teacher_id` = $userId 
+			";
+		if(!empty($_data['academicYear'])){
+			$sql.=" AND s.`for_academic_year` = ".$_data['academicYear'];
+		}
+		$sql.=" 
+			GROUP BY s.`for_academic_year`,s.`exam_type`,s.`for_semester`,
+			CASE
+				WHEN s.`exam_type` !=1 THEN 0
+				ELSE s.`for_month` 
+			END
+			ORDER BY s.`for_academic_year` DESC,s.id DESC
+		";
+		return $db->fetchAll($sql);
+	}
+	function getAllTeachingGroupByTeacher($_data){
+		$db = $this->getAdapter();
+		$userId = empty($_data['userId'])?0:$_data['userId'];
+		$_data['academicYear'] = empty($_data['academicYear'])?0:$_data['academicYear'];
+		$sql="
+			SELECT 
+				g.`id`
+				,CONCAT(COALESCE(g.`group_code`,''),' ',COALESCE(ac.fromYear,''),'-',COALESCE(ac.toYear,'')) AS `name`
+			FROM 
+				rms_group AS g
+				JOIN `rms_group_subject_detail` AS gSubj ON g.`id` = gSubj.`group_id`
+				LEFT JOIN `rms_academicyear` AS ac ON ac.id = g.`academic_year`
+		";
+		$sql.=" WHERE gSubj.`teacher` = $userId ";
+		if(!empty($_data['academicYear'])){
+			$sql.=" AND g.academic_year = ".$_data['academicYear'];	
+		}
+		$sql.=" GROUP BY g.`id` ";
+		$sql.=" ORDER BY 
+			g.`degree` ASC,
+			g.grade ASC,
+			g.id ASC 
+		";
+		return $db->fetchAll($sql);
+	}
+	
+	function getAllTeachingDegreeByTeacher($_data){
+		$db = $this->getAdapter();
+		$userId = empty($_data['userId'])?0:$_data['userId'];
+		$sql="
+			SELECT 
+				g.`degree` AS id
+				,(SELECT de.title FROM `rms_items` AS de WHERE de.type=1 AND de.id = g.`degree` LIMIT 1 ) AS `name`
+			FROM 
+				rms_group AS g
+				JOIN `rms_group_subject_detail` AS gSubj ON g.`id` = gSubj.`group_id`
+		";
+		$sql.=" WHERE gSubj.`teacher` = $userId ";
+		$sql.=" GROUP BY g.`degree` ";
+		$sql.=" ORDER BY g.`degree` ASC ";
+		return $db->fetchAll($sql);
+	}
+	
+	function getAllTeachingSubjectByTeacher($_data){
+		$db = $this->getAdapter();
+		$userId = empty($_data['userId'])?0:$_data['userId'];
+		$sql="
+			SELECT 
+				sub.`id`
+				,CASE
+					WHEN sub.`subject_lang` = 2 THEN sub.`subject_titleen`
+					ELSE sub.subject_titlekh
+				END AS `name`
+			FROM 
+				`rms_group_subject_detail` AS gSubj 
+				 JOIN `rms_subject` AS sub ON sub.id = gSubj.`subject_id`
+		";
+		$sql.=" WHERE gSubj.`teacher` = $userId ";
+		$sql.=" GROUP BY sub.`id`
+				ORDER BY 
+				CASE
+					WHEN sub.`subject_lang` = 2 THEN sub.`subject_titleen`
+					ELSE sub.subject_titlekh
+				END ASC
+		";
+		return $db->fetchAll($sql);
+	}
+	
+	function getCountingClassByTeacher($_data){
+		$_db = $this->getAdapter();
+		try{
+			$currentLang = empty($_data['currentLang'])?1:$_data['currentLang'];
+			$userId = empty($_data['userId'])?0:$_data['userId'];
+			
+			$sql="
+				SELECT
+					g.id
+					,COUNT(DISTINCT gsjb.`group_id`) AS totalClass
+					,COUNT(DISTINCT IF(g.is_pass NOT IN (0,2),gsjb.`group_id`, NULL)) AS competedClass
+					,COUNT(DISTINCT IF(g.is_pass=2,gsjb.`group_id`, NULL)) AS teachingClass
+				FROM `rms_group_subject_detail` AS gsjb,
+					`rms_group` AS g 
+				WHERE 
+					g.id = gsjb.group_id 
+					AND g.is_use=1 
+					AND g.`status` = 1
+					AND gsjb.`teacher` = $userId
+			";
+			$sql.=" GROUP BY gsjb.`teacher` ";
+			$sql.=" LIMIT 1";
+			$row = $_db->fetchAll($sql);
+			$row = empty($row) ? array() : $row;
+			$result = array(
+					'status' =>true,
+					'value' =>$row,
+			);
+			return $result;
+			
+		}catch(Exception $e){
+			Application_Model_DbTable_DbUserLog::writeMessageError($e->getMessage());
+			$result = array(
+					'status' =>false,
+					'value' =>$e->getMessage(),
+			);
+			return $result;
+		}
+	}
+	function getTeachingClassList($_data){
+		$_db = $this->getAdapter();
+		try{
+			$currentLang = empty($_data['currentLang'])?1:$_data['currentLang'];
+			$userId = empty($_data['userId'])?0:$_data['userId'];
+			$label = "name_en";
+			$branch = "branch_nameen";
+			if($currentLang==1){// khmer
+				$label = "name_kh";
+				$branch = "branch_namekh";
+			}
+			$sqlSelect="
+				SELECT
+					g.id AS groupId
+					,(SELECT br.$branch FROM `rms_branch` AS br  WHERE br.br_id = g.branch_id LIMIT 1) AS branchName
+					,(SELECT br.branch_namekh FROM `rms_branch` AS br  WHERE br.br_id = g.branch_id LIMIT 1) AS branchNameKh
+					,(SELECT br.branch_nameen FROM `rms_branch` AS br  WHERE br.br_id = g.branch_id LIMIT 1) AS branchNameEn
+					,(SELECT b.school_nameen FROM rms_branch AS b WHERE b.br_id=g.branch_id LIMIT 1) AS schoolNameen
+					,g.`group_code` AS groupCode
+					,(SELECT CONCAT(COALESCE(ac.fromYear,''),'-',COALESCE(ac.toYear,'')) FROM `rms_academicyear` AS ac WHERE ac.id = g.`academic_year` LIMIT 1) AS academicYear
+					,COALESCE((SELECT `r`.`room_name` FROM `rms_room` `r` WHERE (`r`.`room_id` = `g`.`room_id`)),'N/A') AS `roomName`
+					,t.teacher_name_kh AS mainTeacherNameKh
+					,t.teacher_name_en AS mainTeacherNameEng
+					,CASE 
+						WHEN g.teacher_id = gsjb.`teacher` THEN '1'
+						ELSE '0'
+					END AS isMainTeacher
+					,g.is_pass AS groupProcess
+					,(SELECT $label FROM rms_view AS v WHERE v.type=9 AND v.key_code=g.is_pass LIMIT 1) as groupProcessTitle
+					
+					,g.totalStudent AS totalStudent
+					,g.maleStudent AS maleStudent
+					,g.femaleStudent AS femaleStudent
+					
+					
+				
+			";
+			$sqlFrom="
+				FROM `rms_group_subject_detail` AS gsjb
+						JOIN `vapi_group_info` AS g ON g.id = gsjb.group_id AND g.is_use=1 AND g.`status` = 1
+					LEFT JOIN rms_teacher AS t ON t.id = g.teacher_id
+				WHERE gsjb.`teacher` = $userId";
+			
+			$sqlWhere="";
+			if(!empty($_data['academicYear'])){
+				$sqlWhere.=" AND g.academic_year =".$_data['academicYear'];
+			}
+			if(!empty($_data['degree'])){
+				$sqlWhere.=" AND g.degree =".$_data['degree'];
+			}
+			if(!empty($_data['groupProcess'])){
+				$sqlWhere.=" AND g.is_pass =".$_data['groupProcess'];
+			}
+			$sqlOrder="";
+			$sqlOrder.=" GROUP BY g.id ";
+			$sqlOrder.=" ORDER BY g.`academic_year` DESC ,g.degree ASC,g.grade ASC,g.group_code ASC ";
+			
+			if(!empty($_data['LimitStart'])){
+				$sqlOrder.=" LIMIT ".$_data['LimitStart'].",".$_data['limitRecord'];
+			}else if(!empty($_data['limitRecord'])){
+				$sqlOrder.=" LIMIT ".$_data['limitRecord'];
+			}
+			$sql = $sqlSelect.$sqlFrom.$sqlWhere.$sqlOrder;
+			$row = $_db->fetchAll($sql);
+			
+			$sqlCount="SELECT  COUNT(DISTINCT g.id) AS totalRecord ";
+			$sqlCount.=$sqlFrom;
+			$sqlCount.=$sqlWhere;
+			$totalRecord = $_db->fetchOne($sqlCount);
+			$totalRecord = empty($totalRecord) ? 0 : $totalRecord;
+			
+			$result = array(
+					'status' =>true,
+					'value' =>$row,
+					'totalRecord' =>$totalRecord,
+			);
+			return $result;
+			
+		}catch(Exception $e){
+			Application_Model_DbTable_DbUserLog::writeMessageError($e->getMessage());
+			$result = array(
+					'status' =>false,
+					'value' =>$e->getMessage(),
+			);
+			return $result;
+		}
+	}
+	
+	function getScoreResultOfClass($_data){
+		$_db = $this->getAdapter();
+		try{
+			$currentLang = empty($_data['currentLang'])?1:$_data['currentLang'];
+			$userId = empty($_data['userId'])?0:$_data['userId'];
+			
+			$format = 'Y-m-d';
+			$date = new DateTime();
+			$todayDate = $date->format($format);
+			
+			$date->modify('+7 day');
+			$nextDate = $date->format($format);
+			
+			$annual='Annual';
+			$colunmName='title_en';
+			$label = 'name_en';
+			$branch = "branch_nameen";
+			$month = "month_en";
+			$scoreTitle = "title_score_en";
+			if ($currentLang==1){
+				$annual='ប្រចាំឆ្នាំ';
+				$colunmName='title';
+				$label = 'name_kh';
+				$branch = "branch_namekh";
+				$month = "month_kh";
+				$scoreTitle = "title_score";
+			}
+			$sqlSelect="
+				SELECT 
+					sc.`id` AS scoreId
+					,sc.`branch_id` AS branchId
+					,sc.$scoreTitle AS scoreTitle
+					,sc.`exam_type` AS examType
+					,sc.`for_month` AS forMonth
+					,sc.`for_semester` AS forSemester
+					,sc.`date_input` AS entryDate
+					,(SELECT v.$label FROM `rms_view` AS v WHERE v.type=19 AND v.key_code =sc.`exam_type` LIMIT 1) as forTypeTitle
+					,CASE
+						WHEN sc.exam_type = 2 THEN sc.for_semester
+						WHEN sc.exam_type = 3 THEN '".$annual."'
+						ELSE (SELECT $month FROM `rms_month` WHERE id=sc.for_month  LIMIT 1) 
+					END AS forMonthTitle
+					,g.id AS groupId
+					,g.group_code AS groupCode
+					,g.degree AS degreeId
+					,g.academic_year AS academicYearId
+					,(SELECT CONCAT(COALESCE(ac.fromYear,''),'-',COALESCE(ac.toYear,'')) FROM `rms_academicyear` AS ac WHERE ac.id = g.academic_year LIMIT 1) AS academicYear
+					,(SELECT i.$colunmName FROM `rms_items` AS i WHERE i.type=1 AND i.id = `g`.`degree` LIMIT 1) AS degreeTitle
+					,(SELECT id.$colunmName FROM `rms_itemsdetail` AS id WHERE id.id = `g`.`grade` LIMIT 1) AS gradeTitle
+					,COALESCE((SELECT `r`.`room_name` FROM `rms_room` AS `r` WHERE `r`.`room_id` = `g`.`room_id` LIMIT 1),'N/A') AS `roomName`
+					
+					,g.totalStudent AS totalStudent
+					,g.maleStudent AS maleStudent
+					,g.femaleStudent AS femaleStudent
+					
+					,'' AS groupProcessTitle
+					,(SELECT COUNT( IF( grdT.total_score >= (grdT.totalMaxScore/2), grdT.id, NULL))  FROM `rms_score_monthly` AS grdT WHERE grdT.score_id = sc.`id` AND grdT.totalMaxScore >0 LIMIT 1 ) AS aboveAverage
+					,(SELECT COUNT( IF( grdT.total_score < (grdT.totalMaxScore/2), grdT.id, NULL))  FROM `rms_score_monthly` AS grdT WHERE grdT.score_id = sc.`id` AND grdT.totalMaxScore >0 LIMIT 1 ) AS belowAverage
+					
+			";
+			
+			$sqlFrom=" FROM 
+						`rms_score` AS sc,
+						vapi_group_info AS g
+				";
+			$sqlWhere=' WHERE 
+						sc.`group_id` = g.`id`
+						AND g.`teacher_id` ='.$userId;
+			$sqlWhere.=' 
+					AND g.`is_use` = 1 
+					AND g.`status` =1
+					AND sc.`status` =1
+					AND sc.isPublic =1
+				';
+			if(!empty($_data['academicYear'])){
+				$sqlWhere.=" AND g.academic_year =".$_data['academicYear'];
+			}
+			if(!empty($_data['groupId'])){
+				$sqlWhere.=" AND g.id =".$_data['groupId'];
+			}
+			if(!empty($_data['degree'])){
+				$sqlWhere.=" AND g.degree =".$_data['degree'];
+			}
+			if(!empty($_data['groupProcess'])){
+				$sqlWhere.=" AND g.is_pass =".$_data['groupProcess'];
+			}
+			$sqlOrder="
+				ORDER BY sc.id DESC, g.id ASC
+			";
+			
+			if(!empty($_data['LimitStart'])){
+				$sqlOrder.=" LIMIT ".$_data['LimitStart'].",".$_data['limitRecord'];
+			}else if(!empty($_data['limitRecord'])){
+				$sqlOrder.=" LIMIT ".$_data['limitRecord'];
+			}
+			$sql = $sqlSelect.$sqlFrom.$sqlWhere.$sqlOrder;
+			
+			$row = $_db->fetchAll($sql);
+			$row = empty($row) ? array() : $row;
+			
+			$sqlCount="SELECT  COUNT(DISTINCT sc.id) AS totalRecord ";
+			$sqlCount.=$sqlFrom;
+			$sqlCount.=$sqlWhere;
+			$totalRecord = $_db->fetchOne($sqlCount);
+			$totalRecord = empty($totalRecord) ? 0 : $totalRecord;
+			
+			$result = array(
+					'status' =>true,
+					'value' =>$row,
+					'totalRecord' =>$totalRecord,
+			);
+			return $result;
+			
+			
+		}catch(Exception $e){
+			Application_Model_DbTable_DbUserLog::writeMessageError($e->getMessage());
+			$result = array(
+					'status' =>false,
+					'value' =>$e->getMessage(),
+			);
+			return $result;
+		}
+	}
+	
+	
+	function getClassAvailableForEvaluation($_data){
+		$_db = $this->getAdapter();
+		try{
+			$currentLang = empty($_data['currentLang'])?1:$_data['currentLang'];
+			$userId = empty($_data['userId'])?0:$_data['userId'];
+			
+			$format = 'Y-m-d';
+			$date = new DateTime();
+			$todayDate = $date->format($format);
+			
+			$date->modify('+7 day');
+			$nextDate = $date->format($format);
+			
+			$colunmName='title_en';
+			$label = 'name_en';
+			$branch = "branch_nameen";
+			$month = "month_en";
+			$scoreTitle = "title_score_en";
+			$annual='Annual';
+			if ($currentLang==1){
+				$annual='ប្រចាំឆ្នាំ';
+				$colunmName='title';
+				$label = 'name_kh';
+				$branch = "branch_namekh";
+				$month = "month_kh";
+				$scoreTitle = "title_score";
+			}
+			$sqlSelect="
+				SELECT 
+					sc.`id` AS scoreId
+					,sc.`branch_id` AS branchId
+					,sc.$scoreTitle AS scoreTitle
+					,sc.`exam_type` AS examType
+					,sc.`for_month` AS forMonth
+					,sc.`for_semester` AS forSemester
+					,(SELECT v.$label FROM `rms_view` AS v WHERE v.type=19 AND v.key_code =sc.`exam_type` LIMIT 1) as forTypeTitle
+					,CASE
+						WHEN sc.exam_type = 2 THEN sc.for_semester
+						WHEN sc.exam_type = 3 THEN '".$annual."'
+						ELSE (SELECT $month FROM `rms_month` WHERE id=sc.for_month  LIMIT 1) 
+					END AS forMonthTitle
+					,g.id AS groupId
+					,g.group_code AS groupCode
+					,g.degree AS degreeId
+					,g.academic_year AS academicYearId
+					,(SELECT CONCAT(COALESCE(ac.fromYear,''),'-',COALESCE(ac.toYear,'')) FROM `rms_academicyear` AS ac WHERE ac.id = g.academic_year LIMIT 1) AS academicYear
+					,(SELECT i.$colunmName FROM `rms_items` AS i WHERE i.type=1 AND i.id = `g`.`degree` LIMIT 1) AS degreeTitle
+					,(SELECT id.$colunmName FROM `rms_itemsdetail` AS id WHERE id.id = `g`.`grade` LIMIT 1) AS gradeTitle
+					,COALESCE((SELECT `r`.`room_name` FROM `rms_room` AS `r` WHERE `r`.`room_id` = `g`.`room_id` LIMIT 1),'N/A') AS `roomName`
+					
+					,g.totalStudent AS totalStudent
+					,g.maleStudent AS maleStudent
+					,g.femaleStudent AS femaleStudent
+					
+					,CASE
+						WHEN COALESCE((SELECT ass.issueDate FROM `rms_studentassessment` AS ass WHERE ass.scoreId = sc.`id`  LIMIT 1),NULL) IS NOT NULL
+							THEN (SELECT ass.issueDate FROM `rms_studentassessment` AS ass WHERE ass.scoreId = sc.`id`  LIMIT 1)
+						ELSE '".$todayDate."' 
+					END AS evaluationIssueDate
+					,CASE
+						WHEN COALESCE((SELECT ass.returnDate FROM `rms_studentassessment` AS ass WHERE ass.scoreId = sc.`id`  LIMIT 1),NULL) IS NOT NULL
+							THEN (SELECT ass.returnDate FROM `rms_studentassessment` AS ass WHERE ass.scoreId = sc.`id`  LIMIT 1)
+						ELSE '".$nextDate."' 
+					END AS evaluationReturnDate
+					,(SELECT COUNT(DISTINCT(assD.studentId)) FROM `rms_studentassessment` AS ass,`rms_studentassessment_detail` AS assd WHERE ass.id = assD.assessmentId AND ass.scoreId = sc.`id`  LIMIT 1) AS totalStudentEvaluated
+					,COALESCE((SELECT ass.isLock FROM rms_studentassessment AS ass WHERE ass.scoreId = sc.id LIMIT 1),'0') AS isLock
+			";
+			
+			$sqlFrom=" FROM 
+						`rms_score` AS sc,
+						vapi_group_info AS g
+				";
+			$sqlWhere=' WHERE 
+						sc.`group_id` = g.`id`
+						AND g.`teacher_id` ='.$userId;
+			$sqlWhere.=' 
+					AND g.`is_use` = 1 
+				
+					AND g.`status` =1
+					AND sc.`status` =1
+				';
+				//AND g.`is_pass` = 2
+			
+			
+			$rsSetting = $this->getMobileKeySetting("settingEvaluation");
+			if(!empty($rsSetting)){
+				$settingEvaluation = empty($rsSetting["keyValue"]) ? 0 : $rsSetting["keyValue"];
+				if(!empty($settingEvaluation)){
+					$sqlWhere.=" AND sc.exam_type =".$settingEvaluation;
+				}
+			}
+			
+			// for PSIS SenSok
+			$settingForSenSok=1;
+			if($settingForSenSok==1){
+				$sqlWhere.=" AND g.academic_year > 7 ";
+			}
+			
+			$sqlWhere.=" AND COALESCE((SELECT ass.isLock FROM rms_studentassessment AS ass WHERE ass.scoreId = sc.id LIMIT 1),'0') = 0 ";
+			if(!empty($_data['academicYear'])){
+				$sqlWhere.=" AND g.academic_year =".$_data['academicYear'];
+			}
+			if(!empty($_data['degree'])){
+				$sql.=" AND g.degree =".$_data['degree'];
+			}
+			if(!empty($_data['groupProcess'])){
+				$sqlWhere.=" AND g.is_pass =".$_data['groupProcess'];
+			}
+			$sqlOrder="
+				ORDER BY sc.id DESC, g.id ASC
+			";
+			
+			if(!empty($_data['LimitStart'])){
+				$sqlOrder.=" LIMIT ".$_data['LimitStart'].",".$_data['limitRecord'];
+			}else if(!empty($_data['limitRecord'])){
+				$sqlOrder.=" LIMIT ".$_data['limitRecord'];
+			}
+			$sql = $sqlSelect.$sqlFrom.$sqlWhere.$sqlOrder;
+			$row = $_db->fetchAll($sql);
+			$row = empty($row) ? array() : $row;
+			
+			$sqlCount="SELECT  COUNT(DISTINCT sc.id) AS totalRecord ";
+			$sqlCount.=$sqlFrom;
+			$sqlCount.=$sqlWhere;
+			$totalRecord = $_db->fetchOne($sqlCount);
+			$totalRecord = empty($totalRecord) ? 0 : $totalRecord;
+			
+			$result = array(
+					'status' =>true,
+					'value' =>$row,
+					'totalRecord' =>$totalRecord,
+			);
+			return $result;
+			
+			
+		}catch(Exception $e){
+			Application_Model_DbTable_DbUserLog::writeMessageError($e->getMessage());
+			$result = array(
+					'status' =>false,
+					'value' =>$e->getMessage(),
+			);
+			return $result;
+		}
+	}
+	function getEvaluationCommentByDegree($_data){
+		$_db = $this->getAdapter();
+		try{
+			$currentLang = empty($_data['currentLang'])?1:$_data['currentLang'];
+			$degreeId = empty($_data['degreeId'])?0:$_data['degreeId'];
+			$groupId = empty($_data['groupId'])?0:$_data['groupId'];
+			$studentId = empty($_data['studentId'])?0:$_data['studentId'];
+			$scoreId = empty($_data['scoreId'])?0:$_data['scoreId'];
+			
+			$label = 'name_en';
+			if ($currentLang==1){
+				$label = 'name_kh';
+			}
+			$sql="
+				SELECT 
+					dc.comment_id AS commentId
+					,c.comment AS `commentTitle`
+					,c.commentType
+					
+					,(SELECT v.$label FROM `rms_view` AS v WHERE v.key_code=c.commentType AND v.type=36 LIMIT 1) AS commentTypeTitle
+					,(SELECT v.name_kh FROM `rms_view` AS v WHERE v.key_code=c.commentType AND v.type=36 LIMIT 1) AS commentTypeTitleKh
+					,(SELECT v.name_en FROM `rms_view` AS v WHERE v.key_code=c.commentType AND v.type=36 LIMIT 1) AS commentTypeTitleEn
+					
+					,COALESCE((SELECT assD.ratingId FROM `rms_studentassessment_detail` AS assD,`rms_studentassessment` AS ass WHERE assD.assessmentId=ass.id AND ass.scoreId < $scoreId AND ass.status=1 AND ass.groupId=$groupId AND  assD.studentId=$studentId AND assD.commentId = c.id ORDER BY assD.assessmentId DESC  LIMIT 1 ),'0') AS previousRatingValue
+					,COALESCE((SELECT rt.rating FROM rms_rating AS rt WHERE rt.id = COALESCE((SELECT assD.ratingId FROM `rms_studentassessment_detail` AS assD,`rms_studentassessment` AS ass WHERE assD.assessmentId=ass.id AND ass.scoreId < $scoreId AND ass.status=1 AND ass.groupId=$groupId AND  assD.studentId=$studentId AND assD.commentId = c.id ORDER BY assD.assessmentId DESC  LIMIT 1 ),'0') LIMIT 1 ),'') AS previousRatingTitle
+					,COALESCE((SELECT assD.teacherComment FROM `rms_studentassessment_detail` AS assD,`rms_studentassessment` AS ass WHERE assD.assessmentId=ass.id AND ass.scoreId < $scoreId AND ass.status=1 AND ass.groupId=$groupId AND assD.studentId=$studentId ORDER BY assD.teacherComment DESC,assD.assessmentId DESC  LIMIT 1 ),'') AS previousTeacherComment
+					
+					,COALESCE(assD.ratingId,'2') AS ratingValue
+					,(SELECT rt.rating FROM rms_rating AS rt WHERE rt.id = COALESCE(assD.ratingId,'2') LIMIT 1 ) AS ratingTitle
+					,assD.teacherComment AS teacherComment
+					,COALESCE(assD.id,'') AS detailId
+					
+					,COALESCE((SELECT GROUP_CONCAT(assD.id) FROM `rms_studentassessment_detail` AS assD,`rms_studentassessment` AS ass WHERE assD.assessmentId=ass.id AND ass.status=1 AND ass.groupId=$groupId AND  assD.studentId=$studentId AND ass.scoreId=$scoreId ORDER BY assD.assessmentId DESC  LIMIT 1 ),'') AS detailIdList
+					
+			";
+			
+			$sql.=" FROM 
+						rms_degree_comment AS dc JOIN rms_comment AS c ON dc.comment_id = c.id
+						LEFT JOIN (`rms_studentassessment_detail` AS assD JOIN `rms_studentassessment` AS ass ON assD.assessmentId=ass.id  ) ON ass.status=1 AND ass.groupId=$groupId AND  assD.studentId=$studentId AND ass.scoreId=$scoreId AND assD.commentId = c.id
+				";
+			$sql.=' WHERE dc.degree_id = '.$degreeId;
+			$sql.=' ORDER BY commentType ASC, c.id ASC ';
+			
+			
+			$row = $_db->fetchAll($sql);
+			$row = empty($row) ? array() : $row;
+			
+			$ratingOption = $this->getRatingOption($_data);
+			$arrayResult = array(
+				'commentList' 	=>$row,
+				"ratingOption"  =>$ratingOption,
+			);
+			
+			$result = array(
+					'status' =>true,
+					'value' =>$arrayResult,
+			);
+			return $result;
+			
+			
+		}catch(Exception $e){
+			Application_Model_DbTable_DbUserLog::writeMessageError($e->getMessage());
+			$result = array(
+					'status' =>false,
+					'value' =>$e->getMessage(),
+			);
+			return $result;
+		}
+	}
+	
+	function checkingGroupAssessmentByScore($_data){
+		$dbS = $this->getAdapter();
+		$userId = empty($_data['userId'])?0:$_data['userId'];
+		$scoreId = empty($_data['scoreId'])?0:$_data['scoreId'];
+		$sql="
+			SELECT 
+				ass.*
+			FROM `rms_studentassessment` AS ass 
+			WHERE ass.`scoreId` = ".$scoreId;
+		$sql.=" LIMIT 1 ";
+		return $dbS->fetchRow($sql);
+	}
+	function submitEvaluationRatingStudent($_data){
+    	$db = $this->getAdapter();
+		$db->beginTransaction();
+    	try{
+			$format = 'Y-m-d';
+			
+			$_data['userId']	= empty($_data['userId'])?0:$_data['userId'];
+			$_data['studentId']	= empty($_data['studentId'])?0:$_data['studentId'];
+			
+			$commentListPost 	 = empty($_data['commentList'])?null:$_data['commentList'];
+			$commentList 	 = Zend_Json::decode($commentListPost);
+			
+			$groupEvaluationInfoPost 	 = empty($_data['groupEvaluationInfo'])?null:$_data['groupEvaluationInfo'];
+			$groupInfo 	 = Zend_Json::decode($groupEvaluationInfoPost);
+			$_data['scoreId']	= empty($groupInfo['scoreId'])?0:$groupInfo['scoreId'];	
+			$checkingAss = $this->checkingGroupAssessmentByScore($_data);
+			$assessmentId = empty($checkingAss["id"]) ? "0" : $checkingAss["id"];
+			
+			
+			$dateString = $_data['evaluationIssueDate'];
+			$date = new DateTime($dateString);
+			$evaluationIssueDate = $date->format($format);
+			
+			$toDateString = $_data['evaluationReturnDate'];
+			$toDate = new DateTime($toDateString);
+			$evaluationReturnDate = $toDate->format($format);
+			
+			if(empty($checkingAss)){
+				$arr = array(
+    				'branchId'			=>$groupInfo['branchId'],
+    				'groupId'			=>$groupInfo['groupId'],
+    				'degreeId'			=>$groupInfo['degreeId'],
+    				'forType'			=>$groupInfo['examType'],
+    				'forMonth'			=>$groupInfo['forMonth'],
+    				'forSemester'		=>$groupInfo['forSemester'],
+    				'issueDate'			=>$evaluationIssueDate,
+    				'returnDate'		=>$evaluationReturnDate,
+    				'scoreId'			=>$groupInfo['scoreId'],
+					
+    				'status'			=>1,
+    				'inputOption'		=>2,
+    				'createDate'		=>date("Y-m-d H:i:s"),
+    				'modifyDate'		=>date("Y-m-d H:i:s"),
+    				'teacherId'			=>$_data['userId'],
+				);
+				$this->_name='rms_studentassessment';
+				$assessmentId = $this->insert($arr);
+			}else{
+				$arr = array(
+					'issueDate'			=>$evaluationIssueDate,
+    				'returnDate'		=>$evaluationReturnDate,
+    				'modifyDate'		=>date("Y-m-d H:i:s"),
+    				'teacherId'			=>$_data['userId'],
+				);
+				$this->_name='rms_studentassessment';
+				$where=" id = ".$assessmentId;
+				$this->update($arr, $where);
+				
+				if(!empty($commentList)){
+					$detailIdList = empty($commentList[0]["detailIdList"]) ? "" : $commentList[0]["detailIdList"];
+					
+					$this->_name="rms_studentassessment_detail";
+					$whereDetail="assessmentId = ".$assessmentId." AND studentId=".$_data['studentId'];
+					if (!empty($detailIdList)){
+						$whereDetail.=" AND id NOT IN ($detailIdList) ";
+					}
+					$this->delete($whereDetail);
+				}
+				
+			}
+			if(!empty($commentList)){
+				foreach($commentList as $key => $comment){
+					$teacherComment=  ($key>0) ? null : $_data['teacherComment'];
+					if(!empty($comment['detailId'])){
+						$arrDetail = array(
+							'assessmentId'		=>$assessmentId,
+							'studentId'			=>$_data['studentId'],
+							'commentId'			=>$comment['commentId'],
+							'ratingId'			=>$comment['ratingValue'],
+							'teacherComment'	=>$teacherComment,
+							
+						);
+						
+						$this->_name='rms_studentassessment_detail';
+						$whereDetail = " id =".$comment['detailId'];
+						$this->update($arrDetail, $whereDetail);
+					}else{
+						$arrDetail = array(
+							'assessmentId'		=>$assessmentId,
+							'studentId'			=>$_data['studentId'],
+							'commentId'			=>$comment['commentId'],
+							'ratingId'			=>$comment['ratingValue'],
+							'teacherComment'	=>$teacherComment,
+						);
+						$this->_name='rms_studentassessment_detail';
+						$this->insert($arrDetail);
+					}
+					
+				}
+			}
+			$db->commit();
+    		return true;
+    	}catch (Exception $e){
+			Application_Model_DbTable_DbUserLog::writeMessageError($e->getMessage());
+			$db->rollBack();
+    		return false;
+    	}
+    }
+	
+	
+	function getAssessmentListOfClass($_data){
+		$_db = $this->getAdapter();
+		try{
+			$currentLang = empty($_data['currentLang'])?1:$_data['currentLang'];
+			$userId = empty($_data['userId'])?0:$_data['userId'];
+			
+			
+			$annual='Annual';
+			$colunmName='title_en';
+			$label = 'name_en';
+			$branch = "branch_nameen";
+			$month = "month_en";
+			$scoreTitle = "title_score_en";
+			if ($currentLang==1){
+				$annual='ប្រចាំឆ្នាំ';
+				$colunmName='title';
+				$label = 'name_kh';
+				$branch = "branch_namekh";
+				$month = "month_kh";
+				$scoreTitle = "title_score";
+			}
+			$sqlSelect="
+				SELECT 
+					ass.`id` AS assessmentId
+					,ass.scoreId AS scoreId
+					,ass.`branchId` AS branchId
+					,sc.$scoreTitle AS scoreTitle
+					,sc.`exam_type` AS examType
+					,sc.`for_month` AS forMonth
+					,sc.`for_semester` AS forSemester
+					,(SELECT v.$label FROM `rms_view` AS v WHERE v.type=19 AND v.key_code =sc.`exam_type` LIMIT 1) as forTypeTitle
+					,CASE
+						WHEN sc.exam_type = 2 THEN sc.for_semester
+						WHEN sc.exam_type = 3 THEN '".$annual."'
+						ELSE (SELECT $month FROM `rms_month` WHERE id=sc.for_month  LIMIT 1) 
+					END AS forMonthTitle
+					,g.id AS groupId
+					,g.group_code AS groupCode
+					,g.degree AS degreeId
+					,g.academic_year AS academicYearId
+					,g.is_pass AS groupProcess
+					,(SELECT $label FROM rms_view AS v WHERE v.type=9 AND v.key_code=g.is_pass LIMIT 1) as groupProcessTitle
+					,(SELECT CONCAT(COALESCE(ac.fromYear,''),'-',COALESCE(ac.toYear,'')) FROM `rms_academicyear` AS ac WHERE ac.id = g.academic_year LIMIT 1) AS academicYear
+					,(SELECT i.$colunmName FROM `rms_items` AS i WHERE i.type=1 AND i.id = `g`.`degree` LIMIT 1) AS degreeTitle
+					,(SELECT id.$colunmName FROM `rms_itemsdetail` AS id WHERE id.id = `g`.`grade` LIMIT 1) AS gradeTitle
+					,COALESCE((SELECT `r`.`room_name` FROM `rms_room` AS `r` WHERE `r`.`room_id` = `g`.`room_id` LIMIT 1),'N/A') AS `roomName`
+					
+					,g.totalStudent AS totalStudent
+					,g.maleStudent AS maleStudent
+					,g.femaleStudent AS femaleStudent
+					
+					,ass.issueDate AS evaluationIssueDate
+					,ass.returnDate AS evaluationReturnDate
+					,(SELECT COUNT(DISTINCT(assD.studentId)) FROM `rms_studentassessment_detail` AS assd WHERE ass.id = assD.assessmentId AND ass.scoreId = sc.`id`  LIMIT 1) AS totalStudentEvaluated
+					,ass.isLock AS isLock
+			";
+			
+			$sqlFrom=" FROM 
+						`rms_studentassessment` AS ass JOIN `vapi_group_info` AS g ON g.id  = ass.`groupId` 
+						LEFT JOIN `rms_score` AS sc ON sc.id = ass.`scoreId`
+				";
+			$sqlWhere=' WHERE  g.`teacher_id` ='.$userId;
+			$sqlWhere.=' 
+					AND g.`is_use` = 1 
+					AND g.`status` =1
+					AND ass.`status` =1
+				';
+				//AND g.`is_pass` = 2
+			if(!empty($_data['academicYear'])){
+				$sqlWhere.=" AND g.academic_year =".$_data['academicYear'];
+			}
+			if(!empty($_data['degree'])){
+				$sqlWhere.=" AND g.degree =".$_data['degree'];
+			}
+			if(!empty($_data['groupProcess'])){
+				$sqlWhere.=" AND g.is_pass =".$_data['groupProcess'];
+			}
+			$sqlOrder="
+				ORDER BY g.academic_year DESC,ass.id DESC, g.id ASC
+			";
+			
+			if(!empty($_data['LimitStart'])){
+				$sqlOrder.=" LIMIT ".$_data['LimitStart'].",".$_data['limitRecord'];
+			}else if(!empty($_data['limitRecord'])){
+				$sqlOrder.=" LIMIT ".$_data['limitRecord'];
+			}
+			$sql = $sqlSelect.$sqlFrom.$sqlWhere.$sqlOrder;
+			$row = $_db->fetchAll($sql);
+			$row = empty($row) ? array() : $row;
+			
+			$sqlCount="SELECT  COUNT(DISTINCT ass.id) AS totalRecord ";
+			$sqlCount.=$sqlFrom;
+			$sqlCount.=$sqlWhere;
+			$totalRecord = $_db->fetchOne($sqlCount);
+			$totalRecord = empty($totalRecord) ? 0 : $totalRecord;
+			
+			
+			$result = array(
+					'status' =>true,
+					'value' =>$row,
+					'totalRecord' =>$totalRecord,
+			);
+			return $result;
+			
+			
+		}catch(Exception $e){
+			Application_Model_DbTable_DbUserLog::writeMessageError($e->getMessage());
+			$result = array(
+					'status' =>false,
+					'value' =>$e->getMessage(),
+			);
+			return $result;
+		}
+	}
+	
+	
+	function getVideoTeacherTutorial($_data){
+		$_db = $this->getAdapter();
+		try{
+			$currentLang = empty($_data['currentLang'])?1:$_data['currentLang'];
+			$userId = empty($_data['userId'])?0:$_data['userId'];
+			$colunmName='title_en';
+			$label = 'name_en';
+			if ($currentLang==1){
+				$colunmName='title';
+				$label = 'name_kh';
+			}
+			$sql="
+				SELECT
+		    	act.`id`
+				,act.video_link AS videoYoutubeId
+				,act.ordering AS ordering
+		    	,(SELECT ad.title FROM `mobile_video_detail` AS ad WHERE ad.news_id = act.`id` AND ad.lang=$currentLang LIMIT 1) AS title
+		    	,(SELECT ad.description FROM `mobile_video_detail` AS ad WHERE ad.news_id = act.`id` AND ad.lang=$currentLang LIMIT 1) AS description
+		    	,(SELECT GROUP_CONCAT( COALESCE(i.shortcut,i.$colunmName) ) FROM `rms_items` AS i WHERE i.type=1 AND FIND_IN_SET(i.id,act.`degreeList`) LIMIT 1) AS degreeListTitle
+				,act.`publish_date` AS publishDate
+		    	,(SELECT u.first_name FROM `rms_users` AS u WHERE u.id = act.`user_id` LIMIT 1) AS userName
+			";
+			
+			$sql.=" FROM `mobile_video` AS act 
+				";
+			$sql.=' WHERE act.status = 1 AND act.typeOfVideo = 2 ';
+			$sql.='';
+			if(!empty($_data['degree'])){
+				$sql.=" AND FIND_IN_SET(".$_data['degree'].",act.`degreeList`) ";
+			}
+			$sql.="
+				ORDER BY act.ordering ASC
+			";
+			
+			if(!empty($_data['LimitStart'])){
+				$sql.=" LIMIT ".$_data['LimitStart'].",".$_data['limitRecord'];
+			}else if(!empty($_data['limitRecord'])){
+				$sql.=" LIMIT ".$_data['limitRecord'];
+			}
+			$row = $_db->fetchAll($sql);
+			
+			$row = empty($row) ? array() : $row;
+			$result = array(
+					'status' =>true,
+					'value' =>$row,
+			);
+			return $result;
+			
+			
+		}catch(Exception $e){
+			Application_Model_DbTable_DbUserLog::writeMessageError($e->getMessage());
+			$result = array(
+					'status' =>false,
+					'value' =>$e->getMessage(),
+			);
+			return $result;
+		}
+	}
+	
+	function getSemesterPeriod($_data=array()){
+		$db = $this->getAdapter();
+
+		$fullDate = $_data["fullDate"];
+		$currentLang = empty($_data['currentLang'])?1:$_data['currentLang'];
+		$semesterI='Semester I';
+		$semesterII='Semester II';
+		if ($currentLang==1){
+			$semesterI='ឆមាសទី១';
+			$semesterII='ឆមាសទី២';
+		}
+		
+		$sql = "
+			SELECT 
+				crp.`forSemester`
+				,CASE 
+					WHEN crp.`forSemester` = 1 THEN '$semesterI' 
+					WHEN crp.`forSemester` = 2 THEN '$semesterII' 
+				ELSE '' END AS semeterTitle
+				,crp.start_date AS startDate
+				,crp.end_date AS endDate
+			FROM rms_startdate_enddate AS crp WHERE crp.status=1 AND crp.forDepartment=2 AND FIND_IN_SET(2,crp.`degreeId`) 
+				AND DATE_FORMAT('$fullDate', '%Y/%m/%d')  <= DATE_FORMAT(crp.end_date, '%Y/%m/%d') 
+				AND DATE_FORMAT('$fullDate', '%Y/%m/%d') >= DATE_FORMAT(crp.start_date, '%Y/%m/%d') 
+				ORDER BY crp.`id` ASC,crp.title ASC
+		";
+		$sql .= " LIMIT 1 ";
+		return $db->fetchRow($sql);
+	}
+	function getClassForIssueAttedance($_data){
+		$_db = $this->getAdapter();
+		try{
+			$currentLang = empty($_data['currentLang'])?1:$_data['currentLang'];
+			$userId = empty($_data['userId'])?0:$_data['userId'];
+			$colunmName='title_en';
+			$label = 'name_en';
+			$branchName = 'branch_nameen';
+			if ($currentLang==1){
+				$colunmName='title';
+				$label = 'name_kh';
+				$branchName = 'branch_namekh';
+			}
+			
+			$day = 0;
+			$date = new DateTime();
+			$fullDate = $date->format('Y-m-d');
+			$dayofweek = $date->format('w');
+			$fullDateTime = $date->format('Y-m-d H:i:s');
+			$intervalMin = 0;
+			$allowEnterByTeachingTime=0;
+			
+			$rsIntervalMin = $this->getMobileKeySetting("intervalMinAtt");
+			if(!empty($rsIntervalMin)){
+				$intervalMin = empty($rsIntervalMin["keyValue"]) ? $intervalMin : $rsIntervalMin["keyValue"];
+				$allowEnterByTeachingTime = empty($rsIntervalMin["keyValue"]) ? 0 : 1;
+			}
+			
+			
+			$sqlQueryStatusIssue="
+			,'1' AS isAvailableStatus
+			";
+			if($allowEnterByTeachingTime==1){
+				$sqlQueryStatusIssue="
+				,CASE 	
+						WHEN 
+							(TIMESTAMPDIFF(MINUTE, DATE_ADD(CONCAT('$fullDate ', CAST(REPLACE(schDetail.from_hour, '.', ':') AS TIME) ), INTERVAL -$intervalMin MINUTE), '$fullDateTime'  ) < 0 ) AND 
+							TIMESTAMPDIFF(MINUTE, DATE_ADD(CONCAT('$fullDate ', CAST(REPLACE(schDetail.to_hour, '.', ':') AS TIME) ), INTERVAL $intervalMin MINUTE), '$fullDateTime'  ) < 0 
+							THEN '2' 
+						WHEN 
+							(TIMESTAMPDIFF(MINUTE, DATE_ADD(CONCAT('$fullDate ', CAST(REPLACE(schDetail.from_hour, '.', ':') AS TIME) ), INTERVAL -$intervalMin MINUTE), '$fullDateTime'  ) > 0 ) AND 
+							(TIMESTAMPDIFF(MINUTE, DATE_ADD(CONCAT('$fullDate ', CAST(REPLACE(schDetail.to_hour, '.', ':') AS TIME) ), INTERVAL $intervalMin MINUTE), '$fullDateTime'  ) > 0 )
+							THEN '3'
+						ELSE '1'
+					END AS isAvailableStatus
+				";
+			}
+			
+			$sql="
+				SELECT
+					(SELECT v.$label FROM rms_view AS v WHERE v.key_code=schDetail.day_id AND v.type=18 LIMIT 1)AS daysTitle 
+					,(SELECT t.title FROM rms_timeseting AS t WHERE t.value =schDetail.from_hour LIMIT 1) AS fromHourTitle 
+					,(SELECT t.title FROM rms_timeseting AS t WHERE t.value =schDetail.to_hour LIMIT 1) AS toHourTitle 
+
+					,sj.`shortcut` AS subShortcut
+					,CASE 
+						WHEN sj.`subject_lang` =1 THEN CONCAT(COALESCE(sj.subject_titlekh,''),' (KH)')
+						ELSE CONCAT(COALESCE(sj.subject_titleen,''),' (EN)')
+					END AS subjectTitle
+
+					,te.teacher_name_kh AS teaccherNameKh 
+					,te.teacher_name_en AS teaccherNameEng 
+					,it.$colunmName AS degreeTitle 
+					,itd.$colunmName AS gradeTitle 
+
+					,(SELECT b.$branchName FROM rms_branch AS b WHERE b.br_id=g.branch_id LIMIT 1) AS branchName 
+					,(SELECT b.photo FROM rms_branch AS b WHERE b.br_id=g.branch_id LIMIT 1) AS branchLogo 
+					,`g`.`branch_id` AS branchId 
+
+
+					,(SELECT CONCAT(COALESCE(ac.fromYear,''),'-',COALESCE(ac.toYear,'')) FROM `rms_academicyear` AS ac WHERE ac.id = g.academic_year LIMIT 1) AS academicYear 
+					,`g`.`id` AS groupId 
+					,`g`.`group_code` AS groupCode 
+					,(SELECT `r`.`room_name` FROM `rms_room` `r` WHERE (`r`.`room_id` = `g`.`room_id`)) AS `roomName` 
+					,`g`.`degree` AS degree_id 
+					,`g`.`grade` AS gradeId 
+
+					,schDetail.id AS scheduleDetailId 
+					,schDetail.subject_id AS subjectId 
+					,schDetail.from_hour AS fromHour 
+					,schDetail.to_hour AS toHour 
+					$sqlQueryStatusIssue
+					
+					
+					,g.totalStudent AS totalStudent
+					,g.maleStudent AS maleStudent
+					,g.femaleStudent AS femaleStudent
+					
+					,'$fullDate' AS attendanceDate
+					,COALESCE(att.totalA,'0') AS totalA
+					,COALESCE(att.totalP,'0') AS totalP
+					,COALESCE(att.totalL,'0') AS totalL
+					,COALESCE(att.totalEL,'0') AS totalEL
+					,COALESCE(att.attId,'0') AS isIssueAtt
+					,COALESCE(att.attId,'0') AS attId
+					,COALESCE(att.detailList,'') AS detailList
+			";
+			
+			$sql.=" FROM 
+						(rms_group_reschedule AS schDetail  JOIN rms_group_schedule AS sch ON sch.id =schDetail.main_schedule_id ) 
+						JOIN `vapi_group_info` AS g ON g.`id` = sch.group_id 
+						LEFT JOIN `rms_subject` AS sj ON sj.id = schDetail.subject_id 
+						LEFT JOIN rms_teacher AS te ON te.id = schDetail.techer_id 
+						LEFT JOIN rms_items AS it ON `it`.`id`=`g`.`degree` AND `it`.`type`=1
+						LEFT JOIN rms_itemsdetail AS itd ON `itd`.`id`=`g`.`grade` AND `itd`.`items_type`=1
+						LEFT JOIN vapi_attsubject_counting AS att ON att.subjectId = schDetail.subject_id 
+							AND att.fromHour = schDetail.from_hour 
+							AND att.toHour = schDetail.to_hour 
+							AND att.attendanceDate = '$fullDate'
+				";
+			$sql.=' WHERE 
+						g.is_use =1 
+						AND g.is_pass =2  
+				';
+			$sql.='';
+			
+			
+			
+			$currentDay=$dayofweek;
+			$nextDay=$dayofweek+1;
+			if($dayofweek==0){
+				$currentDay=7;
+			}
+			$day = $currentDay;
+			$sql .= " AND schDetail.day_id=" . $day;
+			$sql .= " AND schDetail.techer_id=" . $userId;
+			$sql .= " GROUP BY schDetail.subject_id,sch.group_id,schDetail.from_hour ";
+			$sql .= " ORDER BY schDetail.day_id ASC ,schDetail.from_hour ASC ";
+			
+			$row = $_db->fetchAll($sql);
+			
+			$row = empty($row) ? array() : $row;
+			
+			$_data['fullDate'] = $fullDate;
+			$semesterInfo = $this->getSemesterPeriod($_data);
+			$arrF = array(
+				"availableClass" => $row,
+				"semesterInfo" => $semesterInfo,
+			);
+			$result = array(
+					'status' =>true,
+					'value' =>$arrF,
+			);
+			return $result;
+			
+			
+		}catch(Exception $e){
+			Application_Model_DbTable_DbUserLog::writeMessageError($e->getMessage());
+			$result = array(
+					'status' =>false,
+					'value' =>$e->getMessage(),
+			);
+			return $result;
+		}
+	}
+	
+	function checkingTodayAttendanceMain($data){
+		$branchId = empty($data['branchId']) ? 0 : $data['branchId'];
+		$groupId = empty($data['groupId']) ? 0 : $data['groupId'];
+		$forSemester = empty($data['forSemester']) ? 0 : $data['forSemester'];
+		
+		$dateObj = new DateTime();
+		if(!empty($data['attendenceDate'])){
+			$dateObj = new DateTime($data['attendenceDate']);
+		}
+		$attendenceDate =  $dateObj->format("Y-m-d");
+	
+		$sql="SELECT 
+				att.id 
+			FROM rms_student_attendence AS att
+			WHERE
+				att.group_id = $groupId 
+				AND att.for_semester = $forSemester 
+				AND att.date_attendence = '$attendenceDate' 
+				AND att.type=1 
+			";
+		if(!empty($branchId)){
+			$sql.=" AND att.branch_id = $branchId  ";
+		}
+		$sql.="LIMIT 1";
+		$db = $this->getAdapter();
+		$id = $db->fetchOne($sql);
+		return $id;
+   }
+   
+	function submitStudentAttendance($_data){
+    	$db = $this->getAdapter();
+		$db->beginTransaction();
+    	try{
+			
+			$deviceType	= empty($_data['deviceType'])?0:$_data['deviceType'];
+			$_data['userId']	= empty($_data['userId'])?0:$_data['userId'];
+			$userId	= $_data['userId'];
+			
+			
+			$attGroupInfoPost 	 = empty($_data['attGroupInfo'])?null:$_data['attGroupInfo'];
+			$attGroupInfo 	 = Zend_Json::decode($attGroupInfoPost);
+			
+			$semesterInfoPost 	 = empty($_data['semesterInfo'])?null:$_data['semesterInfo'];
+			$semesterInfo 	 = Zend_Json::decode($semesterInfoPost);
+			
+			$attId = empty($attGroupInfo["attId"]) ? 0 : $attGroupInfo["attId"];
+			
+			$subjectId = empty($attGroupInfo["subjectId"]) ? -1 : $attGroupInfo["subjectId"]; //ដាក់លេខអវិជ្ជមាន ទុកចាប់ Error
+			$fromHour = empty($attGroupInfo["fromHour"]) ? 0 : $attGroupInfo["fromHour"];
+			$toHour = empty($attGroupInfo["toHour"]) ? 0 : $attGroupInfo["toHour"];
+			
+			$attendanceDate = empty($attGroupInfo["attendanceDate"]) ? null : $attGroupInfo["attendanceDate"];
+			$branchId = empty($attGroupInfo["branchId"]) ? 0 : $attGroupInfo["branchId"];
+			$groupId = empty($attGroupInfo["groupId"]) ? 0 : $attGroupInfo["groupId"];
+			$forSemester = empty($semesterInfo["forSemester"]) ? 0 : $semesterInfo["forSemester"];
+			$arrCheck = array(
+						'forSemester' => $forSemester,
+						'branchId' => $branchId,
+						'groupId' => $groupId,
+						'attendenceDate' => $attendanceDate,
+			);
+			$idAttendance = $attId;
+			
+			$listFromPost 	 = empty($_data['studentListSubmit']) ? null : $_data['studentListSubmit'];
+			$studentList 	 = Zend_Json::decode($listFromPost);
+			
+			if(!empty($attId)){
+				$strChecking =  (string) "0";
+				$arrRow = $studentList;
+				$oldAttStudent = array_filter($arrRow, function ($item) use ($strChecking) {
+					if ($item['detailIdAtt'] != $strChecking) {
+						return $item;
+					}
+					return;
+				});
+				$detailidlist = '';
+				if(!empty($oldAttStudent)) {
+					foreach ($oldAttStudent as $rr){
+						if($rr['attStatus']!=1){
+							if (empty($detailidlist)){
+								if (!empty($rr['attStatus'])){
+									$detailidlist= $rr['attStatus'];
+								}
+							}else{
+								if (!empty($rr['attStatus'])){
+									$detailidlist = $detailidlist.",".$rr['attStatus'];
+								}
+							}
+						}
+						
+					}
+				}
+				$this->_name="rms_student_attendence_detail";
+				$where2=" attendence_id = ".$idAttendance." AND subjectId =".$subjectId;
+				$where2.=" AND fromHour = ".$fromHour." AND toHour =".$toHour;
+				if (!empty($detailidlist)){ // check if has old att detail  detailId
+					$where2.=" AND id NOT IN (".$detailidlist.")";
+				}
+				$this->delete($where2);
+				
+				$strFilter =  (string) "1";
+				$arrRow = $studentList;
+				$resultOfStudent = array_filter($arrRow, function ($item) use ($strFilter) {
+					if ($item['attStatus'] != $strFilter) {
+						return $item;
+					}
+					return;
+				});
+				$amtRecordNotCome = count($resultOfStudent);
+				if($amtRecordNotCome==0){
+					$arr = array(
+						'attendence_id'		=>$idAttendance,
+						'stu_id'			=>0,
+						'attendence_status'	=>0,
+						'description'		=>"",
+						'subjectId'			=>$subjectId,
+						'fromHour'			=>$fromHour,
+						'toHour'			=>$toHour,
+						'byTeacherId'		=>$userId,
+						'platform'			=>$deviceType,
+						'createDate'		=>date("Y-m-d H:i:s"),
+						'modifyDate'		=>date("Y-m-d H:i:s"),
+					);
+					$this->_name ='rms_student_attendence_detail';
+					$this->insert($arr);
+				}else{
+					if(!empty($studentList)) foreach($studentList AS $row){
+						$studentRequestId=0;
+						if(!empty($row['permissionRecordId'])){ // ករណីសុំច្បាប់មុន
+							$_arr = array(
+								'isCompleted'		=>1,
+							);
+							$this->_name ='rms_student_attendence_detail';
+							$where="id=".$row['permissionRecordId'];
+							$this->update($_arr, $where);
+							
+							$studentRequestId=$row['permissionRecordId'];
+						}
+
+						if( $row['attStatus'] != "1" ){
+							$arr = array(
+								'attendence_id'		=>$idAttendance,
+								'stu_id'			=>$row['studentId'],
+								'attendence_status'	=>$row['attStatus'],
+								'description'		=>$row['reason'],
+								'subjectId'			=>$subjectId,
+								'fromHour'			=>$fromHour,
+								'toHour'			=>$toHour,
+								'studentRequestId'	=>$studentRequestId,
+								'byTeacherId'		=>$userId,
+								'platform'			=>$deviceType,
+								'createDate'		=>date("Y-m-d H:i:s"),
+								'modifyDate'		=>date("Y-m-d H:i:s"),
+							);
+							$this->_name ='rms_student_attendence_detail';
+							$this->insert($arr);
+						}
+					}
+				}
+				
+				
+			}else{
+				$idAttendance = $this->checkingTodayAttendanceMain($arrCheck);
+				if(empty($idAttendance)){
+					$_arr = array(
+						'branch_id'			=>$branchId,
+						'group_id'			=>$groupId,
+						'date_attendence'	=>$attendanceDate,
+						
+						'for_semester'		=> $forSemester,
+						'status'			=>1,
+						'date_create'		=>date("Y-m-d H:i:s"),
+						'modify_date'		=>date("Y-m-d H:i:s"),
+						'type'				=>1, //for attendence
+					);
+					$this->_name ='rms_student_attendence';
+					$idAttendance = $this->insert($_arr);
+				}
+				
+				$strFilter =  (string) "1";
+				$arrRow = $studentList;
+				$resultOfStudent = array_filter($arrRow, function ($item) use ($strFilter) {
+					if ($item['attStatus'] != $strFilter) {
+						return $item;
+					}
+					return;
+				});
+				$amtRecordNotCome = count($resultOfStudent);
+				if($amtRecordNotCome==0){
+					$arr = array(
+						'attendence_id'		=>$idAttendance,
+						'stu_id'			=>0,
+						'attendence_status'	=>0,
+						'description'		=>"",
+						'subjectId'			=>$subjectId,
+						'fromHour'			=>$fromHour,
+						'toHour'			=>$toHour,
+						'byTeacherId'		=>$userId,
+						'platform'			=>$deviceType,
+						'createDate'		=>date("Y-m-d H:i:s"),
+						'modifyDate'		=>date("Y-m-d H:i:s"),
+					);
+					$this->_name ='rms_student_attendence_detail';
+					$this->insert($arr);
+				}else{
+					if(!empty($studentList)) foreach($studentList AS $row){
+						$studentRequestId=0;
+						if(!empty($row['permissionRecordId'])){ // ករណីសុំច្បាប់មុន
+							$_arr = array(
+								'isCompleted'		=>1,
+							);
+							$this->_name ='rms_student_attendence_detail';
+							$where="id=".$row['permissionRecordId'];
+							$this->update($_arr, $where);
+							
+							$studentRequestId=$row['permissionRecordId'];
+						}
+
+						if( $row['attStatus'] != "1" ){
+							$arr = array(
+								'attendence_id'		=>$idAttendance,
+								'stu_id'			=>$row['studentId'],
+								'attendence_status'	=>$row['attStatus'],
+								'description'		=>$row['reason'],
+								'subjectId'			=>$subjectId,
+								'fromHour'			=>$fromHour,
+								'toHour'			=>$toHour,
+								'studentRequestId'	=>$studentRequestId,
+								'byTeacherId'		=>$userId,
+								'platform'			=>$deviceType,
+								'createDate'		=>date("Y-m-d H:i:s"),
+								'modifyDate'		=>date("Y-m-d H:i:s"),
+							);
+							$this->_name ='rms_student_attendence_detail';
+							$this->insert($arr);
+						}
+					}
+				}
+			}
+			$db->commit();
+    		return true;
+    	}catch (Exception $e){
+			Application_Model_DbTable_DbUserLog::writeMessageError($e->getMessage());
+			$db->rollBack();
+    		return false;
+    	}
+    }
+	
+	function getSummaryStuAttBySubject($_data){
+		$_db = $this->getAdapter();
+		try{
+			$currentLang = empty($_data['currentLang'])?1:$_data['currentLang'];
+			$userId = empty($_data['userId'])?0:$_data['userId'];
+			
+			
+			$subLangKh = "(KH)";
+			$subLangEng = "(ENG)";
+		
+			$colunmName='title_en';
+			$label = 'name_en';
+			$branch = "branch_nameen";
+			$subjectTitle='subjectTitleEn';
+			if ($currentLang==1){
+				$colunmName='title';
+				$label = 'name_kh';
+				$branch = "branch_namekh";
+				$subjectTitle='subjectTitleKh';
+				
+				$subLangKh = "(ខ្មែរ)";
+				$subLangEng = "(អង់គ្លេស)";
+			}
+			
+			$stringJsonQue="
+					, CONCAT(
+						'[',
+						GROUP_CONCAT('{',
+							'".'"date"'.":','".'"'."',att.`dateAttendance`,'".'"'."',
+							'".',"stuId"'.":','".'"'."',att.`studentId`,'".'"'."',
+							'".',"stuCode"'.":','".'"'."',s.`stu_code`,'".'"'."',
+							'".',"stuNameKh"'.":','".'"'."',s.`stu_khname`,'".'"'."',
+							'".',"stuNameEn"'.":','".'"'."',CONCAT(COALESCE(s.last_name,''),' ',COALESCE(s.stu_enname,'')),'".'"'."',
+							'".',"attStatus"'.":','".'"'."',att.`attendanceStatus`,'".'"'."',
+							'".',"stTitle"'.":','".'"'."',att.`attendanceStatusTitle`,'".'"'."',
+							'".',"reason"'.":','".'"'."',att.`description`,'".'"'."',
+							'".',"fromHour"'.":','".'"'."',COALESCE((SELECT  GROUP_CONCAT(TRIM(fh.`title`)) FROM `rms_timeseting` AS fh WHERE FIND_IN_SET(fh.value,att.`fromHour`) LIMIT 1 ),''),'".'"'."',
+							'".',"toHour"'.":','".'"'."',COALESCE((SELECT  GROUP_CONCAT(TRIM(fh.`title`)) FROM `rms_timeseting` AS fh WHERE FIND_IN_SET(fh.value,att.`toHour`) LIMIT 1 ),''),'".'"'."',
+							
+						'}' ORDER BY att.`dateAttendance` DESC,s.`stu_code` ASC )
+						,']'
+						) AS jsonData
+					";
+		
+			$sqlSelect="
+				SELECT 
+					g.`academicYear`
+					,(SELECT CONCAT(COALESCE(ac.fromYear,''),'-',COALESCE(ac.toYear,'')) FROM `rms_academicyear` AS ac WHERE ac.id = g.`academicYear` LIMIT 1) AS academicYearTitle
+					,g.`groupCode`
+					,g.`totalStudent`
+					,g.`femaleStudent`
+					,g.`maleStudent`
+					,COALESCE((SELECT `r`.`room_name` FROM `rms_room` `r` WHERE (`r`.`room_id` = `g`.`room_id`) LIMIT 1),'N/A') AS `roomName`
+				
+
+					,gsjb.`subject_id`
+
+					,DATE_FORMAT(att.`dateAttendance`,'%Y%m')  AS attMonth
+					,att.`dateAttendance`
+
+					,COUNT(IF(att.attendanceStatus = '2' , att.attendanceStatus, NULL)) AS totalA
+					,COUNT(IF(att.attendanceStatus = '3' , att.attendanceStatus, NULL)) AS totalP
+					,COUNT(IF(att.attendanceStatus = '4' , att.attendanceStatus, NULL)) AS totalL
+					,COUNT(IF(att.attendanceStatus = '5' , att.attendanceStatus, NULL)) AS totalEl
+
+					,CASE 
+						WHEN COALESCE(g.amtLangOfClass,0) > 1 THEN 
+							CASE WHEN COALESCE(gsjb.subjectLang,0) =2 
+								 THEN CONCAT(gsjb.subjectTitleEn,' ','$subLangEng')
+								 ELSE CONCAT(gsjb.subjectTitleKh,' ','$subLangKh')
+							End
+						ELSE gsjb.$subjectTitle
+					End AS subjectTitle
+			";
+			$sqlSelect.=$stringJsonQue;
+			
+			$sqlFrom=" 
+					FROM 
+						(`vapi_group_subject_info` AS gsjb JOIN `vapi_group_info` AS g ON g.id = gsjb.group_id AND g.is_use=1 ) 
+						LEFT JOIN `vapi_daily_stu_attsubject` AS att ON att.`groupId` = g.`id` AND gsjb.`subject_id` = att.`subjectId` AND att.`studentId` > 0
+						LEFT JOIN `rms_student` AS s ON s.`stu_id` = att.`studentId`
+				";
+			$sqlWhere=' 
+					WHERE 
+						gsjb.`amount_subject` > 0
+						AND gsjb.`teacher` = '.$userId;
+			
+			
+			if(!empty($_data['academicYear'])){
+				$sqlWhere.=" AND g.academicYear =".$_data['academicYear'];
+			}
+			$sqlOrder="
+				GROUP BY g.`id`, gsjb.`subject_id`,DATE_FORMAT(att.`dateAttendance`,'%Y%m')
+				ORDER BY g.`academic_year` DESC,DATE_FORMAT(att.`dateAttendance`,'%Y%m') DESC,gsjb.`subject_id`
+			";
+			
+			if(!empty($_data['LimitStart'])){
+				$sqlOrder.=" LIMIT ".$_data['LimitStart'].",".$_data['limitRecord'];
+			}else if(!empty($_data['limitRecord'])){
+				$sqlOrder.=" LIMIT ".$_data['limitRecord'];
+			}
+			$sql = $sqlSelect.$sqlFrom.$sqlWhere.$sqlOrder;
+			$row = $_db->fetchAll($sql);
+			$row = empty($row) ? array() : $row;
+			
+			$sqlCount="SELECT  COUNT(DISTINCT g.`id`,gsjb.`subject_id`,DATE_FORMAT(att.`dateAttendance`,'%Y%m'))  AS totalRecord ";
+			$sqlCount.=$sqlFrom;
+			$sqlCount.=$sqlWhere;
+			$totalRecord = $_db->fetchOne($sqlCount);
+			$totalRecord = empty($totalRecord) ? 0 : $totalRecord;
+			
+			$result = array(
+					'status' =>true,
+					'value' =>$row,
+					'totalRecord' =>$totalRecord,
+			);
+			return $result;
+			
+			
+		}catch(Exception $e){
+			Application_Model_DbTable_DbUserLog::writeMessageError($e->getMessage());
+			$result = array(
+					'status' =>false,
+					'value' =>$e->getMessage(),
+			);
+			return $result;
+		}
+	}
+	
+	
+	
+	function getScoreInfo($_data)
+	{   
+		//using with getStudentGradeBySubject
+		$db = $this->getAdapter();
+		
+		$scoreId = empty($_data['scoreId'])?0:$_data['scoreId'];
+		$userId = empty($_data['userId'])?0:$_data['userId'];
+		$sql = "
+		SELECT 
+			s.id
+			,s.`for_academic_year` AS academicYear
+			,s.`exam_type` AS examType
+			,s.`for_semester` AS forSemester
+			,s.`for_month` AS forMonth
+		FROM 
+			`rms_score` AS s 
+			JOIN `rms_score_detail` AS sd ON sd.`score_id` = s.`id` 
+		WHERE 1 ";
+		if(!empty($scoreId)){
+			$sql.=" AND  s.`id`= ".$scoreId;
+		}else{
+			$sql.=" AND sd.`teacher_id` = ".$userId;
+			$sql.=" GROUP BY s.`for_academic_year`,s.`exam_type`,s.`for_semester`,
+						CASE
+							WHEN s.`exam_type` !=1 THEN 0
+							ELSE s.`for_month` 
+						END ";
+			$sql.=" ORDER BY s.`for_academic_year` DESC,s.id DESC ";
+		}
+		$sql.=" LIMIT 1 ";
+		$res = $db->fetchRow($sql);
+		return $res;
+	}
+	
+	function getScoreStatistic($_data){
+		$_db = $this->getAdapter();
+		try{
+			$currentLang = empty($_data['currentLang'])?1:$_data['currentLang'];
+			$userId = empty($_data['userId'])?0:$_data['userId'];
+			$scoreId = empty($_data['scoreId'])?0:$_data['scoreId'];
+			$academicYear = empty($_data['academicYear'])?0:$_data['academicYear'];
+			
+			$rs = $this->getScoreInfo($_data);
+
+			if(!empty($rs)){
+				$_data['exam_type'] = $rs["examType"];
+				$_data['forSemester'] = $rs["forSemester"];
+				$_data['forMonth'] = $rs["forMonth"];
+				$academicYear = empty($rs["academicYear"]) ? 0 : $rs["academicYear"];
+				$_data["academicYear"] = empty($_data["academicYear"]) ? $academicYear : $rs["academicYear"];
+				
+			}
+			$_data['exam_type'] = empty($_data['exam_type']) ?  0 : $_data['exam_type'];
+			$_data['forSemester'] = empty($_data['forSemester']) ?  0 : $_data['forSemester'];
+			$_data['forMonth'] = empty($_data['forMonth']) ?  0 : $_data['forMonth'];
+			
+			$colunmName='title_en';
+			$label = 'name_en';
+			$branchName = 'branch_nameen';
+			if ($currentLang==1){
+				$colunmName='title';
+				$label = 'name_kh';
+				$branchName = 'branch_namekh';
+			}
+			$sql="
+				SELECT
+					sj.id
+					,sj.title_score AS titleScore
+					,(SELECT CONCAT(ac.fromYear,'-',ac.toYear) FROM `rms_academicyear` AS ac WHERE ac.id = sj.for_academic_year LIMIT 1) AS academicYear
+					, g.group_code AS groupCode
+
+					, (SELECT branch_namekh FROM rms_branch WHERE rms_branch.br_id=g.branch_id LIMIT 1) AS branchName
+					, (SELECT it.$colunmName FROM rms_items AS it WHERE it.id=g.degree AND it.type=1 LIMIT 1) AS degreeTitle
+					, (SELECT itd.$colunmName FROM rms_itemsdetail AS itd WHERE itd.id=g.grade AND itd.items_type=1 LIMIT 1) AS gradeTitle
+					,CASE 
+						WHEN subj.`subject_lang` =1 THEN CONCAT(COALESCE(subj.subject_titlekh,''),' (KH)')
+						ELSE CONCAT(COALESCE(subj.subject_titleen,''),' (EN)')
+					END AS subjectTitle
+					,g.degree
+					,g.academic_year AS academicYearId
+					,sj.subject_id AS subjectId
+					,sj.teacher_id AS teacherId
+					, t.teacher_name_kh AS teacherName
+					, (SELECT COUNT(sm.id) FROM `rms_score_monthly` sm WHERE sm.score_id=sj.id AND sm.type=1 ) totaStudent 
+					,'0' AS totalA
+					,'0' AS totalB
+					,'0' AS totalC
+					,'0' AS totalD
+					,'0' AS totalE
+					,'0' AS totalF
+					
+					,'0' AS percentA
+					,'0' AS percentB
+					,'0' AS percentC
+					,'0' AS percentD
+					,'0' AS percentE
+					,'0' AS percentF
+					
+					,'' AS rowColor
+
+			";
+			
+			$sql.=" FROM v_score_ft_subjectscore AS sj 
+						LEFT JOIN `rms_group` AS g ON g.id = sj.group_id 
+						LEFT JOIN rms_teacher AS t ON t.`id` = sj.`teacher_id` 
+						LEFT JOIN `rms_subject` AS subj ON subj.id = sj.subject_id
+				";
+			$sql.="
+				WHERE 1
+					AND sj.teacher_id =$userId
+					";
+				//156  
+			$sql .= " AND sj.exam_type = ".$_data['exam_type'];
+			$sql .= " AND sj.for_semester = ".$_data['forSemester'];
+			
+			if($_data['exam_type']==1){
+				$sql .= " AND sj.for_month = ".$_data['forMonth'];
+			}
+			if(!empty($_data['academicYear'])){
+				$sql .= " AND g.academic_year = ".$_data['academicYear'];
+			}
+			
+			$sql .= " ORDER BY sj.teacher_id,sj.subject_id,g.degree,g.grade,g.group_code ASC ";
+			
+			$row = $_db->fetchAll($sql);
+		
+			
+			
+			$row = empty($row) ? array() : $row;
+			$gradeStatistic = array(
+				array("grade"=>"A","total"=>"0","data"=> array(),),
+				array("grade"=>"B","total"=>"0","data"=> array(),),
+				array("grade"=>"C","total"=>"0","data"=> array(),),
+				array("grade"=>"D","total"=>"0","data"=> array(),),
+				array("grade"=>"E","total"=>"0","data"=> array(),),
+				array("grade"=>"F","total"=>"0","data"=> array(),),
+				
+			);
+			$avgBar = 0;
+			if (!empty($row)) {
+				$lineColors = array(
+								"#4394E5",
+								"#87BB62",
+								"#ea5455",
+								"#ff9f43",
+								"#92cad1",
+								"#673ab7",
+								"#153c7f",
+								"#28c76f",
+								"#3D2785",
+								"#f4e604",
+								"#308fac",
+								"#ff7954",
+								"#79ccb3",
+								"#a73c5a",
+								"#631e50",
+							);
+				$totalStudent=0;
+				$noRowClass=0;
+				$gTotalA=0;
+				$gTotalB=0;
+				$gTotalC=0;
+				$gTotalD=0;
+				$gTotalE=0;
+				$gTotalF=0;
+				foreach ($row as $key => $rs) {
+					$thisColor  = empty($lineColors[$noRowClass]) ? "#673ab7" : $lineColors[$noRowClass];
+					$row[$key]['rowColor'] = $thisColor;
+					$rowTotaStudent = empty($rs['totaStudent']) ? 0 : $rs['totaStudent'];
+					$totalStudent = $totalStudent + $rowTotaStudent;
+					$_data['subject_id'] = $rs['subjectId'];
+					$_data['teacher_id'] = $rs['teacherId'];
+					$_data['degree'] = $rs['degree'];
+					$_data['scoreId'] = $rs['id'];
+					$_data['academic_year'] = $rs['academicYearId'];
+
+					$rsMention = $this->getStudentGradeBySubject($_data);
+					if (!empty($rsMention))
+						foreach ($rsMention as $rsGrade) {
+							$totalA = !empty($rsGrade['Total_A']) ? $rsGrade['Total_A'] : 0;
+							$totalB = !empty($rsGrade['Total_B']) ? $rsGrade['Total_B'] : 0;
+							$totalC = !empty($rsGrade['Total_C']) ? $rsGrade['Total_C'] : 0;
+							$totalD = !empty($rsGrade['Total_D']) ? $rsGrade['Total_D'] : 0;
+							$totalE = !empty($rsGrade['Total_E']) ? $rsGrade['Total_E'] : 0;
+							$totalF = !empty($rsGrade['Total_F']) ? $rsGrade['Total_F'] : 0;
+							
+							$gTotalA = $gTotalA + $totalA;
+							$gTotalB = $gTotalB + $totalB;
+							$gTotalC = $gTotalC + $totalC;
+							$gTotalD = $gTotalD + $totalD;
+							$gTotalE = $gTotalE + $totalE;
+							$gTotalF = $gTotalF + $totalF;
+							
+							$row[$key]['totalA'] = $totalA;
+							$row[$key]['totalB'] = $totalB;
+							$row[$key]['totalC'] = $totalC;
+							$row[$key]['totalD'] = $totalD;
+							$row[$key]['totalE'] = $totalE;
+							$row[$key]['totalF'] = $totalF;
+							
+							$row[$key]["percentA"]=@str_replace('.00','',number_format($totalA/$rowTotaStudent*100,2));
+							$row[$key]["percentB"]=@str_replace('.00','',number_format($totalB/$rowTotaStudent*100,2));
+							$row[$key]["percentC"]=@str_replace('.00','',number_format($totalC/$rowTotaStudent*100,2));
+							$row[$key]["percentD"]=@str_replace('.00','',number_format($totalD/$rowTotaStudent*100,2));
+							$row[$key]["percentE"]=@str_replace('.00','',number_format($totalE/$rowTotaStudent*100,2));
+							$row[$key]["percentF"]=@str_replace('.00','',number_format($totalF/$rowTotaStudent*100,2));
+				
+							
+							if($totalA > $avgBar){
+								$avgBar = $totalA;
+							}else if($totalB > $avgBar){
+								$avgBar = $totalB;
+							}else if($totalC > $avgBar){
+								$avgBar = $totalC;
+							}else if($totalD > $avgBar){
+								$avgBar = $totalD;
+							}else if($totalE > $avgBar){
+								$avgBar = $totalE;
+							}else if($totalF > $avgBar){
+								$avgBar = $totalF;
+							}
+							
+							$arrA = array(
+								"title"=>$rs['subjectId'],
+								"color"=>$thisColor,
+								"value"=>(string) $totalA,
+							);
+							array_push($gradeStatistic[0]["data"], $arrA);
+							
+							$arrB = array(
+								"title"=>$rs['subjectId'],
+								"color"=>$thisColor,
+								"value"=>(string) $totalB,
+							);
+							array_push($gradeStatistic[1]["data"], $arrB);
+							
+							$arrC = array(
+								"title"=>$rs['subjectId'],
+								"color"=>$thisColor,
+								"value"=>(string) $totalC,
+							);
+							array_push($gradeStatistic[2]["data"], $arrC);
+							
+							$arrD = array(
+								"title"=>$rs['subjectId'],
+								"color"=>$thisColor,
+								"value"=>(string) $totalD,
+							);
+							array_push($gradeStatistic[3]["data"], $arrD);
+							
+							$arrE = array(
+								"title"=>$rs['subjectId'],
+								"color"=>$thisColor,
+								"value"=>(string) $totalE,
+							);
+							array_push($gradeStatistic[4]["data"], $arrE);
+							
+							$arrF = array(
+								"title"=>$rs['subjectId'],
+								"color"=>$thisColor,
+								"value"=>(string) $totalF,
+							);
+							array_push($gradeStatistic[5]["data"], $arrF);
+						}
+						$noRowClass++;
+				}
+				$gradeStatistic[0]["total"] = $gTotalA;
+				$gradeStatistic[1]["total"] = $gTotalB;
+				$gradeStatistic[2]["total"] = $gTotalC;
+				$gradeStatistic[3]["total"] = $gTotalD;
+				$gradeStatistic[4]["total"] = $gTotalE;
+				$gradeStatistic[5]["total"] = $gTotalF;
+				
+			}
+		
+			$arrF = array(
+				"subjectRowClass" => $row,
+				"gradeStatistic" => $gradeStatistic,
+				"maxBarY" => (string) ((ceil($avgBar / 10) * 10)),
+			);
+			$result = array(
+					'status' =>true,
+					'value' =>$arrF,
+			);
+			return $result;
+			
+			
+		}catch(Exception $e){
+			Application_Model_DbTable_DbUserLog::writeMessageError($e->getMessage());
+			$result = array(
+					'status' =>false,
+					'value' =>$e->getMessage(),
+			);
+			return $result;
+		}
+	}
+	function getMentoinGradeSetting($search)
+	{   
+		//using with getStudentGradeBySubject
+		$db = $this->getAdapter();
+		$sqlMention = "
+		SELECT 
+			md.`max_score`, 
+			md.`metion_grade` FROM 
+		`rms_metionscore_setting` AS m 
+			INNER JOIN `rms_metionscore_setting_detail` AS md 
+		ON m.`id`=md.`metion_score_id` 
+		WHERE m.`degree`= " . $search['degree'] . " AND m.`academic_year`= " . $search['academic_year'] . "  ORDER BY md.`max_score` DESC";
+		$mentionResult = $db->fetchAll($sqlMention);
+		return $mentionResult;
+	}
+	function getStudentGradeBySubject($search)
+	{ //using with getScoreStatistic
+		$db = $this->getAdapter();
+		$mentionResult = $this->getMentoinGradeSetting($search);
+		$mentionResultArr = array(
+			"0" => 0,
+			"1" => 0,
+			"2" => 0,
+			"3" => 0,
+			"4" => 0,
+			"5" => 0,
+		);
+
+		if (!empty($mentionResult)) {
+			foreach ($mentionResult as $key => $row) {
+				$mentionResultArr[$key] = $row["max_score"];
+			}
+		}
+		if ($search['exam_type'] == 1) {
+			$totalScore = "sd.orgScore";
+			$totalMaxScore = "(SELECT  gs.max_score FROM `rms_group_subject_detail` AS gs WHERE gs.group_id = sd.group_id AND gs.subject_id= sd.`subject_id`  LIMIT 1)";
+		} else {
+			$totalScore = "sd.orgScore";
+			$totalMaxScore = "(SELECT  gs.semester_max_score FROM `rms_group_subject_detail` AS gs WHERE gs.group_id = sd.group_id AND gs.subject_id= sd.`subject_id`  LIMIT 1)";
+		}
+
+		$sql = "SELECT  
+		  COUNT(IF(" . $totalScore . "/" . $totalMaxScore . "*100 >= '" . $mentionResultArr['0'] . "'   , " . $totalScore . ", NULL)) AS Total_A,
+		  COUNT(IF(" . $totalScore . "/" . $totalMaxScore . "*100 >= '" . $mentionResultArr['1'] . "' AND " . $totalScore . "/" . $totalMaxScore . "*100 < '" . $mentionResultArr['0'] . "'  , " . $totalScore . ", NULL)) AS Total_B,
+		  COUNT(IF(" . $totalScore . "/" . $totalMaxScore . "*100 >= '" . $mentionResultArr['2'] . "' AND " . $totalScore . "/" . $totalMaxScore . "*100 < '" . $mentionResultArr['1'] . "'  , " . $totalScore . ", NULL)) AS Total_C,
+		  COUNT(IF(" . $totalScore . "/" . $totalMaxScore . "*100 >= '" . $mentionResultArr['3'] . "' AND " . $totalScore . "/" . $totalMaxScore . "*100 < '" . $mentionResultArr['2'] . "'  , " . $totalScore . ", NULL)) AS Total_D,
+		  COUNT(IF(" . $totalScore . "/" . $totalMaxScore . "*100 >= '" . $mentionResultArr['4'] . "' AND " . $totalScore . "/" . $totalMaxScore . "*100 < '" . $mentionResultArr['3'] . "'  , " . $totalScore . ", NULL)) AS Total_E,
+		  COUNT(IF(" . $totalScore . "/" . $totalMaxScore . "*100 < '" . $mentionResultArr['4'] . "'  , " . $totalScore . ", NULL)) AS Total_F
+		   
+		FROM `rms_score_detail` AS sd ";
+		$where = ' where 1 ';
+		if (($search['scoreId']) > 0) {
+			$where .= ' AND sd.`score_id` =' . $search['scoreId'];
+		}
+		if (!empty($search['subject_id'])) {
+			$where .= ' AND sd.subject_id =' . $search['subject_id'];
+		}
+		if (!empty($search['teacher_id'])) {
+			$where .= ' AND sd.teacher_id= ' . $search['teacher_id'];
+		}
+		$where .= " GROUP BY sd.`score_id`";
+		return $db->fetchAll($sql . $where);
+	}
+	
+	public function getMobileKeySetting($keyName){
+    	$db = $this->getAdapter();
+    	$sql = " SELECT 
+					s.`code`
+					,s.keyName
+					,s.keyValue 
+					,s.keyValueEn 
+				FROM `moble_label` AS s
+				WHERE s.status=1 
+				AND s.`keyName` ='$keyName' LIMIT 1";
+    	return $db->fetchRow($sql);
+    }
+	
+	
+}

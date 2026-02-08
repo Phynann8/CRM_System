@@ -1,0 +1,494 @@
+<?php
+	$tr = Application_Form_FrmLanguages::getCurrentlanguage();
+	echo $this->headTitle($tr->translate("ADD_GRADING_SYSTEM"));
+	$baseurl = $this->baseUrl();
+	$frm_items= $this->frm_items;
+?>
+<link href="<?php echo $this->baseUrl();?>/css/externalstyle.css" media="screen" rel="stylesheet" type="text/css">
+<div class="card">
+	<div class="card-content collapse show">
+		<div class="card-box">
+       		<div class="col-sm-12 border-botom">
+		    	<div class="col-sm-8 pd-0">
+	    			<h4 class="m-b-0"><i class="fa fa-cubes " aria-hidden="true"></i>&nbsp;&nbsp;&nbsp;<?php echo $tr->translate('ADD_GRADING_SYSTEM');?> <small id="msg_deplicate" class="red italic"></small></h4>
+    			</div>
+    			<div class="col-sm-4 text-right">
+    			</div>
+    		</div>
+    	</div>
+    	<form  id='edit-major' action="" dojoType="dijit.form.Form" method="post" enctype="multipart/form-data">
+			<script type="dojo/method" event="onSubmit">			
+				if(this.validate()) {
+					branch_id = dijit.byId('branch_id').get('value');
+				if(branch_id==-1 || branch_id==""){
+					alert('<?php echo $tr->translate("PLEASE_SELECT_BRANCH");?>');
+					dijit.byId('branch_id').focus();
+					return false;
+				}
+					identity =dijit.byId("identity").get('value');
+					if(identity=='' || identity==null){
+						alert("<?php echo $tr->translate("PLEASE_SET_ITEMS");?>");
+						dijit.byId("branch").focus();
+						return false;
+					}
+					total_percent = dijit.byId('total_percent').get('value');
+					if(total_percent!='100'){
+						//alert("<?php echo $tr->translate("TOTAL_MUST_BE_100_PERCENTAGE");?>");
+						//return false;
+					}
+					loadingBlock();
+					return true;
+				}else {
+					return false;
+				}
+			</script>
+			<div class="card-box">
+				<div class="col-md-4 col-sm-4 col-xs-12">
+					<div class="card-blogform">
+						<div class="card-body"> 
+							<div class="row"> 
+								<div class="col-md-12 col-sm-12 col-xs-12"> 
+									<div class="d-flex"> 
+										<div class="settings-main-icon ">
+											<i class="fa fa-graduation-cap" aria-hidden="true"></i>
+										</div> 
+										<div class="col-md-10 col-sm-10 col-xs-12"> 
+											<p class="tx-20 font-weight-semibold d-flex "><?php echo $tr->translate('GRADING_SYSTEM')?> </p>
+										</div> 
+									</div>
+									<div class="form-group">
+									   <label class="control-label  col-md-5 col-sm-5 col-xs-12" ><?php echo $tr->translate("BRANCH");?> <span class="required">*</span>
+									   </label>
+									   <div class="col-md-7 col-sm-7 col-xs-12">
+											<?php echo $frm_items->getElement("branch_id");?>
+											<?php echo $frm_items->getElement("schoolOption");?>
+									   </div>
+									</div>
+									<div class="form-group">
+										<label class="control-label bold col-md-5 col-sm-5 col-xs-12"><?php echo $tr->translate("DEGREE");?> <span class="required">*</span></label>
+										<div class="col-md-7 col-sm-7 col-xs-12">
+											<?php echo $frm_items->getElement("degreeId");?>
+										</div>
+									 </div>
+									 <div class="form-group">
+										<label class="control-label  col-md-5 col-sm-5 col-xs-12"><?php echo $tr->translate("scoreAttPolicy");?> <span class="required">*</span></label>
+										<div class="col-md-7 col-sm-7 col-xs-12">
+											<input id="settingScoreAttId" />
+										</div>
+									</div>
+									<div class="form-group">
+										<label class="control-label bold col-md-5 col-sm-5 col-xs-12"><?php echo $tr->translate("TITLE");?> <span class="required">*</span></label>
+										<div class="col-md-7 col-sm-7 col-xs-12">
+											<?php echo $frm_items->getElement("title");?>
+										</div>
+									 </div>
+									<div class="form-group">
+									   <label class="control-label  col-md-5 col-sm-5 col-xs-12" ><?php echo $tr->translate("NOTE");?>
+									   </label>
+									   <div class="col-md-7 col-sm-7 col-xs-12">
+											<?php echo $frm_items->getElement("note");?>
+									   </div>
+									</div>
+									<div class="form-group">
+										<div class="card-blogform">
+											<div class="introduction">
+												<div class="d-flex"> 
+													<div class="settings-main-icon ">
+														<i class="fa fa-info-circle" aria-hidden="true"></i>
+													</div> 
+													<div class="col-md-10 col-sm-10 col-xs-12"> 
+														<p class="tx-20 font-weight-semibold d-flex ">ការណែនាំ</p>
+													</div> 
+												</div>
+								                   <label class="control-label bold col-md-12 col-sm-12 col-xs-12">-ករណីមុខវិជ្ជាមិនមានការបែងចែកមុខវិជា្ជតូចៗទៀតយើង មិនត្រូវ ធិក(Tick)ទេ។</label>
+								                   <label class="control-label bold col-md-12 col-sm-12 col-xs-12">-ប្រចាំខែ: មុខវិជ្ជានេះនឹងត្រូវប្រើពេលបញ្ចូលពិន្ទុប្រឡងប្រចាំខែ</label>
+								                   <label class="control-label bold col-md-12 col-sm-12 col-xs-12">-សម្រាប់ឆមាស : មុខវិជ្ជានេះនឹងត្រូវប្រើពេលបញ្ចូលពិន្ទុប្រឡងឆមាស</label>
+								                   <label class="control-label bold col-md-12 col-sm-12 col-xs-12">ឧទាហរណ៍មុខវិជ្ជា ភាសាខ្មែរ</label>
+								                   <ul>
+								                   	   <li>ផ្នែកតូចៗជាភាសាខ្មែរ(អំណាន,សរសេរតាមអាន,សំណេរ)</li>
+								                   	   <li>ផ្នែកតូចៗជាភាសាអង់គ្លេស(Reading Khmer,Khmer Dictation,Khmer Writing)</li>
+								                   </ul>
+							                 </div>
+						                </div>
+							          </div>
+								</div>
+							</div>
+						</div>
+					</div>
+		         </div>
+		         <div class="col-md-8 col-sm-8 col-xs-12">
+		         	<div class="form-group" style=" background: #d8e0e2; padding: 5px 15px; margin: 0; border: solid 1px #697996; border-radius: 2px;">
+		         	  <label class="control-label bold col-md-2 col-sm-2 col-xs-12"><?php echo $tr->translate("SELECT_TYPE");?> </label>
+	                   <div class="col-md-5 col-sm-5 col-xs-12">
+	                   		<?php echo $frm_items->getElement("examtype_items");?>
+	                   </div>
+	                   <div class="col-md-5 col-sm-5 col-xs-12">
+		                   <label class="control-label bold col-md-5 col-sm-5 col-xs-12"><?php echo $tr->translate("TOTAL");?>(%)<span class="required">*</span></label>
+						   <div class="col-md-7 col-sm-7 col-xs-12">
+								<?php echo $frm_items->getElement("total_percent");?>
+						   </div>
+	                   </div>
+	                   <div class="clearfix"></div>
+	                </div>
+	                <div class="form-group">
+	             		<table  class="collape responsiveTable" >
+							<thead>
+								<tr id="head-title" class="head-td" align="center">
+									<th scope="col" width="35px"><?php echo $tr->translate("DEL");?></th>
+									<th scope="col" width="35px"><?php echo $tr->translate("N_O");?></th>
+									<th scope="col"><?php echo $tr->translate("CRITERIAL_NAME");?></th>
+									<th scope="col"><?php echo $tr->translate("PERCENTAGE");?></th>
+									<th scope="col"><?php echo $tr->translate("TIME_INPUT");?></th>
+									<th scope="col">
+										<?php echo $tr->translate("SUBJECT");?>
+										<br />
+										<?php echo $tr->translate("Sub_MajorKH")."/".$tr->translate("Sub_MajorEng");?>
+									</th>
+									<th scope="col"><?php echo $tr->translate("NOTE");?></th>
+								</tr>
+							</thead>
+							<tbody id="table_row">
+							</tbody>
+						</table>
+						<input type="hidden" dojoType="dijit.form.TextBox" id="identity" name="identity" />
+						
+	             	</div>
+		         </div>
+		         <div class="clearfix"></div>
+			         <div class="card-box mt-20">
+		               	<div class="col-md-12 col-sm-12 col-xs-12 border-top mt-20 ptb-10 text-center">
+							<input type="submit" class="button-class button-primary" iconClass="glyphicon glyphicon-floppy-remove" value="save_close" name="save_close" id="save_close" label="<?php echo $tr->translate('SAVE_CLOSE');?>" dojoType="dijit.form.Button"  />
+							<input type="submit" class="button-class button-primary" iconClass="glyphicon glyphicon-floppy-disk" value="save_new" name="save_new" id="save_new" label="<?php echo $tr->translate('SAVE_NEW');?>" dojoType="dijit.form.Button"  />
+		               	</div>
+		             </div>
+			</div>
+		</form>
+    </div>
+</div>
+<style>
+tr.rowData {
+    vertical-align: top;
+}
+</style>
+<script src="<?php echo $baseurl;?>/js/help.js"></script>
+<script type="text/javascript">
+    dojo.require("dojo.NodeList-manipulate");
+    dojo.require("dijit.form.Textarea");
+    dojo.require('dijit.form.NumberTextBox');
+	dojo.require("dojo.data.ItemFileWriteStore");  
+	
+	
+	var branch_store  = getDataStorefromJSON('id','name', <?php print_r(Zend_Json::encode($this->branchopt));?> );
+	
+	var schedulue_store  = getDataStorefromJSON('id','name',<?php print_r(Zend_Json::encode(array()));?>);
+	require(["dojo/ready"], function(ready){
+		new dijit.form.FilteringSelect({
+				store: schedulue_store,
+				queryExpr: "*${0}*",
+				autoComplete: false,                      
+				required: false,               
+				id: "settingScoreAttId",
+				name: "settingScoreAttId",   
+				class: 'fullside', 
+				placeHolder:"<?php echo $tr->translate("scoreAttPolicy");?>",
+				onChange: function() {  
+					
+				}
+			}, "settingScoreAttId");
+			
+		ready(function(){
+		
+			dijit.byId('schoolOption').set('value',1);
+			getSubjectOpt();
+			$("#title").keyup(function(){
+			});
+			
+			var branch_id = dijit.byId('branch_id');
+			branch_id.on('change', function(evt) {
+				getSettingScoreAttendance();
+			});
+			
+			var degreeId = dijit.byId('degreeId');
+			degreeId.on('change', function(evt) {
+				getSettingScoreAttendance();
+			});
+			getSettingScoreAttendance();
+		});
+	});
+
+	
+var subject = '';
+var urlGetSubject = '<?php echo $this->url(array("module"=>"global","controller"=>"subject","action"=>"getsubject"));?>';										
+function getSubjectOpt(){
+	subject='';
+	schoolOption = dijit.byId('schoolOption').get('value');
+	if(schoolOption=='' || schoolOption==-1){
+		dijit.byId('schoolOption').focus();
+		subject="";
+		return false;
+	}
+	dojo.xhrPost({
+		url:urlGetSubject,
+		content:{
+			'schoolOption':schoolOption
+			,'blankTitle':'<?php echo $tr->translate("FOR_GENERAL_SUBJECT");?>'
+			
+			},
+		handleAs:"json",
+		load: function(data) {
+		    for(var i = 0; i < data.length; i++) {
+			    if(data[i].id==-1){
+			    }else{
+			    	subject+='<option value='+data[i].id+'>'+data[i].name+'</option>';
+			    }
+		    }
+		   HideloadingBlock();
+		},
+		error: function(err) {
+			HideloadingBlock();
+		}
+	});
+}
+
+
+	function isNotEnteryCriFunction(rowIndex){
+		if($("#isNotEnteryCri"+rowIndex).is(':checked')){
+			dijit.byId('percentage'+rowIndex).set('value',100);
+			dijit.byId('percentage'+rowIndex).set('readOnly',true);
+			dijit.byId('timeInput'+rowIndex).set('value',1);
+			dijit.byId('timeInput'+rowIndex).set('readOnly',true);
+			dijit.byId('subjectId'+rowIndex).set('required',true);
+		}else{
+			dijit.byId('subjectId'+rowIndex).reset();
+			dijit.byId('percentage'+rowIndex).set('value',0);
+			dijit.byId('percentage'+rowIndex).set('readOnly',false);
+			dijit.byId('timeInput'+rowIndex).set('value',1);
+			dijit.byId('timeInput'+rowIndex).set('readOnly',false);
+			dijit.byId('subjectId'+rowIndex).set('required',false);
+		}
+	}
+	var template = '';
+	var branch_name = '<?php echo $this->branch_name; ?>';
+	var col = 0;
+	var no = 0;
+	var title = 0;
+	tmp = '';
+	temp='';
+	function addRow() {
+		examtype_items = dijit.byId('examtype_items').get('value');
+		var iden = $("#identity").val();
+		var arrays = iden.split(',');
+		if(examtype_items==""){
+			 return false;
+		}
+
+		examtype_label = dijit.byId("examtype_items").attr('displayedValue');
+		
+			col++;no++;
+			template='';
+			if(title!=1){
+				
+				title=1;
+			}
+				template+='<td data-label="<?php echo $tr->translate("DEL");?>" align="center"><span title="<?php echo $tr->translate("REMOVE_RECORD");?>" class="removeRow" onclick="deleteRecord('+col+')"><i class="glyphicon glyphicon-trash" aria-hidden="true"></i></span></td>';
+				template+='<td data-label="<?php echo $tr->translate("N_O");?>" align="center">'+no+'</td>';
+				template+='<td data-label="<?php echo $tr->translate("CRITERIAL_NAME");?>" >';	
+						
+				template+=examtype_label+'<input class="fullside" type="hidden" value="'+examtype_items+'" required="true" name="examtype_name_'+col+'" id="examtype_name_'+col+'" dojoType="dijit.form.TextBox" />';			
+				
+				template+='<div class="form-group"><div class="col-md-6 col-sm-6 col-xs-12">';
+					template+='<div class="custom-control custom-checkbox "><input onClick="isNotEnteryCriFunction('+col+');" type="checkbox" class="custom-control-input" name="isNotEnteryCri'+col+'" id="isNotEnteryCri'+col+'"  >';
+					template+='<label class="custom-control-label" for="isNotEnteryCri'+col+'" >';
+					template+='<?php echo $tr->translate('NOT_ENTER_CRITERIA');?>';
+					template+='</label>';
+				template+='</div></div></div>';	
+				
+				template+='</td>';			
+				template+='<td data-label="<?php echo $tr->translate("PERCENTAGE");?>" > <input class="fullside" type="text" onKeyup="totalPercent()" required="true" name="percentage'+col+'" id="percentage'+col+'" dojoType="dijit.form.NumberTextBox" /></td>';
+				template+='<td data-label="<?php echo $tr->translate("TIME_INPUT");?>" >';
+
+				template+='<div class="form-group">';
+					template+='<input class="fullside" type="text" required="true" name="timeInput'+col+'" id="timeInput'+col+'" dojoType="dijit.form.NumberTextBox" value="1" />';
+				template+='</div>';
+				
+				template+='<div class="form-group"><div class="col-md-6 col-sm-6 col-xs-12">';
+					template+='<div class="custom-control custom-checkbox "><input  onClick="forSubject('+col+') ,handleExclusiveCheck('+col+', this);" type="checkbox" class="custom-control-input" name="forExamType'+col+'" id="forMonth'+col+'"  value="1" >';
+					template+='<label class="custom-control-label" for="forMonth'+col+'" >';
+					template+='<?php echo $tr->translate('MONTHLY');?>';
+					template+='</label>';
+				template+='</div></div></div>';	
+
+				template+='<div class="form-group"><div class="col-md-6 col-sm-6 col-xs-12">';
+					template+='<div class="custom-control custom-checkbox "><input  onClick="forSubject('+col+'), handleExclusiveCheck('+col+', this);" type="checkbox" class="custom-control-input" name="forExamType'+col+'" id="forTerm'+col+'"  value="4" >';
+					template+='<label class="custom-control-label" for="forTerm'+col+'" >';
+					template+='<?php echo $tr->translate('FOR_TERM');?>';
+					template+='</label>';
+				template+='</div></div></div>';	
+
+				template+='<div class="form-group"><div class="col-md-6 col-sm-6 col-xs-12"><div class="custom-control custom-checkbox ">';
+					template+='<input onClick="forSubject('+col+'), handleExclusiveCheck('+col+', this);" type="checkbox" class="custom-control-input" name="forExamType'+col+'" id="forExamType'+col+'" value="2" >';
+					template+='<label class="custom-control-label" for="forExamType'+col+'" >';
+					template+='<?php echo $tr->translate('FOR_SEMESTER');?>';
+				template+='</label>';
+				
+				template+='</div></div></div></td>';		
+
+				template+='<td data-label="<?php echo $tr->translate("SUBJECT");?>" >';
+				template+='<div class="form-group">';
+					template+='<div class="col-md-12 col-sm-12 col-xs-12"';
+						template+='<select onChange="forSubject('+col+');" dojoType="dijit.form.FilteringSelect" queryExpr="*${0}*" autoComplete="false" class="fullside" id="subjectId'+col+'" name="subjectId'+col+'"  >'+subject+'</select>';
+					template+='</div>';
+				template+='</div>';
+				template+='<div class="form-group">';
+					template+='<div class="col-md-6 col-sm-6 col-xs-12">';
+						template+='<input class="fullside" readOnly type="text" name="subCriterialTitleKhMonth'+col+'" id="subCriterialTitleKhMonth'+col+'" dojoType="dijit.form.TextBox" placeholder="<?php echo $tr->translate("Sub_MajorKH");?>" />';
+					template+='</div>';
+		
+					template+='<div class="col-md-6 col-sm-6 col-xs-12">';
+						template+='<input class="fullside" readOnly type="text" name="subCriterialTitleEngMonth'+col+'" id="subCriterialTitleEngMonth'+col+'" dojoType="dijit.form.TextBox" placeholder="<?php echo $tr->translate("Sub_MajorEng");?>"/>';
+					template+='</div>';
+					
+					template+='<div class="col-md-6 col-sm-6 col-xs-12">';
+						template+='<input class="fullside" readOnly type="text" name="subCriterialTitleKh'+col+'" id="subCriterialTitleKh'+col+'" dojoType="dijit.form.TextBox" placeholder="<?php echo $tr->translate("Sub_MajorKH");?>" />';
+					template+='</div>';
+
+					template+='<div class="col-md-6 col-sm-6 col-xs-12">';
+						template+='<input class="fullside" readOnly type="text" name="subCriterialTitleEng'+col+'" id="subCriterialTitleEng'+col+'" dojoType="dijit.form.TextBox" placeholder="<?php echo $tr->translate("Sub_MajorEng");?>"/>';
+					template+='</div>';
+					
+				template+='</div>';
+				template+='</td>';
+				template+='<td data-label="<?php echo $tr->translate("NOTE");?>"><input class="fullside" type="text"  name="note_'+col+'" id="note_'+col+'" dojoType="dijit.form.TextBox"/></td>';
+			tmp='<tr class="rowData" id="row'+col+'">';
+			tmp+="</tr>";
+			dojo.query("#table_row").append(tmp);
+			dijit.byId('examtype_items').attr('value','');
+	
+			if($("#identity").val()!="") {
+				var identity = $("#identity").val();
+				$("#identity").val(identity+','+col);
+			} else {$("#identity").val(col);}
+			dojo.html.set(dojo.byId("row"+col),template , {
+			     parseContent: true,
+			});
+	 }
+
+	 function handleExclusiveCheck(col, currentCheckbox) {
+		var checkboxes = document.querySelectorAll('input[name="forExamType'+col+'"]');
+		checkboxes.forEach(function(box) {
+			if (box !== currentCheckbox) {
+				box.checked = false;
+			}
+		});
+	}
+
+	 
+	 function forSubject(rowIndex){
+		subjectId = dijit.byId('subjectId'+rowIndex).get('value');
+		if(subjectId>0){
+			dijit.byId('timeInput'+rowIndex).set('value',1);
+			dijit.byId('timeInput'+rowIndex).set('readOnly',true);
+		  }else{
+			dijit.byId('timeInput'+rowIndex).set('value',1);
+			dijit.byId('timeInput'+rowIndex).set('readOnly',false); 
+		}
+		
+		if($("#isNotEnteryCri"+rowIndex).is(':checked')){
+			
+			if($("#forExamType"+rowIndex).is(':checked') && subjectId>0){
+				dijit.byId('subCriterialTitleKh'+rowIndex).set('readOnly',false); 
+				dijit.byId('subCriterialTitleEng'+rowIndex).set('readOnly',false);
+			}
+			
+			if($("#forMonth"+rowIndex).is(':checked') && subjectId>0){
+				dijit.byId('subCriterialTitleKhMonth'+rowIndex).set('readOnly',false); 
+				dijit.byId('subCriterialTitleEngMonth'+rowIndex).set('readOnly',false);
+			}
+			
+		}else{
+			if($("#forExamType"+rowIndex).is(':checked') && subjectId>0){
+				
+				dijit.byId('subCriterialTitleKh'+rowIndex).set('readOnly',false); 
+				dijit.byId('subCriterialTitleEng'+rowIndex).set('readOnly',false); 
+				
+				dijit.byId('subCriterialTitleEng'+rowIndex).set('required',true);
+				dijit.byId('subCriterialTitleKh'+rowIndex).set('required',true);
+			 }else{
+				dijit.byId('subCriterialTitleKh'+rowIndex).set('readOnly',true); 
+				dijit.byId('subCriterialTitleEng'+rowIndex).set('readOnly',true); 
+
+				dijit.byId('subCriterialTitleEng'+rowIndex).set('required',false);
+				dijit.byId('subCriterialTitleKh'+rowIndex).set('required',false);
+			}
+			 if($("#forMonth"+rowIndex).is(':checked') && subjectId>0){
+				dijit.byId('subCriterialTitleKhMonth'+rowIndex).set('readOnly',false); 
+				dijit.byId('subCriterialTitleEngMonth'+rowIndex).set('readOnly',false);
+				 
+				dijit.byId('subCriterialTitleKhMonth'+rowIndex).set('required',true);
+				dijit.byId('subCriterialTitleEngMonth'+rowIndex).set('required',true);
+			 }else{
+				 dijit.byId('subCriterialTitleKhMonth'+rowIndex).set('readOnly',true); 
+				 dijit.byId('subCriterialTitleEngMonth'+rowIndex).set('readOnly',true); 
+				 
+				 dijit.byId('subCriterialTitleKhMonth'+rowIndex).set('required',false);
+				 dijit.byId('subCriterialTitleEngMonth'+rowIndex).set('required',false);
+			}
+		}
+
+			
+			 
+	 }
+				
+	 function totalPercent(){
+		 var total_percent =0;
+		 var identity = $('#identity').val();
+		var arrays = identity.split(',');
+		for(var i=0;i<arrays.length;i++) {
+			percent_row = dijit.byId('percentage'+arrays[i]).get('value');
+			percent_row=isNaN(percent_row)?0:percent_row;
+			
+			total_percent = total_percent + percent_row;
+		}
+		dijit.byId('total_percent').set('value',total_percent);
+		 
+	 }
+	function deleteRecord(index) {
+			var identity = $('#identity').val();
+			var arrays = identity.split(',');
+			for(var i=0;i<arrays.length;i++) {
+			if(arrays[i] == index) arrays.splice(i,1);
+			}
+			var strings = arrays.join(',');
+			$('#identity').val(strings);
+			dojo.query("#row"+index).remove();
+			totalPercent();
+	}
+	
+	var urlGetSettingScoreAttendance = '<?php echo $this->url(array("module"=>"issuesetting","controller"=>"settingscoreatt","action"=>"getsettingscore"));?>';										
+	function getSettingScoreAttendance(){
+		dijit.byId('settingScoreAttId').reset();
+		branch_id = dijit.byId('branch_id').get('value');
+		degreeId = dijit.byId('degreeId').get('value');
+		if(branch_id=='' || branch_id==-1){
+			var settingScoreAttStore  = getDataStorefromJSON('id','name',<?php print_r(Zend_Json::encode(array()));?> );
+			dijit.byId('settingScoreAttId').set('store',settingScoreAttStore);  
+			return false;
+		}
+		dojo.xhrPost({
+			url:urlGetSettingScoreAttendance,
+			content:{
+				'branchId':branch_id,
+				'degreeId':degreeId,
+			},
+			handleAs:"json",
+			load: function(data) {
+				settingScoreAttStore  = getDataStorefromJSON('id','name', data);
+				dijit.byId('settingScoreAttId').set('store',settingScoreAttStore);  
+			},
+			error: function(err){
+
+			}
+		});
+	}
+
+</script>

@@ -1,0 +1,453 @@
+<?php
+	$tr = Application_Form_FrmLanguages::getCurrentlanguage();
+	$this->headTitle($tr->translate('STUDENT_ATTENDENCE')); 
+	echo $this->headTitle(''); 
+	$frm =  $this->form_search;
+	$db = new Allreport_Model_DbTable_DbRptAllStudent();
+	$start_date = $this->search['start_date'];
+	$end_date = $this->search['end_date'];
+	$date1 = date("d-m-Y",strtotime($start_date));
+	$date2 = date('d-m-Y',strtotime($end_date));
+	$diff = abs(strtotime($date2) - strtotime($date1));
+	$years = floor($diff / (365*60*60*24));
+	$months = floor(($diff - $years * 365*60*60*24) / (30*60*60*24));
+	$days = floor(($diff - $years * 365*60*60*24 - $months*30*60*60*24)/ (60*60*24));
+	$amount_day =$diff/ (60*60*24);
+	$amount_day = $amount_day + 1;
+	
+	$dayShor = [
+		1 => "Mon",
+		2 => "Tue",
+		3 => "Wed",
+		4 => "Thu",
+		5 => "Fri",
+		6 => "Sat",
+		7 => "Sun",
+	];
+?>	
+<div class="layout-wrapper-report">
+	<div id="mainContent" class="main-content-report">
+		<div class="report-preview">
+			<?php echo $this->controlReport?>
+			<div id="main-viewer" class="main-viewer portrait">
+				<div id="viewer" class="viewer portrait">
+					<div id="divPrint" class="content">
+						<link rel="stylesheet" href="<?php echo $this->baseUrl();?>/admin/build/css/report-style.css">
+						<link rel="stylesheet" href="<?php echo $this->baseUrl();?>/admin/build/css/report-style-screen.css">
+						<style>
+							@media print {
+								<?php if(!empty($this->printFormat)){ echo $this->printFormat; } ?>
+							}
+							.head-report-title {
+								margin-top: -25px;
+							}
+						</style>
+						<table  border="0" style=" margin: 0 auto; width: 100%;">
+							<style>
+								table.table-data{
+									border:none; 
+									page-break-before: always;
+								}
+								table.table-data.table-style tbody{
+									border: 1px solid #000;
+								}
+								table.table-data.table-style .table-style tbody {
+									border: none !important;
+								}
+								.table-style{
+									border-collapse: collapse;
+									width: 100%;
+									margin:0 auto;
+									white-space: nowrap;
+									font-size: 10px;
+									font-family: 'Times New Roman','Khmer OS Battambang';
+									line-height: 20px;
+								}
+								
+								.data-row{
+									line-height: 20px;
+								}
+								.data-row:hover{
+									background-color: #ccd9ff;
+								}
+								td.total_summary{
+									width:15px;
+								} 
+								tr.header{
+									background:#ccd9ff;
+									white-space: nowrap;
+								}
+								.w-100{
+									width: 100px !important;
+									white-space: nowrap;
+								}
+								td.w-60{width: 60px !important;}
+								td.w-20{width: 20px !important;}
+								@media print {
+									@page { 
+										margin: 0.7cm 0.5cm 2.5cm 0.5cm;
+									}
+								}
+								
+								table.tableTop {
+									border: 0 !important;
+								}
+								table.tableTop tbody {
+									border: none !important;
+								}
+								td.day-title {
+									width: 25px;
+									min-width: 25px;
+								}
+								.headerKhmer {
+									font-size: 13px;
+									line-height: 18px;
+									font-weight: initial;
+									font-family: 'Times New Roman','Khmer OS Muol Light', serif;
+								}
+							</style>			
+								<tr>
+									<td colspan="3">
+										<table class="table-data table-style bd-black">
+											<thead>
+											<?php $i=0; $old_groupid=0;
+											if (!empty($this->student))foreach ($this->student as $key => $rs){
+											?>
+											<?php if ($old_groupid!=$rs['group_id']){ ?>
+											<?php if ($key>0){ ?>					
+													<tr>
+														<td align="right" colspan="<?php echo $amount_day+7;?>" style=" border: 2px solid #fff; border-top: 1px solid #000;">
+															<span>
+															<?php echo $tr->translate("TOTAL_STUDENT");?> : <span>&nbsp;<strong><?php echo $i;?></strong> <?php echo $tr->translate("STUDENT_UNIT");?>&nbsp;</span> 
+															</span>
+														</td>
+													</tr>
+													<tr style="font-size: 11px;">
+														<td colspan="<?php echo $amount_day+9;?>" style=" border: 2px solid #fff;">
+															<span style="color: red;">Note:</span>
+															A = Absent , P = Permission , L = Late , EL = Early Leave
+														</td>
+													</tr>
+												</table>
+												<div>&nbsp;</div>
+												<table class="table-data table-style">
+													<thead>
+											<?php }
+											$i=0; ?>
+											<tr>
+												<td align="center" colspan="<?php echo $amount_day+9;?>">
+													
+													<?php echo $this->rsheader;?>
+													<div class="head-report-title"><br />
+														<span class="headerKhmer"><?php echo $tr->translate("STUDENT_ATT_LIST");?></span><br />
+														<?php echo $tr->translate("GROUP");?>&nbsp;&nbsp;<strong><?php echo $rs['group_code'];?></strong> &nbsp;&nbsp;
+														<?php echo $tr->translate("ACADEMIC_YEAR");?> : <strong><?php echo $rs['academic_year'];?></strong> 
+														<br /> 
+														<?php echo $tr->translate("ROOM_NAME");?> : <strong><?php echo $rs['room_name'];?></strong>&nbsp;&nbsp;
+														<?php echo $tr->translate("SESSION");?> : <?php echo $rs['session'];?>
+													</div>
+												</td>
+											</tr>
+											<tr>
+												<td align="center" height="5px" colspan="<?php echo $amount_day+9;?>">
+												</td>
+											</tr>
+											</thead>
+											
+											<?php 
+												$stringMain="";
+												$strDay="";
+												$oldMonthYear=date('M-Y',strtotime($start_date));
+												$oldColspan=0;
+												if($amount_day>0){
+													for($k=0;$k<$amount_day;$k++){
+														if(date('D',strtotime(" $start_date+$k day"))=="Sun"){
+														}else{
+															
+															$thisMonthYear = date('M-Y',strtotime("$start_date +$k day"));
+															$date = date('d-m-Y',strtotime("$start_date +$k day"));
+															if($oldMonthYear!=$thisMonthYear){
+																$stringMain.='<td style="border: solid 1px #000;" align="center" colspan="'.$oldColspan.'">'.$oldMonthYear.'</td>';
+																$oldColspan=0;
+															}
+															$day = empty($dayShor[date("w",strtotime($date))]) ? "" : $dayShor[date("w",strtotime($date))];
+															$strDay.='<td class="day-title" style="border: solid 1px #000;" rowspan="2" align="center" >'.$day.' <br /> '.date("d",strtotime($date)).'</td>';
+															$oldColspan++;
+															$oldMonthYear = $thisMonthYear;
+														}
+													}
+													$stringMain.='<td style="border: solid 1px #000;" align="center" colspan="'.$oldColspan.'">'.$oldMonthYear.'</td>';
+																
+												}
+												
+											?>
+											<tr align="center" class="header vertical-header bd-b-solid bd-w1px bd-black">
+												<td rowspan="3" class="w-20"><?php echo $tr->translate("NUM");?></td>
+												<td rowspan="3" class="w-60"><?php echo $tr->translate("STUDENT_ID");?></td>
+												<td rowspan="3" class="w-100"><?php echo $tr->translate("STUDENT_NAMEKHMERWORD");?></td>
+												<td rowspan="3" class="w-100" ><?php echo $tr->translate("NAME_ENGLISH");?></td>
+												<td rowspan="3" class="w-20"><?php echo $tr->translate("SEX");?></td>
+												<?php echo $stringMain; ?>
+												<td class="border-left-solid-dbl" colspan="4">&nbsp;<?php echo $tr->translate("TOTAL_ATTENDENCE");?>&nbsp;</td>
+											</tr>
+											<tr align="center" class="header ">
+											<?php echo $strDay; ?>
+											</tr>
+											<tr align="center" class="header bd-b-solid bd-w1px bd-black">
+												<td class="w-20 total_summary bd-l-solid bd-l-w2px bd-black">A</td>
+												<td class="w-20 total_summary">P</td>
+												<td class="w-20 total_summary">L</td>
+												<td class="w-20 total_summary">EL</td>
+											</tr>
+											<?php } $i++;?>
+											<tr class="data-row">
+												<td class="bd-b-dashed bd-w1px" align="center">&nbsp;<?php echo $i;?>&nbsp;</td>
+												<td class="bd-b-dashed bd-w1px" align="center">&nbsp;<?php echo $rs['stu_code'];?></td>
+												<td class="bd-b-dashed bd-w1px"><?php echo $rs['stu_khname'];?></td>
+												<td class="bd-b-dashed bd-w1px"><?php echo $rs['last_name']." ".$rs['stu_enname'];?></td>
+												<td class="bd-b-dashed bd-w1px" align="center">&nbsp;<?php echo  ($rs['sex'] == 1) ? $tr->translate("MALE") : $tr->translate("FEMALE");?>&nbsp;</td>
+												<?php
+													$attResultList = json_decode($rs['attendanceStatusList'],true);
+													$attendenceList =empty($attResultList)?array():array_column($attResultList, 'attendanceStatus', 'dateAttendance');
+												$p=0; $a=0;$l=0;$el=0; 
+												for($k=0;$k<$amount_day;$k++){?>
+														<?php if(date('D',strtotime(" $start_date+$k day"))=="Sun"){
+
+														}else{
+															$date = date('Y-m-d',strtotime("$start_date +$k day"));
+														?>
+															<td align="center" class="border-left-solid bd-b-solid bd-w1px bd-black" >
+															<?php
+																$attendenceStatus = empty($attendenceList[$date]) ? '' : $attendenceList[$date];
+																	if($attendenceStatus==2){ 
+																		echo "A";
+																		$a+=1;
+																	}
+																	else if ($attendenceStatus==3){
+																		echo "P"; 
+																		$p+=1;
+																	}
+																	else if ($attendenceStatus==4){
+																		echo "L"; 
+																		$l+=1;
+																	}
+																	else if ($attendenceStatus==5){
+																		echo "EL"; 
+																		$el+=1;
+																	}else{ 
+																		//echo "&#10004;";
+																	}
+															?>
+															</td>
+														<?php }?>
+													<?php }?>
+												<td class="bd-l-w2px bd-l-solid bd-b-solid bd-w1px bd-black " align="center"><?php echo $a;?></td>
+												<td class="bd-b-solid bd-w1px" align="center"><?php echo $p;?></td>
+												<td class="bd-b-solid bd-w1px" align="center"><?php echo $l;?></td>
+												<td class="bd-b-solid bd-w1px" align="center"><?php echo $el;?></td>
+											</tr>
+											<?php $old_groupid = $rs['group_id'];
+											}?>
+											<tr>
+												<td align="right" colspan="<?php echo $amount_day+9;?>" style=" border: 2px solid #fff; border-top: 1px solid #000;">
+													<span>
+													<?php echo $tr->translate("TOTAL_STUDENT");?> : <span>&nbsp;<strong><?php echo $i ?></strong> <?php echo $tr->translate("STUDENT_UNIT");?>&nbsp;</span> 
+													</span><br />
+												</td>
+											</tr>
+											<tr style="font-size: 11px;">
+												<td colspan="<?php echo $amount_day+9;?>" style=" border: 2px solid #fff;">
+													<span style="color: red;">Note:</span>
+													A = Absent , P = Permission , L = Late , EL = Early Leave
+												</td>
+											</tr>
+										</table>
+									</td>
+								</tr>
+							</table>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="right-panel-report" id="rightPanel">
+		<div class="card-box">
+			<div class="card-search-head col-sm-12 border-botom">
+				<div class="col-sm-6 text-left pd-0">
+					<h4 class="m-b-0">
+						<?php echo $tr->translate("SEARCH");?> 
+						<i class="fa fa-search "></i> 
+					</h4>
+				</div>
+				<div class="col-sm-6 text-right pd-0">
+					<button onclick="closeRightPanel()" title="<?php echo $tr->translate("CLOSED");?> " class="btn-close">
+						<i class="fa-solid fa-xmark"></i>
+					</button>
+				</div>
+			</div>
+			<form  id='foundation_class' action="" dojoType="dijit.form.Form" method="post" enctype="application/x-www-form-urlencoded">
+				<script type="dojo/method" event="onSubmit">
+					if(this.validate()) {
+						start_date=dijit.byId("start_date").get("value");
+						if(start_date=='' || start_date==null){
+							alert("Please select start date");
+							dijit.byId("start_date").focus();
+							return false;
+						}
+						return true;
+					}else {
+						return false;
+					}
+				</script>
+				<div class="card-box">
+					<div class="form-group">
+						<div class="col-md-12 col-sm-12 col-xs-12">
+							<?php echo $frm->getElement("adv_search");?>
+						</div>
+						<div class="col-md-12 col-sm-12 col-xs-12">
+							<?php echo $frm->getElement("branch_id");?>
+						</div>
+						<div class="col-md-12 col-sm-12 col-xs-12">
+							<?php echo $frm->getElement("academic_year");?>
+						</div>
+						<div class="col-md-12 col-sm-12 col-xs-12">
+							<input id="group" />
+						</div>
+					</div>
+					<div class="form-group">
+						<div class="col-md-6 col-sm-6 col-xs-12">
+							<?php echo $frm->getElement("degree");?>
+						</div>
+						<div class="col-md-6 col-sm-6 col-xs-12">
+							<input id="grade" />
+						</div>
+					</div>
+					<div class="form-group">
+						<div class="col-md-6 col-sm-6 col-xs-12">
+							<?php echo $frm->getElement("start_date");?>
+						</div>
+						<div class="col-md-6 col-sm-6 col-xs-12">
+							<?php echo $frm->getElement("end_date");?>
+						</div>
+					</div>
+					<div class="form-group">
+						<div class="col-md-12 col-sm-12 col-xs-12">
+							<button class="button-class button-primary fullside" iconClass="glyphicon glyphicon-search" dojoType="dijit.form.Button" showLabel="true" name="search"  type="submit"><?php echo $tr->translate("SEARCH");?></button>
+						</div>
+					</div>
+				 </div>
+			</form>
+		</div>
+	</div>
+</div>
+<script src="<?php echo $this->baseUrl();?>/js/help.js"></script>
+<script type="text/javascript">
+dojo.require("dojo.data.ItemFileWriteStore"); 
+
+var group_store  = getDataStorefromJSON('id','name',<?php print_r(Zend_Json::encode(array()));?> );
+dojo.ready(function(){
+	
+	new dijit.form.FilteringSelect({
+		store: group_store,
+	    queryExpr: "*${0}*",
+		autoComplete: false,                     
+	    id: "group",
+	    name: "group",  
+	    class: 'fullside', 
+	    readonly:false,
+	    required:false,
+	    placeHolder:"<?php echo $tr->translate("SELECT_GROUP");?>",          
+	    onChange: function() {  
+		    
+	    }
+	}, "group");
+	
+	new dijit.form.FilteringSelect({
+		queryExpr: "*${0}*",
+		autoComplete: false,                     
+		required: false,                        
+		id: "grade",
+		name: "grade",  
+		class: 'fullside',  
+		placeHolder:"<?php echo $tr->translate("SELECT_GRADE");?>",          
+		onChange: function() {  
+		}
+	}, "grade");
+	
+	 var branch_id = dijit.byId('branch_id');
+	 branch_id.on('change', function(evt) {
+		 getAllGroupByBranch();
+    });
+	 var academic_year = dijit.byId('academic_year');
+	 academic_year.on('change', function(evt) {
+		 getAllGroupByBranch();
+    });
+	 getallGrade();
+	 getAllGroupByBranch();
+	 
+	setTimeout(function() {
+		setPrintOrientation('landscape','A4',true);
+	}, 500);
+});
+var oldBranch = "<?php echo $this->search['branch_id']?>";
+url_getgroup = '<?php echo $this->url(array('module'=>'foundation','controller'=>'group','action'=>'getallgroup'));?>';
+function getAllGroupByBranch(){
+	dijit.byId('group').reset();
+	branch_id = dijit.byId('branch_id').get('value');
+	if(branch_id=='' || branch_id==-1){
+		var group_store  = getDataStorefromJSON('id','name',<?php print_r(Zend_Json::encode(array()));?> );
+		dijit.byId('group').set('store',group_store);  
+		dijit.byId('branch_id').focus();
+		return false;
+	}
+	degree = dijit.byId('degree').get('value');
+	if(degree=='' || degree==-1){degree ="";}
+	grade = dijit.byId('grade').get('value');
+	if(grade=='' || grade==-1){grade ="";}
+	academic_year = dijit.byId('academic_year').get('value');
+	if(academic_year=='' || academic_year==-1){academic_year ="";}
+	
+	dojo.xhrPost({
+		url: url_getgroup,
+		content:{
+			'branch_id':branch_id,
+			'degree':degree,
+			'grade':grade,
+			'academic_year':academic_year,
+			'noaddnew':1,'forfilter':1
+			},
+		handleAs:"json",
+		load: function(data) {
+		    group_store  = getDataStorefromJSON('id','name', data);
+		    dijit.byId('group').set('store',group_store);   
+		    if(oldBranch==branch_id){
+		    	dijit.byId('group').set('value','<?php echo $this->search['group']?>');  
+		    }
+		},
+		error: function(err) {
+		}
+	});
+}
+var url_dept = '<?php echo $this->url(array('module'=>'global','controller'=>'grade','action'=>'get-grade')); ?>';
+function getallGrade(){
+	getAllGroupByBranch();  
+	dept_id = dijit.byId('degree').get('value');
+	if(dept_id=='' || dept_id==-1){return false;}
+		dojo.xhrPost({
+			url:url_dept,
+			content:{
+				'dept_id':dept_id,
+				'noaddnew':1
+				},
+			handleAs:"json",
+			load: function(data) {
+				dijit.byId('grade').attr('value','');
+				grade_store  = getDataStorefromJSON('id','name', data);
+			    dijit.byId('grade').set('store',grade_store); 
+			    dijit.byId('grade').attr('value','<?php echo $this->search['grade']?>');  
+			},
+			error: function(err) {
+			}
+		});
+}
+</script>

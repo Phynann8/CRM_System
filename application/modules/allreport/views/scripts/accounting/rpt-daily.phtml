@@ -1,0 +1,682 @@
+<?php
+	$tr = Application_Form_FrmLanguages::getCurrentlanguage();
+	echo $this->headTitle($tr->translate("STUDENT_PAYMENT_RECEIPT"));
+	$frm =  $this->form_search;
+	$classHideHeight=classHideHeight;
+	$dateFormat ="d/m/y";
+	$dateFormatExpt ="d/M/Y";
+?>
+<div class="layout-wrapper-report">
+	<div id="mainContent" class="main-content-report">
+		<div class="report-preview">
+			<?php echo $this->controlReport?>
+			<div id="main-viewer" class="main-viewer portrait">
+				<div id="viewer" class="viewer portrait">
+					<div id="divPrint" class="content">
+						<link rel="stylesheet" href="<?php echo $this->baseUrl();?>/admin/build/css/report-style.css">
+						<link rel="stylesheet" href="<?php echo $this->baseUrl();?>/admin/build/css/report-style-screen.css">
+						<style>
+							@media print {
+								<?php if(!empty($this->printFormat)){ echo $this->printFormat; } ?>
+							}
+						</style>
+						<style>
+							.style {
+								line-height: 20px;
+								font-size: 10px !important;
+							}
+							table.content-data {
+								border-collapse: collapse;
+								border: 1px solid #000;
+								font-size: 8px;
+							}
+							table.content-data tr td{
+								padding:2px;
+							}
+							#header {
+								display: table-header-group;
+								page-break-inside: avoid;
+								page-break-after: auto;
+								margin-top: 100px;
+							}
+							table.content-data tr.titlerow,table.content-data thead tr.style {
+								line-height: 20px;
+								font-size: 10px !important;
+								padding: 1px 0px;
+								white-space: nowrap;
+								height: 24px;
+								background: #c1d0f3;
+								font-weight: 600;
+							}
+							table.content-data tr.style {
+								white-space: nowrap;
+							}
+							.noted {
+								word-wrap: break-word;
+								word-break: break-all;
+								font-size: 8px;
+								line-height: 10px;
+								white-space: normal;
+								max-width: 100px;
+								display: block;
+							}
+							table tr td{
+								font-family: 'Times New Roman', 'Khmer OS Battambang';
+							}
+							.row_data{
+								white-space: normal; max-width: 200px; line-height: 12px;
+							}
+							
+							@media print {
+								.hide {
+									visibility: visible;
+									height: <?php echo $classHideHeight;?>;
+								}
+								.bgRow {
+									background: #d6e2ff !important;
+									font-size: 11px;
+								}
+								<?php if(!empty($this->printFormat)){ echo $this->printFormat; } ?>
+							}
+				</style>
+						<table style="width:100%;">
+							<tr>
+								<td colspan="3"><?php echo $this->rsheader;?></td>
+							</tr>
+							<tr style="font-size: 12px;">
+								<td width="15%" align="center"></td>
+								<td align="center" width="70%">
+									<div
+										style="color: #000; font-size: 12px; font-family: 'Times New Roman', 'Khmer OS Muol Light';"><?php echo $tr->translate("STUDENT_PAYMENT_RECEIPT"); ?></div>
+										<?php if(!empty($this->search["start_date"])){?>
+										<span style="color: #000; font-size: 12px; font-family: 'Times New Roman', 'Khmer OS Muol Light'; line-height:18px;"><?php echo date($dateFormat,strtotime($this->search["start_date"]))?> to <?php echo date($dateFormat,strtotime($this->search["end_date"]));?></span><?php }?>
+								</td>
+								<td width="15%">
+								</td>
+							</tr>
+							<tr>
+								<td colspan="3" id="exportExcel" valign="top">
+									<?php 
+										$total_cash = 0;$total_bank = 0;$total_cheque = 0;
+										$total_cashexp = 0;$total_bankexp = 0;$total_chequeexp = 0;
+										$i=0;
+										$total_income_dollar=0;
+										$total_expense_dollar = 0;
+										$total_payment=0;
+										$fine = 0;
+										$credit_memo_case = 0;
+										$credit_memo_bank = 0;
+										$credit_memo_chegue = 0;
+										$credit_memo = 0;
+										$net_amount = 0;
+										$paid_amount = 0;
+										$balance = 0;
+									 ?>
+									<table class="content-data bd-dark-grey bd-w1px text-color-black text-h14px text-size-11px" width="100%" border="1" align="center">
+										<?php if (!empty($this->row)){  ?>
+										<thead>
+											<tr class="styleheader bg-head text-bold hpx-25" align="center">
+												<td scope="col" class="w-px-20"><?php echo $tr->translate("N_O");?></td>
+												<td scope="col" class="w-px-60"><?php echo $tr->translate("RECEIPT_NO");?></td>
+												<td scope="col" class="w-px-70"><?php echo $tr->translate("STUDENT_ID");?></td>
+												<td scope="col" class="w-px-90"><?php echo $tr->translate("STUDENT_NAME");?></td>
+												<td scope="col" class="w-px-110"><?php echo $tr->translate("STUDY_INFO");?></td>
+												<td scope="col"><?php echo $tr->translate("TOTAL_PAYMENT");?></td>
+												<td scope="col"><?php echo $tr->translate("Credit Memo");?></td>
+												<td scope="col"><?php echo $tr->translate("PAID_AMOUNT");?></td>
+												<td scope="col"><?php echo $tr->translate("BALANCE");?></td>
+												<td scope="col"><?php echo $tr->translate("PAYMENT_METHOD");?></td>
+												<td scope="col"><?php echo $tr->translate("PAID_DATE");?></td>
+												<td scope="col"><?php echo $tr->translate("NOTE");?></td>
+												<td scope="col"><?php echo $tr->translate("USER");?></td>
+												<td scope="col"><?php echo $tr->translate("STATUS");?></td>
+												<td scope="col"><?php echo $tr->translate("VOID_BY");?></td>
+											</tr>
+										</thead>  
+										<?php foreach($this->row as $rs){ $i++;?>
+										<tr class="context-menu-one style hover" oncontextmenu="setrowdata(<?php echo $rs['id'];?>,1);return false;" style="<?php if ($rs['is_void']==1){echo "background: #ffd9d9;"; }?>"​ >
+											<td align="center"><?php echo $i;?></td>
+											<td class="text-bold" align="center"><span class="w-px-60 text-truncate"><?php echo $rs['receipt_number']; ?></span></td>
+											<td><span class="w-px-70 text-truncate"><?php  echo $rs['stu_code'];  ?></span></td>
+											<td class="row_data">
+												<span class="w-px-90 text-truncate"><?php echo $rs['stu_khname']; ?></span>
+											</td>
+											<td class="row_data" >
+												<?php 
+													$studyInfo="";
+													if(!empty($rs['degree'])){
+														//$studyInfo = empty($rs['degree'])?"": $rs['degree'];
+													}
+													if(!empty($rs['grade'])){
+														$studyInfo = empty($studyInfo)? $rs['grade'] : $studyInfo.", ".$rs['grade'];
+													}
+													if(!empty($rs['session'])){
+														//$studyInfo = empty($studyInfo)? "": $studyInfo.", ".$rs['session'];
+													}
+												?>
+												<span class="w-px-110 wrapcontent text-truncate"><?php  echo $studyInfo." ".$rs['FeeYear']; ?></span>
+											</td>
+											<td align="right"><?php echo number_format($rs['grand_total'],2); ?></td>
+											<td align="right"><?php if($rs['credit_memo']>0){echo number_format($rs['credit_memo'],2);} ?></td>
+											<td align="right"><?php echo number_format($rs['paid_amount'],2); ?></td>
+											<td align="right" <?php if($rs['balance_due']>0){echo"style='background:#efb6b6;'";}?>><?php echo number_format($rs['balance_due'],2); ?></td>
+											<td class="text-h10px">
+												<?php echo $rs['paymentMethod']; ?>
+												<span class="text-h10px text-size-9px w-px-80 wrapcontent text-max-line2">
+													<?php echo $rs['bank_name'].$rs['number'];?>
+												</span>
+											</td>
+											<td class="hideExport"><?php echo date($dateFormat.' (H:i)', strtotime($rs['create_date'])); ?></td>
+											<td class="showExport" style="display:none;"><?php echo date($dateFormatExpt.' (H:i)', strtotime($rs['create_date'])); ?></td>
+											<td><span class="w-px-80 wrapcontent text-max-line3 text-h12px text-size-9px"><?php echo $rs['note']; ?></span></td>
+											<td align="center"><?php echo $rs['Byuser'];?></td>
+											<td align="center" <?php if($rs['is_void']==1){echo "style='color:red;'";}?>><?php echo $rs['void_status'];?></td>
+											<td align="center"><?php echo $rs['voidBy'];?></td>
+										</tr>
+												 <?php 
+													if($rs['is_void']==0){
+														$total_payment = $total_payment + $rs['total_payment'];
+														$fine = $fine + $rs['penalty'];
+														$credit_memo = $credit_memo + $rs['credit_memo'];
+														$net_amount = $net_amount + $rs['grand_total'];
+														$paid_amount = $paid_amount + $rs['paid_amount'];
+														$balance = $balance + $rs['balance_due'];
+
+														if($rs['payment_method']==1){
+															$total_cash = $total_cash+$rs['paid_amount'];
+															$credit_memo_case = $credit_memo_case+$rs['credit_memo'];
+														}elseif($rs['payment_method']==2){
+															$total_bank = $total_bank+$rs['paid_amount'];
+															$credit_memo_bank = $credit_memo_bank+$rs['credit_memo'];
+														}else{
+															$total_cheque = $total_cheque+$rs['paid_amount'];
+															$credit_memo_chegue = $credit_memo_chegue+$rs['credit_memo'];
+														}
+													} 
+												 ?>
+											  <?php } ?>
+										<?php } ?>
+										<?php if(!empty($this->income)){?>
+										<tr class="bgRow">
+											<td colspan="15">
+												<span class="text-bold hpx-25"><?php echo $tr->translate("OTHER_INCOME");?></span>
+											</td>
+										</tr>
+										<tr class="styleheader bg-head text-bold hpx-25" align="center">
+											<td scope="col" class="w-px-20"><?php echo $tr->translate('N_O')?></td>
+											<td scope="col" class="w-px-60"><?php echo $tr->translate('RECEIPT_NO')?></td>
+											<td scope="col" class="w-px-70"><?php echo $tr->translate("STUDENT_ID");?></td>
+											<td scope="col" class="w-px-90"><?php echo $tr->translate("STUDENT_NAME");?></td>
+											<td scope="col"><?php echo $tr->translate('INCOME_TITLE')?></td>
+											<td scope="col"><?php echo $tr->translate('INCOME_CATEGORY')?></td>
+											<td scope="col"><?php echo $tr->translate('INCOME_OPTION')?></td>
+											<td colspan="2"  scope="col"><?php echo $tr->translate('PAID_AMOUNT')?></td>
+											<td scope="col"><?php echo $tr->translate('PAYMENT_METHOD')?></td>
+											<td scope="col"><?php echo $tr->translate('FOR_DATE')?></td>
+											<td scope="col"><?php echo $tr->translate('NOTE')?></td>
+											<td scope="col"><?php echo $tr->translate('USER')?></td>
+											<td scope="col"><?php echo $tr->translate("STATUS");?></td>
+											<td scope="col"><?php echo $tr->translate("VOID_BY");?></td>
+										</tr>
+												<?php $i=0;foreach($this->income as $row){ $i++;
+													if ($row['status']==1){
+														$total_income_dollar = $total_income_dollar + $row['total_amount'];
+															if($row['payment_methodid']==1){
+																$total_cash = $total_cash+$row['total_amount'];
+															}elseif($row['payment_methodid']==2){
+																$total_bank = $total_bank+$row['total_amount'];
+															}else{
+																$total_cheque = $total_cheque+$row['total_amount'];
+															}
+													}
+												?>
+
+										<tr class="context-menu-one style hover" oncontextmenu="setrowdata(<?php echo $row['id'];?>,2);return false;" style="<?php if ($row['status']==0){echo "background: #ffd9d9;"; }?> " align="center" >
+											<td><?php echo $i;?></td>
+											<td class="text-bold"><span class="w-px-60 text-truncate"><?php echo $row['invoice'];?></span></td>
+											<td align="left"><span class="w-px-70 text-truncate"><?php echo $row['stuCode'];?></span></td>
+											<td align="left"><span class="w-px-90 text-truncate"><?php echo $row['stuNameKh'];?></span></td>
+											<td align="left"><span class="w-px-110 text-truncate"><?php echo $row['title'];?></span></td>
+											<td align="left"><?php echo $row['income_category'];?></td>
+											<td><?php echo $row['incomeType'];?></td>
+											<td colspan="2" align="right"><?php echo number_format($row['total_amount'],2);?></td>
+											<td class="text-h10px" align="left">
+												<?php echo $row['payment_method']; ?>
+												<span class="text-h10px text-size-9px w-px-80 wrapcontent text-max-line2">
+													<?php echo $row['bank_name'].$row['cheqe_no'];?>
+												</span>
+											</td>
+											<td class="hideExport"><?php echo date($dateFormat,strtotime($row['date']));?></td>
+											<td class="showExport" style="display:none;"><?php echo date($dateFormatExpt,strtotime($row['date']));?></td>
+											<td align="left"><span class="w-px-80 wrapcontent text-max-line3 text-h12px text-size-9px"><?php echo $row['description'];?></span></td>
+											<td><?php echo $row['byUser'];?></td>
+											<td <?php //if($rs['is_void']==1){echo "style='color:red;'";}?>><?php //echo 'status';?></td>
+											<td><?php echo $row['voidBy'];?></td>
+										</tr>
+												<?php } ?>
+									<?php } ?>
+										<?php if(!empty($this->expense)){?>
+												<tr>
+											<td colspan="15"><span style="font-size: 12px;"><?php echo $tr->translate("OTHER_EXPENSE");?></span></td>
+										</tr>
+										<tr class="styleheader bg-head text-bold hpx-25" align="center">
+											<td scope="col" class="w-px-20"><?php echo $tr->translate('N_O')?></td>
+											<td scope="col"><?php echo $tr->translate('RECEIPT_NO')?></td>
+											<td scope="col"><?php echo $tr->translate('INVOICE_NO')?></td>
+											<td colspan="2" scope="col"><?php echo $tr->translate('RECEIVER')?></td>
+											<td colspan="2" scope="col"><?php echo $tr->translate('EXPENSE_TITLE')?></td>
+											<td scope="col"><?php echo $tr->translate('TOTAL')?></td>
+											<td colspan="2" scope="col"><?php echo $tr->translate('PAYMENT_METHOD')?></td>
+											<td scope="col"><?php echo $tr->translate('FOR_DATE')?></td>
+											<td scope="col"><?php echo $tr->translate('NOTE')?></td>
+											<td scope="col"><?php echo $tr->translate('USER')?></td>
+											<td scope="col"><?php echo $tr->translate('STATUS')?></td>
+											<td scope="col"><?php echo $tr->translate('VOID_BY')?></td>
+										</tr>
+												<?php $i=0;$total_expense_dollar=0;foreach($this->expense as $row){ $i++;
+													if ($row['isVoid']==0){
+														$total_expense_dollar = $total_expense_dollar + $row['total_amount'];
+														
+														if($row['payment_methodid']==1){
+															$total_cashexp = $total_cashexp+$row['total_amount'];
+														}elseif($row['payment_methodid']==2){
+															$total_bankexp = $total_bankexp+$row['total_amount'];
+														}else{
+															$total_chequeexp = $total_chequeexp+$row['total_amount'];
+														}
+													}
+												?>
+												<tr class="context-menu-one style  hover" oncontextmenu="setrowdata(<?php echo $row['id'];?>,3);return false;" style="<?php if ($row['status']==0){echo "background: #ffd9d9;"; }?> " align="center" >
+													<td><?php echo $i;?></td>
+													<td><a style="text-decoration: none; color: #000;" href="<?php echo $this->url(array('module'=>'allreport','controller'=>'accounting','action'=>'rpt-expensedetail','id'=>$row['id']));?>"
+														target="blank"><?php echo $row['invoice']; ?></a></td>
+													<td><?php echo $row['external_invoice']; ?></td>
+													<td colspan="2" align="left"><?php echo $row['receiver']; ?></td>
+													<td colspan="2" align="left"><?php echo $row['title']; ?></td>
+													<td><?php echo number_format($row['total_amount'],2);?></td>
+													<td colspan="2" class="text-h10px" align="center">
+														<?php echo $row['payment_type']; ?>
+														<span class="text-h10px text-size-9px w-px-80 wrapcontent text-max-line2">
+															<?php echo $row['cheque_no'];?>
+														</span>
+													</td>
+													<td class="hideExport"><?php echo date($dateFormat,strtotime($row['date']));?></td>
+													<td><?php echo date($dateFormatExpt,strtotime($row['date']));?></td>
+													<td align="left" class="showExport" style="display:none;"><span class="w-px-80 wrapcontent text-max-line3 text-h12px text-size-9px"><?php echo $row['note']?></span></td>
+													<td ><?php echo $row['byUser'];?></td>
+													<td <?php if($row['voidBy']==1){echo "style='color:red;'";}?>><?php echo $row['voidStatus'];?></td>
+													<td><?php echo $row['voidByUser'];?></td>
+												</tr>
+												<?php } ?>
+											<?php }?>
+										</table>
+								<?php if(!empty($this->row) || !empty($this->income) || !empty($this->expense)){
+										// $final_total_income = $net_amount + $fine + $total_income_dollar  - $credit_memo - $total_expense_dollar ;
+										$final_total_income = $paid_amount + $fine + $total_income_dollar   - $total_expense_dollar ;
+									?>								
+										<table width="50%" style="margin:0 auto; white-space: nowrap; font-size: 11px;line-height:18px;border-spacing:0px;">
+											
+											<tr>
+												<td style="font-weight: bold;"><?php echo $tr->translate("NET_AMOUNT");?></td>
+												<td style="font-weight: bold;"><?php echo '$ '.number_format($total_payment,2);?></td>
+
+												<td style="font-weight: bold;"></td>
+												<td style="color: blue; font-weight: bold; font-size: 14px;"></td>
+											
+											</tr>
+
+											<tr>
+												<td style="font-weight: bold;"><?php echo $tr->translate("PAID_AMOUNT");?></td>
+												<td style="color: blue; font-weight: bold; font-size: 12px;"><?php echo '$ '.number_format($paid_amount,2);?></td>
+
+												<td><?php echo $tr->translate("BALANCE");?></td>
+												<td ><?php echo '$ '.number_format($balance,2);?></td>
+											</tr>
+
+											<tr>
+												<td><?php echo $tr->translate("OTHER_INCOME"); ?></td>
+												<td style="color: blue; font-weight: bold;"><?php echo '$ '.number_format($total_income_dollar,2);?></td>
+
+												<td><?php echo $tr->translate("CREDIT_MEMO");?>(-)</td>
+												<td style="color: #F00; font-weight: bold;"><?php echo '$ '.number_format($credit_memo,2);?></td>
+											</tr>
+											<tr>
+												<td><?php echo $tr->translate("FINE");?></td>
+												<td style="color: blue; font-weight: bold;"><?php echo empty($fine)?'$ 0.00':'$ '.number_format($fine,2);?></td>
+
+												<td><?php echo $tr->translate("OTHER_EXPENSE"); ?></td>
+												<td style="color: #F00; font-weight: bold;"><?php echo '$ '.number_format($total_expense_dollar,2);?></td>
+											</tr>
+											<tr>
+												<td style="font-weight: bold;"><?php echo $tr->translate("GRAND_TOTAL");?></td>
+												<td style="border-bottom: 5px double #000; color: blue; font-weight: bold; font-size: 12px;"><?php echo '$ '.number_format($final_total_income,2);?></td>
+												<td style="font-weight: bold;"></td>
+												<td style="color: blue; font-weight: bold; font-size: 10px;"></td>
+											</tr>
+											<tr>
+												<td colspan="4"><br /></td>
+											</tr>
+											<tr>
+												<td colspan="4"
+													style="border-bottom: 1px solid #000; margin-top: 5px;"></td>
+											</tr>
+											<tr>
+												<td colspan="4">
+													<div
+														style="width: 33%; float: left; text-align: center; font-size: 11px; font-family: 'Times New Roman', 'Khmer OS Muol Light';">
+															<?php echo $tr->translate("CASH");?>$ <?php echo number_format($total_cash-$total_cashexp,2);?>
+														</div>
+													<div
+														style="width: 33%; float: left; text-align: center; font-size: 11px; font-family: 'Times New Roman', 'Khmer OS Muol Light';">
+															<?php echo $tr->translate("BANK");?> $<?php echo number_format($total_bank-$total_bankexp,2);?>
+														</div>
+													<div
+														style="width: 33%; float: left; text-align: center; font-size: 11px; font-family: 'Times New Roman', 'Khmer OS Muol Light';">
+															<?php echo $tr->translate("CHEQUE");?>$<?php echo number_format($total_cheque-$total_chequeexp,2);?>
+														</div>
+													<div style="clear: both;"></div>
+												</td>
+											</tr>
+											<tr>
+									
+									</table>
+									<?php }?>
+									<?php echo $this->rsfooteracc;?>
+								</td>
+							</tr>
+						</table>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="right-panel-report" id="rightPanel">
+		<div class="card-box">
+			<div class="card-search-head col-sm-12 border-botom">
+				<div class="col-sm-6 text-left pd-0">
+					<h4 class="m-b-0">
+						<?php echo $tr->translate("SEARCH");?> 
+						<i class="fa fa-search "></i> 
+					</h4>
+				</div>
+				<div class="col-sm-6 text-right pd-0">
+					<button onclick="closeRightPanel()" title="<?php echo $tr->translate("CLOSED");?> " class="btn-close">
+						<i class="fa-solid fa-xmark"></i>
+					</button>
+				</div>
+			</div>
+			<form id='foundation_class' action="" dojoType="dijit.form.Form" method="post" enctype="application/x-www-form-urlencoded">
+				<div class="form-group">
+					<div class="col-md-12 col-sm-12 col-xs-12">
+						<input dojoType="dijit.form.TextBox" class="fullside"
+							id="adv_search" name="adv_search"
+							value="<?php echo $this->search['adv_search']?>"
+							placeholder="<?php echo $tr->translate("SEARCH");?>" type="text">
+					</div>
+					<div class="col-md-12 col-sm-12 col-xs-12">
+						<?php echo $frm->getElement("branch_id");?>
+					</div>
+					<div class="col-md-12 col-sm-12 col-xs-12">
+						<input id="stu_name" />
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="col-md-6 col-sm-6 col-xs-12">
+						<?php echo $frm->getElement("degree");?>
+					</div>
+					<div class="col-md-6 col-sm-6 col-xs-12">
+						<input id="grade_all" />
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="col-md-6 col-sm-6 col-xs-12">
+						<?php echo $frm->getElement("session");?>
+					</div>
+					<div class="col-md-6 col-sm-6 col-xs-12">
+						<input id="userId" />
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="col-md-6 col-sm-6 col-xs-12">
+						<?php echo $frm->getElement("start_date");?>
+					</div>
+					<div class="col-md-6 col-sm-6 col-xs-12">
+						<?php echo $frm->getElement("end_date");?>
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="col-md-6 col-sm-6 col-xs-12">
+						<?php echo $frm->getElement("receiptStatus");?>
+					</div>
+					<div class="col-md-6 col-sm-6 col-xs-12">
+						<?php echo $frm->getElement("receipt_order");?>
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="col-md-12 col-sm-12 col-xs-12">
+						<button class="button-class button-primary fullside"
+							iconClass="glyphicon glyphicon-search" dojoType="dijit.form.Button"
+							showLabel="true" type="submit"><?php echo $tr->translate("SEARCH");?></button>
+					</div>
+					<div class="col-md-2 col-sm-2 col-xs-12"></div>
+				</div>
+				<div class="form-group">
+					<div class="col-md-6 col-sm-6 col-xs-12">
+						<div class="custom-control custom-checkbox ">
+							<input type="checkbox" class="checkbox checkboxIncome custom-control-input" <?php echo empty($this->search["checkAll"]) ? '' : 'checked="checked"'; ?>   name="checkAll" id="checkAll" value="all" OnChange="CheckAllIncome(0);"  >
+							<label class="custom-control-label" for="checkAll">
+								<?php echo $tr->translate('CHECK_ALL');?>
+							</label>
+						</div>
+					</div>
+					<div class="col-md-6 col-sm-6 col-xs-12">
+						<div class="custom-control custom-checkbox ">
+							<input type="checkbox" class="checkbox checkboxIncome custom-control-input"  <?php echo empty($this->search["studentPayment"]) ? '' : 'checked="checked"'; ?> name="studentPayment" id="studentPayment" OnChange="CheckAllIncome(1);"  >
+							<label class="custom-control-label" for="studentPayment">
+								<?php echo $tr->translate('STUDENT_PAYMENT_INCOME');?>
+							</label>
+						</div>
+					</div>
+					<div class="col-md-6 col-sm-6 col-xs-12">
+						<div class="custom-control custom-checkbox ">
+							<input type="checkbox" class="checkbox checkboxIncome custom-control-input"  <?php echo empty($this->search["otherIncome"]) ? '' : 'checked="checked"'; ?> name="otherIncome" id="otherIncome" OnChange="CheckAllIncome(2);"  >
+							<label class="custom-control-label" for="otherIncome">
+								<?php echo $tr->translate('OTHER_INCOME');?>
+							</label>
+						</div>
+					</div>
+					<div class="col-md-6 col-sm-6 col-xs-12">
+						<div class="custom-control custom-checkbox ">
+							<input type="checkbox" class="checkbox checkboxIncome custom-control-input"  <?php echo empty($this->search["otherExpense"]) ? '' : 'checked="checked"'; ?> name="otherExpense" id="otherExpense" OnChange="CheckAllIncome(3);"  >
+							<label class="custom-control-label" for="otherExpense">
+								<?php echo $tr->translate('OTHER_EXPENSE');?>
+							</label>
+						</div>
+					</div>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
+<script src="<?php echo $this->baseUrl();?>/js/help.js" type="text/javascript"></script>
+<script src="<?php echo $this->baseUrl();?>/admin/js/global.js" type="text/javascript"></script>
+<script type="text/javascript">
+	dojo.require("dojo.data.ItemFileWriteStore"); 
+	dojo.require("dijit.form.CheckBox"); 
+	
+	dojo.ready(function(){
+		new dijit.form.FilteringSelect({
+			queryExpr: "*${0}*",
+			autoComplete: false,                     
+			required: false,                        
+			id: "grade_all",
+			name: "grade_all",  
+			class: 'fullside',  
+			placeHolder:"<?php echo $tr->translate("SELECT_GRADE");?>",          
+			onChange: function() {  
+			}
+		}, "grade_all");
+
+		new dijit.form.FilteringSelect({
+			queryExpr: "*${0}*",
+			autoComplete: false,                     
+			required: false,                        
+			id: "stu_name",
+			name: "stu_name",  
+			class: 'fullside',  
+			placeHolder:"<?php echo $tr->translate("SELECT_STUDENT_NAME");?>",          
+			onChange: function() {  
+			}
+		}, "stu_name");
+
+		new dijit.form.FilteringSelect({
+			queryExpr: "*${0}*",
+			autoComplete: false,                     
+			required: false,                        
+			id: "userId",
+			name: "userId",  
+			class: 'fullside',  
+			placeHolder:"<?php echo $tr->translate("SELECT_USER");?>",          
+			onChange: function() {  
+			}
+		}, "userId");
+
+		var branch_id = dijit.byId('branch_id');
+		branch_id.on('change', function(evt) {
+			 getAllStudentByBranch();
+			 getAllUser();
+		});
+		
+		getallGrade();
+		getAllStudentByBranch();
+		getAllUser();
+		
+		setTimeout(function() {
+			setPrintOrientation('landscape');
+		}, 500);
+	});
+	
+	function getAllUser(){
+		branch_id = dijit.byId('branch_id').get('value');
+		if(branch_id=='' || branch_id==-1){
+			dijit.byId('branch_id').focus();
+			return false;
+		}
+		let url_user = '<?php echo $this->url(array('module'=>'rsvacl','controller'=>'user','action'=>'get-user')); ?>';
+		contentData = {
+				'branchId':branch_id
+			}
+			selectedId = '';
+			if('<?php echo $this->search['branch_id']?>'==branch_id){
+				selectedId = '<?php echo $this->search['userId']?>';
+			}
+			getAllUserByBranch(url_user,contentData,selectedId);
+	}
+	
+	var url_dept = '<?php echo $this->url(array('module'=>'global','controller'=>'grade','action'=>'get-grade')); ?>';
+	function getallGrade(){
+		dept_id = dijit.byId('degree').get('value');
+		if(dept_id==''){return false;}
+		dojo.xhrPost({
+			url:url_dept,
+			content:{
+				'dept_id':dept_id,
+				'noaddnew':1
+				},
+			handleAs:"json",
+			load: function(data) {
+				grade_store  = getDataStorefromJSON('id','name', data);
+				dijit.byId('grade_all').set('store',grade_store);   
+				dijit.byId('grade_all').attr('value','<?php echo $this->search['grade_all']?>');  
+			},
+			error: function(err) {
+			}
+		});
+	}
+	
+	var url_data = '<?php echo $this->url(array('module'=>'registrar','controller'=>'register','action'=>'getliststudenturl')); ?>';
+	function getAllStudentByBranch(){
+		branch_id = dijit.byId("branch_id").attr("value");
+		if(branch_id==''){  
+				dijit.byId("branch_id").focus();
+				return false;
+		}
+		dojo.xhrPost({
+			url:url_data,
+			content:{
+				'branchId':branch_id,
+				'customerType':1	
+			},
+			handleAs:"json",
+			load: function(data) {
+				student_store  = getDataStorefromJSON('id','name', data);
+			    dijit.byId('stu_name').set('store',student_store); 
+			    dijit.byId('stu_name').attr('value','<?php echo $this->search['stu_name']?>');    
+			},
+			error: function(err) {
+			}
+		});
+	}
+
+	var row=0;
+	var typereceipt=1;
+	var url="";
+	$(function(){
+		$.contextMenu({
+			selector: '.context-menu-one', 
+			callback: function(key, options) {
+				var m = "clicked: " + key;
+				if(key=="receipt"){
+					if(typereceipt==1){//Student Payment
+						url='<?php echo $this->baseUrl()."/allreport/accounting/rptreceiptdetail/id/";?>';
+					}else if(typereceipt==2){//Other Income
+						url='<?php echo $this->baseUrl()."/allreport/accounting/reprint-other-income/id/";?>';
+					}else if(typereceipt==3){//Other Expense
+						url='<?php echo $this->baseUrl()."/allreport/accounting/rpt-expensedetail/id/";?>';
+					}
+				}
+				gotoAction();
+			},
+			items:{
+				"receipt": {name: "<?php echo $tr->translate("RECEIPT");?>", icon: "fa-money-bill", accesskey: "c"},
+			}
+		});
+	});
+	function setrowdata(index,type){
+		row = index;
+		typereceipt = type;
+	}
+	var recordid ='';
+	function gotoAction(){
+		 window.open(url+row, '_blank');
+	}
+	
+	function CheckAllIncome(index){
+		if(index==0){
+			if($('#checkAll').is(":checked")){
+				$('.checkboxIncome').each(function() { //loop through each checkbox
+					this.checked = true;  
+				});
+			}else{
+				$('.checkboxIncome').each(function() { //loop through each checkbox
+					this.checked = false;  
+				});
+			}
+		}else{
+			var a = $("input:checked").val();
+			 var identity = [];
+			 var index=0;
+			 $('.checkboxIncome:checked').each(function(i){
+				 var currentId = $(this).attr('id');
+				 if(currentId != "checkAll" ){
+					 identity[index] = $(this).val();
+					 index++;
+				 }
+			 });
+			 $('#checkAll').prop('checked', false);
+			if(identity.length==3){
+				$('#checkAll').prop('checked', true);
+			}
+		}
+	}
+</script>

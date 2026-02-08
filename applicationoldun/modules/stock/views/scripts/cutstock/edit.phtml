@@ -1,0 +1,854 @@
+<?php
+	$tr = Application_Form_FrmLanguages::getCurrentlanguage();
+	echo $this->headTitle($tr->translate('EDIT_CUTSTOCK')); 
+	$base_url = Application_Form_FrmMessage::getUrl("/");
+	
+	$frm = $this->frm_payment;
+?>	
+ <style>
+	select{ width:100%;}
+	fieldset{  background:none;}
+	.red{ color: red; padding-left:5px;}
+	
+span.oldsup {
+    font-style: normal;
+    padding-left: 10px;
+    color: #cc0100;
+}
+span.oldsup input[type=checkbox] {
+    margin: 0;
+    padding: 0;
+    height: initial;
+}
+label.invoicelabel {
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    width: 120px;
+}
+tr.head-td th {
+    white-space: nowrap;
+}
+</style>
+<div class="card">
+	<div class="card-content collapse show">
+		<div class="card-box">
+               	<div class="col-sm-12 border-botom">
+		    		<div class="col-sm-8 pd-0">
+		    			<h4 class="m-b-0"><i class="fa fa-edit " aria-hidden="true"></i>&nbsp;&nbsp;&nbsp;<?php echo $tr->translate('EDIT_CUTSTOCK');?></h4>
+    			</div>
+    			<div class="col-sm-4 text-right">
+    			</div>
+    		</div>
+    	</div>
+    	<form id='office_receipt' action="" dojoType="dijit.form.Form" method="post" enctype="multipart/form-data">
+			<script type="dojo/method" event="onSubmit">			
+			if(this.validate()) {
+ 				branch_id = dijit.byId('branch_id').get('value');
+				if(branch_id==""){
+					alert("<?php echo $tr->translate('PLEASE_SELECT_BRANCH');?>");
+					dijit.byId("branch_id").focus();
+					return false;
+				}
+				student_id = dijit.byId('student_id').get('value');
+				if(student_id==""){
+					alert("<?php echo $tr->translate('PLEASE_SELECT_STUDENT');?>");
+					dijit.byId("student_id").focus();
+					return false;
+				}
+				if($('#identity').val()==""){
+					alert("<?php echo $tr->translate('PLEASE_CHECK_PRODUCT_TO_RETURN');?>");
+					return false;
+				}
+				total_received = dijit.byId('total_received').get('value');
+				if(total_received==""){
+					alert("<?php echo $tr->translate('PLEASE_ENTER_QTY_TO_RETURN');?>");
+					dijit.byId("amount").focus();
+					return false;
+				}
+                loadingBlock();
+				return true;
+			} else {
+				return false;
+			}
+			</script>
+	          <div class="card-box">
+          		 <div class="col-md-12 col-sm-12 col-xs-12">
+          		 	<div class="col-md-6 col-sm-6 col-xs-12">
+					   <div class="card-blogform">
+							<div class="card-body"> 
+									<div class="row"> 
+										<div class="col-md-12 col-sm-12 col-xs-12">
+
+											<div class="d-flex "> 
+												<div class="settings-main-icon ">
+													<i class="glyphicon glyphicon-export" aria-hidden="true"></i>
+												</div> 
+												<div class="col-md-10 col-sm-10 col-xs-12"> 
+													<p class="tx-20 font-weight-semibold d-flex "><?php echo $tr->translate("CUT_STOCK_INFO");?></p>
+												</div> 
+											</div>
+											<div class="form-group">
+												<label class="control-label  col-md-5 col-sm-5 col-xs-12" ><?php echo $tr->translate("TYPE");?> <span class="required">*</span>
+												</label>
+												<div class="col-md-7 col-sm-7 col-xs-12">
+													<?php echo $frm->getElement("cut_stock_type");?>
+												</div>
+											</div>
+											
+										</div>
+									</div>
+							</div>	
+						</div>
+					   <div class="card-blogform">
+							<div class="card-body"> 
+									<div class="row"> 
+										<div class="col-md-12 col-sm-12 col-xs-12">
+
+											<div class="d-flex "> 
+												<div class="settings-main-icon ">
+													<i class="glyphicon glyphicon-export" aria-hidden="true"></i>
+												</div> 
+												<div class="col-md-10 col-sm-10 col-xs-12"> 
+													<p class="tx-20 font-weight-semibold d-flex "><?php echo $tr->translate("STUDENT_INFO");?></p>
+												</div> 
+											</div>
+
+											<div class="form-group">
+												<label class="control-label  col-md-5 col-sm-5 col-xs-12" ><?php echo $tr->translate("BRANCH");?> <span class="required">*</span>
+												</label>
+												<div class="col-md-7 col-sm-7 col-xs-12">
+														<?php echo $frm->getElement("branch_id");?>
+														<?php echo $frm->getElement("id");?>
+												</div>
+											</div>
+											<div class="form-group">
+												<label class="control-label  col-md-5 col-sm-5 col-xs-12" ><?php echo $tr->translate("STUDENT_NAME");?> <span class="required">*</span>
+												</label>
+												<div class="col-md-7 col-sm-7 col-xs-12">
+														<input id="student_id" />
+												</div>
+											</div>
+										</div>
+									</div>
+							</div>
+						</div>
+		            </div>
+		            <div class="col-md-6 col-sm-6 col-xs-12">
+						<div class="card-blogform">
+							<div class="card-body"> 
+									<div class="row"> 
+										<div class="col-md-12 col-sm-12 col-xs-12">
+											<div class="d-flex "> 
+												<div class="settings-main-icon ">
+													<i class="glyphicon glyphicon-list-alt" aria-hidden="true"></i>
+												</div> 
+												<div class="col-md-10 col-sm-10 col-xs-12"> 
+													<p class="tx-20 font-weight-semibold d-flex "><?php echo $tr->translate("INVOICE_INFO");?></p>
+												</div> 
+											</div>
+
+											<div class="form-group">
+											<label class="control-label  col-md-5 col-sm-5 col-xs-12" ><?php echo $tr->translate("RECEIPT_NO");?> 
+											</label>
+											<div class="col-md-7 col-sm-7 col-xs-12">
+													<?php echo $frm->getElement("serailno");?>
+											</div>
+											</div>
+										
+											<div class="form-group">
+											<label class="control-label  col-md-5 col-sm-5 col-xs-12" ><?php echo $tr->translate("RECEIVED_DATE");?> 
+											</label>
+											<div class="col-md-7 col-sm-7 col-xs-12">
+													<?php echo $frm->getElement("date_payment");?>
+											</div>
+											</div>
+
+											<div class="form-group">
+												<label class="control-label  col-md-5 col-sm-5 col-xs-12" ><?php echo $tr->translate("TOTAL_ORG");?> 
+												</label>
+												<div class="col-md-7 col-sm-7 col-xs-12">
+														<?php echo $frm->getElement("balance");?>
+														
+												</div>
+											</div>
+											
+											<div class="form-group">
+												<label class="control-label bold col-md-5 col-sm-5 col-xs-12" ><?php echo $tr->translate("TOTAL_RECEIVED");?> 
+												</label>
+												<div class="col-md-7 col-sm-7 col-xs-12">
+													<?php echo $frm->getElement("total_received");?>
+													
+												</div>
+											</div>
+											<div class="form-group">
+												<label class="control-label bold col-md-5 col-sm-5 col-xs-12" ><?php echo $tr->translate("REMAIN");?> 
+												</label>
+												<div class="col-md-7 col-sm-7 col-xs-12">
+													<?php echo $frm->getElement("total_remain");?>
+												</div>
+											</div>
+										</div>
+									</div>
+							</div>
+						</div>
+		
+		            </div>
+		         </div>
+			   </div>
+			   <div class="x_panel">
+					<div class="card-box">
+						<div class="x_panel searc-blog">
+			          		<div class="x_title">
+							   	<h2><i class="fa fa-search"></i> <?php echo $tr->translate("FILTER")?></h2>
+								<span class="pull-right"></span>
+								<div class="clearfix"></div>
+							</div>
+							<div class="x_content search">
+								<div class="form-group">      
+					                 <label style=" margin: 0; line-height: 30px; " class="control-label bold col-md-2 col-sm-2 col-xs-12"><?php echo $tr->translate("FILTER_BY_PURCHASE_NO");?> </label>
+					                 <div class="col-md-7 col-sm-7 col-xs-12">
+					                		<?php echo $frm->getElement("bypuchase_no");?>
+					                </div>
+					                <div class="col-md-3 col-sm-3 col-xs-12">
+			                   			<input class="button-class button-primary" iconClass="	glyphicon glyphicon-refresh" type="button" label="<?php echo $tr->translate('SEARCH');?>" dojoType="dijit.form.Button" onclick="getStudentProductPaymentDetail();"/>
+			                   		</div>
+					                <div class="clearfix"></div>
+					                <div class="clearfix">
+					               		 <input type="checkbox" class="checkbox"  name="check_all" id="check_all" value="all" OnChange="CheckAllTotal(0);" style="display: inline-block;height: initial;"  />&nbsp;
+										<span class="bold" style="vertical-align: top;"><?php echo $tr->translate('ALL');?></span>
+									</div>
+				             	</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				        
+			           
+		       <div class="card-box">
+					<div class="card-blogform">
+								<div class="card-body"> 
+										<div class="row"> 
+											<div class="col-md-12 col-sm-12 col-xs-12">
+											<div class="form-group">
+													<table  style="margin: 0 auto; width: 100%; border-collapse: collapse; border: 1px #ccc solid;">
+														<thead>
+															<tr id="head-title" class="head-td" align="right">
+																<th>&nbsp;</th>
+																<th><?php echo $tr->translate("NUM");?></th>
+																<th style=" min-width: 105px;"><?php echo $tr->translate("DATE");?></th>
+																<th ><?php echo $tr->translate("PRODUCT_CODE");?></th>
+																<th><?php echo $tr->translate("PRODUCT");?></th>
+																<th><?php echo $tr->translate("CURRENT_QTY");?></th>
+																<th ><?php echo $tr->translate("ORIG");?></th>
+																<th ><?php echo $tr->translate("DUE");?></th>
+																<th ><?php echo $tr->translate("RECEIVE_QTY");?></th>
+																<th ><?php echo $tr->translate("REMAIN");?></th>
+																
+															</tr>
+														</thead>
+														<tbody id="table_row">
+														<tbody>
+													</table>
+													<input type="hidden" id="identity" name="identity" />
+													<input type="hidden" name="old_identity" id="old_identity"  value="" >
+												<!-- 
+												<input type="button" label="<?php //echo $tr->translate('ADD_ROW');?>" dojoType="dijit.form.Button" id="btn_add_row"
+																	iconClass="dijitIconEditProperty" onclick="addRow();" />
+												-->
+												</div>
+
+											</div>
+										</div>
+								</div>
+					</div>
+		
+	          </div>		
+	          <div class="clearfix"></div>
+	          <div class="card-box">
+          		 <div class="col-md-8 col-sm-8 col-xs-12">
+          		 	<div class="form-group">
+	                   <label class="control-label bold col-md-12 col-sm-12 col-xs-12" ><?php echo $tr->translate("NOTE");?> 
+	                   </label>
+	                </div>
+          		 	<div class="form-group">
+	                   <div class="col-md-12 col-sm-12 col-xs-12">
+	                   		<?php echo $frm->getElement("note");?>
+	                   </div>
+	                </div>
+          		 </div>
+          		 <div class="col-md-4 col-sm-4 col-xs-12">
+				  	
+          		 </div>
+         	 </div>  
+	          <div class="clearfix"></div>
+	         <div class="card-box mt-20">
+               	<div class="col-md-12 col-sm-12 col-xs-12 border-top mt-20 ptb-10 text-center">
+               		<input  class="button-class button-danger" iconClass="glyphicon glyphicon-erase"  type="reset" value="clear" label="<?php echo $tr->translate('CLEAR');?>" dojoType="dijit.form.Button"/>
+					<input type="submit" name="save_close" id="save_close" value="រក្សាទុក" label="<?php echo $tr->translate('SAVE_CLOSE');?>"  dojoType="dijit.form.Button" 
+						class="button-class button-primary" iconClass="glyphicon glyphicon-floppy-open" />
+					<input type="button" id="popup" value="<?php echo $tr->translate('SAVE_PRINT');?>" label="<?php echo $tr->translate('SAVE_PRINT');?>" onclick="printSave();" dojoType="dijit.form.Button" 
+					class="button-class button-primary" iconClass="	glyphicon glyphicon-print"/>
+               	</div>
+             </div>  
+		</form>
+    </div>
+ </div>
+ <div class="dijitHidden" style="padding: 0px; margin: 0px;">
+	<div id="terms" data-dojo-type="dijit.Dialog" style="width:23.5cm;height: 16cm ; overflow: scroll;" align="center" data-dojo-props="title:'<?php echo $tr->translate("បោះពុម្ពទទួលទំនិញ");?>'"  >
+	<div id="PrintReceipt" style="width: 22cm !important; padding: 0px; ">
+		<style>
+			.style{
+					font-family: 'Times New Roman','Khmer OS Battambang' !important;
+					font-size:8px !important;
+					white-space:nowrap;
+				}
+				.conten_data{
+					width: 100%; padding: 0px;
+					margin-top: 2px !important;
+					border-collapse: collapse;
+					border: 1px solid #000;
+					font-size:9px;
+					font-family:'Times New Roman','Khmer OS Battambang' !important;
+					white-space:nowrap;
+				}
+				.print tr td{
+					padding:0px 2px 0px 2px; 
+				}
+				tr.hearder_table td {
+				    padding: 5px;
+					font-size:9px; 
+					text-align:center;
+					background:#f2f2f2;
+					font-weight:bold;
+					line-height:10px;
+				}
+				tr.rowlist td {
+				    padding: 1px;
+					font-size:9px; 
+				}
+				table span.small{
+					display: block;
+					line-height: 10px;
+					width: 100%;
+				}
+				@media print {
+					@page {
+						page: A4;
+						margin: 0.0cm 0.5cm;
+					}
+				}
+		</style>
+		<table width="100%"  class="style print" cellspacing="0"  cellpadding="0">
+			<tr>
+				<td colspan="4"><label id="lbl_header"></label></td>
+			</tr>
+			<tr>
+				<td colspan="4" align="center">
+					<strong style="font-family:'Khmer OS Muol';">បង្កាន់ដៃទទួលទំនិញ<span class="small">RECIEVED NOTED</span></strong>
+				</td>
+			</tr>
+			<tr>
+				<td colspan="2" align="left"><span style="text-align:left; min-width: 100px; display: inline-block;">Student ID</span> : <span id="lb_id" style="text-align:left; min-width: 100px; display: inline-block;"></span></td>
+				<td colspan="2" align="right"><span style="text-align:left; min-width: 100px; display: inline-block;">Serial No.</span> : <span id="lb_receipt_no" style="text-align:left; color:red; min-width: 100px; display: inline-block;"></span></td>
+			</tr>
+			<tr>
+				<td colspan="2" align="left"><span style="text-align:left; min-width: 100px; display: inline-block;">Student Name</span> : <span id="lb_name" style="text-align:left; min-width: 100px; display: inline-block;"></span></td>
+				<td colspan="2" align="right"><span style="text-align:left; min-width: 100px; display: inline-block;">Ref Receipt</span> : <span id="lb_ref_receipt" style="text-align:left;  min-width: 100px; display: inline-block;"></span></td>
+				
+			</tr>
+			<tr>
+				<td colspan="2" align="left"><span style="text-align:left; min-width: 100px; display: inline-block;">Tel</span> : <span id="lb_tel" style="text-align:left; min-width: 100px; display: inline-block;"></span></td>
+				<td colspan="2" align="right"><span style="text-align:left; min-width: 100px; display: inline-block;">Date</span> : <span id="lb_date" style="text-align:left; min-width: 100px; display: inline-block;"><?php echo date("d/M/Y",strtotime($this->row['received_date']));?></span></td>
+			</tr>
+			<tr>
+				<td  colspan="4">
+					<div id="t_amountmoneytype"></div>
+				</td>
+			</tr>
+			<tr>
+				<td colspan="2" width="50%" align="center">
+					<div style="font-size:9px;"></div>
+					<strong>អ្នកប្រគល់ Stock Controller</strong>
+				</td>
+				<td colspan="2" width="50%" align="center">
+					<div style="font-size:9px;"></div>
+					<strong>អ្នកទទួល Customer</strong>
+				</td>
+			</tr>
+			<tr>
+				<td colspan="2" width="50%" align="center">
+					<div style="margin-top:100px;font-size:9px;"></div>
+					<?php 
+						   $session_user=new Zend_Session_Namespace(SYSTEM_SES);
+						   $last_name=$session_user->last_name;
+						   $username = $session_user->first_name;
+						   echo "".$last_name." ".$username;
+						?>
+				</td>
+				<td colspan="2" width="50%" align="center">
+					<div style="margin-top:100px;font-size:9px;"></div>
+					<span id="studentpay"></span>
+				</td>
+			</tr>
+		</table>
+	</div>
+	<iframe name=print_frame width=0 height=0 frameborder=0 src=about:blank></iframe>
+			<button dojoType="dijit.form.Button" class="button-class button-danger" iconClass="glyphicon glyphicon-erase"
+			type="button" onclick="hideDialog();"><?php echo $tr->translate("CANCEL");?></button>
+			<button dojoType="dijit.form.Button" class="button-class button-primary" iconClass="glyphicon glyphicon-print"
+				type="button" onclick="printSubmit();"><?php echo $tr->translate("PRINT");?></button>
+</div>
+</div>
+<script src="<?php echo $this->baseUrl();?>/js/help.js"  type="text/javascript"></script>
+<script type="text/javascript">
+	dojo.require("dojo.data.ItemFileWriteStore");  
+	dojo.require("dojo.NodeList-manipulate");
+	dojo.require("dijit.form.Textarea");
+	dojo.require("dijit.form.DateTextBox");
+	dojo.require('dijit.form.NumberTextBox');
+	dojo.require("dojo.number");
+	dojo.ready(function(){
+		new dijit.form.FilteringSelect({
+			autoComplete: false,
+			queryExpr: "*${0}*",                     
+			id: "student_id",
+			name: "student_id",   
+			required:true,  
+			readOnly:true,        
+			class: 'fullside', 
+			placeHolder:"<?php echo $tr->translate("SELECT_STUDENT_NAME");?>",          
+			onChange: function(){
+					getStudentProductPaymentDetail();
+			}
+		}, "student_id");
+		
+		 var branch_id = dijit.byId('branch_id');
+		 	branch_id.on('change', function(evt) {
+				getallstudentname();
+		 		getStudentProductPaymentDetail();
+		 		getbranchinfo();
+		    });
+		    
+		 	getallstudentname();
+	 		getStudentProductPaymentDetail();
+	 		getbranchinfo();
+	});
+	var url_getbranch = "<?php echo $this->url(array('module'=>'registrar','controller'=>'register','action'=>'getbranchinfo')); ?>";
+	function getbranchinfo(){
+			branch_id = dijit.byId('branch_id').get('value');
+			if(branch_id != ""){
+				dojo.xhrPost({
+					url:url_getbranch,
+					content:{
+						'branch_id':branch_id,
+						},
+					handleAs:"json",
+					load: function(data){
+						dojo.byId('lbl_header').innerHTML=data;
+					},
+					error: function(err) {
+						alert(err);
+					}
+				});	
+			} 
+		}
+	function printSave(new_receipt){
+		if(dijit.byId('office_receipt').validate()){
+			today = dijit.byId("date_payment").get("value");
+			var dd = today.getDate();
+			var mon = today.toDateString().substr(4,3); //January is 0!
+			var yyyy = today.getFullYear();
+			dojo.byId("lb_receipt_no").innerHTML = dijit.byId("serailno").get('value');
+			dojo.byId("lb_date").innerHTML = dijit.byId("date_payment").attr('displayedValue');
+		template="";
+		temp='';
+	    temp='<table border="1" align="center" class="conten_data" >'
+			  temp+='<tr class="hearder_table">';
+			  temp+='<td >លរ<span class="small">No.</span></td>';
+			  temp+='<td >លេខកូដទំនិញ <span class="small">Product Code</span></td>';
+			  temp+='<td >ឈ្មោះទំនិញ<span class="small">Item Name</span></td>';
+			  temp+='<td >ចំនួនទិញ<span class="small">Total Qty</span></td>';
+			  temp+='<td >ចំនួនទទួល<span class="small">Received Qty</span></td>';
+			  temp+='<td >ចំនួនជំពាក់<span class="small">Remain Qty</span></td>';
+			  temp+='</tr>';
+			  var rowId = $('#identity').val();
+				var rowIDArray = rowId.split(',');
+				i=0;
+				var oldpayment_id = '';
+				var receipt_number = '';
+				for(var n = 0; n < rowIDArray.length; n++) {
+					i++;
+					remain = $('#remain'+rowIDArray[n]).val();
+
+					payment_id = $('#payment_id'+rowIDArray[n]).val();
+					current_receipt_number = $('#receipt_number'+rowIDArray[n]).val();
+
+					if (payment_id === oldpayment_id) {
+						
+					} else {
+						if (receipt_number !== '') {
+							receipt_number += ',';
+						}
+						receipt_number += current_receipt_number;
+					}
+					oldpayment_id = payment_id;
+					dojo.byId("lb_ref_receipt").innerHTML = receipt_number;
+
+					dateremide="-";
+				
+			      	temp+='<tr class="rowlist">';
+				 	temp+='<td align="center">&nbsp;'+i+'&nbsp;</td>';
+				 	temp+='<td align="center">&nbsp;'+$('#productCode'+rowIDArray[n]).val()+'&nbsp;</td>';
+				  	temp+='<td>&nbsp;'+$('#productname'+rowIDArray[n]).val()+'&nbsp;</td>';
+				  	temp+='<td align="center">&nbsp;'+$('#qty_balance'+rowIDArray[n]).val()+'&nbsp;</td>';
+				  	temp+='<td align="center">'+$('#qty_receive'+rowIDArray[n]).val()+'</td>';
+				  	temp+='<td align="center">&nbsp;'+remain+'&nbsp;</td>';
+			
+					temp+='</tr>';
+				}
+
+				for(let initrow=n+1;initrow<=6;initrow++){
+					temp+='<tr class="rowlist">';
+						temp+='<td align="center">&nbsp;'+initrow+'&nbsp;</td>';
+						temp+='<td align="center">&nbsp;</td>';
+						temp+='<td>&nbsp;</td>';
+						temp+='<td align="center">&nbsp;</td>';
+						temp+='<td align="center"></td>';
+						temp+='<td align="center">&nbsp;</td>';
+					temp+='</tr>';
+			}
+
+				temp+='<tr class="rowlist">';
+					temp+='<td colspan="5" align="right" style=" border-bottom: #fff 1px solid; border-left: 1px solid #fff;"><strong>ទទួលសរុប Total Qty Received	</strong></td>';
+					temp+='<td align="center">&nbsp;&nbsp;'+dijit.byId('total_received').get('value')+'&nbsp;</td>';
+				temp+='</tr>';
+				temp+='<tr class="rowlist">';
+					temp+='<td colspan="5" align="right" style=" border-bottom: #fff 1px solid; border-left: 1px solid #fff;"><strong>ជំពាក់សរុប Total Qty Remain</strong></td>';
+					temp+='<td align="center">&nbsp;&nbsp;'+dijit.byId('total_remain').get('value')+'&nbsp;</td>';
+				temp+='</tr>';
+			temp+='</table>';
+		dojo.byId('t_amountmoneytype').innerHTML = temp;
+		dijit.byId("terms").show();	
+		}
+	}
+	function hideDialog(){
+		dijit.byId('terms').hide();
+	}
+
+	function printSubmit(){
+		window.frames["print_frame"].document.body.innerHTML = dojo.byId('PrintReceipt').innerHTML;
+	    window.frames["print_frame"].window.focus();
+	    window.frames["print_frame"].window.print();
+	    loadingBlock();
+	    HideloadingBlock();
+	    dijit.byId('office_receipt').submit();
+	}
+	function getMonthByNumber(m){
+		var monthName=[
+		         "Jan",
+	      		 "Feb",
+	      		 "Mar",
+	      		 "Apr",
+	      		 "May",
+	      		 "Jun",
+	      		 "Jul",
+	      		 "Aug",
+	      		 "Sept",
+	      		 "Oct",
+	      		 "Nov",
+	      		 "Dec",
+			];
+		return (monthName[m-1]);
+	}
+	var oldBranch = '<?php echo $this->row['branch_id'];?>';
+	function getallstudentname(){//
+		var url_data = '<?php echo $this->url(array('module'=>'registrar','controller'=>'register','action'=>'getliststudenturl')); ?>';
+		branch_id = dijit.byId("branch_id").attr("value");
+		if(branch_id==''){
+			dijit.byId("branch_id").focus();
+			return false;
+		}
+		
+		dojo.xhrPost({
+			url:url_data,
+			content:{
+				'student_name':1,
+				'branchId':branch_id,
+				'joinGroup': 1,
+				'activeStudent': 1
+			},
+			handleAs:"json",
+			load: function(data) {
+				student_store  = getDataStorefromJSON('id','name', data);
+			    dijit.byId('student_id').set('store',student_store);  
+			    if(oldBranch == branch_id){
+			    	dijit.byId('student_id').set('value','<?php echo $this->row['student_id'];?>');  
+			    }
+			},
+			error: function(err) {
+			}
+		});
+	}
+	var keyindex=1;
+	var url_getSupplier = '<?php echo $this->url(array('module'=>'stock','controller'=>'cutstock','action'=>'getallpaydetailbystudentedit')); ?>';
+	function getStudentProductPaymentDetail(){
+		branch_id = dijit.byId('branch_id').get('value');
+		if(branch_id==""){
+			dijit.byId("branch_id").focus();
+			return false;
+		}
+		student_id = dijit.byId('student_id').get('value');
+		if(student_id==""){
+			dijit.byId("student_id").focus();
+			return false;
+		}
+		invoicesearch = dijit.byId('bypuchase_no').get('value');
+		cutstockid = $('#id').val();
+		loadingBlock();
+		dojo.xhrPost({
+			url: url_getSupplier,
+			content:{
+				'cutstockid':cutstockid,'branch_id':branch_id,'student_id':student_id,'keyindex':keyindex,'bypuchase_no':invoicesearch,
+	 			},
+			handleAs:"json",
+			load: function(data) {
+				keyindex=data.keyindex;
+
+					$("#identity").val(data.identitycheck);
+				$("#old_identity").val(data.identity);
+				dojo.html.set(dojo.byId("table_row"),data.stringrow , {
+				     parseContent: true,
+					});
+				dojo.byId("lb_name").innerHTML =  data.stuName;
+				dojo.byId("lb_id").innerHTML =  data.stucode;
+				dojo.byId("studentpay").innerHTML =  data.stuName;
+				dojo.byId("lb_tel").innerHTML =  data.tel;
+				
+				HideloadingBlock();
+			},
+			error: function(err) {
+				HideloadingBlock();
+			}
+		});
+		
+	}
+	
+	function CheckAllTotal(index){
+		
+		var total = 0;
+		var descriptionr="";
+		var old_identity = $("#old_identity").val();
+
+		cut_stock_type = dijit.byId('cut_stock_type').get('value');
+
+		if(index==0){
+				if($('#check_all').is(":checked")){
+					$('.checkbox').each(function() { //loop through each checkbox
+			            this.checked = true;  
+					});
+					$("#identity").val(old_identity);
+
+					check=1
+					ResetQty(index,check,cut_stock_type);
+					
+				}else{
+					$('.checkbox').each(function() { //loop through each checkbox
+			            this.checked = false;  
+					});
+					$("#identity").val('');
+
+					check=2
+					ResetQty(index,check,cut_stock_type);
+				}
+		}else{
+			 $('#check_all').attr('checked', false); // Unchecks it
+			var a = $("input:checked").val();
+			 var identity = [];
+		     $(':checkbox:checked').each(function(i){
+		    	 identity[i] = $(this).val();
+		     });
+		     $("#identity").val(identity);
+		     var newIdentity = $("#identity").val();
+				if(old_identity == newIdentity ){
+					$('#check_all').attr('checked', true); // checks it
+				}
+			if($('#mfdid_'+index).is(":checked")){
+				check=1
+				ResetQty(index,check,cut_stock_type);
+			}else{
+				check=2
+				ResetQty(index,check,cut_stock_type);
+			}
+		}
+		calculateAmountCheck();
+		
+	}
+	function ResetQty(index,check,type){
+		if(index==0){     /// Reset qty check all
+			var old_identity = $("#old_identity").val();
+			var rowIDArray = old_identity.split(',');
+			for(var n = 0; n < rowIDArray.length; n++) {
+				if(type==1){   /// cut stock 
+					if(check==1){
+						dijit.byId('remain'+rowIDArray[n]).set('value',0);
+						dijit.byId('qty_receive'+rowIDArray[n]).set('readOnly',false);
+
+						qty_balance = parseFloat(dijit.byId('qty_balance'+rowIDArray[n]).get('value'));
+						dijit.byId('qty_receive'+rowIDArray[n]).set('value',qty_balance);
+
+					}else{
+						dijit.byId('qty_receive'+rowIDArray[n]).set('value',0);
+						dijit.byId('qty_receive'+rowIDArray[n]).set('readOnly',true);
+
+						qty_balance = parseFloat(dijit.byId('qty_balance'+rowIDArray[n]).get('value'));
+						dijit.byId('remain'+rowIDArray[n]).set('value',qty_balance);
+					}
+				}else{  // dept stock
+					
+					if(check==1){
+						dijit.byId('qty_receive'+rowIDArray[n]).set('value',0);
+						dijit.byId('qty_balance'+rowIDArray[n]).set('readOnly',false);
+
+						qty = parseFloat(dijit.byId('qty'+rowIDArray[n]).get('value'));
+						dijit.byId('qty_balance'+rowIDArray[n]).set('value',qty);
+						dijit.byId('remain'+rowIDArray[n]).set('value',qty);
+
+					}else{
+						dijit.byId('qty_balance'+rowIDArray[n]).set('value',0);
+						dijit.byId('qty_balance'+rowIDArray[n]).set('readOnly',true);
+
+						qty = parseFloat(dijit.byId('qty'+rowIDArray[n]).get('value'));
+						dijit.byId('qty_receive'+rowIDArray[n]).set('value',qty);
+						dijit.byId('remain'+rowIDArray[n]).set('value',0);
+					}
+				}
+			}
+		}else{   // reset qty check one by one
+
+			if(type==1){   // cut
+				if(check==1){
+				dijit.byId('remain'+index).set('value',0);
+				dijit.byId('qty_receive'+index).set('readOnly',false);
+
+				qty_balance = parseFloat(dijit.byId('qty_balance'+index).get('value'));
+				dijit.byId('qty_receive'+index).set('value',qty_balance);
+
+				}else{
+					dijit.byId('qty_receive'+index).set('value',0);
+					dijit.byId('qty_receive'+index).set('readOnly',true);
+
+					qty_balance = parseFloat(dijit.byId('qty_balance'+index).get('value'));
+					dijit.byId('remain'+index).set('value',qty_balance);
+				}
+
+			}else{   // remain
+				if(check==1){
+					dijit.byId('qty_receive'+index).set('value',0);
+					dijit.byId('qty_balance'+index).set('readOnly',false);
+
+					qty = parseFloat(dijit.byId('qty'+index).get('value'));
+					dijit.byId('qty_balance'+index).set('value',qty);
+					dijit.byId('remain'+index).set('value',qty);
+
+				}else{
+					dijit.byId('qty_balance'+index).set('value',0);
+					dijit.byId('qty_balance'+index).set('readOnly',true);
+
+					qty = parseFloat(dijit.byId('qty'+index).get('value'));
+					dijit.byId('qty_receive'+index).set('value',qty);
+					dijit.byId('remain'+index).set('value',0);
+				}
+			}
+			
+		}
+		calculateAmountCheck();
+	}
+	function calculateAmountCheck(){
+		
+		var rowId = $('#identity').val();
+		if(rowId==""){
+			dijit.byId('balance').attr('value',0);
+			dijit.byId('total_received').attr('value',0);
+			dijit.byId('total_remain').attr('value',0);
+			return false;
+		}
+		var totalbalance=0;
+		var totalreceive=0;
+		var totalremain=0;
+		var rowIDArray = rowId.split(',');
+
+			for(var n = 0; n < rowIDArray.length; n++) {
+			
+				qty_balance = parseFloat(dijit.byId('qty_balance'+rowIDArray[n]).get('value'));
+				qty_receive = parseFloat(dijit.byId('qty_receive'+rowIDArray[n]).get('value'));
+				remain = parseFloat(dijit.byId('remain'+rowIDArray[n]).get('value'));
+
+				totalbalance=totalbalance+qty_balance;
+				totalreceive=totalreceive+qty_receive;
+				totalremain=totalremain+remain;
+			
+			}
+		dijit.byId('balance').attr('value',totalbalance.toFixed(0));
+		dijit.byId('total_received').attr('value',totalreceive.toFixed(0));
+		dijit.byId('total_remain').attr('value',totalremain.toFixed(0));
+	}
+	
+	function calculateqty(index,type){
+		var current_qty = dijit.byId('current_qty'+index).get('value');
+		var org_qty = dijit.byId('qty'+index).get('value');
+		var qty_receive = dijit.byId('qty_receive'+index).get('value');
+		var qty_balance = dijit.byId('qty_balance'+index).get('value');
+		if(type==1){
+			if(current_qty < qty_receive){
+				var qtyremain=qty_balance - current_qty;
+				alert("Stock Qty not enough !");
+				dijit.byId('qty_receive'+index).attr('value',current_qty);
+				dijit.byId('remain'+index).attr('value',qtyremain);
+			}else{
+				var qtyremain=qty_balance-qty_receive;
+				if(qty_receive>qty_balance){
+					alert("Over Balance Qty!");
+					dijit.byId('qty_receive'+index).attr('value',qty_balance);
+					dijit.byId('remain'+index).attr('value',0);
+				}else{
+					dijit.byId('remain'+index).attr('value',qtyremain.toFixed(0));
+				}
+			}
+		}else{
+			var qty_receive=org_qty-qty_balance;
+			dijit.byId('qty_receive'+index).attr('value',qty_receive.toFixed(0));
+			dijit.byId('remain'+index).attr('value',qty_balance.toFixed(0));
+		}
+		calculateAmountCheck();
+	}
+
+	var url_product_info = '<?php echo $this->url(array('module'=>'stock','controller'=>'cutstock','action'=>'get-prodct-info')); ?>';
+	function resetProductCode(index) {
+		var branch_id = dijit.byId('branch_id').get('value');
+		var proId = dijit.byId('itemdetail_id'+index).get('value');
+
+		if(proId==""){
+			return false;
+		}
+		dojo.xhrPost({
+			url:url_product_info,
+			content:{
+				'proId':proId,
+				'branch_id':branch_id,
+				},
+			handleAs:"json",
+			load: function(data) {
+				//alert(data);
+				dijit.byId('current_qty'+index).attr('value',data.pro_qty); 
+				dijit.byId('productCode'+index).attr('value',data.code); 
+				dojo.byId('productcodelabel'+index).innerHTML = data.code;
+				dojo.byId('currentqtylabel'+index).innerHTML = data.pro_qty;
+			},
+			error: function(err) {
+			}
+		});
+	}
+</script>
+
+

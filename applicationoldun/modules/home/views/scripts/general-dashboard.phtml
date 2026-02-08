@@ -1,0 +1,344 @@
+ <?php
+	$tr=Application_Form_FrmLanguages::getCurrentlanguage();
+	$date = new DateTime();
+	$currentDate =  $date->format("Y-m-d");
+		
+    $dbGb = new Application_Model_DbTable_DbGlobal();
+	$lastestAcademic = $dbGb->getLatestAcadmicYear();
+	
+	
+	$_db = new Home_Model_DbTable_DbDashboard();
+      $studropnew = $_db->getStudentDropNew();
+      $alltypedrop = $_db->countStudentDrop();
+      $stu_suppend = $_db->countStudentDrop(2);
+      $stu_stopped = $_db->countStudentDrop(1);
+      
+    	
+	$db = new Allreport_Model_DbTable_DbRptAllStudent();
+		$rsamountstudent = $db->getAmountStudent();
+		$rsnewstudent = $db->getAmountNewStudent();
+		$rsdropstudent = $db->getAmountDropStudent();
+		
+	$search = array(
+				'currentDate' =>$currentDate,
+				'academic_year' =>'',
+				'degree'=>'',
+				'grade'=>'',
+				'branch_id'=>0,
+		);
+	if(!empty($lastestAcademic)){
+		$search["academic_year"] = empty($lastestAcademic["id"]) ? 0 : $lastestAcademic["id"];
+	}
+	
+	$arrayColors = array(
+		"#ff5e92",
+		"#ff0000",
+		"#8bc34a",
+		"#153c7f",
+		"#9b59b6",
+		"#56a9fb",
+		"#673ab7",
+		"#2196f3",
+		"#0fcc6d",
+		"#ed9c18",
+		
+	);
+	$totalClass=0;
+	$classList = $_db->getCountingClass(1);
+	
+	$arr = [
+		"limitRecord"=>6
+	];
+    $yearly =$dbGb->getAllAcademicYear(null,null,$arr);
+?>
+<link rel="stylesheet" href="<?php echo $this->baseUrl()."/"?>dashboard/plugins/morris/morris.css">
+<!-- Icons CSS -->
+<link href="<?php echo $this->baseUrl()."/"?>dashboard/css/icons.css" rel="stylesheet">
+<!-- Custom styles for this template -->
+<link href="<?php echo $this->baseUrl()."/"?>dashboard/css/style.css" rel="stylesheet">
+<style>
+.col-lg-6.capital-box {
+    min-height: 115px;
+}
+span.title-suppend {
+    display: block;
+    margin: 10px 0;
+    border-bottom: solid 2px #0f2a5b;
+    font-weight: bold;
+    color: #0f2a5b;
+}
+.profile_details .profile_view img.img-circle.img-responsive {
+    height: 125px;
+    width: 125px;
+}
+.blog-stu-droplist {
+    height: 290px;
+    overflow-y: auto;
+    width: 100%;
+    padding: 10px;
+}
+h4.brief {
+    font-size: 14px;
+}
+.profile_details .profile_view h2 {
+    font-size: 15px;
+}
+.profile_details .profile_view .left {
+    margin-top: 5px;
+}
+.media .profile_thumb {
+    padding: 9px 15px;
+}
+small.dashbd.badge.bg-green {
+    font-size: 10px;
+    line-height: 13px;
+    padding: 2px 6px;
+    position: absolute;
+    left: 12px;
+    top: 3px;
+    font-weight: 600;
+    z-index: 1;
+}
+article.media.event.unread {
+    background: #f2f1ff;
+    
+}
+article.announce {
+    margin-top: 3px;
+	padding: 10px;
+}
+a.pull-left.newsimage {
+    width: 100px;
+    height: 64px;
+}
+small.pull-right.showall-ann {
+    display: block;
+    padding: 5px 0;
+    margin: 0;
+    line-height: 24px;
+}
+.x_content.news-content {
+    height: 345px;
+    display: block;
+    overflow-y: auto;
+}
+ </style>
+<div id="page-wrapper">
+	<!-- Page content start -->
+	<div class="page-contentbar">
+		<!-- START PAGE CONTENT -->
+		<div id="page-right-content">
+			<div class="container">
+				 <div class="row">
+					<div class="col-lg-8">
+						<div class="x_panel">
+							<div class="card-box" style="padding: 0;">
+								<div class="col-lg-12">
+									<div class="accounting-management text-center">
+										<div class="col-lg-6 capital-box" style="background:#17418e;; color: #fff">
+											<a title="<?php echo $tr->translate("FINDING_ALL_STUDENT_INFORMATION")?>" href="<?php echo $this->url(array('module'=>'home','controller'=>'searchstudentinfo','action'=>'index'), null, true);?>">
+												<span data-bind="text: txnRecorded"><h3><?php echo $tr->translate("FINDING_ALL_STUDENT_INFORMATION")?></h3></span>
+												<p class="month" style="text-align: center; margin: 0 auto;" data-bind="text: lang.lang.transactions_recorded">&nbsp;<?php echo $tr->translate("STUDENT_TOTAL")." : ".$rsamountstudent." ".$tr->translate("STUDENT_UNIT");?> &nbsp;<?php echo $tr->translate("NEW_STUDENT")." : ".$rsnewstudent." ".$tr->translate("STUDENT_UNIT");?></p>
+											</a>
+											<br />
+										</div>
+										<div class="col-lg-6 capital-box" style="background:#0077c5;; color: #fff">
+										<a title="<?php echo $tr->translate("RPT_STUDENT_DROPS");?>" href="<?php echo $this->url(array('module'=>'allreport','controller'=>'allstudent','action'=>'rpt-student-drop'), null, true);?>">
+											<span data-bind="text: txnRecorded"><h3><?php echo $tr->translate("STUDENT_DROP")." : ".$alltypedrop." ".$tr->translate("STUDENT_UNIT");?></h3></span>
+											<p class="month" style="text-align: center; margin: 0 auto;" data-bind="text: lang.lang.transactions_recorded">&nbsp;<?php echo $tr->translate("SUSPEND")." : ".$stu_suppend." ".$tr->translate("STUDENT_UNIT");?> &nbsp;<?php echo $tr->translate("DROPPED")." : ".$stu_stopped." ".$tr->translate("STUDENT_UNIT");?></p>
+										</a>
+										<br />
+									</div>
+									<div class="clearfix"></div>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="card-box">
+							<div class="col-lg-12">
+								<h4 class="m-t-0"><?php echo $tr->translate("Yearly Student")?></h4>
+								<div class="text-center">
+									<ul class="list-inline chart-detail-list">
+										<li>
+											<h5 class="font-normal"><i class="fa fa-circle m-r-10 text-primary"></i><?php echo $tr->translate("Number Of Student")?></h5>
+										</li>
+									</ul>
+								</div>
+								<div id="dashboard-bar-stacked" style="height: 250px;"></div>
+							</div>
+						</div>
+					</div>
+					<div class="col-lg-4">
+						<div class="card-box" >
+							
+							<div class="col-md-6 col-6">
+								<ul class="list-inline count2" style=" color: #17418e; font-weight: bold;">
+									<li style="width:100%;">
+									  <h3 style=" color: #17418e; font-weight: bold;"><i class="fa fa-laptop"></i> <span class="totalClass"><?php echo sprintf('%02d',$totalClass); ?></span></h3>
+									  <span><?php echo $tr->translate("Total Class");?> <?php  echo empty($lastestAcademic["academicYear"]) ? "" : $lastestAcademic["academicYear"];?></span>
+									</li>
+								</ul>
+								<?php if(!empty($classList)) { ?>
+									<div class="row g-3">
+										<?php  foreach($classList as $key =>$attSum ){ 
+										$color = empty($arrayColors[$key]) ? '#ff9f43' : $arrayColors[$key];
+										$classList[$key]["color"] = $color;
+										
+										$amtClass = empty($attSum["value"]) ? 0 : $attSum["value"];
+										$totalClass = $totalClass + $amtClass;
+					
+										?>
+											<div class="col-md-6 col-sm-6 col-xs-12 m-0">
+												<div class="row g-3">
+													<div class="col-md-8 col-sm-8 col-xs-12 m-0">
+													<small class="d-block text-truncate"><i class="fa fa-square " style="color:<?php echo $color; ?>;" ></i>&nbsp;<?php echo $attSum["label"];?></small>
+													</div>
+													<div class="col-md-4 col-sm-4 col-xs-12 m-0">
+													<small class="text-truncate"> :<strong><?php echo empty($attSum["value"]) ? "00" : sprintf('%02d',$attSum["value"])?></strong></small>
+													</div>
+												</div>
+											</div>
+										<?php } ?>
+									</div>
+									<?php } ?>
+							</div>
+							<div class="col-md-6 col-6">
+							  <div class="d-flex align-items-center">
+								<div id="donutClass" class="morris-donut-inverse" style="width:100%; height:150px;"></div>
+							  </div>
+							</div>
+							
+						</div>
+						<?php if (!empty($studropnew)){?>
+						<div class="x_panel">
+							<div class="card-box" style=" margin: 0; padding: 0;">
+								
+								<span class="title-suppend" data-bind="text: lang.lang.performance"><i class="fa fa-user-times" aria-hidden="true"></i> <?php echo $tr->translate("STUDENT_DROP_NEW");?>&nbsp;<?php echo count($studropnew)." ".$tr->translate("STUDENT_UNIT");?></span>
+								<div class="blog-stu-droplist">
+									<?php if (!empty($studropnew)) foreach ($studropnew as $drop){?>
+									<div class="profile_details" title="<?php echo $drop['stu_khname'];?> <?php echo $drop['stu_enname']." ".$drop['last_name'];?>">
+										<div class="well profile_view">
+										  <div class="col-sm-12">
+										  <?php 
+										  $style='';
+										  if (!empty($drop['branch_photo'])){
+											if (file_exists(PUBLIC_PATH.'/images/'.$drop['branch_photo'])) {
+												$style="background: url(/elt/trunk/public/images/".$drop['branch_photo'].");  background-repeat: no-repeat; background-size: 100%;";
+											}
+										  }
+										  ?>
+											<div class="bg-style-drop" style="<?php echo $style;?>"></div>
+											<h4 class="brief"><i><?php echo $drop['type_drop'];?><br /><small><?php echo $drop['branch_name'];?></small></i></h4>
+											<div class="left col-xs-7">
+											  <h2><?php echo $drop['stu_khname'];?></h2>
+											  <h2><?php echo $drop['stu_enname']." ".$drop['last_name'];?></h2>
+											  <p><strong><?php echo $tr->translate("STUDENT_CODE")?>: </strong> <?php echo $drop['stu_code'];?> </p>
+											  <ul class="list-unstyled">
+												<li><i class="fa fa-graduation-cap"></i> <?php echo $tr->translate("ACADEMIC_YEAR")?>: <?php echo $drop['academic'];?></li>
+												<li><i class="fa fa-magic"></i> <?php echo $tr->translate("DEGREE")?>: <?php echo $drop['degree'];?></li>
+												<li><i class="fa fa-building"></i> <?php echo $tr->translate("GRADE")?>: <?php echo $drop['group_name'];?></li>
+												<li><i class="fa fa-phone"></i> <?php echo $tr->translate("PHONE")?>: <?php echo $drop['tel'];?></li>
+											  </ul>
+											</div>
+											<div class="right col-xs-5 text-center">
+												<?php $photo = $this->baseUrl()."/images/no-profile.png";
+													if (!empty($drop['photo'])){
+														if (file_exists(PUBLIC_PATH."/images/photo/".$drop['photo'])){
+															$photo = $this->baseUrl().'/images/photo/'.$drop['photo'];
+														}
+													}
+												?>
+											  <img src="<?php echo $photo;?>" alt="" class="img-circle img-responsive">
+											</div>
+										  </div>
+										  <div class="col-xs-12 bottom text-center">
+											<div class="col-xs-12 col-sm-6 emphasis">
+											  <?php echo $tr->translate("STOP_DATE");?> <?php echo date("d/M/Y",strtotime($drop['date_stop']));?>
+											</div>
+											<div class="col-xs-12 col-sm-6 emphasis">
+												<?php 
+												$sex="btn-primary";
+												$sexTitle=$tr->translate("MALE");
+												if ($drop['sex']==2){
+													$sex="btn-danger";
+													$sexTitle=$tr->translate("FEMALE");
+												}?>
+											  <button type="button" title="<?php echo $sexTitle;?>" class="btn <?php echo $sex;?> btn-xs"> <i class="fa fa-user">
+												</i>
+											  </button>
+											  <a class="btn btn-info btn-xs" href="<?php echo $this->baseUrl()."/home/searchstudentinfo/student-detail/id/".$drop['stu_id']."?droplink=true&drid=".$drop['id'];?>"><i class="fa fa-user"> </i> <?php echo $tr->translate("View Profile")?></a>
+											</div>
+										  </div>
+										</div>
+								  </div>
+								  <?php }?>
+								</div>
+								
+							</div>
+						</div>
+						<?php }?>
+					</div>		
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<script src="<?php echo $this->baseUrl()."/"?>dashboard/plugins/morris/morris.min.js"></script>
+<script src="<?php echo $this->baseUrl()."/"?>dashboard/plugins/raphael/raphael-min.js"></script>
+<script type="text/javascript">
+
+var $stckedData  = [
+                    <?php if (!empty($yearly)) foreach ($yearly as $yearly){
+                    		$stu = $db->getAmountStudent($yearly['id'],0);
+                    	?>
+                   	 { y: '<?php echo $yearly['name'];?>', a: <?php echo $stu;?>},
+                    <?php }?>
+                   
+                ];
+				
+$( document ).ready(function() {
+    $('.morris-hover.morris-default-style').css({
+		"font-family" : "inherit !important",
+		"padding" : "3%"
+	});
+	$('.totalClass').html("<?php echo empty($totalClass) ? "00" : sprintf('%02d', $totalClass); ?>");
+	
+});
+
+var colorDanger = "#FF1744";
+Morris.Donut({
+  element: 'donutClass',
+  resize: true,
+  data: <?php  echo Zend_Json::encode($classList);?>
+});
+
+!function($) {
+    "use strict";
+    var Dashboard = function() {};
+    //creates Stacked chart
+    Dashboard.prototype.createStackedChart  = function(element, data, xkey, ykeys, labels, lineColors) {
+        Morris.Bar({
+            element: element,
+            data: data,
+            xkey: xkey,
+            ykeys: ykeys,
+            stacked: true,
+            labels: labels,
+            hideHover: 'auto',
+            resize: true, //defaulted to true
+            gridLineColor: '#eee',
+            barColors: lineColors
+        });
+    },
+    Dashboard.prototype.init = function() {
+        this.createStackedChart('dashboard-bar-stacked', $stckedData, 'y', ['a'], ['<?php echo $tr->translate('TOTAL_STUDENT');?>'], ['#458bc4']);
+    },
+    $.Dashboard = new Dashboard, $.Dashboard.Constructor = Dashboard
+    
+}(window.jQuery),
+
+function($) {
+    "use strict";
+    $.Dashboard.init();
+}(window.jQuery);
+</script>

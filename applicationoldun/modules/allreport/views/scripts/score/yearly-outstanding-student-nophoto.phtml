@@ -1,0 +1,394 @@
+<?php
+	$tr = Application_Form_FrmLanguages::getCurrentlanguage();
+	echo $this->headTitle($tr->translate("តារាងកិត្តិយស")); 
+	$db = new Allreport_Model_DbTable_DbRptStudentScore();
+?>	
+<script src="<?php echo $this->baseUrl();?>/js/pdbs_js.js"  type="text/javascript"></script>
+<form  action="<?php echo $this->url(array('module'=>'allreport','controller'=>'score','action'=>'yearly-outstanding-student')); ?>" dojoType="dijit.form.Form" method="post">
+</form>
+<div style="min-height:15cm; margin:0 auto; padding:0.5cm 0.5cm 0cm 0.5cm">
+	<div id="divPrint">
+		<style type="text/css">
+			.style{
+				line-height: 20px; font-size: 12px !important;
+				font-family: 'Times New Roman','Khmer OS Battambang';
+				body{
+				    background:url(../images/logo.png);  
+				}
+			}
+			.padding{ padding: 0 1px !important;}
+			table{ page-break-inside:auto;font-family:Arial,'Khmer OS Battambang'; }
+			tr{ page-break-inside:avoid; page-break-after:auto }
+			.cheader{height: 30px;font-weight: bold; background: #ccc; white-space: nowrap;}
+			#header {
+			  display: table-header-group;
+			  page-break-inside:avoid; page-break-after:auto;
+			}
+			@media print{
+				@page {
+					page:A4;
+					size: portrait;
+					margin: 0.5cm;
+				}
+			}
+		</style>
+		<table style="width:27cm;background:#fff; margin: 0 auto; font-family: 'Times New Roman','Khmer OS Battambang'; ">
+				<?php
+					 $old_groupid=0; $count_fail=0; $count=0; $old_yearaverage = 0; $old_rank=0;
+					 $duplicate=0;
+					 $rank1="";$rank2="";$rank3="";$rank4="";$rank5="";
+					 if (!empty($this->studentgroup)){ foreach($this->studentgroup as $key=> $rs){ 
+						
+						$average_semester1 = ($rs['avg_forsemester1']+$rs['avg_formonthsemester1'])/2;
+						$average_semester2 = ($rs['avg_forsemester2']+$rs['avg_formonthsemester2'])/2;
+						$year_average = ($average_semester1+$average_semester2)/2;
+							
+						if($year_average==$old_yearaverage){
+							$duplicate=$duplicate+1;
+						}else{
+							$old_rank=$old_rank+1+$duplicate;
+							$duplicate=0;
+						}
+						
+						if($year_average == $old_yearaverage){
+							if($key==1){
+								$rank2=$old_rank;
+							}
+							if($key==2){
+								$rank3=$old_rank;
+							}
+							if($key==3){
+								$rank4=$old_rank;
+							}
+							if($key==4){
+								$rank5=$old_rank;
+							}
+						}else{
+							if($key==0){
+								$rank1="១";
+								$old_rank = "១";
+							}
+							if($key==1){
+								$rank2="២";
+								$old_rank = "២";
+							}
+							if($key==2){
+								$rank3="៣";
+								$old_rank = "៣";
+							}
+							if($key==3){
+								$rank4="៤";
+								$old_rank = "៤";
+							}
+							if($key==4){
+								$rank5="៥";
+								$old_rank = "៥";
+							}
+						}
+					?>
+					<?php 
+						$old_yearaverage = $year_average;
+					?>
+				<?php }}?>
+				<tr>
+					<td>
+						<table width="100%" border="0" >
+							<tr>
+								<td colspan="3" align="center" style="font-family: Khmer OS Muol Light;font-size: 25px;">
+									ព្រះរាជាណាចក្រកម្ពុជា <br />
+									ជាតិ សាសនា ព្រះមហាក្សត្រ <br />
+									<img style="width: 20%;" alt="<?php ?>" src="<?php echo $this->baseUrl().'/images/style.png'?>">
+								</td>
+							</tr>
+							<tr>
+								<td width="33%">&nbsp;</td>
+								<td width="34%">&nbsp;</td>	
+								<td width="33%">&nbsp;</td>
+							</tr>
+							<tr>
+								<td>
+									<table width="70%">
+										<tr>
+											<td width="100%" align="center">
+												<?php $logo = $this->baseUrl().'/images/logo.png';
+													if (!empty($this->studentgroup[0]['branch_logo'])){
+														$logo = $this->baseUrl().'/images/'.$this->studentgroup[0]['branch_logo'];
+													}
+													?>
+												<img style="width: 65%;" alt="<?php ?>" src="<?php echo $logo;?>"><br />
+											</td>
+										</tr>
+									</table>
+								</td>
+								<td align="center" style="font-family: Khmer OS Muol Light;font-size: 22px;">
+									<div style="font-size: 25px;">តារាងកិត្តិយស </div>
+									<span style="white-space: nowrap;">ប្រចាំឆ្នាំសិក្សា  <label id="academic_year"></label></span><br />
+									ថ្នាក់ <?php echo $this->studentgroup[0]['group_code'];?>
+								</td>
+								<script type="text/javascript">
+									year = convertEnglishToKhmerNumber(' <?php echo $this->studentgroup[0]['start_year'];?>')+' - '+convertEnglishToKhmerNumber('<?php echo $this->studentgroup[0]['end_year'];?>');
+									dojo.byId('academic_year').innerHTML=year;
+								</script>
+								
+								<td></td>
+							</tr>
+							<style>
+								.number{color: #fff;font-size: 25px;}
+								.studentname{color:#fff;font-size: 19px;}
+								.background{width:65% !important;background:#2e3192 !important;border-radius: 8px;margin-top:10px;border: 1px solid red;height: 60px;}
+								.margin{margin-top:10px;}
+								.background-number{width:13% !important;background:#2e3192 !important;border-radius: 8px;border: 1px solid red;}
+							</style>
+							<tr>
+								<td colspan="3">&nbsp;</td>
+							</tr>
+							<tr>
+								<td colspan="3">&nbsp;</td>
+							</tr>
+							<tr>
+								<td>&nbsp;</td>
+								<td>
+									<table width="100%" style="margin: 0 auto; font-family: Khmer OS Muol Light;font-size: 17px ;">
+										<tr align="center">
+											<td class="number" >
+												<div class="background-number">
+													<?php echo $rank1;?>
+												</div>
+											</td>
+										</tr>
+										<tr align="center">
+											<td class="studentname">
+												<div class="background">
+													<div class="margin">
+														<?php 
+															  if(!empty($this->studentgroup[0])){
+																if(!empty($this->studentgroup[0]['stu_khname'])){
+																	echo $this->studentgroup[0]['stu_khname'];
+																}else{
+																	echo $this->studentgroup[0]['stu_enname'];
+																}
+															  }
+														?>
+													</div>	
+												</div>
+											</td>
+										</tr>
+									</table>
+								</td>
+								<td>&nbsp;</td>
+							</tr>	
+							<tr>
+								<td colspan="3">&nbsp;</td>
+							</tr>
+							<tr>
+								<td colspan="3">&nbsp;</td>
+							</tr>
+							<tr>
+								<td colspan="3">&nbsp;</td>
+							</tr>
+							<tr>
+								<td>
+									<table width="100%" style="margin: 0 auto; font-family: Khmer OS Muol Light;font-size: 17px ;">
+										<tr align="center">
+											<td class="number" >
+												<div class="background-number">
+													<?php echo $rank2;?>
+												</div>
+											</td>
+										</tr>
+										<tr align="center">
+											<td class="studentname">
+												<div class="background">
+													<div class="margin">
+														<?php 
+														  if(!empty($this->studentgroup[1])){
+															if(!empty($this->studentgroup[1]['stu_khname'])){
+																echo $this->studentgroup[1]['stu_khname'];
+															}else{
+																echo $this->studentgroup[1]['stu_enname'];
+															}
+														  }
+														?>
+													</div>	
+												</div>
+											</td>
+										</tr>
+									</table>
+								</td>
+								<td>
+									&nbsp;
+								</td>
+								<td>
+									<table width="100%" style="margin: 0 auto; font-family: Khmer OS Muol Light;font-size: 17px ;">
+										<tr align="center">
+											<td class="number" >
+												<div class="background-number">
+													<?php echo $rank3;?>
+												</div>
+											</td>
+										</tr>
+										<tr align="center">
+											<td class="studentname">
+												<div class="background">
+													<div class="margin">
+														<?php 
+															  if(!empty($this->studentgroup[2])){
+																if(!empty($this->studentgroup[2]['stu_khname'])){
+																	echo $this->studentgroup[2]['stu_khname'];
+																}else{
+																	echo $this->studentgroup[2]['stu_enname'];
+																}
+															  }
+														?>
+													</div>	
+												</div>
+											</td>
+										</tr>
+									</table>
+								</td>
+							</tr>
+							<tr>
+								<td colspan="3">&nbsp;</td>
+							</tr>
+							<tr>
+								<td colspan="3">&nbsp;</td>
+							</tr>
+							<tr>
+								<td colspan="3">&nbsp;</td>
+							</tr>
+							<tr>
+								<td colspan="3">&nbsp;</td>
+							</tr>
+							<tr>
+								<td colspan="3">&nbsp;</td>
+							</tr>
+							<tr>
+								<td>
+									<table width="100%" style="margin: 0 auto; font-family: Khmer OS Muol Light;font-size: 17px ;">
+										<tr align="center">
+											<td class="number" >
+												<div class="background-number">
+													<?php echo $rank4;?>
+												</div>
+											</td>
+										</tr>
+										<tr align="center">
+											<td class="studentname">
+												<div class="background">
+													<div class="margin">
+														<?php 
+															  if(!empty($this->studentgroup[3])){
+																if(!empty($this->studentgroup[3]['stu_khname'])){
+																	echo $this->studentgroup[3]['stu_khname'];
+																}else{
+																	echo $this->studentgroup[3]['stu_enname'];
+																}
+															  }
+														?>
+													</div>	
+												</div>
+											</td>
+										</tr>
+									</table>
+								</td>
+								<td>&nbsp;</td>
+								<td>
+									<table width="100%" style="margin: 0 auto; font-family: Khmer OS Muol Light;font-size: 17px ;">
+										<tr align="center">
+											<td class="number" >
+												<div class="background-number">
+													<?php echo $rank5;?>
+												</div>
+											</td>
+										</tr>
+										<tr align="center">
+											<td class="studentname">
+												<div class="background">
+													<div class="margin">
+														<?php 
+															  if(!empty($this->studentgroup[4])){
+																if(!empty($this->studentgroup[4]['stu_khname'])){
+																	echo $this->studentgroup[4]['stu_khname'];
+																}else{
+																	echo $this->studentgroup[4]['stu_enname'];
+																}
+															  }
+														?>
+													</div>	
+												</div>
+											</td>
+										</tr>
+									</table>
+								</td>
+							</tr>	
+							<tr>
+								<td colspan="3">
+									&nbsp;
+								</td>
+							</tr>
+							<tr>
+								<td colspan="3">
+									&nbsp;
+								</td>
+							</tr>	
+							<tr>
+								<td colspan="3">
+									&nbsp;
+								</td>
+							</tr>	
+							<tr>
+								<td colspan="3">
+									&nbsp;
+								</td>
+							</tr>
+							<tr style="border: 1px solid #fff;">
+								<td colspan="3" style="border:0px solid #fff !important;">
+									<table " cellpadding="0" cellspacing="0" width="100%" style="font-family:'Khmer OS Battambang';font-size: 14px">
+										<tr>
+											<td width="35%" align="center">
+												<span style="color:#000; font-size: 16px;font-family:Times New Roman,Khmer OS Battambang;"><?php echo $tr->translate("CHECKANDAPPROVED");?></span><br />
+												<span style="color:#000; font-size: 16px;font-family:Times New Roman,Khmer OS Battambang;"><?php echo $tr->translate("PRINCIPAL");?></span>
+											</td>
+											<td width="30%">&nbsp;</td>
+											<td width="35%" align="center">
+												<span style="color:#000; font-size: 16px;font-family:Times New Roman,Khmer OS Battambang;;"><?php echo $tr->translate("CREATE_WORK_DATE");?></span><br />
+												<span style="color:#000; font-size: 16px;font-family:Times New Roman,Khmer OS Battambang;;"><?php echo $tr->translate("TEACHER_ROOM");?></span>
+											</td>
+										</tr>
+									</table>
+								</td>
+							</tr>
+							<tr>	
+								<td colspan="3">
+									&nbsp;
+								</td>
+							</tr>
+							<tr>	
+								<td colspan="3">
+									&nbsp;
+								</td>
+							</tr>
+							<tr>	
+								<td colspan="3">
+									&nbsp;
+								</td>
+							</tr>
+							<tr>	
+								<td colspan="3">
+									&nbsp;
+								</td>
+							</tr>
+							<tr>	
+								<td colspan="2">
+									&nbsp;
+								</td>
+								<td colspan="1" align="center" style="font-family: Khmer OS Muol Light;font-size: 15px;">
+									&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <?php echo $this->studentgroup[0]['teacher_name'];?>
+								</td>
+							</tr>							
+						</table>
+					</td>
+				</tr>
+		</table>
+	</div>
+</div>

@@ -1,0 +1,1359 @@
+<?php
+	$tr = Application_Form_FrmLanguages::getCurrentlanguage();
+	echo $this->headTitle($tr->translate('EDIT_STUDENT_TEST'));
+	$frm = $this->frm_crm;
+	
+	$testCondiction = TEST_CONDICTION;
+	$test_online = SHOW_TEST_ONLINE;
+
+?>
+<style>
+.image-box {
+    text-align: center;
+}
+.image-box img {
+    width: 165px;
+    height: 185px;
+}
+.button_browse {
+    position: relative;
+    overflow: hidden;
+    text-align: center;
+    width: 100%;
+    height: 38px;
+    background: #fbf9f9;
+    border: 1px solid #e8e8e8;
+}
+.button_browse span {
+    line-height: 33px;
+    font-weight: 600;
+    cursor: pointer;
+}
+input.btn_borwse_image {
+    position: absolute;
+    width: 100%;
+    height: 38px;
+    top: 0;
+    left: 0;
+    z-index: 2;
+    opacity: 0;
+    cursor: pointer;
+}
+.account-image {
+    border: solid 1px #eee;
+    width: 165px;
+    margin: 0 auto;
+}
+table.history-record {
+    width: 100%;
+    font-size: 12px;
+}
+table.history-record thead tr th {
+    text-align: center;
+    padding: 5px 2px;
+    background: #e0eafb;
+    border-bottom: solid 1px #afadad;
+	    border: solid 1px #ccc;
+}
+table.history-record tbody tr {
+    border-bottom: solid 1px #e8e8e8;
+}
+table.history-record tbody tr td {
+    padding: 5px;
+	vertical-align: top;
+}
+a.btn.btn-primary.btn-xs {
+    margin-bottom: -2px;
+    padding: 1px 5px;
+    background: #02014a;
+    border: solid 1px #3d3c7d;
+}
+.hiddenControl{
+	display: none !important;
+}
+</style>
+<script type="text/javascript">
+	dojo.require("dijit.form.DateTextBox");
+	dojo.require('dijit.form.NumberTextBox');
+	dojo.require("dojo.NodeList-manipulate");
+	dojo.require("dojo.data.ItemFileWriteStore");  
+	dojo.require("dijit.form.Textarea");
+</script>
+<div class="card">
+	<div class="card-content collapse show">
+		<form id='frm_teststudent' action="" dojoType="dijit.form.Form" method="post" enctype="multipart/form-data">
+			<script type="dojo/method" event="onSubmit" enctype="multipart/form-data">			
+			if(this.validate()) {
+				if(dijit.byId("branch_id").get("value")==''){
+                    alert("<?php echo $tr->translate("PLEASE_SELECT_BRANCH");?>");
+					dijit.byId("branch_id").focus();
+					return false;
+				}
+				loadingBlock();
+				return true;
+			}else {
+				return false;
+			}
+			</script>
+			<div class="card-box">
+               	<div class="col-sm-12 border-botom">
+		    		<div class="col-sm-8 pd-0">
+		    			<h4 class="m-b-0"><i class="fa fa-edit" aria-hidden="true"></i>&nbsp;&nbsp;&nbsp;<?php echo $tr->translate('EDIT_STUDENT_TEST');?></h4>
+	    			</div>
+	    			<div class="col-sm-4 text-right">
+	    			</div>
+	    		</div>
+	    	</div>
+	    	<!-- Tab Menu -->
+	    	<div class="card-box">
+	    		 <ul class="nav  md-pills pills-primary nav-tab" role="tablist">
+		            <li class="nav-item active">
+		                <a class="nav-link " data-toggle="tab" href="#panel21" role="tab"><i class="fa fa-user ml-2"></i> <?php echo $tr->translate("STUDENT_INFO");?></a>
+		            </li>
+		           
+					<li class="nav-item">
+		                <a class="nav-link" data-toggle="tab" href="#panel23" role="tab">
+		                <i class="fa fa-users ml-2"></i> <?php echo $tr->translate("PARENT_INFO");?>
+		                </a>
+		            </li>
+					<li class="nav-item">
+		                <a class="nav-link" data-toggle="tab" href="#panel24" role="tab">
+		                 <i class="fa fa-graduation-cap ml-2" aria-hidden="true"></i><?php echo $tr->translate("STUDY_INFO");?>
+		                </a>
+		            </li>
+					<li class="nav-item">
+		                <a class="nav-link" data-toggle="tab" href="#panel22" role="tab">
+		                <i class="fa fa-graduation-cap ml-2"></i> <?php echo $tr->translate("STUDENT_TEST_INFORMATION");?>
+		                </a>
+		            </li>
+		        </ul>
+		    </div>
+		    <!--/. Tab Menu -->
+		    <div class="col-md-12">
+		        <!-- Tab panels -->
+		        <div class="tab-content vertical">
+		        	<!--Panel 1-->
+			        <div class="tab-pane fade in active" id="panel21" role="tabpanel">
+				    	<div class="card-box">
+				        	<div class="col-md-4 col-sm-4 col-xs-12">
+								<div class="card-blogform">
+									<div class="card-body"> 
+										<div class="form-group">
+											<div class="d-flex"> 
+												<div class="settings-main-icon ">
+													<i class="glyphicon glyphicon-user" aria-hidden="true"></i>
+												</div> 
+												<div class="col-md-10 col-sm-10 col-xs-12"> 
+													<p class="tx-20 font-weight-semibold d-flex "><?php echo $tr->translate("STUDENT_INFO");?></p>
+												</div> 
+											</div>
+										</div>
+										<div class="form-group <?php if ($testCondiction==2){ echo "hiddenControl";}?>">
+											<label class="control-label bold col-md-5 col-sm-5 col-xs-12" ><?php echo $tr->translate("BRANCH");?> <span class="required">*</span>
+											</label>
+											<div class="col-md-7 col-sm-7 col-xs-12">
+													<?php echo $frm->getElement("branch_id");?>
+											</div>
+										</div>
+										<div class="form-group">
+											<label class="control-label col-md-5 col-sm-5 col-xs-12" ><?php echo $tr->translate("STUDENT_ID");?> 
+											</label>
+											<div class="col-md-7 col-sm-7 col-xs-12">
+													<?php echo $frm->getElement("stu_code");?>
+													<?php echo $frm->getElement("id");?>
+											</div>
+										</div>
+										<div class="form-group">
+											<label class="control-label col-md-5 col-sm-5 col-xs-12" ><?php echo $tr->translate("SERIAL");?> <span class="required">*</span>
+											</label>
+											<div class="col-md-7 col-sm-7 col-xs-12">
+													<?php echo $frm->getElement("serial");?>
+											</div>
+										</div>
+										<div class="form-group">
+											<label class="control-label bold col-md-5 col-sm-5 col-xs-12" ><?php echo $tr->translate("STUDENT_NAMEKHMER");?> <span class="required">*</span>
+											</label>
+											<div class="col-md-7 col-sm-7 col-xs-12">
+													<?php echo $frm->getElement("kh_name");?>
+											</div>
+										</div>
+										<div class="form-group">
+											<label class="control-label bold col-md-5 col-sm-5 col-xs-12" ><?php echo $tr->translate("Last Name");?> 
+											</label>
+											<div class="col-md-7 col-sm-7 col-xs-12">
+													<?php echo $frm->getElement("en_name");?>
+											</div>
+										</div>
+										<div class="form-group">
+											<label class="control-label bold col-md-5 col-sm-5 col-xs-12" ><?php echo $tr->translate("First Name");?> 
+											</label>
+											<div class="col-md-7 col-sm-7 col-xs-12">
+													<?php echo $frm->getElement("first_name");?>
+											</div>
+										</div>
+										<div class="form-group">
+										<label class="control-label col-md-5 col-sm-5 col-xs-12" ><?php echo $tr->translate("SEX");?> 
+											</label>
+											<div class="col-md-7 col-sm-7 col-xs-12">
+													<?php echo $frm->getElement("sex");?>
+											</div>
+										</div>
+										<div class="form-group">
+											<label class="control-label col-md-5 col-sm-5 col-xs-12" ><?php echo $tr->translate("DOB");?> 
+											</label>
+											<div class="col-md-7 col-sm-7 col-xs-12">
+													<?php echo $frm->getElement("dob");?>
+											</div>
+										</div>
+										<div class="form-group">
+											<label class="control-label col-md-5 col-sm-5 col-xs-12" ><?php echo $tr->translate("POB");?> 
+											</label>
+											<div class="col-md-7 col-sm-7 col-xs-12">
+													<?php echo $frm->getElement("pob");?>
+											</div>
+										</div>
+										<div class="form-group">
+											<label class="control-label col-md-5 col-sm-5 col-xs-12" ><?php echo $tr->translate("Marital_Status");?> 
+											</label>
+											<div class="col-md-7 col-sm-7 col-xs-12">
+													<?php echo $frm->getElement("student_status");?>
+											</div>
+										</div>
+										<div class="form-group <?php if ($testCondiction==2){ echo "hiddenControl";}?>">
+											<label class="control-label col-md-5 col-sm-5 col-xs-12" ><?php echo $tr->translate("NATIONALITY");?> 
+											</label>
+											<div class="col-md-7 col-sm-7 col-xs-12">
+													<?php echo $frm->getElement("nationality");?>
+											</div>
+										</div>
+										<div class="form-group <?php if ($testCondiction==2){ echo "hiddenControl";}?>">
+											<label class="control-label col-md-5 col-sm-5 col-xs-12" ><?php echo $tr->translate("NATION");?> 
+											</label>
+											<div class="col-md-7 col-sm-7 col-xs-12">
+												<?php echo $frm->getElement("nation");?>
+											</div>
+										</div>
+										<div class="form-group">
+											<label class="control-label col-md-5 col-sm-5 col-xs-12" ><?php echo $tr->translate("OCCUPATION");?> 
+											</label>
+											<div class="col-md-7 col-sm-7 col-xs-12">
+													<?php echo $frm->getElement("student_option");?>
+											</div>
+										</div>
+
+									</div>
+								</div>
+								
+				             </div>
+				             <div class="col-md-4 col-sm-4 col-xs-12">
+								 <div class="card-blogform">
+									<div class="card-body"> 
+										<div class="form-group">
+											<div class="d-flex"> 
+												<div class="settings-main-icon ">
+													<i class="fa fa-phone" aria-hidden="true"></i>
+												</div> 
+												<div class="col-md-10 col-sm-10 col-xs-12"> 
+													<p class="tx-20 font-weight-semibold d-flex "><?php echo $tr->translate("CONTACT_INFO");?></p>
+												</div> 
+											</div>
+										</div>
+										<div class="form-group">
+											<label class="control-label col-md-5 col-sm-5 col-xs-12" ><?php echo $tr->translate("PHONE");?> 
+											</label>
+											<div class="col-md-7 col-sm-7 col-xs-12">
+													<?php echo $frm->getElement("phone");?>
+											</div>
+										</div>
+										<div class="form-group">
+											<label class="control-label col-md-5 col-sm-5 col-xs-12" ><?php echo $tr->translate("EMAIL");?> 
+											</label>
+											<div class="col-md-7 col-sm-7 col-xs-12">
+													<?php echo $frm->getElement("email");?>
+											</div>
+										</div>
+										
+										<div class="form-group">
+											<div class="d-flex"> 
+												<div class="settings-main-icon ">
+													<i class="fa fa-map" aria-hidden="true"></i>
+												</div> 
+												<div class="col-md-7 col-sm-7 col-xs-12"> 
+													<p class="tx-20 font-weight-semibold d-flex "><?php echo $tr->translate("CURRENT_ADDRESS");?></p>
+												</div> 
+												<label class="col-md-3 col-sm-3 col-xs-12" >
+													<input class="button-class button-primary" iconClass="glyphicon glyphicon-refresh" type="button" label="<?php echo $tr->translate('REFRESH');?>" dojoType="dijit.form.Button" onclick="AllRefresh();"/>
+												</label>
+											</div>
+										</div>
+										
+										<div class="form-group">
+											<label class="control-label col-md-5 col-sm-5 col-xs-12" ><?php echo $tr->translate("NUMBER_HOME");?> 
+											</label>
+											<div class="col-md-7 col-sm-7 col-xs-12">
+													<?php echo $frm->getElement("home_num");?>
+											</div>
+										</div>
+										<div class="form-group">
+											<label class="control-label col-md-5 col-sm-5 col-xs-12" ><?php echo $tr->translate("STREET");?> 
+											</label>
+											<div class="col-md-7 col-sm-7 col-xs-12">
+													<?php echo $frm->getElement("street_num");?>
+											</div>
+										</div>
+										<div class="form-group">
+											<label class="control-label col-md-5 col-sm-5 col-xs-12" ><?php echo $tr->translate("PROVINCE");?> 
+											</label>
+											<div class="col-md-7 col-sm-7 col-xs-12">
+													<?php echo $frm->getElement("province_id");?>
+											</div>
+										</div>
+										<div class="form-group">
+											<label class="control-label col-md-5 col-sm-5 col-xs-12" ><?php echo $tr->translate("DISTRICT");?> 
+											</label>
+											<div class="col-md-7 col-sm-7 col-xs-12">
+													<input id="district_name"/>
+											</div>
+										</div>
+										<div class="form-group">
+											<label class="control-label col-md-5 col-sm-5 col-xs-12" ><?php echo $tr->translate("COMMUNE");?> 
+											</label>
+											<div class="col-md-7 col-sm-7 col-xs-12">
+													<input id="commune_name"/>
+											</div>
+										</div>
+										<div class="form-group">
+											<label class="control-label col-md-5 col-sm-5 col-xs-12" ><?php echo $tr->translate("VILLAGE");?> 
+											</label>
+											<div class="col-md-7 col-sm-7 col-xs-12">
+													<input id="village_name"/>
+											</div>
+										</div>
+										<?php if($this->rs["is_studenttest"]==1 && $this->rs["customer_type"]==4){?>
+										<div class="form-group">
+											<label class="control-label custom-switch float-end "> 
+												<a href="javascript:void(0);" class="switchButton status"><?php echo $tr->translate("STATUS");?></a> 
+												<input type="checkbox" id="status" name="status" class="custom-switch-input" <?php if(!empty($this->rs['status'])){ echo "checked";} ?> > 
+												<span class="custom-switch-indicator custom-radius switch-status"></span> 
+											</label>
+										</div>
+										<?php } ?>
+										
+									</div>
+								 </div>
+				             </div>
+				             <div class="col-md-4 col-sm-4 col-xs-12">
+								 <div class="card-blogform">
+									<div class="card-body"> 
+										<div class="form-group">
+												<div class="d-flex"> 
+													<div class="settings-main-icon ">
+														<i class="material-icons-outlined">
+														add_a_photo
+														</i>
+													</div> 
+													<div class="col-md-10 col-sm-10 col-xs-12"> 
+														<p class="tx-20 font-weight-semibold d-flex "><?php echo $tr->translate("PHOTO");?></p>
+													</div> 
+												</div>
+										</div>
+										<div class="form-group">
+											<div class="col-md-12 col-sm-12 col-xs-12">
+													<div class="account-image text-center">
+														<div class="image-box">
+															<?php 
+															$image = $this->baseUrl().'/images/no-profile.png';
+															if(!empty($this->rs['photo'])){
+																if (file_exists(PUBLIC_PATH."/images/photo/".$this->rs['photo'])){
+																	$image = $this->baseUrl().'/images/photo/'.$this->rs['photo'];
+																}
+															}?>
+															<img id="profile_wiew" src="<?php echo $image;?>" alt=""  />
+														</div>
+														<div class="button_browse">
+														<div id='preview'></div>	
+															<span>Upload <span ><i class="fa fa-camera" aria-hidden="true"></i></span></span>
+															<input class="btn_borwse_image" type="file" id="photo" name="photo"   />
+															<input type="hidden" name="uploaded" id="uploaded" value=""/>
+															<input type="hidden" name="old_photo" name="old_photo" value="<?php echo $this->rs['photo'];?>" dojoType="dijit.form.TextBox" />
+														</div>
+														<button type="button" style="padding-left: 20px;" onClick="setup()" class="btn btn-success btn-sm">បើក Camera</button>
+													</div>
+											</div>
+										</div>
+										<div class="<?php if($test_online == 0 ){ echo  "dijitHidden"; }  ?>">
+											<div class="form-group">
+												<label class="control-label col-md-12 col-sm-12 col-xs-12 title-blog bold" ><i class="fa fa-hand-o-right" aria-hidden="true"></i> <?php echo $tr->translate("TEST_INFO");?> 
+												</label>
+											</div>
+											<div class="form-group">
+												<label class="control-label col-md-5 col-sm-5 col-xs-12" ><?php echo $tr->translate("TEST_TYPE");?> :
+												</label>
+												<div class="col-md-7 col-sm-7 col-xs-12">
+														<?php echo $frm->getElement("test_type");?>
+												</div>
+											</div>
+											<div class="form-group">
+												<label class="control-label col-md-5 col-sm-5 col-xs-12" ><?php echo $tr->translate("TEST_VERSION");?>
+												</label>
+												<div class="col-md-7 col-sm-7 col-xs-12">
+														<input id="test_setting_id" />
+												</div>
+											</div>
+										</div>
+									</div>
+								 </div>
+				             </div>
+				        </div>
+				   </div>
+				   <!--/.Panel 1-->
+				   <div class="tab-pane fade in " id="panel23" role="tabpanel">
+				    	<div class="card-box">
+				        	<div class="col-md-4 col-sm-4 col-xs-12">
+								<div class="card-blogform">
+									<div class="card-body"> 
+										<div class="form-group">
+											<div class="d-flex"> 
+												<div class="settings-main-icon ">
+													<i class="glyphicon glyphicon-user" aria-hidden="true"></i>
+												</div> 
+												<div class="col-md-10 col-sm-10 col-xs-12"> 
+													<p class="tx-20 font-weight-semibold d-flex "><?php echo $tr->translate("GUARDIAN_INFO");?></p>
+												</div> 
+											</div>
+										</div>
+										<div class="form-group">
+										   <label class="control-label  col-md-5 col-sm-5 col-xs-12" ><?php echo $tr->translate("FAMILY");?> 
+										   </label>
+										   <div class="col-md-4 col-sm-4 col-xs-12">
+												<select class="custome-select-opt fullside" onchange="getFamilyInfo()" placeHolder="<?php echo $tr->translate("SELECT_FAMILY"); ?>" required="false" name="familyId" id="familyId" ></select>
+										   </div>
+										   <label class="col-md-3 col-sm-3 col-xs-12" >
+												<input class="button-class button-primary" iconClass="glyphicon glyphicon-refresh" type="button" label="<?php echo $tr->translate('REFRESH');?>" dojoType="dijit.form.Button" onclick="getFamilyIdList();"/>
+											</label>
+										</div>
+										<div class="table-responsive">
+											<table class="table">
+											  <tbody>
+												<tr>
+												  <th style="width:50%"><?php echo $tr->translate('FATHER_NAME');?></th>
+												  <td align="right"><span class="fatherNameKh">N/A</span></td>
+												</tr>
+												<tr>
+												  <th><?php echo $tr->translate('PHONE');?></th>
+												  <td align="right"><span class="fatherPhone">N/A</span></td>
+												</tr>
+												<tr>
+												  <th><?php echo $tr->translate('MOTHER_NAME');?></th>
+												  <td align="right"><span class="motherNameKh">N/A</span></td>
+												</tr>
+												<tr>
+												  <th><?php echo $tr->translate('PHONE');?></th>
+												  <td align="right"><span class="motherPhone">N/A</span></td>
+												</tr>
+											  </tbody>
+											</table>
+										</div>
+										<div class="form-group">
+											<div class="col-md-12 col-sm-12 col-xs-12">
+												&nbsp;
+											</div>
+										</div>
+										<div class="form-group">
+											<div class="d-flex"> 
+												<div class="settings-main-icon ">
+													<i class="fa fa-hand-point-right" aria-hidden="true"></i>
+												</div> 
+												<div class="col-md-10 col-sm-10 col-xs-12"> 
+													<p class="tx-20 font-weight-semibold d-flex "><?php echo $tr->translate("EMERGENCY_CONTACT");?></p>
+												</div> 
+											</div>
+										</div>
+										<div class="form-group">
+											<label style="  white-space: normal;  font-style: italic;" class="control-label col-md-12 col-sm-12 col-xs-12 " > 
+											List any person whom you would like to be contacted in case of emergency.
+											</label>
+										</div>
+										<div class="form-group">
+											<label class="control-label col-md-5 col-sm-5 col-xs-12" ><?php echo $tr->translate("NAME");?>
+											</label>
+											<div class="col-md-7 col-sm-7 col-xs-12">
+													<?php echo $frm->getElement("emergency_name");?>
+											</div>
+										</div>
+										<div class="form-group">
+											<label class="control-label col-md-5 col-sm-5 col-xs-12" ><?php echo $tr->translate("RELATIONSHIP_TO_STUDENT");?>
+											</label>
+											<div class="col-md-7 col-sm-7 col-xs-12">
+													<?php echo $frm->getElement("relationship_to_student");?>
+											</div>
+										</div>
+										<div class="form-group">
+											<label class="control-label col-md-5 col-sm-5 col-xs-12" ><?php echo $tr->translate("PHONE");?>
+											</label>
+											<div class="col-md-7 col-sm-7 col-xs-12">
+													<?php echo $frm->getElement("emergency_tel");?>
+											</div>
+										</div>
+										
+									</div>
+								</div>
+				            </div>
+							<div class="col-md-4 col-sm-4 col-xs-12">
+								
+							</div>
+				        </div>
+				   </div>
+				    <!--Panel 2-->
+			        <div class="tab-pane fade in " id="panel22" role="tabpanel">
+				        <?php if (!empty($this->testresult)){?>
+				        <div class="card-box">
+							<div class="col-md-12 col-sm-12 col-xs-12 ">
+								<div class="card-blogform">
+									<div class="card-body"> 
+										<div class="form-group">
+											<div class="d-flex"> 
+												<div class="settings-main-icon ">
+													<i class="fa fa-hand-o-right" aria-hidden="true"></i>
+												</div> 
+												<div class="col-md-10 col-sm-10 col-xs-12"> 
+													<p class="tx-20 font-weight-semibold d-flex "><?php echo $tr->translate("TEST_HISTORY");?></p>
+												</div> 
+											</div>
+										</div>
+										<div class="form-group">
+											<table class="history-record" >
+												<thead>
+													<tr>
+														<th rowspan="2"><?php echo $tr->translate("Default");?></th>
+														<th rowspan="2"><?php echo $tr->translate("NUM");?></th>
+														<th rowspan="2"><?php echo $tr->translate("TEST_TYPE");?></th>
+														<th colspan="4"><?php echo $tr->translate("REQUEST_FOR");?></th>
+														<th colspan="5"><?php echo $tr->translate("RESULT");?></th>
+														<th rowspan="2"><?php echo $tr->translate("NOTE");?></th>
+														<th rowspan="2"></th>
+													</tr>
+													<tr>
+														<th><?php echo $tr->translate("TEST_DATE");?></th>
+														<th><?php echo $tr->translate("TEST_TERM");?></th>
+														<th><?php echo $tr->translate("DEGREE");?></th>
+														<th><?php echo $tr->translate("GRADE");?></th>
+														<th><?php echo $tr->translate("RESULT_DATE");?></th>
+														<th><?php echo $tr->translate("DEGREE");?></th>
+														<th><?php echo $tr->translate("GRADE");?></th>
+														<th><?php echo $tr->translate("SCORE");?></th>
+														<th><?php echo $tr->translate("COMMENTS");?></th>
+													</tr>
+												</thead>
+												<tbody>
+													<?php foreach ($this->testresult as $key => $record){?>
+													<tr>
+														<td align="center">
+															<?php if (!empty($record['score']) AND !empty($record['degree_result']) AND !empty($record['grade_result'])){?>
+															<input <?php if ($record['is_current']==1){ echo 'checked="checked"';}?> style=" vertical-align: top; height: initial;" type="checkbox" class="checkbox" id="default_<?php echo $record['id'];?>"  name="default_<?php echo $record['id'];?>"/>
+															<?php }else{ echo '&nbsp;';}?>
+														</td>
+														<td align="center">&nbsp;<?php echo $key+1;?>&nbsp;</td>
+														<td align="left">&nbsp;<?php echo $record['test_type_title'];?>&nbsp;</td>
+														<td align="center">&nbsp;<?php echo date("d/M/Y",strtotime($record['test_date']))?>&nbsp;</td>
+														<td align="left">&nbsp;<?php echo $record['study_term'];?>&nbsp;</td>
+														<td align="left">&nbsp;<?php echo $record['degree_title'];?>&nbsp;</td>
+														<td align="left">&nbsp;<?php echo $record['grade_title'];?>&nbsp;</td>
+														<td align="center">&nbsp;<?php echo empty($record['result_date'])?"":date("d/M/Y",strtotime($record['result_date']));?>&nbsp;</td>
+														<td align="left">&nbsp;<?php echo $record['degree_result_title'];?>&nbsp;</td>
+														<td align="left">&nbsp;<?php echo $record['grade_result_title'];?>&nbsp;</td>
+														<td align="center">&nbsp;<?php echo $record['score'];?>&nbsp;</td>
+														<td align="left">&nbsp;<?php echo $record['comment_title'];?>&nbsp;</td>
+														<td align="center">&nbsp;<?php echo $record['note'];?>&nbsp;</td>
+														<td align="center">&nbsp;
+															<?php 
+															$url="#";
+															$url = $this->baseUrl()."/test/index/createtestexam/id/".$this->rs['stu_id']."?test=".$record['id']."&type=".$record['test_type'];
+															?>
+															<a class="btn btn-primary btn-xs" target="_blank" title="<?php echo $tr->translate("Update Or Edit Result");?>" href="<?php echo $url;?>">
+															<i class="fa fa-edit" aria-hidden="true"></i>
+															</a>&nbsp;
+														</td>
+													</tr>
+													<?php }?>
+												</tbody>
+											</table>
+										</div>
+									</div>
+								</div>
+							</div>
+				        </div>
+				        <?php }?>
+						<div class="card-box">
+							<div class="col-md-12 col-sm-12 col-xs-12 text-center">
+								<div class="card-blogform">
+									<div class="card-body"> 
+										<div class="col-sm-12  text-center">
+											<input class="button-class button-primary" iconClass="glyphicon glyphicon-list-alt" type="button" label="<?php echo $tr->translate('TEST_EXAM_EN');?>" dojoType="dijit.form.Button" onclick="goEnglishTest();"/>
+											<input class="button-class button-warning" iconClass="glyphicon glyphicon-list-alt" type="button" label="<?php echo $tr->translate('TEST_EXAM_KH');?>" dojoType="dijit.form.Button" onclick="goKhTest();"/>
+	    								</div>
+									</div>
+								</div>
+							</div>
+						</div>
+			        </div>
+			        <!--/.Panel 2-->
+					<div class="tab-pane fade in " id="panel24" role="tabpanel">
+				    	<div class="card-box">
+				        	<div class="col-md-4 col-sm-4 col-xs-12">
+								<div class="card-blogform">
+									<div class="card-body"> 
+										<div class="form-group">
+											<div class="d-flex"> 
+												<div class="settings-main-icon ">
+													<i class="glyphicon glyphicon-education" aria-hidden="true"></i>
+												</div> 
+												<div class="col-md-10 col-sm-10 col-xs-12"> 
+													<p class="tx-20 font-weight-semibold d-flex "><?php echo $tr->translate("STUDY_INFO");?></p>
+												</div> 
+											</div>
+										</div>
+										<div class="form-group <?php if ($testCondiction==2){ echo "hiddenControl";}?>">
+											<label class="control-label col-md-5 col-sm-5 col-xs-12" ><?php echo $tr->translate("OLD_SCHOOL");?>
+											</label>
+											 <div class="col-md-4 col-sm-4 col-xs-12">
+												<input id="old_school" />
+												<?php //echo $frm->getElement("old_school");?>
+											</div>
+											<label class="col-md-3 col-sm-3 col-xs-12" >
+												<input class="button-class button-primary" iconClass="glyphicon glyphicon-refresh" type="button" label="<?php echo $tr->translate('REFRESH');?>" dojoType="dijit.form.Button" onclick="refreshing();"/>
+											</label>
+										</div>
+										<div class="form-group">
+											<label class="control-label col-md-5 col-sm-5 col-xs-12" ><?php echo $tr->translate("OLD_GRADE");?>
+											</label>
+											<div class="col-md-7 col-sm-7 col-xs-12">
+													<?php echo $frm->getElement("old_grade");?>
+											</div>
+										</div>
+									</div>
+								</div>
+				            </div>
+							<div class="col-md-8 col-sm-8 col-xs-12">
+								<div class="card-blogform">
+									<div class="card-body"> 
+										<div class="form-group">
+											<div class="d-flex"> 
+												<div class="settings-main-icon ">
+													<i class="glyphicon glyphicon-education" aria-hidden="true"></i>
+												</div> 
+												<div class="col-md-10 col-sm-10 col-xs-12"> 
+													<p class="tx-20 font-weight-semibold d-flex "><?php echo $tr->translate("EDUCATIONAL_BACKGROUND")?></p>
+												</div> 
+											</div>
+										</div>
+										<div class="form-group">
+											<div class="col-md-12 col-sm-12 col-xs-12">
+													<table class="collape tablesorter" id="table_row" style="white-space: nowrap;border:1px solid #ddd;width: 100%;">
+														<tr id="head-title" class="head-td" align="center"></tr>
+													</table>
+													<input type="button" label="<?php echo $tr->translate('ADD_ROW');?>" dojoType="dijit.form.Button" 
+													class="button-class button-primary" iconClass="glyphicon glyphicon-sort-by-attributes" onclick="addRow();" />
+													<input type="hidden" name="identity" id="identity" dojoType="dijit.form.TextBox" value="" >
+											</div>
+										</div>
+									</div>
+								</div>
+				            </div>
+				        </div>
+				   </div>
+				   <!--Paneelll--->
+	       		</div>
+	      	 </div>
+	        <div class="card-box">
+               	<div class="col-sm-12 border-top mt-20 ptb-10 text-center">
+					<input label="<?php echo $tr->translate("SAVE_CLOSE")?>" name='saveclose' id='saveclose' value='saveclose' dojoType="dijit.form.Button" type="submit"  class="button-class button-primary" iconClass="glyphicon glyphicon-floppy-saved" />
+	    		</div>
+	    	</div>
+		</form>
+	</div>
+</div>
+<div class="dijitHidden">
+	<div data-dojo-type="dijit.Dialog" data-dojo-props="title:'<?php echo $tr->translate("ADD_NATION")?>'" style="width:500px;" id="popup_nation" >
+		<form  id='frm_nation_kh' dojoType="dijit.form.Form" method="post" enctype="application/x-www-form-urlencoded">
+			<table cellspacing="10" width="100%" style="margin: 0 auto;">
+				<tr>
+					<td>
+						<fieldset >
+						<legend class="bold" align="center" ><?php echo $tr->translate('ADD_NATION');?></legend>
+							<table style="margin: 0 auto; width: 100%;  padding:10px; line-height: 35px;" cellspacing="10" >
+							<tr>
+								<td><?php echo $tr->translate('KH_NAME');?></td>
+								<td><input dojoType="dijit.form.ValidationTextBox" required="true"  class="fullside" id="title_kh" name="title_kh" value="" type="text"></td>
+							</tr>
+							<tr>
+								<td><?php echo $tr->translate('EN_NAME');?></td>
+								<td>
+									<input dojoType="dijit.form.ValidationTextBox" required="true"  class="fullside" id="title_en" name="title_en" value="" type="text">
+									<input type="hidden" id="status_na" name="status_na" value="1" />
+									<input type="hidden" id="indexkey" name="indexkey" value="1" />
+								</td>
+							</tr>
+								<tr>
+									<td colspan="4" align="center">
+										<input type="button" value="ចាកចេញ" label="<?php echo $tr->translate('CLOSE');?>" id="hide_nation" name="hide_nation" dojoType="dijit.form.Button" 
+										​ ​​class="button-class button-primary" iconClass="glyphicon glyphicon-floppy-remove" onclick="dijit.byId('popup_nation').hide();"/>
+										<input type="button" value="save" label="<?php echo $tr->translate('SAVE');?>" id="save_nation" name="save_nation" dojoType="dijit.form.Button" 
+										 class="button-class button-primary" iconClass="glyphicon glyphicon-floppy-disk" onclick="addNationBy();"/>
+									</td>
+								</tr>
+							</table>
+						</fieldset>
+					</td>
+				</tr>
+			</table>
+		</form>
+	</div>
+</div>		
+<div class="dijitHidden">
+	<div data-dojo-type="dijit.Dialog" style="width:320px;" align="center" data-dojo-props="title:'Camera'" id="showcamera" >
+		<div class="app">
+		    <a href="#" id="start-camera" class="visible">Touch here to start the app.</a>
+		    <video id="camera-stream"></video>
+		    <img id="snap">
+		
+		    <p id="error-message"></p>
+		
+		    <div class="controls">
+		      <a href="#" id="delete-photo" title="Re-take Photo" class="disabled"><i class="fa fa-refresh"></i></a>
+		      <a href="#" id="take-photo" title="Take Photo"><i class="fa fa-camera"></i></a>
+		      <a href="#" id="close-photo" class="disabled" onClick='dijit.byId("showcamera").hide();'><i class="fa fa-times"></i></a>
+		      <!-- <a href="#" id="download-photo" download="selfie.png" title="Save Photo" class="disabled"><i class="fa fa-download"></i></a>  --> 
+		    </div>
+		
+		    <!-- Hidden canvas element. Used for taking snapshot of video. -->
+		    <canvas></canvas>
+			
+		  </div>
+	</div>
+</div>	
+<script src="<?php echo $this->baseUrl();?>/js/help.js"  type="text/javascript"></script>
+<link href="<?php echo $this->baseUrl()."/admin"?>/3.5.0/select2.css" rel="stylesheet">
+<script src="<?php echo $this->baseUrl()."/admin"?>/3.5.0/select2.min.js"></script>
+
+<script type="text/javascript">
+
+var schoolStore  = getDataStorefromJSON('id','name', <?php print_r(Zend_Json::encode(array()));?> );
+var district_store  = getDataStorefromJSON('id','name', <?php print_r(Zend_Json::encode(array()));?> );
+var commune_store  = getDataStorefromJSON('id','name', <?php print_r(Zend_Json::encode(array()));?> );
+var village_store  = getDataStorefromJSON('id','name', <?php print_r(Zend_Json::encode(array()));?> );
+var setting_store  = getDataStorefromJSON('id','name',<?php print_r(Zend_Json::encode(array()));?>);
+
+dojo.ready(function(){
+	
+	new dijit.form.FilteringSelect({
+		store: district_store,
+		autoComplete:false,
+		queryExpr:'*${0}*',
+		required: false,		           
+		name: "district_name",
+		id: "district_name",
+		value:"<?php echo $this->rs['district_name'];?>",
+		searchAttr: "name",
+		class: 'fullside',
+			onChange: function() {
+				district_name = dijit.byId('district_name').get('value');
+				if(district_name==-1){
+					window.open('<?php echo Zend_Controller_Front::getInstance()->getBaseUrl()."/global/district/add?rightclick=true";?>','_blank');
+				}
+				filterCommune();
+			}  
+		}, "district_name");
+		 
+		new dijit.form.FilteringSelect({
+		store: commune_name,
+		autoComplete:false,
+		queryExpr:'*${0}*',
+		required: false,		           
+		name: "commune_name",
+		id: "commune_name",
+		searchAttr: "name",
+		class: 'fullside',
+			onChange: function() {
+				commune_name = dijit.byId('commune_name').get('value');
+				if(commune_name==-1){
+					window.open('<?php echo Zend_Controller_Front::getInstance()->getBaseUrl()."/global/commune/add?rightclick=true";?>','_blank');
+				}
+				else{
+					filterVillage();
+				}
+	  }
+		}, "commune_name");
+		 
+		new dijit.form.FilteringSelect({
+		store: village_store,
+		autoComplete:false,
+		queryExpr:'*${0}*',
+		required: false,		           
+		name: "village_name",
+		id: "village_name",
+		searchAttr: "name",
+		class: 'fullside',
+			onChange: function() {
+				vill = dijit.byId('village_name').get('value');
+				if(vill==-1){
+					window.open('<?php echo Zend_Controller_Front::getInstance()->getBaseUrl()."/global/village/add?rightclick=true";?>','_blank');
+				}
+			}
+		}, "village_name");
+
+		new dijit.form.FilteringSelect({
+			store: grade_store,
+			autoComplete:false,
+			queryExpr:'*${0}*',                     
+			required: false,
+			id: "grade",
+			name: "grade",           
+			class: "fullside", 
+			placeHolder:"<?php echo $tr->translate('SELECT_GRADE');?>",          
+			onChange: function() {  
+				
+			}
+		}, "grade");
+		
+		new dijit.form.FilteringSelect({
+			store: grade_result_store,
+			autoComplete:false,
+			queryExpr:'*${0}*',                    
+			required: false,
+			id: "grade_result",
+			name: "grade_result",           
+			class: "fullside", 
+			placeHolder:"<?php echo $tr->translate('SELECT_GRADE');?>",          
+			onChange: function() {  
+			}
+		}, "grade_result");
+		
+		new dijit.form.FilteringSelect({
+			store: schoolStore,
+			autoComplete: false,
+			queryExpr:'*${0}*',                        
+			required: false,
+			id: "old_school",
+			name: "old_school",           
+			class: "fullside", 
+			placeHolder:"<?php echo $tr->translate('FROM_SCHOOL');?>",          
+			onChange: function() {  
+				var thisPrevSchool = dijit.byId('old_school').get('value');
+				if( thisPrevSchool == -1){
+					addTab('<?php echo $tr->translate("ADD_SCHOOLL");?>','<?php echo $this->baseUrl() . "/global/prevschool/add".'?inFrame=true'; ?>');
+				}
+			}
+		}, "old_school");
+		
+		filterDistrict();
+		oldRow();
+
+		new dijit.form.FilteringSelect({
+			store: setting_store,
+			queryExpr: "*${0}*",
+			autoComplete: false,                      
+			required: false,               
+			id: "test_setting_id",
+			name: "test_setting_id",   
+			class: 'fullside', 
+			placeHolder:"<?php echo $tr->translate("SECTION");?>",
+			onChange: function() {  
+			}
+		}, "test_setting_id");
+
+		var test_type = dijit.byId('test_type');
+		test_type.on('change', function(evt) {
+			$('#identity1').val('');
+			getAllTestSetting();
+		});
+		getAllTestSetting();
+		
+		$("#familyId").select2(
+			{dropdownAutoWidth : true,allowClear: "true"}
+		);
+		$('#familyId').prop('required', false);
+		getFamilyIdList();
+		getPrevSchoolStore();
+});
+
+
+function refreshing(){
+	getPrevSchoolStore();
+}
+var urlGetPrevStore = '<?php echo $this->url(array('module'=>'global','controller'=>'prevschool','action'=>'get-prevschool')); ?>';
+function getPrevSchoolStore(){
+	dojo.xhrPost({
+		url: urlGetPrevStore,
+		content:{
+			<?php if(!empty($this->rs["from_school"])){?>
+			'id':'<?php echo $this->rs["from_school"];?>',
+			<?php } ?>
+			},
+		handleAs:"json",
+		load: function(data) {
+			schoolStore  = getDataStorefromJSON('id','name', data);
+			dijit.byId('old_school').set('store',schoolStore);  
+			<?php if(!empty($this->rs["from_school"])){?>
+			dijit.byId('old_school').set('value','<?php echo $this->rs["from_school"];?>');
+			<?php } ?>
+		},
+		error: function(err) {
+		}
+	});
+}
+
+function getFamilyIdList() {
+	
+	let urlGetFamilyList = '<?php echo $this->url(array('module' => 'foundation', 'controller' => 'family', 'action' => 'get-family-list')); ?>';
+	contentData = {
+		'option':1,
+		'recordType':1,//general
+		'formType':'input',
+	}
+	dojo.xhrPost({
+		url: urlGetFamilyList,
+		content:contentData,
+		handleAs:"json",
+		load: function(data){
+			$('#familyId').empty().trigger("change");
+			$('#familyId').append(data).trigger('change');
+			$('#familyId').val("<?php echo empty($this->rs['familyId']) ? 0 : $this->rs['familyId'];?>").trigger('change');
+			document.getElementsByClassName("overlay")[0].style.display="none";	
+		},
+		error: function(err) {
+			document.getElementsByClassName("overlay")[0].style.display="none";	
+		}
+	});
+}
+function getFamilyInfo(){
+	var familyId = $('#familyId').find(":selected").val();
+	if(typeof familyId !=="undefined" ){
+		if( familyId >0){
+			var familyInfo = ($("#familyId").find(':selected').data('record-info'));
+			if(familyInfo !="undefined" ){
+				$(".fatherNameKh").html(familyInfo.fatherNameKh);
+				$(".fatherPhone").html(familyInfo.fatherPhone);
+				$(".motherNameKh").html(familyInfo.motherNameKh);
+				$(".motherPhone").html(familyInfo.motherPhone);
+				
+			}
+		}else if( familyId == -1){
+			addTab('<?php echo $tr->translate("ADD_FAMILY");?>','<?php echo $this->baseUrl() . "/foundation/family/add".'?inFrame=true'; ?>');
+		}
+	}
+} 
+
+function goEnglishTest(){
+	window.open('<?php echo Zend_Controller_Front::getInstance()->getBaseUrl()."/test/index/createtestexam?type=2&id=".$this->rs['stu_id'];?>','_blank');
+}
+function goKhTest(){
+	window.open('<?php echo Zend_Controller_Front::getInstance()->getBaseUrl()."/test/index/createtestexam?type=1&id=".$this->rs['stu_id'];?>','_blank');
+}
+
+var url_section = '<?php echo $this->url(array("module"=>"placement","controller"=>"setting","action"=>"allsettings"));?>';										
+function getAllTestSetting(){
+	dijit.byId('test_setting_id').reset();
+	test_type = dijit.byId('test_type').get('value');
+	if(test_type=='' || test_type==-1){
+		var setting_store  = getDataStorefromJSON('id','name',<?php print_r(Zend_Json::encode(array()));?> );
+		dijit.byId('test_setting_id').set('store',setting_store);  
+		return false;
+	}
+	dojo.xhrPost({
+		url: url_section,
+		content:{
+			'test_type':test_type
+		},
+		handleAs:"json",
+		load: function(data) {
+			setting_store  = getDataStorefromJSON('id','name', data);
+		    dijit.byId('test_setting_id').set('store',setting_store);  
+		    dijit.byId('test_setting_id').set('value','<?php echo $this->rs['test_setting_id'];?>');
+		},
+		error: function(err){
+
+		}
+	});
+}
+new dijit.form.FilteringSelect({
+	name: "nationality",
+	id: "nationality",
+	autoComplete:false,
+	queryExpr:'*${0}*',
+	searchAttr: "name",
+	class: 'fullside',
+	onChange: function() {
+		popupNation(1);
+    }
+	}, "nationality");
+new dijit.form.FilteringSelect({
+	name: "nation",
+	id: "nation",
+	autoComplete:false,
+	queryExpr:'*${0}*',
+	searchAttr: "name",
+	class: 'fullside',
+	onChange: function() {
+		popupNation(2);
+    }
+	}, "nation");
+
+	
+function AllRefresh(){
+	loadingBlock();
+	pro_id = dijit.byId('province_id').get('value');
+	if(pro_id!=''){
+		filterDistrict();
+	}
+	district_name = dijit.byId('district_name').get('value');
+	if(district_name!='' || district_name!=-1){
+		filterCommune();
+	}
+	commune_name = dijit.byId('commune_name').get('value');
+	if(commune_name!='' || commune_name!=-1){
+		filterVillage();
+	}
+	
+	getFamilyIdList();
+}
+oldProvinceId = '<?php echo $this->rs['province_id'];?>';
+oldDistrict = '<?php echo $this->rs['district_name'];?>';
+oldcommune_name = '<?php echo $this->rs['commune_name'];?>';
+url_getdistrict = '<?php echo $this->url(array('module'=>'global','controller'=>'district','action'=>'get-district'));?>';
+function filterDistrict(){
+	pro_id = dijit.byId('province_id').get('value');
+	if(pro_id==0){
+		return false;}
+	dojo.xhrPost({
+		url:url_getdistrict,	
+		content:{ 
+			'pro_id': pro_id
+		},
+		handleAs:"json",
+		load: function(data) {	
+			district_store  = getDataStorefromJSON('id','name', data);		
+		    dijit.byId('district_name').set('store', district_store);
+		    if(oldProvinceId==pro_id){
+		    	dijit.byId('district_name').set('value', "<?php echo $this->rs['district_name'];?>");
+		    }
+		    document.getElementsByClassName("overlay")[0].style.display="none";	
+		},
+		error: function(err) {
+		}
+	});	
+}
+url_getcommune = '<?php echo $this->url(array('module'=>'global','controller'=>'commune','action'=>'get-commune'));?>';
+function filterCommune(){
+	distict_id = dijit.byId('district_name').get('value');
+	if(distict_id==0){
+		return false;}
+	dojo.xhrPost({
+		url:url_getcommune,	
+		content:{ 
+			'district_id': distict_id
+		},
+		handleAs:"json",
+		load: function(data) {	
+			commune_store  = getDataStorefromJSON('id','name', data);		
+		    dijit.byId('commune_name').set('store', commune_store);
+		    if(oldDistrict==distict_id){
+		    	dijit.byId('commune_name').set('value', "<?php echo $this->rs['commune_name'];?>");
+		    }
+		    document.getElementsByClassName("overlay")[0].style.display="none";	
+		},
+		error: function(err) {
+		}
+	});
+}
+url_getvillage = '<?php echo $this->url(array('module'=>'global','controller'=>'village','action'=>'get-allvillage'));?>';
+function filterVillage(){
+	commune_id = dijit.byId('commune_name').get('value');
+	if(commune_id==0){
+		return false;}
+		dojo.xhrPost({
+			url:url_getvillage,	
+			content:{ 
+				'commune_id': commune_id
+			},
+			handleAs:"json",
+			load: function(data) {	
+				village_store  = getDataStorefromJSON('id','name', data);		
+			    dijit.byId('village_name').set('store', village_store);
+			    if(oldcommune_name==commune_id){
+			    	dijit.byId('village_name').set('value', "<?php echo $this->rs['village_name'];?>");
+			    }
+			    document.getElementsByClassName("overlay")[0].style.display="none";	
+			},
+			error: function(err) {
+			}
+		});
+}
+
+function readURL(input) {
+    if (input.files && input.files[0]) {
+        var reader = new FileReader();
+        
+        reader.onload = function (e) {
+            $('#profile_wiew').attr('src', e.target.result);
+        }
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+var maxSize = 0;
+$("#photo").change(function(){
+    readURL(this);
+});
+
+var url_getserial = '<?php echo $this->url(array('module'=>'registrar','controller'=>'studenttest','action'=>'getserial')); ?>';
+function getSerailCodeByBranch(){
+	branch_id = dijit.byId('branch_id').get('value');
+	if(branch_id==''){
+		return false;
+	}
+	dojo.xhrPost({
+		url: url_getserial,
+		content:{
+			'branch_id':branch_id
+			},
+		handleAs:"json",
+		load: function(data) {
+			dijit.byId('serial').set('value',data);
+		},
+		error: function(err) {
+		}
+	});
+}
+
+function popupNation(key){
+	if(key==1){
+		var nation = dijit.byId('nationality').get('value');
+		$("#indexkey").val(key);
+	}else{
+		var nation = dijit.byId('nation').get('value');
+		$("#indexkey").val(key);
+	}
+	if(nation==''){
+		return false;
+	}
+	if(nation==-1){
+		dijit.byId("popup_nation").show();
+	}
+}
+var nation_store  = getDataStorefromJSON('id','name',<?php print_r(Zend_Json::encode($this->nation));?> );
+var nation_store1  = getDataStorefromJSON('id','name',<?php print_r(Zend_Json::encode($this->nation));?> );
+var url_add_nation = '<?php echo $this->url(array("module"=>"foundation","controller"=>"register","action"=>"add-nation")); ?>';
+	function addNationBy(){
+		if(dijit.byId('frm_nation_kh').validate()){
+			dijit.byId("save_nation").attr("disabled",true);
+			nationality=dijit.byId('nationality').get('value');
+			nation=dijit.byId('nation').get('value');
+			loadingBlock();	
+			dojo.xhrPost({
+				url:url_add_nation,
+				form: dojo.byId("frm_nation_kh"),
+				handleAs:"json",
+				load: function(data) {
+					var indexkey = $("#indexkey").val();
+						var Itemmake = { 
+							 id: data,
+							 name: dijit.byId('title_kh').get('value')
+						   };
+					   if(indexkey==1){
+						   addDataToSelectbox(dijit.byId('nationality'), nation_store, Itemmake, data);
+						   addDataToSelectbox(dijit.byId('nation'), nation_store1, Itemmake, data);
+						   nation =  dijit.byId('nation').get('value');
+						   dijit.byId('nation').set('store', nation_store);
+						   if(nation!=""){
+						   dijit.byId('nation').set('value', nation);
+						   }
+					   }else{	   
+						   addDataToSelectbox(dijit.byId('nationality'), nation_store, Itemmake, data);
+						   addDataToSelectbox(dijit.byId('nation'), nation_store1, Itemmake, data);
+						  dijit.byId('nationality').set('store', nation_store);
+						  nation =  dijit.byId('nationality').get('value');
+						  if(nation!=""){
+						  	dijit.byId('nationality').set('value', nation);
+						  }
+					   }
+					   dijit.byId('frm_nation_kh').reset();
+					   dijit.byId("popup_nation").hide();
+					   HideloadingBlock();
+				},
+				error: function(err) {
+				}
+			});
+		}
+	}
+		dojo.require("dojo.data.ItemFileWriteStore");  
+		var grade_store  = getDataStorefromJSON('id','name', <?php print_r(Zend_Json::encode(array()));?> );
+		var grade_result_store  = getDataStorefromJSON('id','name', <?php print_r(Zend_Json::encode(array()));?> );
+		
+		var url_get_grade = '<?php echo $this->url(array('module'=>'global','controller'=>'grade','action'=>'get-grade')); ?>';
+		function getAllGrade(){
+			dijit.byId('grade').set('value',''); 
+			dept_id = dijit.byId('degree').get('value');
+			if(dept_id==''){
+				return false;
+			}
+			dijit.byId('degree_result').set('value',dept_id);
+			dojo.xhrPost({
+				url:url_get_grade,
+				content:{
+					'dept_id':dept_id,
+					'noaddnew':1
+					},
+				handleAs:"json",
+				load: function(data) {
+					grade_store  = getDataStorefromJSON('id','name', data);
+					dijit.byId('grade').set('store',grade_store);  
+				},
+				error: function(err) {
+				}
+			});
+		}
+		var url_get_grade = '<?php echo $this->url(array('module'=>'global','controller'=>'grade','action'=>'get-grade')); ?>';
+		function getAllGradeResult(){
+			dijit.byId('grade_result').set('value',''); 
+			dept_id = dijit.byId('degree_result').get('value');
+			if(dept_id==''){
+				return false;
+			}
+			dojo.xhrPost({
+				url:url_get_grade,
+				content:{
+					'dept_id':dept_id,
+					'noaddnew':1
+					},
+				handleAs:"json",
+				load: function(data) {
+					grade_result_store  = getDataStorefromJSON('id','name', data);
+					dijit.byId('grade_result').set('store',grade_result_store);  
+				},
+				error: function(err) {
+				}
+			});
+		}
+</script>
+ <script>
+
+	var col= 0; var no=0;
+	var title = 0;
+	var all_stu = '<?php //echo $this->all_stu; ?>';
+	function addRow() {
+		col++;no++;
+		template='';
+		temp = "";
+		if(title!=1){
+			temp+='<td><?php echo $tr->translate("DEL");?></td>';
+			temp+='<td><?php echo $tr->translate("N_O");?></td>';
+			temp+='<td><?php echo $tr->translate("SCHOOL_AND_NAME");?></td>';
+			temp+='<td><?php echo $tr->translate("GRADE_LAVEL");?></td>';
+			temp+='<td><?php echo $tr->translate("YEAR");?></td>';
+			temp+='<td><?php echo $tr->translate("GRADE");?></td>';
+			temp+='<td><?php echo $tr->translate("NOTE");?></td>';
+			dojo.query("#head-title").append(temp);
+			title=1;
+		}
+		template+='<td width="2%" align="center"><img onclick="deleteRecord('+col+');" src="<?php echo $this->baseUrl();?>/images/Delete_16.png"></td>';
+		template+='<td align="center" width="2%">'+no+'</td>';
+		template+='<td width="10%"><input dojoType="dijit.form.ValidationTextBox" class="fullside" required="required" id="school_name'+col+'" name="school_name'+col+'" value="" type="text"  ></td>';	
+		template+='<td width="10%"><input dojoType="dijit.form.ValidationTextBox" class="fullside" id="level'+col+'" name="level'+col+'" value="" type="text"  ></td>';	
+		template+='<td width="10%"><input dojoType="dijit.form.ValidationTextBox" class="fullside" id="year'+col+'" name="year'+col+'" value="" type="text"  ></td>';	
+		template+='<td width="10%"><input dojoType="dijit.form.ValidationTextBox" class="fullside" id="major'+col+'" name="major'+col+'" value="" type="text"  ></td>';	
+		template+='<td width="10%"><input dojoType="dijit.form.ValidationTextBox" class="fullside" id="remark_'+col+'" name="remark_'+col+'" value="" type="text"  ></td>';	
+		tmp='<tr id="row'+col+'">';
+		tmp+="</tr>";
+		dojo.query("#table_row").append(tmp);
+		if($("#identity").val()!="") {
+			var identity = $("#identity").val();
+			$("#identity").val(identity+','+col);
+		} else {$("#identity").val(col);}
+		dojo.html.set(dojo.byId("row"+col),template , {
+		     parseContent: true,
+		});
+	}
+	function deleteRecord(index) {
+		var identity = $('#identity').val();
+		var arrays = identity.split(',');
+		for(var i=0;i<arrays.length;i++) {
+			if(arrays[i] == index) arrays.splice(i,1);
+			}
+		var strings = arrays.join(',');
+		$('#identity').val(strings);
+		dojo.query("#row"+index).remove();
+	}
+
+	function oldRow() {
+		<?php if(!empty($this->row_detail)) foreach($this->row_detail As $rs_detail){?>
+		col++;no++;
+		template='';
+		temp = "";
+		if(title!=1){
+			temp+='<td><?php echo $tr->translate("DEL");?></td>';
+			temp+='<td><?php echo $tr->translate("N_O");?></td>';
+			temp+='<td><?php echo $tr->translate("SCHOOL_AND_NAME");?></td>';
+			temp+='<td><?php echo $tr->translate("GRADE_LAVEL");?></td>';
+			temp+='<td><?php echo $tr->translate("YEAR");?></td>';
+			temp+='<td><?php echo $tr->translate("GRADE");?></td>';
+			temp+='<td><?php echo $tr->translate("NOTE");?></td>';
+			dojo.query("#head-title").append(temp);
+			title=1;
+		}
+		template+='<td width="2%" align="center"><img onclick="deleteRecord('+col+');" src="<?php echo $this->baseUrl();?>/images/Delete_16.png"></td>';
+		template+='<td align="center" width="2%">'+no+'</td>';
+		template+='<td width="10%"><input dojoType="dijit.form.ValidationTextBox" class="fullside" id="school_name'+col+'" name="school_name'+col+'" value="" type="text"  ></td>';	
+		template+='<td width="10%"><input dojoType="dijit.form.ValidationTextBox" class="fullside" id="level'+col+'" name="level'+col+'" value="" type="text"  ></td>';	
+		template+='<td width="10%"><input dojoType="dijit.form.ValidationTextBox" class="fullside" id="year'+col+'" name="year'+col+'" value="" type="text"  ></td>';	
+		template+='<td width="10%"><input dojoType="dijit.form.ValidationTextBox" class="fullside" id="major'+col+'" name="major'+col+'" value="" type="text"  ></td>';	
+		template+='<td width="10%"><input dojoType="dijit.form.ValidationTextBox" class="fullside" id="remark_'+col+'" name="remark_'+col+'" value="" type="text"  ></td>';	
+		tmp='<tr id="row'+col+'">';
+		tmp+="</tr>";
+		dojo.query("#table_row").append(tmp);
+		if($("#identity").val()!="") {
+			var identity = $("#identity").val();
+			$("#identity").val(identity+','+col);
+		} else {$("#identity").val(col);}
+		
+		dojo.html.set(dojo.byId("row"+col),template , {
+		     parseContent: true,
+		});
+		dijit.byId("school_name"+col).attr("value",'<?php echo $rs_detail['school_name']?>');
+		dijit.byId("level"+col).attr("value",'<?php echo $rs_detail['level']?>');
+		dijit.byId("year"+col).attr("value",'<?php echo $rs_detail['year']?>');
+		dijit.byId("major"+col).attr("value",'<?php echo $rs_detail['major']?>');
+		dijit.byId("remark_"+col).attr("value",'<?php echo $rs_detail['note']?>');
+	<?php }?>
+	}
+	function setup() {
+		// dijit.byId("showcamera").show();	
+		// Webcam.reset();
+		// Webcam.attach('#my_camera' );
+		dijit.byId("showcamera").show();	
+		startWebCam();
+	}
+	var shutter = new Audio();
+	shutter.autoplay = false;
+	shutter.src = navigator.userAgent.match(/Firefox/) ? '<?php echo $this->baseUrl();?>/webcam/shutter.ogg' : '<?php echo $this->baseUrl();?>/webcam/shutter.mp3';
+	function take_snapshot() {
+		shutter.play();
+		Webcam.snap( function(data_uri) {
+			  $('#profile_wiew').attr('src',data_uri);
+			  SaveSnap();
+		} );
+	}
+	function SaveSnap(){
+	    var url_upload = '<?php echo $this->url(array('module'=>'test','controller'=>'index','action'=>'webcam')); ?>';	
+	    var base64image = document.getElementById("profile_wiew").src;
+	    Webcam.upload( base64image, url_upload, function(code, text) {
+	    	  console.log('Save successfully');
+	    	  uploadcomplete(event);
+	    	 });
+	}
+	function uploadcomplete(event){
+	    var image_return=event.target.responseText;
+	    $("#uploaded").val(image_return);
+	}
+</script>
+<script src="<?php echo $this->baseUrl()."/webcam/scripttakephoto.js"?>"></script>
+<link href="<?php echo $this->baseUrl();?>/webcam/scripttakephoto.css" rel="stylesheet">

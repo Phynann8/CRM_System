@@ -1,0 +1,497 @@
+<?php
+	$tr = Application_Form_FrmLanguages::getCurrentlanguage();
+	echo $this->headTitle($tr->translate("CREDIT_DASH"));	
+	
+	$crAva = $this->countingCreditAvailable;
+?>
+<div class="card">
+	<div class="card-content collapse show">
+		<div class="p-5">
+			<div class="row g-6 mb-6">
+				<div class="col-md-4 col-sm-4 col-xs-6">
+					<div class="card border rounded-3">
+						<div class="card-body">
+							<div class="d-flex align-items-start justify-content-between">
+								<div class="content-left">
+									<span class="text-heading"><?php echo $tr->translate('AVAILABLE_CREDIT_MEMO');?></span>
+									<div class="d-flex align-items-center my-1">
+									  <h4 class="mb-0 me-2"><?php echo empty($crAva["totalRecord"]) ? "00" : sprintf('%02d', $crAva["totalRecord"]); ?></h4>
+									</div>
+								</div>
+								<div class="avatar">
+									<span class="badge p-4 rounded bg-label-primary">
+									  <i class="fa fa-briefcase fa-lg"></i>
+									</span>
+								</div>
+							</div>
+							<div class="d-flex align-items-start justify-content-start">
+								<span class="rounded bg-label-danger  p-1 px-3">
+									<span><?php echo $tr->translate('TOTAL_AMOUNT');?></span>
+									<i class="fa fa-usd fa-lg me-1 ms-1"></i>
+									<span class="fw-bold"><?php echo empty($crAva["totalRemain"]) ? "00" : number_format($crAva["totalRemain"],2); ?>
+									</span>
+								</span>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="col-md-4 col-sm-4 col-xs-6">
+					<div class="card border rounded-3">
+						<div class="card-body">
+							<div class="d-flex align-items-start justify-content-between">
+								<div class="content-left">
+									<span class="text-heading"><?php echo $tr->translate('DISCOUNTSETTING');?> <strong><?php echo empty($this->lastestAcademic["academicYear"]) ? "N/A" :$this->lastestAcademic["academicYear"]; ?></strong></span>
+									<div class="d-flex align-items-center my-1">
+									  <h4 class="mb-0 me-2"><?php echo empty($this->countingDis) ? "00" : sprintf('%02d', $this->countingDis); ?></h4>
+									</div>
+								</div>
+								<div class="avatar">
+									<span class="badge p-4 rounded bg-label-success">
+									  <i class="fa fa-percent fa-lg"></i>
+									</span>
+								</div>
+							</div>
+							<small class="d-flex justify-content-between mb-0">
+								<a class="btn btn-primary btn-xs waves-effect waves-light" href="<?php echo $this->baseUrl()."/accounting/discountsetting/add";?>">
+									<?php echo $tr->translate('ADD_NEW');?> <i class="fa fa-plus-square-o"></i>
+								</a>
+								<a class="btn-xs btn-text-primary waves-effect waves-light" href="<?php echo $this->baseUrl()."/accounting/discountsetting";?>">
+									<?php echo $tr->translate('SHOW_ALL');?> <i class="fa fa-angle-right fa-xs"></i>
+								</a>
+							</small>
+						</div>
+					</div>
+				</div>
+				<div class="col-md-4 col-sm-4 col-xs-6">
+					<div class="card border rounded-3">
+						<div class="card-body">
+							<div class="d-flex align-items-start justify-content-between">
+								<div class="content-left">
+									<span class="text-heading"><?php echo $tr->translate('DISCOUNT_TYPE');?></span>
+									<div class="d-flex align-items-center my-1">
+									  <h4 class="mb-0 me-2"><?php echo empty($this->countingDisType) ? "00" : sprintf('%02d', $this->countingDisType); ?></h4>
+									</div>
+								</div>
+								<div class="avatar">
+									<span class="badge p-4 rounded bg-label-warning">
+										<i class="fa fa-list fa-lg"></i>
+									</span>
+								</div>
+							</div>
+							<small class="d-flex justify-content-between mb-0">
+								<a class="btn btn-primary btn-xs waves-effect waves-light" href="<?php echo $this->baseUrl()."/accounting/discount/add";?>">
+									<?php echo $tr->translate('ADD_NEW');?> <i class="fa fa-plus-square-o"></i>
+								</a>
+								<a class="btn-xs btn-text-primary waves-effect waves-light" href="<?php echo $this->baseUrl()."/accounting/discount";?>">
+									<?php echo $tr->translate('SHOW_ALL');?> <i class="fa fa-angle-right fa-xs"></i>
+								</a>
+							</small>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		
+		<div class="row g-6 mb-6">
+			<div class="col-md-6 col-sm-6 col-xs-12">
+				<div class="card h-100">
+					<div class="card-header ">
+						<div class="card-title mb-2">
+							<h5 class="mb-1">
+								<i class="fa fa-credit-card-alt me-1"></i> <?php echo $tr->translate("CREDIT_LIST")?>
+							</h5>
+						</div>
+						<small class="d-flex justify-content-between mb-0">
+							<a class="btn btn-primary btn-xs waves-effect waves-light" href="<?php echo $this->baseUrl()."/accounting/creditmemo/add";?>">
+								<?php echo $tr->translate('ADD_NEW');?> <i class="fa fa-plus-square-o"></i>
+							</a>
+							<a class="btn-xs btn-text-primary waves-effect waves-light" href="<?php echo $this->baseUrl()."/accounting/creditmemo";?>">
+								<?php echo $tr->translate('SHOW_ALL');?> <i class="fa fa-angle-right fa-xs"></i>
+							</a>
+						</small>
+					</div>
+					<div class="card-body p-0">
+						<div class="row g-3">
+							<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+								<ul class="nav nav-tabs bar_tabs" role="tablist">
+									<li role="presentation" class="active">
+										<a class="nav-link " data-toggle="tab" href="#credit-memo" role="tab"><i class="fa fa-briefcase ml-2"></i> <?php echo $tr->translate("CREDIT_MEMO");?></a>
+									</li>
+									<li role="presentation">
+										<a class="nav-link" data-toggle="tab" href="#transfer-credit" role="tab">
+										<i class="fa fa-compass ml-2"></i> <?php echo $tr->translate("TRANFER_CREDIT");?>
+										</a>
+									</li>
+								</ul>
+							</div>
+						</div>
+						<div class="nav-align-top">
+							<div class="tab-content vertical p-5 m-0">
+								<div class="tab-pane fade in active" id="credit-memo" role="tabpanel">
+									<?php if(!empty($this->creditList)){ ?>
+										<div class="card-datatable dataTables_scrollBody table-responsive h-px-300 overflow-auto p-0 px-5" style="position: relative;  width: 100%; ">
+											<table id="datatable-responsive" class=" nowrap dt-row-grouping table">
+												<thead>
+													<tr>
+														<th class="text-center" ><?PHP echo $tr->translate('NUM');?></th>
+														<th class="text-center" ><?PHP echo $tr->translate('BRANCH');?></th>
+														<th class="text-center" ><?PHP echo $tr->translate('STUDENT');?></th>
+														<th class="text-center" ><?PHP echo $tr->translate('TOTAL_AMOUNT');?></th>
+														<th class="text-center" ><?PHP echo $tr->translate('ACTION');?></th>
+													</tr>
+												</thead>
+												<tbody>
+												<?php foreach($this->creditList AS $ind => $crRow){ 
+												
+													$labelDeposit="";
+													$labelExpired="";
+													
+													$status = $crRow["statusValue"];
+													$isExpired = $crRow["isExpired"];
+													$otherIncomeId = $crRow["otherIncomeId"];
+													if($otherIncomeId>0){
+														$labelDeposit= $tr->translate('deposit')." ".$crRow["incInvoice"]." ";
+													}
+													if($status==0){
+														$isExpired=1;
+													}else{
+														if($isExpired==1){
+															$labelExpired= '<small class="d-block text-danger fw-bold">'.$tr->translate('EXPIRED').'</small>';
+														}
+													}
+												?>
+													<tr>
+														<td class="items-no text-center"><?php echo ($ind+1); ?></td>
+														<td class="">
+															<span class=" text-primary text-truncate fw-medium mb-0 text-wrap" >
+																<?php echo $crRow["branchName"]; ?>
+															</span>
+														</td>
+														<td class="">
+															<div>
+																<span class=" text-primary text-truncate fw-medium mb-0 text-wrap" >
+																	<?php echo $crRow["stuCode"]; ?>
+																</span>
+																<div class="mt-0">
+																	<small class="d-block text-nowrap text-heading"><?php echo $crRow["studentNameKh"]; ?></small>
+																	<small class="d-block text-nowrap text-heading"><?php echo $crRow["studentNameEng"]; ?></small>
+																	
+																</div>
+															</div>
+														</td>
+														<td class="text-center">
+															<div class="d-flex align-items-center justify-content-center">
+																<span class="rounded text-danger  p-1">
+																	<i class="fa fa-usd fa-lg me-1"></i>
+																	<strong><?php echo number_format($crRow["total_amount"],2); ?></strong>
+																	
+																</span>
+															</div>
+															<div class="d-flex align-items-center justify-content-center">
+																<span class="rounded bg-label-primary  p-1">
+																	 <span class="d-block">
+																		<?php echo $crRow["creditTypeTitle"]; ?> 
+																	</span>
+																</span>
+															</div>
+															<small class="d-block fs-tiny fst-italic w-px-200 text-truncate mt-1"><?php echo $labelDeposit.$crRow["prob"]; ?></small>
+														</td>
+														<td class="text-center">
+															<?php echo $crRow["status"]; ?>
+															<?php if($isExpired==0){ ?>
+															<ul class="nav navbar-right table-action-col " style="float: none !important;display: inline-block;">
+																<li class="dropdown">
+																	<a href="href=" javascript:void(0);""="" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-ellipsis-v"></i></a>
+																	<ul class="dropdown-menu" role="menu">
+																		<li>
+																		<a href="<?php echo $this->baseUrl()."/accounting/creditmemo/edit/id/".$crRow["id"];?>"><?php echo $tr->translate('EDIT');?></a>
+																		</li>
+																	</ul>
+																</li>
+															</ul>
+															<?php }else{ echo $labelExpired;?>
+															
+															<?php }?>
+														</td>
+													</tr>
+												<?php }?>
+												</tbody>
+											</table>
+										</div>
+									<?php }?>
+									
+								</div>
+								<div class="tab-pane fade" id="transfer-credit" role="tabpanel">
+									<?php if(!empty($this->transferCreditList)){ ?>
+										<div class="card-datatable dataTables_scrollBody table-responsive h-px-300 overflow-auto p-0 px-5" style="position: relative;  width: 100%; ">
+											<table id="datatable-responsive" class=" nowrap dt-row-grouping table">
+												<thead>
+													<tr>
+														<th class="text-center" ><?PHP echo $tr->translate('NUM');?></th>
+														<th class="text-center" ><?PHP echo $tr->translate('BRANCH');?></th>
+														<th class="text-center" ><?PHP echo $tr->translate('STUDENT');?></th>
+														<th class="text-center" ><?PHP echo $tr->translate('TO_STUDENT');?></th>
+														<th class="text-center" ><?PHP echo $tr->translate('TOTAL_AMOUNT');?></th>
+														<th class="text-center" ><?PHP echo $tr->translate('ACTION');?></th>
+													</tr>
+												</thead>
+												<tbody>
+												<?php foreach($this->transferCreditList AS $ind => $crRow){ 
+												
+													$labelDeposit="";
+													$labelExpired="";
+													
+													$status = $crRow["statusValue"];
+													$isExpired = $crRow["isExpired"];
+													$otherIncomeId = $crRow["otherIncomeId"];
+													if($otherIncomeId>0){
+														$labelDeposit= $tr->translate('deposit')." ".$crRow["incInvoice"]." ";
+													}
+													if($status==0){
+														$isExpired=1;
+													}else{
+														if($isExpired==1){
+															$labelExpired= '<small class="d-block text-danger fw-bold">'.$tr->translate('EXPIRED').'</small>';
+														}
+													}
+													
+												?>
+													<tr>
+														<td class="items-no text-center"><?php echo ($ind+1); ?></td>
+														<td class="">
+															<span class=" text-primary text-truncate fw-medium mb-0 text-wrap" >
+																<?php echo $crRow["branchName"]; ?>
+															</span>
+														</td>
+														<td class="">
+															<div>
+																<span class=" text-primary text-truncate fw-medium mb-0 text-wrap" >
+																	<?php echo $crRow["fromStuCode"]; ?>
+																</span>
+																<div class="mt-0">
+																	<small class="d-block text-nowrap text-heading"><?php echo $crRow["fromStudentNameKh"]; ?></small>
+																	<small class="d-block text-nowrap text-heading"><?php echo $crRow["fromStudentNameEng"]; ?></small>
+																	
+																</div>
+															</div>
+														</td>
+														<td class="">
+															<div>
+																<span class=" text-primary text-truncate fw-medium mb-0 text-wrap" >
+																	<?php echo $crRow["stuCode"]; ?>
+																</span>
+																<div class="mt-0">
+																	<small class="d-block text-nowrap text-heading"><?php echo $crRow["studentNameKh"]; ?></small>
+																	<small class="d-block text-nowrap text-heading"><?php echo $crRow["studentNameEng"]; ?></small>
+																	
+																</div>
+															</div>
+														</td>
+														<td class="text-center">
+															<div class="d-flex align-items-center justify-content-center">
+																<span class="rounded text-danger  p-1">
+																	<i class="fa fa-usd fa-lg me-1"></i>
+																	<strong><?php echo number_format($crRow["total_amount"],2); ?></strong>
+																	
+																</span>
+															</div>
+															<div class="d-flex align-items-center justify-content-center">
+																<span class="rounded bg-label-primary  p-1">
+																	 <span class="d-block">
+																		<?php echo $crRow["creditTypeTitle"]; ?> 
+																	</span>
+																</span>
+															</div>
+															<small class="d-block fs-tiny fst-italic w-px-200 text-truncate mt-1"><?php echo $labelDeposit.$crRow["prob"]; ?></small>
+														</td>
+														<td class="text-center">
+															<?php echo $crRow["status"]; ?>
+															<?php if($isExpired==0){ ?>
+															<ul class="nav navbar-right table-action-col " style="float: none !important;display: inline-block;">
+																<li class="dropdown">
+																	<a href="href=" javascript:void(0);""="" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-ellipsis-v"></i></a>
+																	<ul class="dropdown-menu" role="menu">
+																		<li>
+																		<a href="<?php echo $this->baseUrl()."/accounting/tcredit/edit/id/".$crRow["id"];?>"><?php echo $tr->translate('EDIT');?></a>
+																		</li>
+																	</ul>
+																</li>
+															</ul>
+															<?php }else{ echo $labelExpired;?>
+															
+															<?php }?>
+														</td>
+													</tr>
+												<?php }?>
+												</tbody>
+											</table>
+										</div>
+									<?php }?>
+								</div>
+							</div>
+						</div>
+						
+					</div>
+				</div>
+			</div>
+			<div class="col-md-6 col-sm-6 col-xs-12">
+				<div class="card h-100">
+					<div class="card-header pb-2">
+						<div class="card-title mb-2">
+							<h5 class="mb-1">
+								<i class="fa fa-percent me-1"></i> <?php echo $tr->translate("DISCOUNTSETTING")?>
+							</h5>
+						</div>
+						<small class="d-flex justify-content-between mb-0">
+							<a class="btn btn-primary btn-xs waves-effect waves-light" href="<?php echo $this->baseUrl()."/accounting/discountsetting/add";?>">
+								<?php echo $tr->translate('SET_UP_NEW');?> <i class="fa fa-plus-square-o"></i>
+							</a>
+							<a class="btn-xs btn-text-primary waves-effect waves-light" href="<?php echo $this->baseUrl()."/accounting/discountsetting";?>">
+								<?php echo $tr->translate('SHOW_ALL');?> <i class="fa fa-angle-right fa-xs"></i>
+							</a>
+						</small>
+					</div>
+					<div class="card-body p-0 px-2">
+						<?php if(!empty($this->discoutSetting)){ ?>
+							<div class="row g-6">
+								<?php foreach($this->discoutSetting AS $disRow){ ?>
+									<div class="col-xl-6 col-lg-6 col-md-12">
+										<div class="card border rounded-3 mb-2">
+											<div class="card-body">
+												<div class="d-flex justify-content-between align-items-center mb-1">
+													<div class="<?php echo "dis-branch-".$disRow["id"];?>">
+														<h6 class="fw-normal mb-0 text-body "><i class="fa fa-university me-1"></i> <?php echo $disRow["branchName"];?></h6>
+														<small class="mb-1 d-block text-body"><?php echo $disRow["academicYearTitle"];?></small>
+													</div>
+													<span class="rounded bg-label-primary  p-1">
+														<i class="fa fa-briefcase fa-lg me-1"></i>
+														<span class="<?php echo "dis-type-".$disRow["id"];?>"><?php echo $disRow["discName"];?></span>
+													</span>
+												</div>
+												<div class="d-flex justify-content-between align-items-end">
+													<div class="role-heading">
+														<small class="text-primary mb-0 <?php echo "dis-title-".$disRow["id"];?>"><?php echo $disRow["discountTitle"];?></small>
+														<small class="mb-1 d-block text-body <?php echo "dis-sub-title".$disRow["id"];?>"><i class="ti ti-calendar-week ti-xs me-1"></i> <?php echo $disRow["discountPeriod"];?> <span class="fw-bold"><?php echo $disRow["discountForOption"];?></span></small>
+														<small class="mb-1 d-none text-body <?php echo "dis-degree".$disRow["id"];?>"><?php echo $disRow["degreeListTitle"];?></small>
+													</div>
+												</div>
+												<div class="d-flex justify-content-between align-items-end">
+													<small class="mb-1 d-block text-body <?php echo "dis-amt-stu".$disRow["id"];?>"><i class="ti ti-users-group ti-xs me-1"></i> <span class="text-success fw-bold"><?php echo sprintf('%02d', $disRow["amtActiveStudent"]);?></span> / <span class="fw-bold"><?php echo sprintf('%02d', $disRow["amtAllStudent"]);?></span></small>
+												</div>
+												<div class="d-flex justify-content-between align-items-end">
+													<div>
+														<a title="<?php echo $tr->translate("EDIT")?>" href="<?php echo $this->baseUrl()."/accounting/discountsetting/edit/id/".$disRow["id"];?>" class="" >
+															<span>
+																<i class="fa fa-pencil-square-o ti-md text-heading"></i>
+															</span>
+														</a>
+														<a title="<?php echo $tr->translate("VIEW")?>" href="javascript:void(0);" onClick="getContentInfo('1','<?php echo $disRow["id"];?>');"><i class="fa fa-eye fa-md text-heading"></i></a>
+													</div>
+													<span class="text-danger fw-bold fs-big <?php echo "dis-value-".$disRow["id"];?>">
+														<?php 
+															if($disRow["discountValue"]==1){
+																echo '<i class="ti ti-currency-dollar me-1"></i>'.number_format($disRow["discountValue"],2);
+															}else{
+																echo str_replace(".00","",number_format($disRow["discountValue"],2))."%";
+															}
+															
+														?>
+													</span>
+												</div>
+											</div>
+										</div>
+									</div>
+								<?php }?>
+							</div>
+						<?php }?>
+					</div>
+				</div>
+			</div>
+		</div>
+
+	</div>
+</div>
+
+
+
+
+<!-- Modal -->
+<div class="modal fade" id="modal-info" tabindex="-1" aria-hidden="true">
+	<div class="modal-dialog modal-lg modal-simple modal-dialog-centered modal-add-new-role">
+		<div class="modal-content p-10">
+			<div class="modal-body p-0">
+				<button type="button" class="btn-close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+				<div class="d-flex justify-content-between align-items-center mb-1">
+					<h6 class="fw-normal mb-0 ">
+						<span class="modal-top-left"></span>
+					</h6>
+					<div >
+						<span class="d-block rounded bg-label-primary  p-1 mb-2">
+							<i class="fa fa-briefcase fa-lg me-1"></i>
+							<span class="modal-top-right"></span>
+						</span>
+						<span class="modal-top-right-desc d-block"></span>
+						<a title="<?php echo $tr->translate("Export")?>" onClick="exportExcel('exportExcelList','Exporting Data');" class="btn btn-success btn-xs waves-effect waves-light" href="javascript:void(0);">
+							<i class="fa fa-file-excel-o"></i>
+						</a>
+					</div>
+				</div>
+				<div class="text-center mb-6">
+				  <h4 class="modal-title mb-2"></h4>
+				  <p class="modal-title-desc"></p>
+				  <p class="modal-title-degree"></p>
+				</div>
+				
+				<div class="col-12 contentInfo">
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<!--/ Modal -->
+<style>
+.global-action {
+    display: none;
+}
+</style>
+<script>
+function getContentInfo(type=1,recordId){
+	var getUrl = "<?PHP echo $this->baseUrl()."/accounting/creditdash/get-detail-info";?>";
+	loadingBlock();
+	$(".modal-title").html("");
+	$(".modal-title-desc").html("");
+	$(".modal-top-left").html("");
+	$(".modal-top-right").html("");
+	$(".contentInfo").html("");
+	
+	$.ajax({
+		url: getUrl,
+		type: 'post',
+		dataType: 'json',
+		data: {
+			"type": type,
+			"recordId": recordId,
+		},
+		success: function (data) {
+			if(type==1){
+				
+				$(".modal-title").html($(".dis-title-"+recordId).html());
+				$(".modal-title-desc").html($(".dis-sub-title"+recordId).html());
+				$(".modal-title-degree").html($(".dis-degree"+recordId).html());
+				$(".modal-top-left").html($(".dis-branch-"+recordId).html());
+				$(".modal-top-right").html($(".dis-type-"+recordId).html());
+				$(".modal-top-right-desc").html($(".dis-amt-stu"+recordId).html());
+			
+			}
+			$(".contentInfo").html(data.content);
+			$('#modal-info').modal('show');
+			HideloadingBlock();
+		},
+		error: function(request, status, error) {
+			HideloadingBlock();
+		}
+	});
+}
+</script>

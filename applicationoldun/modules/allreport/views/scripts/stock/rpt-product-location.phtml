@@ -1,0 +1,309 @@
+<?php
+	$tr = Application_Form_FrmLanguages::getCurrentlanguage();
+	echo $this->headTitle($tr->translate('RPT_PRODUCT_LOCATION')); 
+	$frm =  $this->form_search;
+	$show_image=1;//1 show,0 hide
+?>
+<div class="layout-wrapper-report">
+	<div id="mainContent" class="main-content-report">
+		<div class="report-preview">
+			<?php echo $this->controlReport?>
+			<div id="main-viewer" class="main-viewer portrait">
+				<div id="viewer" class="viewer portrait">
+					<div id="divPrint" class="content">
+						<link rel="stylesheet" href="<?php echo $this->baseUrl();?>/admin/build/css/report-style.css">
+						<link rel="stylesheet" href="<?php echo $this->baseUrl();?>/admin/build/css/report-style-screen.css">
+						<style>
+							@media print {
+								<?php if(!empty($this->printFormat)){ echo $this->printFormat; } ?>
+							}
+						</style>
+						<table style="background:#fff;width:90%; margin: 0 auto;white-space: nowrap;width: 100%;">
+							<tr>
+								<td colspan="3"><?php echo $this->rsheader;?></td>
+							</tr>
+							<tr>
+								<td width="15%" align="center">
+								</td>
+								<td align="center" width="70%">
+									<span <?php echo TITLE_REPORT;?>><?php echo $tr->translate('RPT_PRODUCT_LOCATION');?></span><br />
+								</td>
+								<td width="15%" align="center"></td>
+							</tr>
+							<tr>
+								<td colspan="3" id="exportExcel">
+							<style>
+								
+								.hover:hover{ background:#ccc;}
+								
+								table.content-data{
+									border-collapse:collapse;
+									table-layout: fixed;
+									border:1px solid #000; 
+									width:100%;
+									font-family: 'Times New Roman','Khmer OS Battambang';
+									font-size: 11px !important;
+								}
+								
+								
+								table.content-data .style-head{
+									line-height: 25px;
+									font-size:12px !important; 
+									padding:1px 0px; 
+									height: 22px; 
+									background: #c1d0f3;
+									font-weight:600;
+								}
+								
+								table tr td{
+									padding:0px 1px;
+								}
+								
+								table.content-data tr td{
+									padding:1px;
+									border-bottom: 1px solid #ddd;
+									border-right:1px dotted #ddd;
+									line-height: 18px;
+								}
+								tr.style-head th{
+									border: 1px solid #000;
+									line-height: 15px;
+									text-align: center;
+								}	
+								table.content-data tr:last-child td {
+									border-bottom: 1px solid #000; /* Thicker border bottom */
+								}
+								
+								.nowrap{white-space:nowrap;}
+								.wrapcontent{width:300px;white-space:normal;}
+								.smallwrap{width: 150px;white-space:normal;}
+								col:nth-child(1) { width:25px;}
+								col:nth-child(2){ width: 120px;}
+								col:nth-child(3){ width:70px;}
+								col:nth-child(4) { width:180px;}
+								
+								@media print{
+									@page{
+										margin:0.7cm;
+										-webkit-transform: scale(0.5);  /* Chrome, Safari 3.1+  */
+										-moz-transform: scale(0.5);  /* Firefox 3.5-15 */
+										-ms-transform: scale(0.5);   /* IE 9 */
+										-o-transform: scale(0.5);    /* Opera 10.50-12.00 */
+										transform: scale(0.5);
+										size: A4;
+									}
+								}
+							</style>
+									<table class="content-data bd-dark-grey text-color-black text-h14px text-size-11px" cellpadding="5">
+										<colgroup>
+												<col>
+												<col>
+												<col>
+												<col>
+												<col>
+												<col>
+												<col>
+												<col>
+												<col class="hideClass">
+												<col class="hideClass">
+												<col class="hideClass">
+												<col class="hideClass">
+											</colgroup>
+										<thead>
+											<tr class="styleheader bg-head text-bold hpx-25 bd-w1px bd-solid" align="center">
+												<th class="bd-w1px bd-solid" scope="col" rowspan="2"><?php echo $tr->translate("NUM");?></th>
+												<th class="bd-w1px bd-solid" scope="col" colspan="4"><?php echo $tr->translate("PRODUCT_INFO");?></th>
+												<th class="bd-w1px bd-solid" scope="col" id="head_info" colspan="5"><?php echo $tr->translate("STOCK_INFO");?></th>
+												<?php if($show_image==1){?>
+												<th class="hideClass bd-w1px bd-solid" scope="col" rowspan="2"><?php echo $tr->translate("IMAGE");?></th>
+												<?php }?>
+												<th class="hideClass bd-w1px bd-solid" scope="col" rowspan="2"><?php echo $tr->translate("NOTE");?></th>
+												<th class="showClass bd-w1px bd-solid" scope="col" rowspan="2"><?php echo $tr->translate("OTHER_INFOMATION");?></th>
+											</tr>
+											<tr class="styleheader bg-head text-bold hpx-25 bd-w1px bd-solid " align="center">
+												<th class="bd-w1px bd-solid" scope="col"><?php echo $tr->translate('PRODUCT_CATEGORY');?></th>
+												<th class="bd-w1px bd-solid" scope="col"><?php echo $tr->translate('PRODUCT_CODE');?></th>
+												<th class="bd-w1px bd-solid" scope="col"><?php echo $tr->translate('PRODUCT_NAME');?></th>
+												<th class="bd-w1px bd-solid" scope="col"><?php echo $tr->translate('TYPE');?></th>
+												<th class="bd-w1px bd-solid" scope="col"><?php echo $tr->translate('CURRENT_QTY');?></th>
+												<th class="showClass bd-w1px bd-solid" scope="col"><?php echo $tr->translate('COUNT_QTY');?></th>
+												<th class="hideClass bd-w1px bd-solid" scope="col"><?php echo $tr->translate('UNIT_COST');?></th>
+												<th class="hideClass bd-w1px bd-solid" scope="col"><?php echo $tr->translate('TOTAL');?></th>
+												<th class="hideClass bd-w1px bd-solid" scope="col"><?php echo $tr->translate('SELL_PRICE');?></th>
+												<th class="hideClass bd-w1px bd-solid" scope="col"><?php echo $tr->translate('PRICE_SET');?></th>
+										   </tr>
+									   </thead>
+									<?php 
+										$branch_name =''; 
+										$i=0;
+										$total_cost=0;
+										if(!empty($this->pro_loc)) foreach ($this->pro_loc AS $rs) { $i++;
+									   if($branch_name!=$rs['brand_name']){
+									  ?>
+										<tr class="hover" style="font-family:'Times New Roman','Khmer OS Muol Light';height: 18px;" align="center">
+											<td class="locationHead" colspan="12" ><span><?php echo $rs['brand_name']; ?></span></td>
+										</tr>
+										<?php } $branch_name=$rs['brand_name'];?>
+										<tr class="hover" align="center">
+											<td data-label="<?php echo $tr->translate("NUM");?>"><?php echo $i; ?></td>
+											<td data-label="<?php echo $tr->translate("PRODUCT_CATEGORY");?>" align="left"><?php echo $rs['category_name'];?></td>
+											<td class="smallwrap" align="left" data-label="<?php echo $tr->translate("PRODUCT_CODE");?>"><?php echo $rs['pro_code'];?></td>
+											<td class="wrapcontent" data-label="<?php echo $tr->translate("PRODUCT_NAME");?>" align="left"><?php echo $rs['pro_name'];?></td​>
+											<td class="nowrap" data-label="<?php echo $tr->translate("TYPE");?>" align="left"><?php echo $rs['product_type'];?></td>
+											<td data-label="<?php echo $tr->translate("QTY");?>"><?php echo number_format($rs['pro_qty'],0); ?></td>
+											<td class="showClass"  data-label="<?php echo $tr->translate("COUNT_QTY");?>"></td>
+											<td class="hideClass" data-label="<?php echo $tr->translate("UNIT_COST");?>"><?php echo number_format($rs['costing'],2);?></td>
+											<td class="hideClass" data-label="<?php echo $tr->translate("TOTAL");?>"  align="right"><strong><?php echo number_format($rs['pro_qty']*$rs['costing'],2);?></strong></td>
+												<?php 
+												$total_cost+=$rs['pro_qty']*$rs['costing'];
+												?>
+											<td class="hideClass" data-label="<?php echo $tr->translate("SELL_PRICE");?>"  align="right"><?php echo number_format($rs['pro_price'],2);?></td>
+											<td class="hideClass" data-label="<?php echo $tr->translate("PRICE_SET");?>"  align="right"><?php echo number_format($rs['price_set'],2);?></td>
+											<?php if($show_image==1){?>
+												<td class="hideClass" ><a target="_blank" href="<?php echo $this->baseUrl().'/images/proimage/'.$rs['images'];?>"><img style="max-height:30px;" <?php if(!empty($rs['images'])){echo "src='".$this->baseUrl().'/images/proimage/'.$rs['images']."'";}?> /></a></td>
+											<?php }?>
+											<td class="hideClass" data-label="<?php echo $tr->translate("NOTE");?>"><?php echo $rs['note']; ?></td>
+											<td class="showClass" data-label="<?php echo $tr->translate("OTHER_INFOMATION");?>"></td>
+										</tr>
+											<?php
+												} 
+											?>
+									</table>
+									
+									<?php if(!empty($this->pro_loc)){?>
+										 <br />
+										 <table width="25%"  style="float:right;font-family:'Times New Roman','Khmer OS Battambang'; border: 1px solid #000; border-collapse: collapse;white-space: nowrap;"  border="1"  >
+											   <tr align="center" class="bg-head text-bold text-size-12px hpx-25" align="center">
+												   <td class="hideClass" ><?php echo $tr->translate('TOTAL_UNIT_PRICE');?> :</td>
+												   <td class="hideClass"  align="right"><strong>$<?php echo number_format($total_cost,2);?></strong></td>
+											   </tr>
+										 </table>
+									<?php }?>	
+								</td>
+							</tr>
+							<tr>
+								<td colspan="3" width="100%">
+									<?php echo $this->rsfooteracc;?>
+								</td>
+							</tr>
+						</table>
+					</div>						
+				</div>						
+			</div>						
+		</div>						
+	</div>
+	<div class="right-panel-report" id="rightPanel">
+		<div class="card-box">
+			<div class="card-search-head col-sm-12 border-botom">
+				<div class="col-sm-6 text-left pd-0">
+					<h4 class="m-b-0">
+						<?php echo $tr->translate("SEARCH");?> 
+						<i class="fa fa-search "></i> 
+					</h4>
+				</div>
+				<div class="col-sm-6 text-right pd-0">
+					<button onclick="closeRightPanel()" title="<?php echo $tr->translate("CLOSED");?> " class="btn-close">
+						<i class="fa-solid fa-xmark"></i>
+					</button>
+				</div>
+			</div>
+			<form dojoType="dijit.form.Form" method="post">
+				<div class="form-group">
+					<div class="col-md-12 col-sm-12 col-xs-12">
+						<?php echo $frm->getElement("adv_search");?>
+					</div>
+					<div class="col-md-12 col-sm-12 col-xs-12">
+						<?php echo $frm->getElement("branch_id");?>
+					</div>
+					<div class="col-md-12 col-sm-12 col-xs-12">
+						<?php echo $frm->getElement("category_id");?>
+					</div>
+					<div class="col-md-12 col-sm-12 col-xs-12">
+						<input id="product" />
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="col-md-12 col-sm-12 col-xs-12">
+						<?php echo $frm->getElement("product_type");?>
+					</div>
+					<div class="col-md-12 col-sm-12 col-xs-12">
+						<?php echo $frm->getElement("sort_by");?>
+					</div>
+					<div class="col-md-12 col-sm-12 col-xs-12">
+						<button class="button-class button-primary" iconClass="glyphicon glyphicon-search" dojoType="dijit.form.Button"
+								showLabel="true" type="submit"><?php echo $tr->translate("SEARCH");?></button>
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="col-md-12 col-sm-12 col-xs-12">
+						<label class="control-label custom-switch float-start "> 
+							<a href="javascript:void(0);"  class="switchButton status"><?php echo $tr->translate("SHOW_PRODUCT_INFO");?></a> 
+							<input type="checkbox"  id="IsShowPrice" name="IsShowPrice" class="custom-switch-input"  onChange="Checkchange();" checked> 
+							<span class="custom-switch-indicator custom-radius switch-status"></span> 
+						</label>
+					</div>
+				</div>
+			</form>			
+		</div>		
+	</div>						
+</div>		
+<script src="<?php echo $this->baseUrl();?>/js/help.js"  type="text/javascript"></script>
+<script>
+	dojo.require("dojo.data.ItemFileWriteStore");  
+	
+	require(["dojo/ready"], function(ready){
+		ready(function(){
+			getProductByCate();
+			Checkchange();
+			setTimeout(function() {
+				setPrintOrientation('lanscape');
+			}, 500);
+		});
+		new dijit.form.FilteringSelect({
+			store: item_store,
+			autoComplete: false,
+			queryExpr: "*${0}*",                     
+			id: "product",
+			name: "product",   
+			required:false,        
+			class: 'fullside', 
+		}, "product");
+	});
+	
+	var item_store  = getDataStorefromJSON('id','name', <?php print_r(array())?> );
+	var url_dept = '<?php echo $this->url(array('module'=>'allreport','controller'=>'stock','action'=>'get-productbycate')); ?>';
+	function getProductByCate(){
+		cate_id = dijit.byId("category_id").get("value");
+			dojo.xhrPost({
+				url:url_dept,
+				content:{
+					'cate_id':cate_id,
+					},
+				handleAs:"json",
+				load: function(data) {
+					item_store  = getDataStorefromJSON('id','name', data);
+					dijit.byId('product').set('store',item_store);  	
+					dijit.byId('product').attr('value',"<?php echo $this->search['product']?>");
+				},
+				error: function(err) {
+				}
+			});
+	}
+	function Checkchange(){
+		var cell = document.getElementById('head_info');
+		if (dojo.byId("IsShowPrice").checked){
+			$(".hideClass").css("display", "table-cell");
+			$(".showClass").css("display", "none");
+			cell.colSpan = 5; 
+			document.querySelectorAll('tr > td.locationHead').forEach(td => td.setAttribute('colspan', 12));
+			
+		}else{
+			$(".hideClass").css("display", "none");
+			$(".showClass").css("display", "table-cell");	
+			cell.colSpan =2; 
+			document.querySelectorAll('tr > td.locationHead').forEach(td => td.setAttribute('colspan', 8));
+			
+		}
+	}
+	
+</script>

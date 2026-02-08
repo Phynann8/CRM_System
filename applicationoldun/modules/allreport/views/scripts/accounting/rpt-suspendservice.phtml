@@ -1,0 +1,266 @@
+<?php
+	$tr = Application_Form_FrmLanguages::getCurrentlanguage();
+	echo $this->headTitle($tr->translate('STUDENT_STOP_SERVICE_REPORT'));
+	$base_url = Application_Form_FrmMessage::getUrl("/");
+	$frm=$this->form_search;
+	$classHideHeight=classHideHeight;
+?>
+<div style="min-height:15cm; margin:0 auto; padding:0.5cm 0.5cm 0cm 0.5cm">
+	<div class="card-box">
+       	<div class="col-sm-12 border-botom">
+		   	<div class="col-sm-8 pd-0">
+	    		<h4 class="m-b-0"><i class="fa fa-file " aria-hidden="true"></i>&nbsp;&nbsp;&nbsp;<?php echo $tr->translate('STUDENT_STOP_SERVICE_REPORT');?></h4>
+    		</div>
+    		<div class="col-sm-4 text-right">
+    		</div>
+    	</div>
+    </div>	
+	<form  id='foundation_class' action="<?php echo $this->url(array('module'=>'allreport','controller'=>'accounting','action'=>'rpt-suspendservice')); ?>" dojoType="dijit.form.Form" method="post" enctype="application/x-www-form-urlencoded">
+		<div class="form-group">
+       		<div class="col-md-3 col-sm-3 col-xs-12">
+				<?php echo $frm->getElement("adv_search");?>
+			</div>
+			<div class="col-md-3 col-sm-3 col-xs-12">
+				<?php echo $frm->getElement("branch_id");?>
+			</div>
+			<div class="col-md-3 col-sm-3 col-xs-12">
+       			<input id="stu_name" />
+       		</div>
+			<div class="col-md-3 col-sm-3 col-xs-12">
+				<select name="category" id="category" class="fullside" dojoType="dijit.form.FilteringSelect" >
+					<option value=""><?php echo $tr->translate('SELECT_CATEGORY')?></option>
+					<?php if(!empty($this->category)){foreach($this->category as $cate){?>
+					<option value="<?php echo $cate['id']?>" <?php if($cate['id']==$this->search['category']){echo "selected";}?>><?php echo $cate['name']?></option>
+					<?php }}?>
+				</select>
+			</div>
+		</div>
+		<div class="form-group">
+			<div class="col-md-3 col-sm-3 col-xs-12">
+				<?php echo $frm->getElement("start_date");?>
+			</div>
+			<div class="col-md-3 col-sm-3 col-xs-12">
+				<?php echo $frm->getElement("end_date");?>
+			</div>
+			<div class="col-md-3 col-sm-3 col-xs-12">
+				<button  class="button-class button-primary" iconClass="glyphicon glyphicon-search" dojoType="dijit.form.Button" showLabel="true" name="search"  type="submit"><?php echo $tr->translate("SEARCH");?></button>
+			</div>
+       	</div>
+	</form>
+<style>
+#footer{display: none;}
+.hideprintdate{display:none !important;}
+</style>	
+	<div id="divPrint">
+		<table style="background:#fff; margin: 0 auto; width: 100%; ">
+			<tr>
+				<td colspan="3"><?php echo $this->rsheader;?></td>
+			</tr>
+			<tr>
+				<td>&nbsp;</td>
+			</tr>
+			<tr>
+				<td width="20%" align="center">
+				</td>
+				<td width="60%" align="center">
+					<span style="padding-left: 0px;  color:#000; font-size: 14px;font-family:'Times New Roman','Khmer OS Muol Light';"><?php echo $tr->translate('STUDENT_STOP_SERVICE_REPORT')?></span><br />
+					<span style="color:#000; font-size: 14px;font-family:'Times New Roman','Khmer OS Muol Light';"><?php if(!empty($this->search['start_date'])){?>&nbsp; <?php echo date("d-M-Y",strtotime($this->search["start_date"]))?> <?php echo $tr->translate('TO')?> <?php echo date("d-M-Y",strtotime($this->search["end_date"]));}?></span>     
+				</td>
+				<td width="20%" align="center">
+					<label class='hideprintdate'>Print Date <?php echo date("d-m-Y h:i");?></label>
+				</td>
+			</tr>
+			<tr>
+				<style> th,td{ padding:0 1px;}</style>
+				<style type="text/css">
+					.style{
+						line-height: 20px;font-size: 11px !important;
+						font-family: 'Times New Roman','Khmer OS Battambang';
+					}
+					.hideblog{display: none;}
+					.hiddenblog{display: block !important;}
+					.style1:hover{ background: #ccc; }
+					table tr td ul li{text-align: center;list-style: none;line-height: 25px; }
+					table.content-data { page-break-inside:auto }
+					tr.content-data{ page-break-inside:avoid; page-break-after:auto; }
+					#header {
+					  display: table-header-group;
+					  page-break-inside:avoid; page-break-after:auto;
+					  margin-top: 100px;
+					}
+					.hide{visibility: hidden;}
+					@media print {
+					 div.divFooter {
+					    position: fixed;
+					    top: 0;
+					  	width: 100%;
+					  	height: 100px;
+					  	bottom:0px;
+						margin:0;
+					  }
+						.hide{visibility: visible; height: <?php echo $classHideHeight;?>;}
+						
+					}
+					.center{text-align: center !important;}
+					table.content-data{
+						border-collapse:collapse;
+						border:1px solid #000; 
+						font-size:8px;
+					}
+					table.content-data thead tr.style {
+					   line-height: 25px; font-size:10px !important; padding:1px 0px; white-space: nowrap;height: 22px; 
+						background: #c1d0f3;
+						font-weight:600;
+					}
+					table.content-data  tr.style {
+					    white-space: nowrap;
+						
+					}
+					table.tb-footer{
+						border-collapse:collapse;
+						border:1px solid #000; 
+						font-size:11px;
+						font-family: 'Times New Roman','Khmer OS Battambang';
+					}
+					table.tb-footer tr{
+					 line-height: 14px; font-size:11px; padding:2px 0px; height: 25px;
+					}
+					table tr td{
+						padding:0 2px;
+					}
+					tr.voidclass {
+						background: #fff7f7;
+					}
+					td.centerText{
+						text-align: center;
+					}
+					.redBold {
+						font-weight: 600;
+						color: #f80000;
+					}
+					span.stuName {
+						display: block;
+						line-height: 15px;
+					}
+					span.noteIfo {
+						display: block;
+						width: 200px;
+						min-width: 200px;
+						font-size: 90%;
+						font-style: italic;
+						white-space: pre-line;
+						line-height: 11px;
+						padding: 4px 2px;
+					}
+					@media print{
+						<?php if(!empty($this->printFormat)){ echo $this->printFormat; } ?>
+					}
+					label.hideprintdate {
+						font-size: 10px;
+						line-height: 14px;
+					}
+				</style>
+				<td colspan="3" id="exporteExcel">
+					<table class="content-data" width="100%" border="1" align="center" >
+							<thead>
+								<tr class="style" align="center">
+									<td scope="col" rowspan="2"><?php echo $tr->translate('N_O')?></td>
+									<td scope="col" colspan="3"><?php echo $tr->translate('STUDENT_INFO')?></td>
+									<td scope="col" colspan="5"><?php echo $tr->translate('SERVICE_INFO')?></td>
+									<td scope="col" rowspan="2"><?php echo $tr->translate('USER')?></td>
+								</tr>
+								<tr class="style" align="center">
+									<td scope="col"><?php echo $tr->translate('BRANCH')?></td>
+									<td scope="col"><?php echo $tr->translate('STUDENT_ID')?></td>
+									<td scope="col"><?php echo $tr->translate('STUDENT_NAME')?></td>
+									
+									<td scope="col"><?php echo $tr->translate('CATEGORY')?></td>
+									<td scope="col"><?php echo $tr->translate('SERVICE')?></td>
+									<td scope="col" style="width:200px;"><?php echo $tr->translate('REASON')?></td>
+									<td scope="col"><?php echo $tr->translate('STOP_DATE')?></td>
+									<td scope="col"><?php echo $tr->translate('CREATE_DATE')?></td>
+								</tr>
+							</thead>
+							<tbody>
+							<?php $i=0; if(!empty($this->rs)){foreach($this->rs as $rs){$i++;?>
+								<tr class="hover style"	align="center">
+									<td data-label="<?php echo $tr->translate("N_O");?>"> <?php echo $i;?></td>
+									<td data-label="<?php echo $tr->translate("BRANCH");?>"><?php echo $rs['branchName']; ?></td>
+									<td data-label="<?php echo $tr->translate("STUDENT_ID");?>"><?php echo $rs['stuCode']; ?></td>
+									<td data-label="<?php echo $tr->translate("STUDENT_NAME");?>" align="left">
+										<span class="stuName"><?php echo $rs['stuNameKh']; ?></span>
+										<span class="stuName"><?php echo $rs['stuNameEn']; ?></span>
+									</td>
+									<td data-label="<?php echo $tr->translate("CATEGORY");?>" align="left"><?php echo $rs['category']; ?></td>
+									<td data-label="<?php echo $tr->translate("SERVICE");?>" align="left"><?php echo $rs['service_name']; ?></td>
+									<td data-label="<?php echo $tr->translate("REASON");?>" align="left"><span class="noteIfo"><?php echo $rs['reason']; ?></span></td>
+									<td data-label="<?php echo $tr->translate("CREATE_DATE");?>"><?php echo date("d-M-y",strtotime($rs['stopDate'])); ?></td>
+									<td data-label="<?php echo $tr->translate("CREATE_DATE");?>"><?php echo date("d-M-y",strtotime($rs['create_date'])); ?></td>
+									<td data-label="<?php echo $tr->translate("USER");?>"><?php echo $rs['user']; ?></td>
+								</tr>
+							<?php } }?>
+							</tbody>
+						</table>
+				</td>
+			</tr>
+			<tr>
+				<td colspan="3" width="100%">
+					<?php echo $this->rsfooteracc;?>
+				</td>
+			</tr>
+		</table>
+	</div>
+</div>
+<script src="<?php echo $this->baseUrl();?>/js/help.js"  type="text/javascript"></script>
+<script type="text/javascript">
+	dojo.require("dojo.data.ItemFileWriteStore"); 
+	var student_store  = getDataStorefromJSON('id','name',<?php print_r(Zend_Json::encode(array()));?> );
+	dojo.ready(function(){
+		new dijit.form.FilteringSelect({
+			store: student_store,
+			autoComplete: false,
+			queryExpr: "*${0}*",                     
+			id: "stu_name",
+			name: "stu_name",   
+			required: false,        
+			class: 'fullside', 
+			placeHolder:"<?php echo $tr->translate("SELECT_STUDENT_NAME");?>",          
+			onChange: function() { 
+
+			}
+		}, "stu_name");
+		getallstudentname();
+		var branch_id = dijit.byId('branch_id');
+		branch_id.on('change', function(evt) {
+			 getallstudentname();
+		});
+	});
+	
+	var url_data = '<?php echo $this->url(array('module'=>'registrar','controller'=>'register','action'=>'getliststudenturl')); ?>';
+	function getallstudentname(){//
+		dijit.byId('stu_name').reset();
+		branch_id = dijit.byId('branch_id').get('value');
+		if(branch_id=='' || branch_id==-1){
+			var student_store  = getDataStorefromJSON('id','name',<?php print_r(Zend_Json::encode(array()));?> );
+			dijit.byId('stu_name').set('store',student_store);  
+			dijit.byId('branch_id').focus();
+			return false;
+		}
+		dojo.xhrPost({
+			url:url_data,
+			content:{
+				'branchId':branch_id,
+				'customerType':1
+			},
+			handleAs:"json",
+			load: function(data){
+				student_store  = getDataStorefromJSON('id','name', data);
+				dijit.byId('stu_name').set('store',student_store);  
+				dijit.byId('stu_name').set('value','<?php echo $this->search['stu_name']?>');  
+			},
+			error: function(err) {
+			}
+		});
+	}
+	
+</script>

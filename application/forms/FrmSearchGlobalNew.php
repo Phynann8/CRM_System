@@ -1,0 +1,2143 @@
+<?php 
+Class Application_Form_FrmSearchGlobalNew extends Zend_Dojo_Form {
+	
+	protected $tr;
+	protected $db;
+	protected $request;
+	public function init()
+	{
+		$this->tr = Application_Form_FrmLanguages::getCurrentlanguage();
+		$this->request=Zend_Controller_Front::getInstance()->getRequest();
+		$this->db = new Application_Model_DbTable_DbGlobal();
+	}
+
+	public function controlTextSearch($_data=null){//used
+		
+		$adv_search = new Zend_Dojo_Form_Element_TextBox('adv_search');
+		$adv_search->setAttribs(array(
+				'dojoType'=>'dijit.form.TextBox',
+				'class'=>'fullside',
+				'placeholder'=>$this->tr->translate("SEARCH")));
+		$adv_search->setValue($this->request->getParam("adv_search"));
+
+		return $adv_search;
+	}
+	public function getBranchSearch($_data=null){//used
+
+		$_arr_opt_branch = array(""=>$this->tr->translate("SELECT_BRANCH"));
+		$optionBranch = $this->db->getAllBranch();
+		if(!empty($optionBranch))foreach($optionBranch AS $row) $_arr_opt_branch[$row['id']]=$row['name'];
+		$_branch_id = new Zend_Dojo_Form_Element_FilteringSelect("branch_id");
+		$_branch_id->setMultiOptions($_arr_opt_branch);
+
+		$_branch_id->setAttribs(array(
+				'dojoType'=>'dijit.form.FilteringSelect',
+				'required'=>'false',
+				'placeholder'=>$this->tr->translate("SELECT_BRANCH"),
+				'autoComplete'=>'false',
+				'queryExpr'=>'*${0}*',
+				'class'=>'fullside height-text',));
+			
+		$_branch_id->setValue($this->request->getParam("branch_id"));
+		if (count($optionBranch)==1){
+			$_branch_id->setAttribs(array('readonly'=>'readonly'));
+			if(!empty($optionBranch))foreach($optionBranch AS $row){
+				$_branch_id->setValue($row['id']);
+			}
+		}
+
+		return $_branch_id;
+	}
+	public function getBranchIdSearch($_data=null){//used
+
+		$_arr_opt_branch = array(""=>$this->tr->translate("SELECT_BRANCH"));
+		$optionBranch = $this->db->getAllBranch();
+		if(!empty($optionBranch))foreach($optionBranch AS $row) $_arr_opt_branch[$row['id']]=$row['name'];
+		$_branchId = new Zend_Dojo_Form_Element_FilteringSelect("branchId");
+		$_branchId->setMultiOptions($_arr_opt_branch);
+
+		$_branchId->setAttribs(array(
+				'dojoType'=>'dijit.form.FilteringSelect',
+				'required'=>'false',
+				'placeholder'=>$this->tr->translate("SELECT_BRANCH"),
+				'autoComplete'=>'false',
+				'queryExpr'=>'*${0}*',
+				'class'=>'fullside height-text',));
+			
+		$_branchId->setValue($this->request->getParam("branchId"));
+		if (count($optionBranch)==1){
+			$_branchId->setAttribs(array('readonly'=>'readonly'));
+			if(!empty($optionBranch))foreach($optionBranch AS $row){
+				$_branchId->setValue($row['id']);
+			}
+		}
+
+		return $_branchId;
+	}
+	
+	public function getBranchListSearch($_data=null){//used
+
+		$_arr_opt_branch = array();
+		$optionBranch = $this->db->getAllBranch();
+		if(!empty($optionBranch))foreach($optionBranch AS $row) $_arr_opt_branch[$row['id']]=$row['name'];
+		$_branchList = new Zend_Form_Element_Select("branchList");
+		$_branchList->setMultiOptions($_arr_opt_branch);
+
+		$_branchList->setAttribs(
+			array(
+				'multiple'=>'multiple',
+				'placeholder'=>$this->tr->translate("SELECT_BRANCH"),
+				'data-placeholder'=>$this->tr->translate("SELECT_BRANCH"),
+				'class'=>'fullside bs-multiselect',
+				'autoComplete'=>'false',
+				'queryExpr'=>'*${0}*',
+				)
+			);
+			
+		$_branchList->setValue($this->request->getParam("branchList"));
+		if (count($optionBranch)==1){
+			$_branchList->setAttribs(array('data-disabled'=>true));
+			if(!empty($optionBranch))foreach($optionBranch AS $row){
+				$_branchList->setValue($row['id']);
+			}
+		}
+
+		return $_branchList;
+	}
+	
+	public function getDegreeSearch($_data=null){//used
+
+		$_degree = new Zend_Dojo_Form_Element_FilteringSelect('degree');
+		$_degree->setAttribs(array(
+				'dojoType'=>'dijit.form.FilteringSelect',
+				'placeholder'=>$this->tr->translate("DEGREE"),
+				'class'=>'fullside',
+				'autoComplete'=>"false",
+				'queryExpr'=>'*${0}*',
+				'required'=>'false',
+				'onchange'=>'getallGrade();',
+		));
+		$opt_deg = array(''=>$this->tr->translate("DEGREE"));
+		$opt_degree = $this->db->getAllItems(1);//degree
+
+		if(!empty($opt_degree))foreach ($opt_degree As $rows)$opt_deg[$rows['id']]=$rows['name'];
+		$_degree->setMultiOptions($opt_deg);
+
+		$_degree->setValue($this->request->getParam('degree'));
+
+		return $_degree;
+	}
+
+	public function getDegreeMulitiOptionSearch($_data=null){//used
+
+		$_degree = new Zend_Form_Element_Select('multiDegree');
+		$_degree->setAttribs(array(
+				'multiple'=>'multiple',
+				'placeholder'=>$this->tr->translate("DEGREE"),
+				'data-placeholder'=>$this->tr->translate("DEGREE"),
+				'class'=>'fullside bs-multiselect',
+				'onchange'=>'getallGrade();',
+		));
+		$opt_deg = array();
+		$opt_degree = $this->db->getAllItems(1);//degree
+
+		if(!empty($opt_degree))foreach ($opt_degree As $rows)$opt_deg[$rows['id']]=$rows['name'];
+		$_degree->setMultiOptions($opt_deg);
+		$_degree->setValue($this->request->getParam('degree'));
+		return $_degree;
+	}
+	
+	public function getItemsSearch($_data=null){//used
+
+		$_item = new Zend_Dojo_Form_Element_FilteringSelect('item');
+		$_item->setAttribs(array(
+				'dojoType'=>'dijit.form.FilteringSelect',
+				'placeholder'=>$this->tr->translate("SELECT_CATEGORY"),
+				'class'=>'fullside',
+				'autoComplete'=>"false",
+				'queryExpr'=>'*${0}*',
+				'required'=>'false',
+				'onchange'=>'getallGrade();',
+		));
+		$opt_deg = array(''=>$this->tr->translate("SELECT_CATEGORY"));
+		$opt_degree = $this->db->getAllItems();//All Items
+
+		if(!empty($opt_degree))foreach ($opt_degree As $rows)$opt_deg[$rows['id']]=$rows['name'];
+		$_item->setMultiOptions($opt_deg);
+
+		$_item->setValue($this->request->getParam('item'));
+
+		return $_item;
+	}
+
+	public function getacademicYearEnrollSearch($_data=null){//used
+
+		$academicYearEnroll = new Zend_Dojo_Form_Element_FilteringSelect('academicYearEnroll');
+		$academicYearEnroll->setAttribs(array(
+				'dojoType'=>'dijit.form.FilteringSelect',
+				'placeholder'=>$this->tr->translate("SELECT_ENROLL_YEAR"),
+				'class'=>'fullside',
+				'required'=>'false',
+				'queryExpr'=>'*${0}*',
+				'autoComplete'=>'false',
+		));
+		
+		$academicYearEnroll->setValue($this->request->getParam("academicYearEnroll"));
+		$rows =  $this->db->getAllAcademicYear();
+		$opt=array();
+		array_unshift($rows, array('id'=>'','name'=>$this->tr->translate("SELECT_ENROLL_YEAR")));
+		if(!empty($rows))foreach($rows As $row)$opt[$row['id']]=$row['name'];
+		$academicYearEnroll->setMultiOptions($opt);
+
+		return $academicYearEnroll;
+	}
+		
+	public function getAcademicYearSearch($_data=null){//used
+
+		$_academic = new Zend_Dojo_Form_Element_FilteringSelect('academic_year');
+		$_academic->setAttribs(array('dojoType'=>'dijit.form.FilteringSelect',
+				'placeholder'=>$this->tr->translate("ACADEMIC_YEAR"),
+				'class'=>'fullside',
+				'required'=>'false',
+				'queryExpr'=>'*${0}*',
+				'autoComplete'=>'false',
+		));
+		
+		$rows =  $this->db->getAllAcademicYear();
+		$opt=array();
+		array_unshift($rows, array('id'=>'','name'=>$this->tr->translate("SELECT_YEAR")));
+		if(!empty($rows))foreach($rows As $row)$opt[$row['id']]=$row['name'];
+		$_academic->setMultiOptions($opt);
+		$currentAcademic = $this->request->getParam("academic_year");
+		if(empty($currentAcademic)){
+			$result = $this->db->getLatestAcadmicYear();
+			$currentAcademic = $result['id'];
+		}
+		$_academic->setValue($currentAcademic);
+		return $_academic;
+	}
+	public function getAcademicYearIdSearch($_data=null){//used
+
+		$_academicYear = new Zend_Dojo_Form_Element_FilteringSelect('academicYear');
+		$_academicYear->setAttribs(array('dojoType'=>'dijit.form.FilteringSelect',
+				'placeholder'=>$this->tr->translate("ACADEMIC_YEAR"),
+				'class'=>'fullside',
+				'required'=>'false',
+				'queryExpr'=>'*${0}*',
+				'autoComplete'=>'false',
+		));
+		
+		$rows =  $this->db->getAllAcademicYear();
+		$opt=array();
+		array_unshift($rows, array('id'=>'','name'=>$this->tr->translate("SELECT_YEAR")));
+		if(!empty($rows))foreach($rows As $row)$opt[$row['id']]=$row['name'];
+		$_academicYear->setMultiOptions($opt);
+		$currentAcademic = $this->request->getParam("academicYear");
+		if(empty($currentAcademic)){
+			$result = $this->db->getLatestAcadmicYear();
+			$currentAcademic = $result['id'];
+		}
+		$_academicYear->setValue($currentAcademic);
+		return $_academicYear;
+	}
+	function getStatusSearch($_data=null){
+		$_status_search=  new Zend_Dojo_Form_Element_FilteringSelect('status');
+		$_status_search->setAttribs(array(
+			'dojoType'=>'dijit.form.FilteringSelect',
+			'class'=>'fullside',
+			'required'=>'false',
+			'placeholder'=>$this->tr->translate("STATUS"),
+		));
+		$_status_opt = array(
+				-1=>$this->tr->translate("ALL"),
+				1=>$this->tr->translate("ACTIVE"),
+				0=>$this->tr->translate("DACTIVE"));
+		$_status_search->setMultiOptions($_status_opt);
+		$_status_search->setValue($this->request->getParam("status"));
+
+		return $_status_search;
+	}
+	
+	function getStartDateSearch($_data=null,$stringHolder=''){//used
+		$_startdate = new Zend_Dojo_Form_Element_DateTextBox('start_date');
+		$_startdate->setAttribs(array('dojoType'=>'dijit.form.DateTextBox',
+				'class'=>'fullside',
+				'required'=>'false',
+				'constraints'=>"{datePattern:'dd/MM/yyyy'}",
+				'placeholder'=>($stringHolder=='')?$this->tr->translate("START_DATE"):$this->tr->translate($stringHolder),
+		));
+		$_date = $this->request->getParam("start_date");
+		$_startdate->setValue($_date);
+		return $_startdate;
+	}
+	function getPaymentDateSearch($_data=null){//used
+		$_paymentdate = new Zend_Dojo_Form_Element_DateTextBox('payment_date');
+		$_paymentdate->setAttribs(array('dojoType'=>'dijit.form.DateTextBox',
+				'class'=>'fullside',
+				'required'=>'false',
+				'constraints'=>"{datePattern:'dd/MM/yyyy'}",
+				'placeholder'=>$this->tr->translate("PAYMENT_DATE"),
+		));
+		$_date = $this->request->getParam("payment_date");
+		$_paymentdate->setValue($_date);
+
+		return $_paymentdate;
+	}
+
+	function getEndDateSearch($_data=null){//used
+	
+		$_enddate = new Zend_Dojo_Form_Element_DateTextBox('end_date');
+		$_enddate->setAttribs(array(
+				'dojoType'=>'dijit.form.DateTextBox',
+				'required'=>'false',
+				'class'=>'fullside',
+				'constraints'=>"{datePattern:'dd/MM/yyyy'}",
+				'placeholder'=>$this->tr->translate("END_DATE"),
+		));
+		$_date = $this->request->getParam("end_date");
+		
+		if(empty($_date)){
+			$_date = date("Y-m-d");
+		}
+		$_enddate->setValue($_date);
+
+		return $_enddate;
+	}
+		function getPaymentTermSearch($_data=null){
+			$pay_term = new Zend_Dojo_Form_Element_FilteringSelect('pay_term');
+			$pay_term->setAttribs(array('dojoType'=>'dijit.form.FilteringSelect',
+						'placeholder'=>$this->tr->translate("PAYMENT_TERM"),
+						'class'=>'fullside',
+						'autoComplete'=>"false",
+						'queryExpr'=>'*${0}*',
+						'required'=>false
+				));
+				
+				$opt_term = array(
+						''=>$this->tr->translate("PAYMENT_TERM"),
+						1=>$this->tr->translate('MONTHLY'),
+						2=>$this->tr->translate('TERM'),
+						3=>$this->tr->translate('SEMESTER'),
+						4=>$this->tr->translate('YEAR'),
+						5=>$this->tr->translate('ONE_PAYMENT'),
+						6=>$this->tr->translate('OTHER'),
+				);
+				
+				$pay_term->setMultiOptions($opt_term);
+				$pay_term->setValue($this->request->getParam("pay_term"));
+			return $pay_term;
+		}
+		function getTermListSearch($_data=null){
+				$termlist = new Zend_Dojo_Form_Element_FilteringSelect('termList');
+				$termlist->setAttribs(array(
+						'dojoType'=>'dijit.form.FilteringSelect',
+						'placeholder'=>$this->tr->translate("Select Term"),
+						'class'=>'fullside',
+						'autoComplete'=>"false",
+						'queryExpr'=>'*${0}*',
+						'required'=>false
+				));
+				
+				$opt_term = array(
+						-1=>$this->tr->translate("Select Term"),
+						1=>$this->tr->translate('Term1'),
+						2=>$this->tr->translate('Term2'),
+						3=>$this->tr->translate('Term3'),
+						4=>$this->tr->translate('Term4'),
+				);
+				$termlist->setMultiOptions($opt_term);
+				$termlist->setValue($this->request->getParam("termList"));
+			return $termlist;
+		}
+	function getSessionSearch($_data=null){
+
+		$_session = new Zend_Dojo_Form_Element_FilteringSelect('session');
+		$_session->setAttribs(
+			array(
+				'dojoType'=>'dijit.form.FilteringSelect',
+				'placeholder'=>$this->tr->translate("SESSION"),
+				'class'=>'fullside',
+				'autoComplete'=>"false",
+				'queryExpr'=>'*${0}*',
+				'required'=>'false'
+		));
+		
+		$opt_sesion=$this->db->getViewById(4);
+		$opt_session = array(''=>$this->tr->translate("SELECT_SESSION"));
+		if(!empty($opt_sesion))foreach ($opt_sesion As $rs)$opt_session[$rs['key_code']]=$rs['view_name'];
+		$_session->setMultiOptions($opt_session);
+
+		$_session->setValue($this->request->getParam("session"));
+
+		return $_session;
+	}
+	
+	function getStudentTypeSearch($_data=null){
+		
+		$_stu_type=  new Zend_Dojo_Form_Element_FilteringSelect('stu_type');
+		$_stu_type->setAttribs(array('dojoType'=>'dijit.form.FilteringSelect','class'=>'fullside',));
+		$_stu_opt = array(
+				-1=>$this->tr->translate("ALL_STUDENT"),
+				0=>$this->tr->translate("OLD_STUDENTS"),
+				1=>$this->tr->translate("NEW_STUDENT"));
+		$_stu_type->setMultiOptions($_stu_opt);
+		$_stu_type->setValue($this->request->getParam("stu_type"));
+
+		return $_stu_type;
+	}
+	
+	function getStudyTypeSearch($_data=null){
+
+		$_study_type=  new Zend_Dojo_Form_Element_FilteringSelect('study_type');
+		$_study_type->setAttribs(array('dojoType'=>'dijit.form.FilteringSelect','class'=>'fullside',));
+		$optRs=$this->db->getViewById(5);
+		$opt_study_type = array(''=>$this->tr->translate("STUDEN_STATUS"));
+		if(!empty($optRs))foreach ($optRs As $rs)$opt_study_type[$rs['key_code']]=$rs['view_name'];
+		$_study_type->setMultiOptions($opt_study_type);
+		$_study_type->setValue($this->request->getParam("study_type"));
+		return $_study_type;
+	}
+
+	function getStopTypeSearch($_data = null) {
+		$_stop_type = new Zend_Dojo_Form_Element_FilteringSelect('stop_type');
+		$_stop_type->setAttribs(array(
+			'dojoType' => 'dijit.form.FilteringSelect',
+			'class' => 'fullside',
+		));
+
+		$optRs = $this->db->getViewById(5);
+		$opt_stop_type = array('' => $this->tr->translate("STUDEN_STATUS"));
+
+		if (!empty($optRs)) {
+			foreach ($optRs as $rs) {
+				if (in_array($rs['key_code'], [0, 3, 4, 5])) {
+					continue; // skip these keys
+				}
+				$opt_stop_type[$rs['key_code']] = $rs['view_name'];
+			}
+		}
+
+		$_stop_type->setMultiOptions($opt_stop_type);
+		$_stop_type->setValue($this->request->getParam("stop_type"));
+		return $_stop_type;
+	}
+
+
+	function getPaymentStatusSearch($_data=null){
+
+		$paymentstatus=  new Zend_Dojo_Form_Element_FilteringSelect('paymentstatus');
+		$paymentstatus->setAttribs(array('dojoType'=>'dijit.form.FilteringSelect','class'=>'fullside',));
+		$optRs=$this->db->getViewById(42);
+		$opt_study_type =array();
+		if(!empty($optRs))foreach ($optRs As $rs)$opt_study_type[$rs['key_code']]=$rs['view_name'];
+		$paymentstatus->setMultiOptions($opt_study_type);
+		$paymentstatus->setValue($this->request->getParam("paymentstatus"));
+		return $paymentstatus;
+	}
+	function getStudyStatusSearch($_data=null){
+		$study_status = new Zend_Dojo_Form_Element_FilteringSelect('study_status');
+		$study_status->setAttribs(array(
+				'dojoType'=>'dijit.form.FilteringSelect',
+				'class'=>'fullside',
+				'autoComplete'=>"false",
+				'queryExpr'=>'*${0}*',
+				'required'=>'false',
+				'placeholder'=>$this->tr->translate("STUDENT_TYPE"),
+		));
+		$study_option = $this->db->getViewById(9,1);
+		$study_option[-1]=$this->tr->translate("PLEASE_SELECT_STATUS");
+		$study_status->setMultiOptions($study_option);
+		$study_status->setValue($this->request->getParam("study_status"));
+
+		return $study_status;
+	}
+
+	//for score search
+	function getExamTypeSearch($_data=null){
+		
+		$_exam_type = new Zend_Dojo_Form_Element_FilteringSelect("exam_type");
+		$_arr = array(
+			0=>$this->tr->translate("SELECT_TYPE"),
+			1=>$this->tr->translate("MONTHLY"),
+			2=>$this->tr->translate("SEMESTER"),
+			3=>$this->tr->translate("YEARLY_RESULT"),
+			4=>$this->tr->translate("TERM"),
+			5=>$this->tr->translate("FINAL"),
+		);
+		$_exam_type->setMultiOptions($_arr);
+		$_exam_type->setAttribs(array(
+				'dojoType'=>'dijit.form.FilteringSelect',
+				'required'=>'false',
+				'placeholder'=>$this->tr->translate("SELECT_TYPE"),
+				'missingMessage'=>'Invalid Module!',
+				'class'=>'fullside height-text',));
+		$_exam_type->setValue($this->request->getParam("exam_type"));
+
+		return $_exam_type;
+	}
+	function getForSemesterSearch($_data=null){
+		
+		$_for_semester = new Zend_Dojo_Form_Element_FilteringSelect("for_semester");
+		$_arr = array(
+			0=>$this->tr->translate("SELECT_SEMESTER"),
+			1=>$this->tr->translate("SEMESTER1"),
+			2=>$this->tr->translate("SEMESTER2"));
+		$_for_semester->setMultiOptions($_arr);
+		$_for_semester->setAttribs(array(
+				'dojoType'=>'dijit.form.FilteringSelect',
+				'required'=>'false',
+				'placeholder'=>$this->tr->translate("SELECT_SEMESTER"),
+				'missingMessage'=>'Invalid Module!',
+				'class'=>'fullside height-text',));
+		$_for_semester->setValue($this->request->getParam("for_semester"));
+
+		return $_for_semester;
+	}
+
+	function getForTermSearch($_data=null){
+		
+		$_for_term = new Zend_Dojo_Form_Element_FilteringSelect("for_term");
+		$_arr = array(
+			0=>$this->tr->translate("FOR_TERM"),
+			1=>$this->tr->translate("TERM_I"),
+			2=>$this->tr->translate("TERM_II"),
+			3=>$this->tr->translate("TERM_III"));
+		$_for_term->setMultiOptions($_arr);
+		$_for_term->setAttribs(array(
+				'dojoType'=>'dijit.form.FilteringSelect',
+				'required'=>'false',
+				'placeholder'=>$this->tr->translate("FOR_TERM"),
+				'missingMessage'=>'Invalid Module!',
+				'class'=>'fullside height-text',));
+		$_for_term->setValue($this->request->getParam("for_term"));
+
+		return $_for_term;
+	}
+
+	function getForMonthSearch($_data=null){
+
+		$_for_month = new Zend_Dojo_Form_Element_FilteringSelect("for_month");
+		$_opt_month = array(0=>$this->tr->translate("CHOOSE_MONTH"));
+		$_allMonth = $this->db->getAllMonth();
+		if(!empty($_allMonth))foreach($_allMonth AS $row) $_opt_month[$row['id']]=$row['name'];
+		$_for_month->setMultiOptions($_opt_month);
+		$_for_month->setAttribs(array(
+				'dojoType'=>'dijit.form.FilteringSelect',
+				'required'=>'false',
+				'autoComplete'=>'false',
+				'placeholder'=>$this->tr->translate("CHOOSE_MONTH"),
+				'queryExpr'=>'*${0}*',
+				'missingMessage'=>'Invalid Module!',
+				'class'=>'fullside height-text',));
+		$_for_month->setValue($this->request->getParam("for_month"));
+
+		return $_for_month;
+	}
+
+	//for other
+	function getGetLanguageSearch($_data=null){
+		
+		$_language_type=  new Zend_Dojo_Form_Element_FilteringSelect('language_type');
+		$_language_type->setAttribs(array(
+			'dojoType'=>'dijit.form.FilteringSelect',
+			'class'=>'fullside',
+		));
+		$_language_opt = array(
+				0=>$this->tr->translate("PLEASE_SELECT"),
+				1=>$this->tr->translate("KHMER"),
+				2=>$this->tr->translate("ENGLISH"));
+		$_language_type->setMultiOptions($_language_opt);
+		$_language_type->setValue($this->request->getParam("language_type"));
+
+		return $_language_type;
+	}
+	function getDaysSearch($_data=null){
+		
+		$_day= new Zend_Dojo_Form_Element_FilteringSelect('day');
+		$_day->setAttribs(array(
+				'dojoType'=>'dijit.form.FilteringSelect',
+				'class'=>'fullside',
+				'autoComplete'=>"false",
+				'queryExpr'=>'*${0}*',
+				'required'=>'false'
+		));
+		$result = $this->db->getAllDayName();
+		$opt_group = array(''=>$this->tr->translate("SELECT_DAY"));
+		if(!empty($result))foreach ($result As $rs)$opt_group[$rs['id']]=$rs['name'];
+		$_day->setMultiOptions($opt_group);
+		$_day->setValue($this->request->getParam("day"));
+
+		return $_day;
+	}
+	function getGenerationSearch($_data=null){
+		
+		$generation = new Zend_Dojo_Form_Element_FilteringSelect('generation');
+		$generation->setAttribs(array(
+				'dojoType'=>'dijit.form.FilteringSelect',
+				'class'=>'fullside',
+				'autoComplete'=>"false",
+				'queryExpr'=>'*${0}*',
+				'required'=>'false'
+		));
+		$generation->setValue($this->request->getParam("generation"));
+		$generoption=$this->db->getAllGeneration(1,1);
+		$generation->setMultiOptions($generoption);
+
+		return $generation;
+	}
+	function getSchoolOptionSearch($_data=null){
+		
+		$_arr_opt = array(""=>$this->tr->translate("PLEASE_SELECT_SCHOOL_OPTION"));
+		$Option = $this->db->getAllSchoolOption();
+		if(!empty($Option))foreach($Option AS $row) $_arr_opt[$row['id']]=$row['name'];
+		$school_option = new Zend_Dojo_Form_Element_FilteringSelect("school_option");
+		$school_option->setMultiOptions($_arr_opt);
+		$school_option->setAttribs(array(
+				'dojoType'=>'dijit.form.FilteringSelect',
+				'required'=>'true',
+				'placeholder'=>$this->tr->translate("PLEASE_SELECT_SCHOOL_OPTION"),
+				'missingMessage'=>'Invalid Module!',
+				'class'=>'fullside height-text',));
+		$school_option->setValue($this->request->getParam("school_option"));
+
+		return $school_option;
+	}
+	function getFinishStatusSearch($_data=null){
+			
+		$finished_status = new Zend_Dojo_Form_Element_FilteringSelect('finished_status');
+		$finished_status->setAttribs(array(
+				'dojoType'=>'dijit.form.FilteringSelect',
+				'class'=>'fullside',
+				'autoComplete'=>"false",
+				'queryExpr'=>'*${0}*',
+				'required'=>'false'
+		));
+		$finish_opt = new Accounting_Model_DbTable_DbTuitionFee();
+		$fin_row=$finish_opt->getProcessTypeView();
+		$opt = array('-1'=>$this->tr->translate("PROCESS_TYPE"));
+		if(!empty($fin_row))foreach($fin_row AS $row) $opt[$row['id']]=$row['name'];
+		$finished_status->setMultiOptions($opt);
+		$finished_status->setValue($this->request->getParam("finished_status"));
+
+		return $finished_status;
+	}
+	function getUserListSearch($_data=null){
+		
+		$_arr_opt_user = array(""=>$this->tr->translate("PLEASE_SELECT_USER"),);
+		$userinfo = $this->db->getUserInfo();
+		$optionUser = $this->db->getAllUserGlobal();
+		if(!empty($optionUser))foreach($optionUser AS $row) $_arr_opt_user[$row['id']]=$row['name'];
+		$_user_id = new Zend_Dojo_Form_Element_FilteringSelect("user_id");
+		$_user_id->setMultiOptions($_arr_opt_user);
+		$_user_id->setAttribs(array(
+				'dojoType'=>'dijit.form.FilteringSelect',
+				'required'=>'false',
+				'placeholder'=>$this->tr->translate("PLEASE_SELECT_USER"),
+				'missingMessage'=>'Invalid Module!',
+				'class'=>'fullside height-text',));
+		if ($userinfo['level']!=1){
+			$_user_id->setAttribs(array(
+					'readonly'=>true,
+			));
+			$_user_id->setValue($userinfo['user_id']);
+		}
+		$_user_id->setValue($this->request->getParam("user_id"));
+		
+		return $_user_id;
+	}
+	function getTypeExamSearch($_data=null){
+
+		$_type_exam = new Zend_Dojo_Form_Element_FilteringSelect("type_exam");
+		$_arr = array(
+			""=>$this->tr->translate("TYPE_TEST"),
+			1=>$this->tr->translate("KHMER_KNOWLEDGE"),
+			2=>$this->tr->translate("ENGLISH"),
+		//	3=>$this->tr->translate("UNIVERSITY")
+		);
+		$_type_exam->setMultiOptions($_arr);
+		$_type_exam->setAttribs(array(
+				'dojoType'=>'dijit.form.FilteringSelect',
+				'class'=>'fullside height-text',
+				'placeholder'=>$this->tr->translate("TYPE_TEST"),
+				'required'=>'false',
+				'autoComplete'=>'false',
+				'queryExpr'=>'*${0}*',));
+		$_type_exam->setValue($this->request->getParam("type_exam"));
+
+		$userinfo = $this->db->getUserInfo();
+		if($userinfo['level']!=1){
+			$_type_exam->setAttribs(array('readonly'=>'readonly'));
+			if(!empty($userinfo['schoolOption'])){
+				$_type_exam->setValue($userinfo['schoolOption']);
+			}
+		}
+
+		return $_type_exam;
+	}
+	function getStudentOptionSearch($_data=null){
+
+		$_student_option_search = new Zend_Dojo_Form_Element_FilteringSelect("student_option_search");
+		$_arr = array(
+		""=>$this->tr->translate("OCCUPATION"),1=>
+		$this->tr->translate("STUDENT"),
+		2=>$this->tr->translate("STAFF"),
+		3=>$this->tr->translate("OWN_BUSSINESS"));
+		$_student_option_search->setMultiOptions($_arr);
+		$_student_option_search->setAttribs(array(
+				'dojoType'=>'dijit.form.FilteringSelect',
+				'placeholder'=>$this->tr->translate("OCCUPATION"),
+				'required'=>'false',
+				'class'=>'fullside height-text',
+				'autoComplete'=>'false',
+				'queryExpr'=>'*${0}*',));
+		$_student_option_search->setValue($this->request->getParam("student_option_search"));
+
+		return $_student_option_search;
+	}
+	function getProviceSearch($_data=null){
+		
+		$_province_search = new Zend_Dojo_Form_Element_FilteringSelect("province_search");
+		$rs_province = $this->db->getProvince();
+		$opt = array(""=>$this->tr->translate("SELECT_PROVINCE"));
+		if(!empty($rs_province))foreach($rs_province AS $row) $opt[$row['province_id']]=$row['province_en_name'];
+		
+		$_province_search->setMultiOptions($opt);
+		$_province_search->setAttribs(array(
+				'dojoType'=>'dijit.form.FilteringSelect',
+				'required'=>'false',
+				'class'=>'fullside',
+				'placeholder'=>$this->tr->translate("SELECT_PROVINCE"),
+				'onChange'=>'filterDistrict();',
+				'autoComplete'=>'false',
+				'queryExpr'=>'*${0}*',
+		));
+		$_province_search->setValue($this->request->getParam("province_search"));
+		return $_province_search;
+	}
+	function getStudentDropTypeSearch($_data=null){
+		
+		$_type = new Zend_Dojo_Form_Element_FilteringSelect('type');
+		$_type->setAttribs(array('dojoType'=>'dijit.form.FilteringSelect',
+				'class'=>'fullside',
+				'required'=>'false',
+				'queryExpr'=>'*${0}*',
+				'autoComplete'=>'false',
+				'placeholder'=>$this->tr->translate("SELECT_TYPE"),
+		));
+		
+		$db = new Foundation_Model_DbTable_DbStudentDrop();
+		$rows= $db->getAllDropType();
+		array_unshift($rows, array('id'=>'','name'=>$this->tr->translate("SELECT_TYPE")));
+		$opt=array();
+		if(!empty($rows))foreach($rows As $row)
+		{
+			$opt[$row['id']]=$row['name'];
+		}
+		$_type->setMultiOptions($opt);
+		$_type->setValue($this->request->getParam("type"));
+
+		return $_type;
+	}
+	function getResultTextStatusSearch($_data=null){
+		
+		$_result_status=  new Zend_Dojo_Form_Element_FilteringSelect('result_status');
+		$_result_status->setAttribs(array(
+			'dojoType'=>'dijit.form.FilteringSelect',
+			'class'=>'fullside',
+			'required'=>'false',
+			'placeholder'=>$this->tr->translate("RESULT_TEST_TYPE"),
+		));
+		$_result_status_opt = array(
+				''=>$this->tr->translate("RESULT_TEST_TYPE"),
+				1=>$this->tr->translate("GET_RESULT"),
+				0=>$this->tr->translate("NO_RESULT"));
+		$_result_status->setMultiOptions($_result_status_opt);
+		$_result_status->setValue($this->request->getParam("result_status"));
+
+		return $_result_status;
+	}
+	function getRegisterStatusSearch($_data=null){
+		
+		$_register_status=  new Zend_Dojo_Form_Element_FilteringSelect('register_status');
+		$_register_status->setAttribs(array(
+			'dojoType'=>'dijit.form.FilteringSelect',
+			'class'=>'fullside',
+			'required'=>'false',
+			'placeholder'=>$this->tr->translate("ENROLL_STATUS"),
+		));
+		$_register_status_opt = array(
+				''=>$this->tr->translate("ENROLL_STATUS"),
+				1=>$this->tr->translate("ENROLLED"),
+				0=>$this->tr->translate("NOT_YET_ENROLL")
+			);
+		$_register_status->setMultiOptions($_register_status_opt);
+		$_register_status->setValue($this->request->getParam("register_status"));
+
+		return $_register_status;
+	}
+	function getGroupStatusSearch($_data=null){
+
+		$_student_group_status=  new Zend_Dojo_Form_Element_FilteringSelect('student_group_status');
+		$_student_group_status->setAttribs(array(
+			'dojoType'=>'dijit.form.FilteringSelect',
+			'class'=>'fullside',
+			'required'=>'false',
+			'placeholder'=>$this->tr->translate("STATUS"),
+		));
+		$_group_status_opt = array(
+				-1=>$this->tr->translate("ALL_STUDENT"),
+				1=>$this->tr->translate("IS_GROUP"),
+				0=>$this->tr->translate("NOT_YET_GROUP")
+			);
+		$_student_group_status->setMultiOptions($_group_status_opt);
+		$_student_group_status->setValue($this->request->getParam("student_group_status"));
+
+		return $_student_group_status;
+	}
+	function getCutStockTypeSearch($_data=null){
+		
+		$_cut_stock_type = new Zend_Dojo_Form_Element_FilteringSelect('cut_stock_type');
+		$_cut_stock_type->setAttribs(array(
+			'dojoType'=>'dijit.form.FilteringSelect',
+			'class'=>'fullside',
+			'required'=>'false',
+			'placeholder'=>$this->tr->translate("TYPE"),
+		));
+		$_stock_opt = array(
+				''=>$this->tr->translate("SELECT_TYPE"),
+				1=>$this->tr->translate("USAGE_STOCK"),
+				2=>$this->tr->translate("DEBT_STOCK"));
+		$_cut_stock_type->setMultiOptions($_stock_opt);
+		$_cut_stock_type->setValue($this->request->getParam("cut_stock_type"));
+
+		return $_cut_stock_type;
+	}
+	function getShortDegreeSearch($_data=null){
+		
+		$_sort_degree = new Zend_Dojo_Form_Element_FilteringSelect('sort_degree');
+		$_sort_degree->setAttribs(array(
+			'dojoType'=>'dijit.form.FilteringSelect',
+			'class'=>'fullside',
+			'required'=>'false',
+			'placeholder'=>$this->tr->translate("DEGREE"),
+		));
+		$_sort_dg_opt = array(
+
+				''=>$this->tr->translate("ALL"),
+				'2,3'=>$this->tr->translate("Junior-Senior"),
+				
+			);
+		$_sort_degree->setMultiOptions($_sort_dg_opt);
+		$_sort_degree->setValue($this->request->getParam("sort_degree"));
+
+		return $_sort_degree;
+	}
+
+	function getCriteriaIDSearch($_data=null){
+		
+		$_arr_opt_exam = array(""=>$this->tr->translate("PLEASE_SELECT_CRITERIAL"));
+    	$optionExametype = $this->db->getExamTypeEngItems();
+    	if(!empty($optionExametype))foreach($optionExametype AS $row) $_arr_opt_exam[$row['id']]=$row['name'];
+    	$_criteriaId = new Zend_Dojo_Form_Element_FilteringSelect("criteriaId");
+    	$_criteriaId->setMultiOptions($_arr_opt_exam);
+    	$_criteriaId->setAttribs(array(
+    			'dojoType'=>'dijit.form.FilteringSelect',
+    			'required'=>'false',
+    			'autoComplete'=>'false',
+    			'queryExpr'=>'*${0}*',
+    			'onChange'=>'addRow()',
+    			'missingMessage'=>'Invalid Module!',
+    			'class'=>'fullside height-text',));
+
+		return $_criteriaId;
+	}
+
+	function getShortStudentByTypeSearch($_data=null){
+		
+		$_stuOrderBy=  new Zend_Dojo_Form_Element_FilteringSelect('stuOrderBy');
+		$_stuOrderBy->setAttribs(array(
+			'dojoType'=>'dijit.form.FilteringSelect',
+			'class'=>'fullside',
+			'required'=>'false',
+			'placeholder'=>$this->tr->translate("ORDER_BY"),
+		));
+		$_order_opt = array(
+				0=>$this->tr->translate("DEFAULT"),
+				1=>$this->tr->translate("BY_STU_CODE_ASC"),
+				2=>$this->tr->translate("BY_STU_KHNAME_ASC"),
+				3=>$this->tr->translate("BY_STU_ENNAME_ASC")
+			);
+		$_stuOrderBy->setMultiOptions($_order_opt);
+		$_stuOrderBy->setValue($this->request->getParam("stuOrderBy"));
+
+		return $_stuOrderBy;
+	}
+
+	function getScoreResultStatusSearch($_data=null){
+		
+		$_score_result_status=  new Zend_Dojo_Form_Element_FilteringSelect('score_result_status');
+		$_score_result_status->setAttribs(array(
+			'dojoType'=>'dijit.form.FilteringSelect',
+			'class'=>'fullside',
+			'required'=>'false',
+			'placeholder'=>$this->tr->translate("STATUS"),
+		));
+		$_rs_opt = array(
+				0=>$this->tr->translate("Unpublished"),
+				1=>$this->tr->translate("Published"),
+			);
+		$_score_result_status->setMultiOptions($_rs_opt);
+		$_score_result_status->setValue($this->request->getParam("score_result_status"));
+
+		return $_score_result_status;
+	}
+	function getDepartSearch($_data=null){
+		
+		$dbTeacher = new Global_Model_DbTable_DbTeacher();
+		$rowDept = $dbTeacher->getAllDepartment();
+		$optDeptpartment = array(''=>$this->tr->translate("PLEASE_SELECT_DEPARTMENT"));
+		if(!empty($rowDept))foreach ($rowDept As $rs)$optDeptpartment[$rs['id']]=$rs['name'];
+		$_department=  new Zend_Dojo_Form_Element_FilteringSelect('department');
+		$_department->setAttribs(array(
+			'dojoType'=>'dijit.form.FilteringSelect',
+			'class'=>'fullside',
+			'required'=>'false',
+			'placeholder'=>$this->tr->translate("DEPARTMENT"),
+		));
+		$_department->setMultiOptions($optDeptpartment);
+		$_department->setValue($this->request->getParam("department"));
+
+		return $_department;
+	}
+	function getResultStatusSearch($_data=null){
+		
+    	$_resultStatus = new Zend_Dojo_Form_Element_FilteringSelect("resultStatus");
+		$_resultStatus->setAttribs(array(
+			'dojoType'=>'dijit.form.FilteringSelect',
+			'required'=>'true',
+			'class'=>'fullside height-text',
+			'autoComplete'=>'false',
+			'queryExpr'=>'*${0}*',));
+		$_arrResultStatus = array(
+			""=>$this->tr->translate("PLEASE_SELECT"),
+			1=>$this->tr->translate("Qualified"),
+			2=>$this->tr->translate("Unqualified"));
+    	$_resultStatus->setMultiOptions($_arrResultStatus);
+    	
+		$_resultStatus->setValue($this->request->getParam("resultStatus"));
+
+		return $_resultStatus;
+	}
+	function getMentionGradeSearch($_data=null){
+		
+		$_mention=  new Zend_Dojo_Form_Element_FilteringSelect('mention');
+		$_mention->setAttribs(array(
+			'dojoType'=>'dijit.form.FilteringSelect',
+			'class'=>'fullside',
+			'required'=>'false',
+			'placeholder'=>$this->tr->translate("SELCECT_MENTION"),
+		));
+		$_mention_opt = array(
+			''=>$this->tr->translate("SELCECT_MENTION"),
+			90=>$this->tr->translate("GRADE_A"),
+			80=>$this->tr->translate("GRADE_B"),
+			70=>$this->tr->translate("GRADE_C"),
+			60=>$this->tr->translate("GRADE_D"),
+			50=>$this->tr->translate("GRADE_E"),
+			1=>$this->tr->translate("GRADE_F"),
+		);
+		$_mention->setMultiOptions($_mention_opt);
+
+		$_mention->setValue($this->request->getParam("mention"));
+
+		return $_mention;
+	}
+	function getStudentTypeStatusTypeSearch($_data=null){
+		
+		$studentType = new Zend_Dojo_Form_Element_FilteringSelect("studentType");	
+		$studentType->setAttribs(array(
+				'dojoType'=>'dijit.form.FilteringSelect',
+				'required'=>'false',
+				'class'=>'fullside',
+				'autoComplete'=>'false',
+				'queryExpr'=>'*${0}*',
+		));
+		$opt = $this->db->getViewByType(40, 1);
+		$opt['']=$this->tr->translate('STUDENT_TYPE');
+		$studentType->setMultiOptions($opt);
+
+		return $studentType;
+	}
+	function getUpdateOptionSearch($_data=null){
+		
+		$updateOption=  new Zend_Dojo_Form_Element_FilteringSelect('updateOption');
+		$updateOption->setAttribs(array('dojoType'=>'dijit.form.FilteringSelect','class'=>'fullside',));
+		$updateopt = array(
+				''=>$this->tr->translate("SELECT_TYPE"),
+				1=>$this->tr->translate("ADD_TO_DISCOUNT"),
+				2=>$this->tr->translate("UPGRADE_DISCOUNT"),
+				3=>$this->tr->translate("CHANGE_DISCOUNT"),
+			);
+		$updateOption->setMultiOptions($updateopt);
+		$updateOption->setValue($this->request->getParam("updateOption"));
+
+		return $updateOption;
+	}
+
+	function getDiscountStatusSearch($_data=null){
+		
+		$discountStatus=  new Zend_Dojo_Form_Element_FilteringSelect('discountStatus');
+		$discountStatus->setAttribs(array('dojoType'=>'dijit.form.FilteringSelect','class'=>'fullside',));
+		$discountstatusopt = array(
+				1=>$this->tr->translate("USING"),
+				0=>$this->tr->translate("STOP_USED"));
+		$discountStatus->setMultiOptions($discountstatusopt);
+		$discountStatus->setValue($this->request->getParam("discountStatus"));
+
+		return $discountStatus;
+	}
+	function getLimitFilterSearch($_data=null){
+		
+		$limit=  new Zend_Dojo_Form_Element_FilteringSelect('limit');
+		$limit->setAttribs(array('dojoType'=>'dijit.form.FilteringSelect','class'=>'fullside',));
+		$limitopt = array(
+				25=>25,
+				50=>50,
+				100=>100,
+				150=>150,
+				200=>200,
+			);
+		$limit->setMultiOptions($limitopt);
+		$limit->setValue($this->request->getParam("limit"));
+
+		return $limit;
+	}
+	function getStudentStatusSearch($_data=null){
+		
+		$student_status=  new Zend_Dojo_Form_Element_FilteringSelect('student_status');
+		$student_status->setAttribs(array('dojoType'=>'dijit.form.FilteringSelect','class'=>'fullside',));
+		$statusopt = array(
+				1=>$this->tr->translate("LEARNING"),
+				2=>$this->tr->translate("STOP_STUDY"));
+		$student_status->setMultiOptions($statusopt);
+		$student_status->setValue($this->request->getParam("student_status"));
+
+		return $student_status;
+	}
+	function getStudentStudyStatus($_data=null){
+		
+		$student_study_status = new Zend_Dojo_Form_Element_FilteringSelect('student_study_status');
+		$student_study_status->setAttribs(array('dojoType'=>'dijit.form.FilteringSelect','class'=>'fullside',));
+		$stud_option = $this->db->getViewById(5,1);
+		$stud_option[-1]=$this->tr->translate("PLEASE_SELECT_STATUS");
+		$student_study_status->setMultiOptions($stud_option);
+		$student_study_status->setValue($this->request->getParam("student_status"));
+
+		return $student_study_status;
+	}
+	
+	function getTermOptionSearch($_data=null){
+		
+		$termOption=  new Zend_Dojo_Form_Element_FilteringSelect('termOption');
+		$termOption->setAttribs(array('dojoType'=>'dijit.form.FilteringSelect','class'=>'fullside',));
+		$rowsOpt = $this->db->getAllPaymentTerm($id=null,$hidemonth=1);
+		$optTerm = array(0=>$this->tr->translate("PLEASE_SELECT"));
+		if(!empty($rowsOpt)) foreach($rowsOpt as $key => $opt){
+			$optTerm[$key] =$opt;
+		}
+		$termOption->setMultiOptions($optTerm);
+		$termOption->setValue($this->request->getParam("termOption"));
+
+		return $termOption;
+	}
+
+	function getMainGradeTypeSearch($_data=null){
+		$_isMainGradeType=  new Zend_Dojo_Form_Element_FilteringSelect('isMainGradeType');
+		$_isMainGradeType->setAttribs(array(
+				'dojoType'=>'dijit.form.FilteringSelect',
+				'class'=>'fullside',
+				'required'=>'false',
+				'placeholder'=>$this->tr->translate("ALL_STATUS"),
+			));
+			$_isMainGradeOpt = array(
+					0=>$this->tr->translate("ALL"),
+					1=>$this->tr->translate("MAIN_CLASS"),
+					2=>$this->tr->translate("SUB_CLASS")
+					);
+			$_isMainGradeType->setMultiOptions($_isMainGradeOpt);
+			$_isMainGradeType->setValue($this->request->getParam("isMainGradeType"));
+
+		return $_isMainGradeType;
+	}
+	function getTypeStudySearch($_data=null){
+		$type_study = new Zend_Dojo_Form_Element_FilteringSelect('type_study');
+		$type_study->setAttribs(array(
+				'dojoType'=>'dijit.form.FilteringSelect',
+				'required' =>'true',
+				'class'=>'fullside',
+				'onchange'=>'filterClient();',
+				'queryExpr'=>'*${0}*',
+				'autoComplete'=>"false"
+		));
+		$typestudy_opt = $this->db->getAllTermStudyTitle(1);
+		$type_study->setMultiOptions($typestudy_opt);
+		$type_study->setValue($this->request->getParam("type_study"));
+
+		return $typestudy_opt;
+	}
+
+	function getAskForSearch($_data=null){
+		$_arr = array(
+			""=>$this->tr->translate("ASK_FOR"),
+			1=>$this->tr->translate("KHMER_KNOWLEDGE"),
+			2=>$this->tr->translate("ENGLISH_KNOWLEDGE"),
+			3=>$this->tr->translate("UNIVERSITY"),
+			4=>$this->tr->translate("CHINESE_KNOWLEDGE"),
+			5=>$this->tr->translate("OTHER")
+		);
+		$_ask_for_search = new Zend_Dojo_Form_Element_FilteringSelect("ask_for_search");
+		$_ask_for_search->setMultiOptions($_arr);
+		$_ask_for_search->setAttribs(array(
+			'dojoType'=>'dijit.form.FilteringSelect',
+			'required'=>'false',
+			'autoComplete'=>'false',
+			'queryExpr'=>'*${0}*',
+			'placeholder'=>$this->tr->translate("ASK_FOR"),
+			'class'=>'fullside height-text',));
+		$_ask_for_search->setValue($this->request->getParam("ask_for_search"));
+		return $_ask_for_search;
+	}
+	function getKnowBySearch($_data=null){
+		$_arr_opt_know = array(""=>$this->tr->translate("KNOW_BY"));
+    	$optionKnowBy = $this->db->getAllKnowBy();
+    	if(!empty($optionKnowBy))foreach($optionKnowBy AS $row) $_arr_opt_know[$row['id']]=$row['name'];
+    	$_know_by_search = new Zend_Dojo_Form_Element_FilteringSelect("know_by_search");
+    	$_know_by_search->setMultiOptions($_arr_opt_know);
+    	$_know_by_search->setAttribs(array(
+			'dojoType'=>'dijit.form.FilteringSelect',
+			'required'=>'false',
+			'autoComplete'=>'false',
+			'queryExpr'=>'*${0}*',
+			'placeholder'=>$this->tr->translate("KNOW_BY"),
+			'class'=>'fullside height-text',));
+    	$_know_by_search->setValue($this->request->getParam("know_by_search"));
+		return $_know_by_search;
+	}
+
+	function getFollowStatusSearch($_data=null){
+		$followup = new Zend_Dojo_Form_Element_FilteringSelect("followup_status");
+		$followup->setAttribs(array(
+			'dojoType'=>'dijit.form.FilteringSelect',
+			'required'=>'false',
+			'autoComplete'=>'false',
+			'queryExpr'=>'*${0}*',
+			'placeholder'=>$this->tr->translate("FOLLOWU_STATUS"),
+			'class'=>'fullside height-text',));
+		
+		$_arr =array(
+			-1=>$this->tr->translate("FOLLOWU_STATUS"),
+			1=>$this->tr->translate("FOLLOW_UP"),
+			0=>$this->tr->translate("STOP_FOLLOW_UP"),
+		);
+		$followup->setMultiOptions($_arr);
+		
+		$followup->setValue($this->request->getParam('followup_status'));	
+		return $followup;
+	}
+	function getCrmStatusSearch($_data=null){
+		$_arr= $this->db->getcrmFollowupStatus();
+		$crm_status = new Zend_Dojo_Form_Element_FilteringSelect("crm_status");
+		$crm_status->setMultiOptions($_arr);
+		$crm_status->setAttribs(array(
+			'dojoType'=>'dijit.form.FilteringSelect',
+			'autoComplete'=>'false',
+			'required'=>'false',
+			'queryExpr'=>'*${0}*',
+			'placeholder'=>$this->tr->translate("STATUS"),
+			'class'=>'fullside height-text',));
+		$crm_status->setValue($this->request->getParam("crm_status"));
+		return $crm_status;
+	}
+	function getTestTypeSearch($_data=null){
+		$_arr_type_exam = array(
+			""=>$this->tr->translate("TYPE_TEST"),
+			1=>$this->tr->translate("KHMER_KNOWLEDGE"),
+			2=>$this->tr->translate("ENGLISH"),
+			3=>$this->tr->translate("UNIVERSITY")
+		);
+		$_type_exam_search = new Zend_Dojo_Form_Element_FilteringSelect("type_exam_search");
+		$_type_exam_search->setMultiOptions($_arr_type_exam);
+		$_type_exam_search->setAttribs(array(
+			'dojoType'=>'dijit.form.FilteringSelect',
+			'class'=>'fullside height-text',
+			'autoComplete'=>'false',
+			'queryExpr'=>'*${0}*',));
+		$_type_exam_search->setValue($this->request->getParam("type_exam_search"));
+		return $_type_exam_search;
+	}
+	function getTeacherSearch($_data=null){
+		$_teacher = new Zend_Dojo_Form_Element_FilteringSelect('teacher');
+		$_teacher->setAttribs(array(
+				'dojoType'=>'dijit.form.FilteringSelect',
+				'class'=>'fullside',
+				'autoComplete'=>"false",
+				'queryExpr'=>'*${0}*',
+				'placeholder'=>$this->tr->translate("SELECT_TEACHER"),
+				'required'=>'false'
+		));
+		$_teacher->setValue($this->request->getParam("teacher"));
+		$result = $this->db->getAllTeahcerName();
+		$opt_group = array(''=>$this->tr->translate("SELECT_TEACHER"));
+		if(!empty($result))foreach ($result As $rs)$opt_group[$rs['id']]=$rs['name'];
+		$_teacher->setMultiOptions($opt_group);
+		return $_teacher;
+	}
+	function getIsPassSearch($_data=null){
+		$is_pass = new Zend_Dojo_Form_Element_FilteringSelect('is_pass');
+		$is_pass->setAttribs(array(
+			'dojoType'=>'dijit.form.FilteringSelect',
+			'class'=>'fullside',
+			'placeholder'=>$this->tr->translate("SERVIC"),
+			'autoComplete'=>"false",
+			'queryExpr'=>'*${0}*',
+			'missingMessage'=>'Invalid Module!',
+			'required'=>'false'
+		));
+		$opt = array(""=>$this->tr->translate("PLEASE_SELECT"));
+		$rs = $this->db->getViewById(9);
+		if(!empty($rs))foreach($rs AS $row) $opt[$row['id']]=$row['name'];
+		$is_pass->setMultiOptions($opt);
+		$is_pass->setValue($this->request->getParam("is_pass"));
+		return $is_pass;
+	}
+
+	function staffTypeSearch($_data=null){
+		$_staff=  new Zend_Dojo_Form_Element_FilteringSelect('staff_type');
+		$_staff->setAttribs(array(
+			'dojoType'=>'dijit.form.FilteringSelect',
+			'class'=>'fullside',
+			'placeholder'=>$this->tr->translate("SELECT_TYPE"),
+			'required'=>'false',
+		));
+		$_staff_opt = array(
+			0=>$this->tr->translate("SELECT_TYPE"),
+			1=>$this->tr->translate("TEACHER"),
+			2=>$this->tr->translate("STAFF"));
+		$_staff->setMultiOptions($_staff_opt);
+		$_staff->setValue($this->request->getParam("staff_type"));
+		return $_staff;
+	}
+
+	function getNationSearch($_data=null){
+		$_arr_opt_nation = array(""=>$this->tr->translate("SELECT_NATION"),);
+		$optionNation = $this->db->getViewByType(21);//Nation
+		if(!empty($optionNation))foreach($optionNation AS $row) $_arr_opt_nation[$row['id']]=$row['name'];
+		$_nationality = new Zend_Dojo_Form_Element_FilteringSelect("nationality");
+		$_nationality->setMultiOptions($_arr_opt_nation);
+		$_nationality->setAttribs(array(
+				'dojoType'=>'dijit.form.FilteringSelect',
+				'class'=>'fullside height-text',
+				'placeholder'=>$this->tr->translate("SELECT_NATION"),
+				'required'=>'false',
+				)
+			);
+		$_nationality->setValue($this->request->getParam("nationality"));	
+		return $_nationality;
+	}
+
+	function getTeacherTypeSearch($_data=null){
+		$teacher_type=  new Zend_Dojo_Form_Element_FilteringSelect('teacher_type');
+		$teacher_type->setAttribs(array(
+			'dojoType'=>'dijit.form.FilteringSelect',
+			'class'=>'fullside',
+			'placeholder'=>$this->tr->translate("PLEASE_SELECT_TEACHER_TYPE"),
+			'required'=>'false',
+		));
+		$_teacher_opt = array(
+			-1=>$this->tr->translate("PLEASE_SELECT_TEACHER_TYPE"),
+			1=>$this->tr->translate("TEACHER_KHMER"),
+			0=>$this->tr->translate("TEACHER_FOREIGNER"));
+		$teacher_type->setMultiOptions($_teacher_opt);
+		$teacher_type->setValue($this->request->getParam("teacher_type"));
+		return $teacher_type;
+	}
+
+	function getActiveTypeSearch($_data=null){
+		$_active_type=  new Zend_Dojo_Form_Element_FilteringSelect('active_type');
+		$_active_type->setAttribs(array(
+			'dojoType'=>'dijit.form.FilteringSelect',
+			'placeholder'=>$this->tr->translate("PLEASE_SELECT"),
+			'class'=>'fullside',
+			'required'=>'false',
+		));
+		$_active_type_opt = array(
+			-1=>$this->tr->translate("PLEASE_SELECT"),
+			0=>$this->tr->translate("ACTIVING"),
+			1=>$this->tr->translate("STOP"));
+		$_active_type->setMultiOptions($_active_type_opt);
+		$_active_type->setValue($this->request->getParam("active_type"));
+		return $_active_type;
+	}
+	
+	function getServiceTypeSearch($_data=null){
+		$service_type = new Zend_Dojo_Form_Element_FilteringSelect("service_type");
+		$service_type->setAttribs(array(
+			'dojoType'=>'dijit.form.FilteringSelect',
+			'class'=>'fullside',
+			'autoComplete'=>"false",
+			'queryExpr'=>'*${0}*',
+			'required'=>false
+			)
+		);
+		
+		$_arr =array(
+				''=>$this->tr->translate("PLEASE_SELECT"),
+				1=>$this->tr->translate("TUITION_FEE"),
+				2=>$this->tr->translate("SERVICE"),
+				3=>$this->tr->translate("PRODUCT")
+		);
+		$service_type->setMultiOptions($_arr);
+		
+		$service_type->setValue($this->request->getParam('service_type'));	
+		return $service_type;
+	}
+	function getNearlyPaymetySortSearch($_data=null){
+		$nearlyPaymetySort = new Zend_Dojo_Form_Element_FilteringSelect("nearlyPaymetySort");
+		$nearlyPaymetySort->setAttribs(array(
+			'dojoType'=>'dijit.form.FilteringSelect',
+			'class'=>'fullside',
+			'autoComplete'=>"false",
+			'queryExpr'=>'*${0}*',
+			'required'=>false
+			)
+		);
+		
+		$_arr =array(
+				2=>$this->tr->translate("SERVICE"),
+				1=>$this->tr->translate("STUDENT"),
+		);
+		$nearlyPaymetySort->setMultiOptions($_arr);
+		
+		$nearlyPaymetySort->setValue($this->request->getParam('nearlyPaymetySort'));	
+		return $nearlyPaymetySort;
+	}
+	function getNearlyPaymetyFilterType($_data=null){
+		$nearlyFilterType = new Zend_Dojo_Form_Element_FilteringSelect("nearlyFilterType");
+		$nearlyFilterType->setAttribs(array(
+			'dojoType'=>'dijit.form.FilteringSelect',
+			'class'=>'fullside',
+			'autoComplete'=>"false",
+			'queryExpr'=>'*${0}*',
+			'required'=>false
+			)
+		);
+		
+		$_arr =array(
+				1=>$this->tr->translate("WITH_NO_NEARLY_DATE"),
+				2=>$this->tr->translate("NEARLY_DATE"),
+				3=>$this->tr->translate("Unexpired"),
+		);
+		$nearlyFilterType->setMultiOptions($_arr);
+		
+		$nearlyFilterType->setValue($this->request->getParam('nearlyFilterType'));	
+		return $nearlyFilterType;
+	}
+	
+	function getPeriodDaySearch($_data=null){
+		$periodDay = new Zend_Dojo_Form_Element_FilteringSelect("periodDay");
+		$periodDay->setAttribs(array(
+			'dojoType'=>'dijit.form.FilteringSelect',
+			'class'=>'fullside',
+			'autoComplete'=>"false",
+			'queryExpr'=>'*${0}*',
+			'required'=>false
+			)
+		);
+		
+		$_arr =array(
+				0=>$this->tr->translate("BY_SELECTED_DATE"),
+				7=>$this->tr->translate("BEFORE_ONE_WEEK"),
+				15=>$this->tr->translate("BEFORE_HALF_MONTH"),
+				30=>$this->tr->translate("BEFORE_ONE_MONTH"),
+		);
+		$periodDay->setMultiOptions($_arr);
+		
+		$periodDay->setValue($this->request->getParam('periodDay'));	
+		return $periodDay;
+	}
+	
+	function getCalendarTypeSearch($_data=null){
+		$calendarType = new Zend_Dojo_Form_Element_FilteringSelect("calendarType");
+		$calendarType->setAttribs(array(
+			'dojoType'=>'dijit.form.FilteringSelect',
+			'class'=>'fullside',
+			'autoComplete'=>"false",
+			'queryExpr'=>'*${0}*',
+			'required'=>false
+			)
+		);
+		$_arr =array(
+				0=>$this->tr->translate("ALL"),
+				1=>$this->tr->translate("HOLIDAY"),
+				2=>$this->tr->translate("SCHOOL_EVENT"),
+				3=>$this->tr->translate("EXAMINATION"),
+				4=>$this->tr->translate("COMPETITION"),
+		);
+		$calendarType->setMultiOptions($_arr);
+		
+		$calendarType->setValue($this->request->getParam('calendarType'));	
+		return $calendarType;
+	}
+
+	function getIssueScoreStatusSearch($_data=null){
+		$issueScoreStatus = new Zend_Dojo_Form_Element_FilteringSelect("issueScoreStatus");
+		$issueScoreStatus->setAttribs(array(
+			'dojoType'=>'dijit.form.FilteringSelect',
+			'class'=>'fullside',
+			'autoComplete'=>"false",
+			'queryExpr'=>'*${0}*',
+			'required'=>false
+			)
+		);
+		$_arr =array(
+				''=>$this->tr->translate("ALL"),
+				1=>$this->tr->translate("EXAM_COMPLETED"),
+				2=>$this->tr->translate("NOT_YET_EXAM"),
+				//3=>$this->tr->translate("NOT_YET_INPUT_CRITERIA"),
+		);
+		$issueScoreStatus->setMultiOptions($_arr);
+		$issueScoreStatus->setValue($this->request->getParam('issueScoreStatus'));	
+		return $issueScoreStatus;
+	}
+	function getCombineStatusSearch($_data=null){
+		$scoreCombineStatus = new Zend_Dojo_Form_Element_FilteringSelect("scoreCombineStatus");
+		$scoreCombineStatus->setAttribs(array(
+			'dojoType'=>'dijit.form.FilteringSelect',
+			'class'=>'fullside',
+			'autoComplete'=>"false",
+			'queryExpr'=>'*${0}*',
+			'required'=>false
+			)
+		);
+		$_arr =array(
+				''=>$this->tr->translate("RESULT_STATUS"),
+				1=>$this->tr->translate("RESULT_COMBINED"),
+				2=>$this->tr->translate("RESULT_NOT_YET_COMBINED"),
+		);
+		$scoreCombineStatus->setMultiOptions($_arr);
+		$scoreCombineStatus->setValue($this->request->getParam('scoreCombineStatus'));	
+		return $scoreCombineStatus;
+	}
+	function getEvaluationStatusSearch($_data=null){
+		$evaluationStatus = new Zend_Dojo_Form_Element_FilteringSelect("evaluationStatus");
+		$evaluationStatus->setAttribs(array(
+			'dojoType'=>'dijit.form.FilteringSelect',
+			'class'=>'fullside',
+			'autoComplete'=>"false",
+			'queryExpr'=>'*${0}*',
+			'required'=>false
+			)
+		);
+		$_arr =array(
+				''=>$this->tr->translate("ALL"),
+				1=>$this->tr->translate("EVALUATED"),
+				2=>$this->tr->translate("NOT_YET_EVALUATION"),
+		);
+		$evaluationStatus->setMultiOptions($_arr);
+		$evaluationStatus->setValue($this->request->getParam('evaluationStatus'));	
+		return $evaluationStatus;
+	}
+	
+	function getSortDegreeSearch($_data=null){
+		$sort_degree = new Zend_Dojo_Form_Element_FilteringSelect("sort_degree");
+		$sort_degree->setAttribs(array(
+			'dojoType'=>'dijit.form.FilteringSelect',
+			'class'=>'fullside',
+			'autoComplete'=>"false",
+			'queryExpr'=>'*${0}*',
+			'required'=>false
+			)
+		);
+		$_arr =array(
+			''=>$this->tr->translate("SELECT_DEGREE"),
+			4=>"Kindergarten",
+			1=>"Primary",
+			'2,3'=>$this->tr->translate("Junior-Senior"),
+		);
+		$sort_degree->setMultiOptions($_arr);
+		$sort_degree->setValue($this->request->getParam('sort_degree'));	
+		return $sort_degree;
+	}
+	
+	function getPreAttOptionSearch($_data=null){
+		
+		$_queryOption=  new Zend_Dojo_Form_Element_FilteringSelect('queryOption');
+		$_queryOption->setAttribs(array(
+			'dojoType'=>'dijit.form.FilteringSelect',
+			'class'=>'fullside',
+			'required'=>'false',
+			'placeholder'=>$this->tr->translate("RESULT_TEST_TYPE"),
+		));
+		$_queryOptionOpt = array(
+				0=>$this->tr->translate("ALL"),
+				1=>$this->tr->translate("ONLY_SCANNED"),
+				2=>$this->tr->translate("UNSCAN"));
+		$_queryOption->setMultiOptions($_queryOptionOpt);
+		$_queryOption->setValue($this->request->getParam("queryOption"));
+
+		return $_queryOption;
+	}
+	
+	function getPasswordOptionSearch($_data=null){
+		
+		$_queryOption=  new Zend_Dojo_Form_Element_FilteringSelect('passwordStatus');
+		$_queryOption->setAttribs(array(
+			'dojoType'=>'dijit.form.FilteringSelect',
+			'class'=>'fullside',
+			'required'=>'false',
+			'placeholder'=>$this->tr->translate("passwordStatus"),
+		));
+		$_queryOptionOpt = array(
+				0=>$this->tr->translate("ALL"),
+				1=>$this->tr->translate("IS_DEFAULT_PASS"),
+				2=>$this->tr->translate("PASSWORD_CHANGED"));
+		$_queryOption->setMultiOptions($_queryOptionOpt);
+		$_queryOption->setValue($this->request->getParam("passwordStatus"));
+
+		return $_queryOption;
+	}
+	function getUsedAppSearch($_data=null){
+		
+		$_queryOption=  new Zend_Dojo_Form_Element_FilteringSelect('usedAppStatus');
+		$_queryOption->setAttribs(array(
+			'dojoType'=>'dijit.form.FilteringSelect',
+			'class'=>'fullside',
+			'required'=>'false',
+			'placeholder'=>$this->tr->translate("passwordStatus"),
+		));
+		$_queryOptionOpt = array(
+				0=>$this->tr->translate("USING_APP"),
+				1=>$this->tr->translate("USED_APP"),
+				2=>$this->tr->translate("NOT_YET_USE"));
+		$_queryOption->setMultiOptions($_queryOptionOpt);
+		$_queryOption->setValue($this->request->getParam("usedAppStatus"));
+
+		return $_queryOption;
+	}
+	function getExpenseCategory($_data=null){
+		
+		$db = new Registrar_Model_DbTable_DbCateExpense();
+		$opt = array(""=>$this->tr->translate("SELECT_TYPE"),);
+		$expenseResult = $db->getParentCateExpense();
+		if(!empty($expenseResult))foreach($expenseResult AS $row) $opt[$row['id']]=$row['name'];
+
+		$expenseCategory=  new Zend_Dojo_Form_Element_FilteringSelect('expenseCategory');
+		$expenseCategory->setAttribs(array(
+			'dojoType'=>'dijit.form.FilteringSelect',
+			'class'=>'fullside',
+			'required'=>'false',
+		));
+		
+		$expenseCategory->setMultiOptions($opt);
+		$expenseCategory->setValue($this->request->getParam("expenseCategory"));
+		return $expenseCategory;
+	}
+	function getdisplayCategory($_data=null){
+		
+	
+		$opt = array(
+			"0"=>$this->tr->translate("Show All"),
+			"1"=>$this->tr->translate("Show Parent Category"),
+			"2"=>$this->tr->translate("Show Item Category"),
+	);
+
+		$displayCategory=  new Zend_Dojo_Form_Element_FilteringSelect('displayCategory');
+		$displayCategory->setAttribs(array(
+			'dojoType'=>'dijit.form.FilteringSelect',
+			'class'=>'fullside',
+			'required'=>'false',
+		));
+		
+		$displayCategory->setMultiOptions($opt);
+		$displayCategory->setValue($this->request->getParam("displayCategory"));
+		return $displayCategory;
+	}
+	function getProductCategory($data=null){
+		$cate= new Zend_Dojo_Form_Element_FilteringSelect('category_id');
+		$cate->setAttribs(array(
+				'dojoType'=>'dijit.form.FilteringSelect',
+				'class'=>'fullside',
+				'autoComplete'=>'false',
+				'queryExpr'=>'*${0}*',
+				'required'=>'false',
+				'onChange'=>'getProductByCate();',
+				'placeholder'=>$this->tr->translate("SELECT_PRODUCT")
+		));
+		$cate->setValue($this->request->getParam("category_id"));
+		
+		$opt_ls = array(''=>$this->tr->translate("PRODUCT_CATEGORY"));
+		
+		$row =  $this->db->getAllItems(3);
+		
+		if(!empty($row))foreach ($row As $rs)$opt_ls[$rs['id']]=$rs['name'];
+		$cate->setMultiOptions($opt_ls);
+		return $cate;
+	}
+	function getProductType($data=null){
+		$product_type=  new Zend_Dojo_Form_Element_FilteringSelect('product_type');
+		$product_type->setAttribs(array(
+				'dojoType'=>'dijit.form.FilteringSelect',
+				'class'=>'fullside',
+		));
+		$_opt = array(
+				0=>$this->tr->translate("TYPE"),
+				1=>$this->tr->translate("PRODUCT_FOR_SELL"),
+				2=>$this->tr->translate("OFFICE_MATERIAL"));
+		$product_type->setMultiOptions($_opt);
+		$product_type->setValue($this->request->getParam("product_type"));
+		return $product_type;
+	}
+	function frmIsCountStock($data=null){
+		$isCountStock=  new Zend_Dojo_Form_Element_FilteringSelect('isCountStock');
+		$isCountStock->setAttribs(array(
+				'dojoType'=>'dijit.form.FilteringSelect',
+				'class'=>'fullside',
+		));
+		$_opt = array(
+				-1=>$this->tr->translate("PLEASE_SELECT"),
+				0=>$this->tr->translate("NOT_COUNT_STOCK"),
+				1=>$this->tr->translate("COUNT_STOCK"));
+		$isCountStock->setMultiOptions($_opt);
+		$isCountStock->setValue($this->request->getParam("isCountStock"));
+		return $isCountStock;
+	}
+	function frmIsProductSet($data=null){
+		$isProductSet=  new Zend_Dojo_Form_Element_FilteringSelect('isProductSet');
+		$isProductSet->setAttribs(array(
+				'dojoType'=>'dijit.form.FilteringSelect',
+				'class'=>'fullside',
+		));
+		$_opt = array(
+				-1=>$this->tr->translate("PLEASE_SELECT"),
+				0=>$this->tr->translate("GENERAL"),
+				1=>$this->tr->translate("PRODUCTSET"));
+		$isProductSet->setMultiOptions($_opt);
+		$isProductSet->setValue($this->request->getParam("isProductSet"));
+		return $isProductSet;
+	}
+	
+	function sortDisplayProduct($data=null){
+		$_sort_by = new Zend_Dojo_Form_Element_FilteringSelect('sort_by');
+		$_sort_by->setAttribs(array(
+				'dojoType'=>'dijit.form.FilteringSelect',
+				'class'=>'fullside',
+		));
+		$_order_opt = array(
+				-1=>$this->tr->translate("SORT_BY"),
+				1=>$this->tr->translate("PRODUCT_CATEGORY"),
+				2=>$this->tr->translate("PRODUCT_NAME"));
+		$_sort_by->setMultiOptions($_order_opt);
+		$_sort_by->setValue($this->request->getParam("sort_by"));
+		return $_sort_by;
+	}
+	function frmGetSupplier($data=null){
+		$supplier_id= new Zend_Dojo_Form_Element_FilteringSelect('supplier_id');
+		$supplier_id->setAttribs(array(
+				'dojoType'=>'dijit.form.FilteringSelect',
+				'class'=>'fullside',
+		));
+		$supplier_id->setValue($this->request->getParam("supplier_id"));
+		$opt_p = array(''=>$this->tr->translate("SELECT_SUPPLIER"));
+		$_pro=new Stock_Model_DbTable_DbPurchase();
+		$rows=$_pro->getSuplierName();
+		if(!empty($rows))foreach ($rows As $row)$opt_p[$row['id']]=$row['sup_name'];
+		$supplier_id->setMultiOptions($opt_p);
+		return $supplier_id;
+	}	
+
+	function frmGetRequestFor($data=null){
+		$request_for= new Zend_Dojo_Form_Element_FilteringSelect('request_for');
+		$request_for->setAttribs(array(
+				'dojoType'=>'dijit.form.FilteringSelect',
+				'class'=>'fullside',
+		));
+		$request_for->setValue($this->request->getParam("request_for"));
+		$opt_p = array(''=>$this->tr->translate("SELECT_REQUEST_FOR"));
+		$_pur =  new Accounting_Model_DbTable_DbRequestProduct();
+		$req_for = $_pur->getAllRequestFor();
+		if(!empty($req_for))foreach ($req_for As $row)$opt_p[$row['id']]=$row['name'];
+		$request_for->setMultiOptions($opt_p);
+		return $request_for;
+	}	
+
+	function frmGetForSection($data=null){
+		$for_section= new Zend_Dojo_Form_Element_FilteringSelect('for_section');
+		$for_section->setAttribs(array(
+				'dojoType'=>'dijit.form.FilteringSelect',
+				'class'=>'fullside',
+		));
+		$for_section->setValue($this->request->getParam("for_section"));
+		$opt_p = array(''=>$this->tr->translate("SELECT_REQUEST_FOR_DEPT"));
+		$_pur =  new Accounting_Model_DbTable_DbRequestProduct();
+		$rs = $_pur->getAllForSection();
+		if(!empty($rs))foreach ($rs As $row)$opt_p[$row['id']]=$row['name'];
+		$for_section->setMultiOptions($opt_p);
+		return $for_section;
+	}	
+
+	function getRequestStatusSearch($_data=null){
+		$request_status=  new Zend_Dojo_Form_Element_FilteringSelect('request_status');
+		$request_status->setAttribs(array(
+			'dojoType'=>'dijit.form.FilteringSelect',
+			'class'=>'fullside',
+			'required'=>'false',
+			'placeholder'=>$this->tr->translate("REQUEST_STATUS"),
+		));
+		$_status_opt = array(
+			-1=>$this->tr->translate("REQUEST_STATUS"),
+			1=>$this->tr->translate("IS_RETURN"),
+			0=>$this->tr->translate("NOT_RETURN")
+		);
+		$request_status->setMultiOptions($_status_opt);
+		$request_status->setValue($this->request->getParam("request_status"));
+
+		return $request_status;
+	}
+	function getTransferStatusSearch($_data=null){
+		$transfer_status=  new Zend_Dojo_Form_Element_FilteringSelect('transfer_status');
+		$transfer_status->setAttribs(array(
+			'dojoType'=>'dijit.form.FilteringSelect',
+			'class'=>'fullside',
+			'required'=>'false',
+			'placeholder'=>$this->tr->translate("TRANSFER_STATUS"),
+		));
+		$_status_opt = array(
+				-1=>$this->tr->translate("ALL"),
+				1=>$this->tr->translate("RECEIVED"),
+				0=>$this->tr->translate("PENDING"));
+		$transfer_status->setMultiOptions($_status_opt);
+		$transfer_status->setValue($this->request->getParam("transfer_status"));
+
+		return $transfer_status;
+	}
+	function getStockStatusSearch($_data=null){
+		$stock_status=  new Zend_Dojo_Form_Element_FilteringSelect('stock_status');
+		$stock_status->setAttribs(array(
+			'dojoType'=>'dijit.form.FilteringSelect',
+			'class'=>'fullside',
+			'required'=>'false',
+			'placeholder'=>$this->tr->translate("stock_status"),
+		));
+		$_status_opt = array(
+			''=>$this->tr->translate("SELECT_TYPE"),
+			1=>$this->tr->translate("RECEIVED_ALL"),
+			2=>$this->tr->translate("IDEPTED")
+		);
+		$stock_status->setMultiOptions($_status_opt);
+		$stock_status->setValue($this->request->getParam("stock_status"));
+
+		return $stock_status;
+	}
+	function getItemSearch($data=null){
+		$items_search= new Zend_Dojo_Form_Element_FilteringSelect('items_search');
+		$items_search->setAttribs(array(
+				'dojoType'=>'dijit.form.FilteringSelect',
+				'class'=>'fullside',
+		));
+		$items_search->setValue($this->request->getParam("items_search"));
+		$opt_p = array(''=>$this->tr->translate("PLEASE_SELECT"));
+		$_pur =  new Application_Model_DbTable_DbGlobal();
+		$rs = $_pur->getAllItems(3);
+		if(!empty($rs))foreach ($rs As $row)$opt_p[$row['id']]=$row['name'];
+		$items_search->setMultiOptions($opt_p);
+		return $items_search;
+	}	
+	function getIsOnePaymentSearch($_data=null){
+		$_onepayment = new Zend_Dojo_Form_Element_FilteringSelect("is_onepayment");
+		$_onepayment->setAttribs(array(
+			'dojoType'=>'dijit.form.FilteringSelect',
+			'required'=>'false',
+			'autoComplete'=>'false',
+			'placeholder'=>$this->tr->translate("SELECT_TYPE"),
+			'queryExpr'=>'*${0}*',
+			'missingMessage'=>'Invalid Module!',
+			'class'=>'fullside height-text',));
+		$_status_opt = array(
+			-1=>$this->tr->translate("SELECT_TYPE"),
+			0=>$this->tr->translate("IS_VALIDATE"),
+			1=>$this->tr->translate("ONE_PAYMENTONLY")
+		);
+		$_onepayment->setMultiOptions($_status_opt);
+		$_onepayment->setValue($this->request->getParam("is_onepayment"));
+
+		return $_onepayment;
+	}
+	function getReceiptStatusSearch($_data=null){
+		$receiptStatus = new Zend_Dojo_Form_Element_FilteringSelect('receiptStatus');
+		$receiptStatus->setAttribs(array(
+				'dojoType'=>'dijit.form.FilteringSelect',
+				'placeholder'=>$this->tr->translate("Select Term"),
+				'class'=>'fullside',
+				'autoComplete'=>"false",
+				'queryExpr'=>'*${0}*',
+				'required'=>false
+		));
+		$optStatus = array(
+				0=>$this->tr->translate("ALL"),
+				1=>$this->tr->translate('NORMARL'),
+				2=>$this->tr->translate('VOID'),
+		);
+		$receiptStatus->setMultiOptions($optStatus);
+		$receiptStatus->setValue($this->request->getParam("receiptStatus"));
+		return $receiptStatus;
+	}
+	
+	function getPreAttShiftSearch($_data=null){
+		
+		$_shift=  new Zend_Dojo_Form_Element_FilteringSelect('shift');
+		$_shift->setAttribs(array(
+			'dojoType'=>'dijit.form.FilteringSelect',
+			'class'=>'fullside',
+			'required'=>'false',
+			'placeholder'=>$this->tr->translate("RESULT_TEST_TYPE"),
+		));
+		$_queryOptionOpt = array(
+				0=>$this->tr->translate("ALL"),
+				1=>$this->tr->translate("MORNING"),
+				2=>$this->tr->translate("AFTERNOON"));
+		$_shift->setMultiOptions($_queryOptionOpt);
+		$_shift->setValue($this->request->getParam("shift"));
+
+		return $_shift;
+	}
+	
+	function getPreAttFormatTypeSearch($_data=null){
+		
+		$_format=  new Zend_Dojo_Form_Element_FilteringSelect('format');
+		$_format->setAttribs(array(
+			'dojoType'=>'dijit.form.FilteringSelect',
+			'class'=>'fullside',
+			'required'=>'false',
+			'placeholder'=>$this->tr->translate("RESULT_TEST_TYPE"),
+		));
+		$_queryOptionOpt = array(
+				0=>$this->tr->translate("GENERAL_FORMAT"),
+				1=>$this->tr->translate("AS_CLASS_FORMAT"),
+				);
+		$_format->setMultiOptions($_queryOptionOpt);
+		$_format->setValue($this->request->getParam("format"));
+
+		return $_format;
+	}
+	
+	function getConnectTelegramStatusearch($_data=null){
+		
+		$_connectedTelegram=  new Zend_Dojo_Form_Element_FilteringSelect('connectedTelegram');
+		$_connectedTelegram->setAttribs(array(
+			'dojoType'=>'dijit.form.FilteringSelect',
+			'class'=>'fullside',
+			'required'=>'false',
+			'placeholder'=>$this->tr->translate("PLEASE_SELECT"),
+		));
+		$_queryOptionOpt = array(
+				1=>$this->tr->translate("CONNECTED"),
+				2=>$this->tr->translate("NOT_CONNECT"),
+				);
+		$_connectedTelegram->setMultiOptions($_queryOptionOpt);
+		$_connectedTelegram->setValue($this->request->getParam("connectedTelegram"));
+
+		return $_connectedTelegram;
+	}
+	
+	function getByDateOptionSearch($_data=null){
+		
+		$_queryOption=  new Zend_Dojo_Form_Element_FilteringSelect('by_date');
+		$_queryOption->setAttribs(array(
+			'dojoType'=>'dijit.form.FilteringSelect',
+			'class'=>'fullside',
+			'required'=>'false',
+			'placeholder'=>$this->tr->translate("PLEASE_SELECT_DATE"),
+		));
+		$_queryOptionOpt = array(
+				0=>$this->tr->translate("PLEASE_SELECT_DATE"),
+				1=>$this->tr->translate("START_DATE"),
+				2=>$this->tr->translate("END_DATE"));
+		$_queryOption->setMultiOptions($_queryOptionOpt);
+		$_queryOption->setValue($this->request->getParam("by_date"));
+
+		return $_queryOption;
+	}
+	
+	function getCreditTypeSearch($_data=null){
+		
+		$_queryOption=  new Zend_Dojo_Form_Element_FilteringSelect('creditType');
+		$_queryOption->setAttribs(array(
+			'dojoType'=>'dijit.form.FilteringSelect',
+			'class'=>'fullside',
+			'required'=>'false',
+			'placeholder'=>$this->tr->translate("TYPE"),
+		));
+		$_queryOptionOpt = array(
+				0=>$this->tr->translate("PLEASE_SELECT"),
+				1=>$this->tr->translate("LIFE_TIME"),
+				2=>$this->tr->translate("IS_VALIDATE"));
+		$_queryOption->setMultiOptions($_queryOptionOpt);
+		$_queryOption->setValue($this->request->getParam("creditType"));
+
+		return $_queryOption;
+	}
+	
+	function getCashTypeSearch($_data=null){
+		
+		$_queryOption=  new Zend_Dojo_Form_Element_FilteringSelect('cashType');
+		$_queryOption->setAttribs(array(
+			'dojoType'=>'dijit.form.FilteringSelect',
+			'class'=>'fullside',
+			'required'=>'false',
+			'placeholder'=>$this->tr->translate("TYPE"),
+		));
+		$_queryOptionOpt = array(
+				0=>$this->tr->translate("PLEASE_SELECT"),
+				1=>$this->tr->translate("Cash In"),
+				2=>$this->tr->translate("Cash Out"));
+		$_queryOption->setMultiOptions($_queryOptionOpt);
+		$_queryOption->setValue($this->request->getParam("cashType"));
+
+		return $_queryOption;
+	}
+	
+	function getCrOpertationType($_data=null){
+		
+		$_crOpertationType=  new Zend_Dojo_Form_Element_FilteringSelect('crOpertationType');
+		$_crOpertationType->setAttribs(array(
+			'dojoType'=>'dijit.form.FilteringSelect',
+			'class'=>'fullside',
+			'required'=>'false',
+			'placeholder'=>$this->tr->translate("TYPE"),
+		));
+		$_crOpertationOpt = array(
+				0=>$this->tr->translate("ALL"),
+				1=>$this->tr->translate("DEPOSIT_CREDIT"),
+				2=>$this->tr->translate("CREDIT_REMAIN"),
+				3=>$this->tr->translate("TRAN_TO"),
+				4=>$this->tr->translate("RECEIVE_FROM"),
+				5=>$this->tr->translate("RECIEPT_PAYMENT"),
+				6=>$this->tr->translate("VODI_RECIEPT_PAYMENT"),
+				);
+		$_crOpertationType->setMultiOptions($_crOpertationOpt);
+		$_crOpertationType->setValue($this->request->getParam("crOpertationType"));
+
+		return $_crOpertationType;
+	}
+
+	function getReceiptOrder($_data=null){
+
+		$receipt_order=  new Zend_Dojo_Form_Element_FilteringSelect('receipt_order');
+		$receipt_order->setAttribs(array(
+			'dojoType'=>'dijit.form.FilteringSelect',
+			'class'=>'fullside',
+			'required'=>'false',
+			'placeholder'=>$this->tr->translate("ORDER_BY_RECEIPT"),
+		));
+		$_queryOptionOpt = array(
+				'0'=>$this->tr->translate('RECEIPT_ASC'),
+				'1'=>$this->tr->translate('RECEIPT_DESC'),
+			);
+		$receipt_order->setMultiOptions($_queryOptionOpt);
+		$receipt_order->setValue($this->request->getParam("receipt_order"));
+
+		return $receipt_order;
+	}
+
+	function getExpenseRecordOrdering($_data=null){
+
+		$_expRecordOrdering = new Zend_Dojo_Form_Element_FilteringSelect('expRecordOrdering');
+		$_expRecordOrdering->setAttribs(array(
+				'dojoType'=>'dijit.form.FilteringSelect',
+				'placeholder'=>$this->tr->translate("RECORD_ORERING"),
+				'class'=>'fullside',
+				'autoComplete'=>"false",
+				'queryExpr'=>'*${0}*',
+				'required'=>false
+				));
+		$optRecordOrdering = array(
+				1=>$this->tr->translate("SPLIT_BY_EXPENSE_CATEGORY"),
+				2=>$this->tr->translate("SPLIT_BY_SUPPLIER"),
+				);
+		$_expRecordOrdering->setMultiOptions($optRecordOrdering);
+		$_expRecordOrdering->setValue($this->request->getParam("expRecordOrdering"));
+
+		return $_expRecordOrdering;
+	}
+	function getIncomeOrdering($_data=null){
+
+		$_recordOrdering = new Zend_Dojo_Form_Element_FilteringSelect('recordOrdering');
+		$_recordOrdering->setAttribs(array('dojoType'=>'dijit.form.FilteringSelect',
+				'placeholder'=>$this->tr->translate("RECORD_ORERING"),
+				'class'=>'fullside',
+				'autoComplete'=>"false",
+				'queryExpr'=>'*${0}*',
+				'required'=>false
+				));
+		$optRecordOrdering = array(
+				1=>$this->tr->translate("SPLIT_BY_BANK"),
+				2=>$this->tr->translate("SPLIT_BY_CATEGORY"),
+				);
+		$_recordOrdering->setMultiOptions($optRecordOrdering);
+		$_recordOrdering->setValue($this->request->getParam("recordOrdering"));
+
+		return $_recordOrdering;
+	}
+
+	function getExpenseType($_data=null){
+		$db = new Registrar_Model_DbTable_DbCateExpense();
+		$opt = array(""=>$this->tr->translate("SELECT_TYPE"),);
+		$expenseResult = $db->getParentCategoryExpense();
+		if(!empty($expenseResult))foreach($expenseResult AS $row) $opt[$row['id']]=$row['name'];
+
+		$expenseCategoryId=  new Zend_Dojo_Form_Element_FilteringSelect('expenseCategoryId');
+		$expenseCategoryId->setAttribs(array(
+			'dojoType'=>'dijit.form.FilteringSelect',
+			'class'=>'fullside',
+			'required'=>'false',
+		));
+		
+		$expenseCategoryId->setMultiOptions($opt);
+		$expenseCategoryId->setValue($this->request->getParam("expenseCategoryId"));
+		return $expenseCategoryId;
+	}
+	
+	function getHideInactiveOpt($_data=null){
+
+		$_hideInactive = new Zend_Dojo_Form_Element_FilteringSelect('hideInactive');
+		$_hideInactive->setAttribs(array(
+				'dojoType'=>'dijit.form.FilteringSelect',
+				'placeholder'=>$this->tr->translate("RECORD_ORERING"),
+				'class'=>'fullside',
+				'autoComplete'=>"false",
+				'queryExpr'=>'*${0}*',
+				'required'=>false
+				));
+		$optRecordOrdering = array(
+				0=>$this->tr->translate("ALL"),
+				1=>$this->tr->translate("HIDE_INACTIVE"),
+				);
+		$_hideInactive->setMultiOptions($optRecordOrdering);
+		$_hideInactive->setValue($this->request->getParam("hideInactive"));
+
+		return $_hideInactive;
+	}
+	
+	function getProInLocationSearch($_data=null){
+		$_inLocationStatus=  new Zend_Dojo_Form_Element_FilteringSelect('inLocationStatus');
+		$_inLocationStatus->setAttribs(array(
+			'dojoType'=>'dijit.form.FilteringSelect',
+			'class'=>'fullside',
+			'required'=>'false',
+			'placeholder'=>$this->tr->translate("STATUS"),
+		));
+		$_status_opt = array(
+				0=>$this->tr->translate("Default"),
+				1=>$this->tr->translate("IN_LOCATION"),
+				2=>$this->tr->translate("NOT_IN_LOCATION")
+			);
+		$_inLocationStatus->setMultiOptions($_status_opt);
+		$_inLocationStatus->setValue($this->request->getParam("inLocationStatus"));
+
+		return $_inLocationStatus;
+	}
+	
+	function getPmtStatusSearch($_data=null){
+		$_arr_opt_nation = array(-1=>$this->tr->translate("ALL"),);
+		$optionNation = $this->db->getViewByType(10);//pmt Status
+		if(!empty($optionNation))foreach($optionNation AS $row) $_arr_opt_nation[$row['id']]=$row['name'];
+		$_pmtStatus = new Zend_Dojo_Form_Element_FilteringSelect("pmtStatus");
+		$_pmtStatus->setMultiOptions($_arr_opt_nation);
+		$_pmtStatus->setAttribs(array(
+				'dojoType'=>'dijit.form.FilteringSelect',
+				'class'=>'fullside height-text',
+				'placeholder'=>$this->tr->translate("PLEASE_SELECT"),
+				'required'=>'false',
+				)
+			);
+		$_pmtStatus->setValue($this->request->getParam("pmtStatus"));	
+		return $_pmtStatus;
+	}
+	function pickUpOption($data=[]){
+		$goHomeType =  new Zend_Dojo_Form_Element_FilteringSelect('goHomeType');
+		$goHomeType->setAttribs(array('dojoType'=>'dijit.form.FilteringSelect','class'=>'fullside'));
+		$type_opt = array(
+				0=>$this->tr->translate("All Pickup Option"),
+				1=>$this->tr->translate("BY_THEMSELVES"),
+				2=>$this->tr->translate("BY_PARENTS"),
+				3=>$this->tr->translate("BY_SCHOOL_BUS"),
+				);
+		$goHomeType->setMultiOptions($type_opt);
+		$goHomeType->setValue($this->request->getParam("goHomeType"));
+		return $goHomeType;
+	}
+	
+	function isPassClassSearch($data=[]){
+		$isPassClass =  new Zend_Dojo_Form_Element_FilteringSelect('isPassClass');
+		$isPassClass->setAttribs(array('dojoType'=>'dijit.form.FilteringSelect','class'=>'fullside'));
+		$type_opt = array(
+				''=>$this->tr->translate("PLEASE_SELECT"),
+				0=>"Not Yet Pass",
+				1=>$this->tr->translate("IS_PASS"),
+				);
+		$isPassClass->setMultiOptions($type_opt);
+		$isPassClass->setValue($this->request->getParam("isPassClass"));
+		return $isPassClass;
+	}
+	
+	function stuReportTypeSearch($data=[]){
+		$stuReportType =  new Zend_Dojo_Form_Element_FilteringSelect('stuReportType');
+		$stuReportType->setAttribs(array('dojoType'=>'dijit.form.FilteringSelect','class'=>'fullside'));
+		$type_opt = array(
+					1=>$this->tr->translate("GENERAL"),
+					2=>$this->tr->translate("SPLIT_BY_DEGREE"),
+				);
+		$stuReportType->setMultiOptions($type_opt);
+		$stuReportType->setValue($this->request->getParam("stuReportType"));
+		return $stuReportType;
+	}
+	
+	function getTelegramReportLayoutSearch($_data=null){
+		
+		$_reportLayout=  new Zend_Dojo_Form_Element_FilteringSelect('reportLayout');
+		$_reportLayout->setAttribs(array(
+			'dojoType'=>'dijit.form.FilteringSelect',
+			'class'=>'fullside',
+			'required'=>'false',
+			'placeholder'=>$this->tr->translate("LAYOUT"),
+		));
+		$_queryOptionOpt = array(
+				1=>$this->tr->translate("TELEGRAM_ACCOUNT"),
+				2=>$this->tr->translate("STUDENT"),
+				);
+		$_reportLayout->setMultiOptions($_queryOptionOpt);
+		$_reportLayout->setValue($this->request->getParam("reportLayout"));
+
+		return $_reportLayout;
+	}
+	function getIncomeCategory($_data=null){
+		
+		$_cate = new Zend_Dojo_Form_Element_FilteringSelect('incomeCategory');//should be remove it becuase all index not call it to use
+		$_cate->setAttribs(array(
+				'dojoType'=>'dijit.form.FilteringSelect',
+				'class'=>'fullside',
+				'autoComplete'=>"false",
+				'queryExpr'=>'*${0}*',
+				'required'=>'false',
+				'placeholder'=>$this->tr->translate("SELECT_CATEGORY"),
+		));
+		$_cate->setValue($this->request->getParam("incomeCategory"));
+
+		$_db = new Registrar_Model_DbTable_DbCateIncome();	
+		$result = $_db->getParentCateIncome('',0,'','',false);
+		$opt_cate = array(''=>$this->tr->translate("SELECT_CATEGORY"));
+		if(!empty($result))foreach ($result As $rs)$opt_cate[$rs['id']]=$rs['name'];
+		$_cate->setMultiOptions($opt_cate);
+		return $_cate;
+	}
+}

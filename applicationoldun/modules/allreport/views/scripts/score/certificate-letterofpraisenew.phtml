@@ -1,0 +1,402 @@
+<?php 
+	$tr = Application_Form_FrmLanguages::getCurrentlanguage();
+	echo $this->headTitle($tr->translate('Letter of praise'));
+	$_dbgb = new Application_Model_DbTable_DbGlobal();
+	$month = array("01"=>"មករា","02"=>"កុម្ភៈ","03"=>"មីនា","04"=>"មេសា","05"=>"ឧសភា","06"=>"មិថុនា","07"=>"កក្កដា","08"=>"សីហា","09"=>"កញ្ញា","10"=>"តុលា","11"=>"វិច្ឆិកា","12"=>"ធ្នូ",);
+	
+	$setting = $this->certificateSetting;
+	$template = 2;
+?>
+<?php if($template ==1) { ?>
+<div style="margin:0 auto; padding:0.5cm 0.5cm 0cm 0.5cm">	
+	<div class="card-box">
+		<div id="divPrint">
+			<?php 
+				$image = $this->baseUrl().'/images/card/certificate/LetterOfPraise.jpg';
+				if (!empty($setting['background'])) {
+					if (file_exists(PUBLIC_PATH . "/images/background/" . $setting['background'])) {
+						$image = $this->baseUrl() . '/images/background/' . $setting['background'];
+					}
+				} 
+			?>
+			<style>
+				.certificate{
+					background-image: url('<?php echo $image;?>');
+					background-size: 29.7cm 20.6cm;
+					background-repeat: no-repeat;
+					position: relative;
+					display:inline-block; 
+					line-height: 23px;   
+					top:2px;
+					width: 29.7cm; 
+					height:20.6cm;   
+					color: #3f3f95; 
+					font-family: 'Times New Roman', sans-serif,'Khmer OS Muol Light';
+				}
+				.one-row-certif{
+					text-align:center; 
+					margin: 0 auto; 
+					padding: 0;
+		
+				}
+					
+				span.value{
+					 font-size: 17px;
+					 display: inline-block;
+					     color: #1e3b77;
+				}
+				span.student_name {
+				   position: absolute;
+				   top:<?php echo $setting['name_top'];?>px;
+				   left: <?php echo $setting['name_left'];?>px;
+				    min-width: 150px;
+				    text-align: center;
+				}
+				
+				span.gender {
+				   position: absolute;
+				   top:<?php echo $setting['gender_top'];?>px;
+				   left: <?php echo $setting['gender_left'];?>px;
+				   min-width: 75px;
+				   text-align: center;
+				}
+					
+				span.dob {
+				   position: absolute;
+				   top:<?php echo $setting['date_top'];?>px;
+				   left: <?php echo $setting['date_left'];?>px;
+				   min-width: 145px;
+				   text-align: center;
+				}
+					
+				span.stu_code {
+					position: absolute;
+					top:<?php echo $setting['code_top'];?>px;
+				    left: <?php echo $setting['code_left'];?>px;
+					min-width: 100px;
+					text-align: center;
+					font-weight: bold;
+				}	
+				span.rank {
+				    position: absolute;
+				    min-width: 70px;
+				    top:<?php echo $setting['rank_top'];?>px;
+				    left: <?php echo $setting['rank_left'];?>px;
+				    text-align: center;color:red !important;
+				    font-weight: bold;
+				}	
+				span.class {
+					position: absolute;
+				    top:<?php echo $setting['grade_top'];?>px;
+				    left: <?php echo $setting['grade_left'];?>px;
+				    min-width: 70px;
+				    text-align: center;
+				    font-weight: bold;
+				}
+				span.academic_year{
+					position: absolute;
+				    top:<?php echo $setting['academic_top'];?>px;
+				    left: <?php echo $setting['academic_left'];?>px;
+				    font-size: 17px;
+				    min-width: 120px;
+				    text-align: center;
+				    color:red !important;
+				}
+				span.issue_day{
+					position: absolute;
+				    top:<?php echo $setting['day_top'];?>px;
+				    left: <?php echo $setting['day_left'];?>px;
+				    font-size: 17px;
+				    min-width: 40px;
+				    text-align: center;
+				    font-family: 'Times New Roman','Khmer OS Battambang';
+				}
+				span.issue_month{
+					position: absolute;
+					top:<?php echo $setting['month_top'];?>px;
+				    left: <?php echo $setting['month_left'];?>px;
+					font-size: 17px;
+					min-width: 70px;
+					text-align: center;
+					font-family: 'Times New Roman','Khmer OS Battambang';
+				}
+				span.noted{
+					position: absolute;
+				    top:<?php echo $setting['describe_top'];?>px;
+				    left: <?php echo $setting['describe_left'];?>px;
+				    font-size: 17px;
+				    min-width: 40px;
+				    font-size: 17px;
+				    text-align: center;color:#1e3b77;font-family: 'Times New Roman','Khmer OS Battambang';
+				}
+				span.issue_year{
+					position: absolute;
+				    top:<?php echo $setting['year_top'];?>px;
+				    left:<?php echo $setting['year_left'];?>px;
+				    font-size: 17px;
+				    min-width: 40px;
+				    text-align: center;
+				    font-family: 'Times New Roman','Khmer OS Battambang';
+				}
+				* {
+					margin: 0;
+					padding: 0;
+				}
+				
+				body{padding:0;margin:0}
+
+				@media print{
+					@page{
+						page: A4;
+						size: landscape;
+						margin:0;
+						padding:0;
+					}
+					body {
+						-webkit-print-color-adjust: exact; /* Ensures colors and backgrounds are printed */
+						print-color-adjust: exact; /* Standard version for color printing */
+					}
+					.certificate{
+						background-image: url('<?php echo $image;?>');
+						background-size: 29.7cm 20.6cm;
+						background-repeat: no-repeat;
+						position: relative;
+						display:inline-block; 
+						line-height: 23px;   
+						top:2px;
+						width: 29.7cm; 
+						height:20.6cm;   
+						color: #3f3f95; 
+						font-family: 'Times New Roman', sans-serif,'Khmer OS Muol Light';
+					}
+					
+				}
+			
+				
+					
+				</style>
+			<div class="one-row-certif" >
+				<div class="certificate">
+					<span class="value student_name"><?php echo $this->rs['stu_khname'];?></span>
+					<span class="value gender"><?php echo $this->rs['sex'];?></span>
+					<span class="value dob"><?php echo $_dbgb->getNumberInkhmer(date("d",strtotime($this->rs['dob'])))."-".$month[date("m",strtotime($this->rs['dob']))]."-".$_dbgb->getNumberInkhmer(date("Y",strtotime($this->rs['dob'])));?></span>
+					<span class="value stu_code"><?php echo $this->rs['stu_code'];?></span>
+					<span class="value academic_year"><?php echo $_dbgb->getNumberInkhmer($this->rs['fromYear'])."-".$_dbgb->getNumberInkhmer($this->rs['toYear']);?></span>
+					<span class="value rank"><?php echo $_dbgb->getNumberInkhmer($this->rank);?></span>
+					<span class="value class"><?php echo $_dbgb->getNumberInkhmer($this->rs['grade']);?></span>
+					<span class="value noted">ប័ណ្ណសរសើរនេះប្រគល់ជូនសាមីខ្លួនប្រើប្រាស់តាមការដែលអាចប្រើបាន។</span>
+					<?php if(!empty($this->rs['issueDate']) AND $this->rs['issueDate'] != "0000-00-00"){ ?>
+					<span class="value issue_day"><?php echo $_dbgb->getNumberInkhmer(date("d",strtotime($this->rs['issueDate'])));?></span>
+					<span class="value issue_month"><?php echo $month[date("m",strtotime($this->rs['issueDate']))];?></span>
+					<span class="value issue_year"><?php echo $_dbgb->getNumberInkhmer(date("Y",strtotime($this->rs['issueDate'])));?></span>
+					<?php }?>
+					
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<?php }else if($template ==2){ ?>
+
+<div style="margin:0 auto; ">	
+	<div class="card-box">
+		<div id="divPrint">
+			<?php 
+				$image = $this->baseUrl().'/images/card/certificate/LetterOfPraise.jpg';
+				if (!empty($setting['background'])) {
+					if (file_exists(PUBLIC_PATH . "/images/background/" . $setting['background'])) {
+						$image = $this->baseUrl() . '/images/background/' . $setting['background'];
+					}
+				} 
+			?>
+			<style>
+				@font-face{font-family:'Embassy BT';src:url('<?php echo $this->baseUrl() ."/font/EmbassyBT.ttf" ?>');}
+				
+				.certificate{
+					background-image: url('<?php echo $image;?>');
+					background-size: 29.7cm 20.6cm;
+					background-repeat: no-repeat;
+					position: relative;
+					display:inline-block; 
+					line-height: 20px;
+					top:2px;
+					width: 29.7cm; 
+					height:20.6cm;   
+					color: #3f3f95; 
+					font-family: 'Times New Roman', sans-serif,'Khmer OS Muol Light';
+				}
+				.one-row-certif{
+					text-align:center; 
+					margin: 0 auto; 
+					padding: 0;
+		
+				}
+					
+				span.value{
+					 font-size: 17px;
+					 display: inline-block;
+					     color: #1e3b77;
+				}
+				span.rank {
+					font-family: "Old English Text MT";
+					font-size: 36px;
+				    position: absolute;
+				    min-width: 70px;
+				    top:<?php echo $setting['rank_top'];?>px;
+				    left: <?php echo $setting['rank_left'];?>px;
+				    text-align: center;
+					color: #042975 !important;
+				}	
+
+				.rank sup {
+					font-size: 16px; /* Smaller superscript */
+					top: -1.3em !important; 
+				}
+				/* sup {
+					top: -1.3em !important; 
+				} */
+				span.student_name {
+				   position: absolute;
+				   top:<?php echo $setting['name_top'];?>px;
+				   width: 100%;
+				   font-family: 'Lucida Calligraphy';
+				   font-size: 34px;
+				   color: #00AEEF; /* Light blue */
+				   text-align: center;
+				   font-weight: bold;
+				   display: block;
+					
+				}
+				span.class {
+					width: 100%;
+					display: block;
+					position: absolute;
+				    top:<?php echo $setting['grade_top'];?>px;
+					font-family: 'Lucida Calligraphy';
+					font-size: 24px;
+					font-style: italic;
+					color: #00AEEF;
+					text-align: center;
+					font-weight: bold;
+					width: 100%;
+					display: block;
+				}
+				span.academic_year{
+					font-family: 'Times New Roman';
+					position: absolute;
+				    top:<?php echo $setting['academic_top'];?>px;
+				    left: <?php echo $setting['academic_left'];?>px;
+				    font-size: 20px;
+				    min-width: 120px;
+				    text-align: center;
+				    color: #042975 !important;
+					font-weight: bold;
+				}
+				span.noted{
+					font-family: 'Embassy BT';
+					font-size: 24px;
+					position: absolute;
+				    top:<?php echo $setting['describe_top'];?>px;
+				    left: <?php echo $setting['describe_left'];?>px;
+				
+				    min-width: 40px;
+				    text-align: center;
+					color:#040404;
+				}
+				
+				* {
+					margin: 0;
+					padding: 0;
+				}
+				
+				body{padding:0;margin:0}
+
+				@media print{
+					@page{
+						page: A4;
+						size: landscape;
+						margin:0;
+						padding:0;
+					}
+					body {
+						-webkit-print-color-adjust: exact; /* Ensures colors and backgrounds are printed */
+						print-color-adjust: exact; /* Standard version for color printing */
+					}
+					.certificate{
+						background-image: url('<?php echo $image;?>');
+						/* background-size: 29.7cm 20.6cm; */
+						background-repeat: no-repeat;
+						position: relative;
+						display:inline-block; 
+					
+						top:2px;
+						width: 29.7cm; 
+						height:20.6cm;   
+						color: #3f3f95; 
+						font-family: 'Times New Roman', sans-serif,'Khmer OS Muol Light';
+					}
+					
+				}
+			
+				
+					
+				</style>
+			<div class="one-row-certif" >
+				<div class="certificate">
+					<?php 
+						if($this->rank==1){
+							$sub = "st";
+						}elseif($this->rank==2){
+							$sub = "nd";
+						}elseif($this->rank==3){
+							$sub = "rd";
+						}else{
+						    $sub = "th";
+						}
+					?>
+					<span class="value rank">
+						<?php echo $this->rank;?><sup><?php echo $sub ?></sup>
+						<?php //echo $_dbgb->getNumberInkhmer($this->rank);?>
+					</span>
+					<span class="value student_name"><?php echo $this->rs['stu_name'];?></span>
+					<span class="value class">Grade
+						 <?php
+					
+						 $groupCode = $this->rs['grade'];
+						 preg_match('/\((.*?)\)/', $groupCode, $matches);
+						 echo $matches[1];
+						/// echo $this->rs['grade'];
+						 ?>
+					</span>
+					<span class="value academic_year"><?php echo $this->rs['fromYear']."-".$this->rs['toYear'];?></span>
+					<span class="value noted">
+						<?php 
+							echo $setting['certificate_describe'].' ';
+							if(!empty($setting['issue_date']) AND $setting != "0000-00-00"){
+								echo date("F", strtotime($setting['issue_date']));
+							}
+						?>
+						<?php
+							$newDate = date("j", strtotime($setting['issue_date']));
+							echo $newDate;
+						?>
+						<sup>
+							<?php
+								$newDate = date("S", strtotime($setting['issue_date']));
+								echo $newDate;
+							?>
+						</sup>
+						<?php 
+							if(!empty($setting['issue_date']) AND $setting['issue_date'] != "0000-00-00"){
+								echo ', '.date("Y", strtotime($setting['issue_date']));
+							}
+						?>
+					</span>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<?php } ?>

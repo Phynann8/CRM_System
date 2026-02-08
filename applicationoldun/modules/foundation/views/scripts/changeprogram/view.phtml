@@ -1,0 +1,213 @@
+<?php
+	$tr = Application_Form_FrmLanguages::getCurrentlanguage();
+	$frm = $this->frm_callteral;
+	echo $this->headTitle($tr->translate("CHANGE_PROGRAM_DETAIL"));
+	$baseurl =  Zend_Controller_Front::getInstance()->getBaseUrl();
+	$tr=Application_Form_FrmLanguages::getCurrentlanguage();
+	$rs= $this->rs;
+	$classHideHeight=classHideHeight;
+?>
+<div class="reportblog">
+	<div class="card-box">
+    	<div class="col-sm-12 border-botom">
+		   	<div class="col-sm-8 pd-0">
+	    		<h4 class="m-b-0"><i class="fa fa-file-text " aria-hidden="true"></i>&nbsp;&nbsp;&nbsp;<?php echo $tr->translate('CHANGE_PROGRAM_DETAIL');?></h4>
+    		</div>
+    		<div class="col-sm-4 text-right">
+    		</div>
+    	</div>
+    </div>
+	<div class="card-box">
+    	<div id="divPrint">
+			<style type="text/css">
+				.style{
+					line-height: 20px; font-size: 12px !important;
+					font-family: 'Times New Roman','Khmer OS Battambang';
+				}
+				
+				.padding{ padding: 0 1px !important;}
+				.padding td{padding: 0 1px !important;}
+				table.content-data{ page-break-inside:auto;font-family:Arial,'Khmer OS Battambang'; }
+				tr.content-data{ page-break-inside:avoid; page-break-after:auto }
+				#header {
+				  display: table-header-group;
+				  page-break-inside:avoid; page-break-after:auto;
+				}
+				table.content-data{
+					border-collapse:collapse;
+					width:100%;
+					border:1px solid #000; 
+					font-family:'Times New Roman','Khmer OS Battambang';
+					font-size:12px;
+					white-space: nowrap;
+					margin:0 auto;
+					color: #000;
+				}
+				table.content-data tr.style-head,
+				table.content-data thead tr.style-head {
+				   line-height: 25px; padding:1px 0px; white-space: nowrap;height: 22px; 
+					background: #ccd9ff;
+					text-align: center;;
+				}
+				table.content-data tr td {
+					padding: 0 2px;
+				}
+				table.content-data tr.style-rowdata {
+					font-size:12px; 
+					height: 23px;
+				}
+				ul.scoreTitle {
+					padding: 0;
+					margin: 0;
+					list-style: none;
+					font-size: 12px;
+					line-height: 17px;
+				}
+				ul.scoreTitle li {
+					list-style-type: none !important;
+				}
+				.hide{visibility: hidden;}
+				@media print {
+					 div.divFooter {
+						position: fixed;
+						top: 0;
+						width: 100%;
+						height: 100px;
+						bottom:0px;
+						margin:0;
+					 }
+					.hide{visibility: visible; height: <?php echo $classHideHeight;?>;}
+					.hidden{visibility: hidden; display: none;}
+				}
+				table .border {
+					display: block;
+					width: 100%;
+					height: 2px;
+					margin-bottom: 10px;
+					background: #000;
+					border: none !important;
+				}
+			</style>
+			<table style="width: 100%;background:#fff; margin: 0 auto; font-family: 'Times New Roman','Khmer OS Battambang'; ">
+					<tr>
+						<td colspan="3"><?php echo $this->rsheader;?></td>
+					</tr>
+					<tr>
+						<td width="28%" align="left">
+						</td>
+						<td width="44%" align="center">
+							<span style="color:#000; font-size: 18px;font-family:Times New Roman,'Khmer OS Muol Light';"><?php echo $tr->translate("CHANGE_PROGRAM_DETAIL");?></span>
+						</td>
+						<td align="right" width="28%"></td>
+					</tr>
+					<tr>
+						<td colspan="3"  align="center" style=" border-top: 1px solid #fff;  border-left: 1px solid #fff; border-right: 1px solid #fff;">
+							<ul class="scoreTitle">
+								<li style="font-family:'Times New Roman','Khmer OS Battambang';">
+									<?php echo $tr->translate("BRANCH");?> : <strong><?php echo $rs['branchName']; ?></strong>
+									<?php echo $tr->translate("ACADEMIC_YEAR");?> : <strong><?php echo $rs['academicYear']; ?></strong>
+								</li>
+								<li style="font-family:'Times New Roman','Khmer OS Battambang';">
+									<?php echo $tr->translate("FROM_STUDY_PROGRAM");?> : <strong><?php echo $rs['fromProgramTypeTitle']; ?></strong>
+									<?php echo $tr->translate("TO_STUDY_PROGRAM");?> : <strong><?php echo $rs['toProgramTypeTitle']; ?></strong>
+								</li>
+							</ul>
+						</td>
+					</tr>
+					<tr>
+						<td style="height: 10px">&nbsp;</td>
+					</tr>
+					<?php if(!empty($this->rowNewProgram)){?>
+					<tr>
+						<td colspan="3"  style="font-size:14px; font-weight: initial; font-family:'Times New Roman','Khmer OS Muol Light';">
+							I. <?php echo $tr->translate("LISTS_STUDENT_CHANGE_PROGRAM");?>
+						</td>
+					</tr>
+					<?php } ?>
+					<tr>
+						<td colspan="3" >
+							<table class="content-data" cellpadding="5" border="1" width="100%">
+								
+								<tr class="style-head" align="center">
+									<td rowspan="2" scope="col"><?php echo $tr->translate("NUM");?></td>
+									<td colspan="3" scope="col"><?php echo $tr->translate("STUDENT_INFO");?></td>
+									<td colspan="4" scope="col"><?php echo $tr->translate("STUDY_INFO");?></td>
+								</tr>
+								<tr class="style-head" align="center">
+									<td scope="col"><?php echo $tr->translate("ID_NUMBER");?></td>
+									<td scope="col"><?php echo $tr->translate("STUDENT_NAMEKHMERWORD");?></td>
+									<td scope="col"><?php echo $tr->translate("SEX");?></td>
+									
+									<td scope="col"><?php echo $tr->translate("DEGREE");?></td>
+									<td scope="col"><?php echo $tr->translate("GRADE");?></td>
+									<td scope="col"><?php echo $tr->translate("GROUP");?></td>
+									<td scope="col"><?php echo $tr->translate("ROOM");?></td>
+								</tr>
+								<?php if(!empty($this->rowDetail)) foreach($this->rowDetail as $key => $rowSt){ ?>
+								<tr class="style-rowdata hover"  align="center" >
+									<td data-label="<?php echo $tr->translate("NUM");?>" ><?php echo $key+1;?></td>
+									<td data-label="<?php echo $tr->translate("ID_NUMBER");?>" ><?php echo $rowSt["stuCode"];?></td>
+									<td data-label="<?php echo $tr->translate("STUDENT_NAMEKHMERWORD");?>" ><?php echo $rowSt["stuNameKh"];?></td>
+									<td data-label="<?php echo $tr->translate("SEX");?>" ><?php echo $rowSt["genderTitle"];?></td>
+									
+									<td data-label="<?php echo $tr->translate("DEGREE");?>" ><?php echo $rowSt["degreeTitle"];?></td>
+									<td data-label="<?php echo $tr->translate("GRADE");?>" ><?php echo $rowSt["gradeTitle"];?></td>
+									<td data-label="<?php echo $tr->translate("GROUP");?>" ><?php echo $rowSt["groupCode"];?></td>
+									<td data-label="<?php echo $tr->translate("ROOM");?>" ><?php echo $rowSt["roomName"];?></td>
+								</tr>
+								<?php } ?>
+							</table>
+						</td>
+					</tr>
+					<?php if(!empty($this->rowNewProgram)){?>
+					<tr>
+						<td colspan="3"  style="font-size:14px; font-weight: initial; font-family:'Times New Roman','Khmer OS Muol Light';">
+							II. <?php echo $tr->translate("STUDY_INFO_FOR_SUB_CLASS");?>
+						</td>
+					</tr>
+					<tr>
+						<td colspan="3" >
+							<table class="content-data" cellpadding="5" border="1" width="100%">
+								<tr class="style-head" align="center">
+									<td rowspan="2" scope="col"><?php echo $tr->translate("NUM");?></td>
+									<td colspan="4" scope="col"><?php echo $tr->translate("STUDY_INFO");?></td>
+								</tr>
+								<tr class="style-head" align="center">
+									<td scope="col"><?php echo $tr->translate("DEGREE");?></td>
+									<td scope="col"><?php echo $tr->translate("GRADE");?></td>
+									<td scope="col"><?php echo $tr->translate("GROUP");?></td>
+									<td scope="col"><?php echo $tr->translate("ROOM");?></td>
+								</tr>
+								<?php  foreach($this->rowNewProgram as $key => $rowPro){ ?>
+								<tr class="style-rowdata hover"  align="center" >
+									<td data-label="<?php echo $tr->translate("NUM");?>" ><?php echo $key+1;?></td>
+									<td data-label="<?php echo $tr->translate("DEGREE");?>" ><?php echo $rowPro["degreeTitle"];?></td>
+									<td data-label="<?php echo $tr->translate("GRADE");?>" ><?php echo $rowPro["gradeTitle"];?></td>
+									<td data-label="<?php echo $tr->translate("GROUP");?>" ><?php echo $rowPro["groupCode"];?></td>
+									<td data-label="<?php echo $tr->translate("ROOM");?>" ><?php echo $rowPro["roomName"];?></td>
+								</tr>
+								<?php } ?>
+							</table>
+						</td>
+					</tr>
+					<?php } ?>
+			</table>
+		</div>
+    </div>
+ </div>
+<div class="ptss-frame  js-ptss-frame ">
+	<div class="ptss__toggle-btn  js-ptss-toggle-btn ">
+		<i class="fa fa-print"></i>
+	</div>
+	<div class="ptss__header"><?php echo $tr->translate("PRINT");?></div>
+	<div class="ptss__settings">
+		<div class="ptss__single-setting" id="ptss__layout">
+			<div class="ptss__setting-control">
+				<div class="ptss__layout-wrapper">
+					<a class="qButton" href="javascript:void(0);" title="<?php echo $tr->translate("Preview");?>" onclick="preview();"><i class="fa fa-search" ></i></a>
+					<a class="qButton print" href="javascript:void(0);" title="<?php echo $tr->translate("PRINT");?>" onclick="doPrint();"><i class="fa fa-print" ></i></a>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>

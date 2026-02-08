@@ -1,0 +1,122 @@
+<?php
+	$tr = Application_Form_FrmLanguages::getCurrentlanguage();
+	echo $this->headTitle('ប័ណ្ណស្នើរស្តុក');
+	$base_url = Application_Form_FrmMessage::getUrl("/");
+	$dateFormat ="d/m/Y";
+?>	
+<style>
+	button#portraitBtn,
+	button#landscapeBtn,
+	button.btn-search {
+		display: none !important;
+	}
+</style>
+<div class="layout-wrapper-report">
+	<div id="mainContent" class="main-content-report">
+		<div class="report-preview">
+			<?php echo $this->controlReport?>
+			<div id="main-viewer" class="main-viewer portrait">
+				<div id="viewer" class="viewer portrait">
+					<div id="divPrint" class="content">
+						<link rel="stylesheet" href="<?php echo $this->baseUrl();?>/admin/build/css/report-style.css">
+						<link rel="stylesheet" href="<?php echo $this->baseUrl();?>/admin/build/css/report-style-screen.css">
+						<style>
+							table.collape.tablesorter {
+								white-space: nowrap;
+							}
+						</style>
+						<?php  echo $this->officailRequestVoucher; ?>
+						<?php if(AMOUNT_RECEIPT>1){?>
+							<div id="printblog2" class="content"></div>
+						 <?php }?>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<script type="text/javascript">
+dojo.ready(function(){
+	initiLizeData();
+	getbranchinfo();
+	cloneReceipt();
+	setTimeout(function() {
+		setPrintOrientation('landscape',"A5");
+	}, 500);
+});	
+function cloneReceipt(){
+	loadingBlock();
+	setTimeout(function () {
+		 <?php if(AMOUNT_RECEIPT>1){?>
+		 	dojo.byId('printblog2').innerHTML = dojo.byId('divPrint').innerHTML;
+		 <?php }?>
+        HideloadingBlock();
+    }, 500);
+}
+
+function initiLizeData(){
+	dojo.byId("bl_branch").innerHTML = '<?php echo preg_replace( "/\r|\n/", "", strip_tags(htmlspecialchars($this->row['branch_name'])));?>';
+	dojo.byId("lb_invoice").innerHTML =  '<?php echo preg_replace( "/\r|\n/", "", strip_tags(htmlspecialchars($this->row['request_no'])));?>';
+	dojo.byId("lb_request_for").innerHTML =  '<?php echo preg_replace( "/\r|\n/", "", strip_tags(htmlspecialchars($this->row['request_for'])));?>';
+	dojo.byId("lb_request_date").innerHTML =  '<?php echo preg_replace( "/\r|\n/", "", strip_tags(htmlspecialchars($this->row['request_date'])));?>';
+	dojo.byId("lb_for_section").innerHTML =  '<?php echo preg_replace( "/\r|\n/", "", strip_tags(htmlspecialchars($this->row['for_section'])));?>';
+	dojo.byId("lb_purpose").innerHTML =  '<?php echo preg_replace( "/\r|\n/", "", strip_tags(htmlspecialchars($this->row['purpose'])));?>';
+	
+	temp='';
+	 temp='<table class="collape tablesorter"  align="center" style=" width: 100%; padding: 0px; margin: 0px; border-collapse: collapse; border: 1px solid #000; font-size:12px;font-family:Khmer OS Battambang !important;  " id="table">'
+		  temp+='<tr class="" style="text-align:center; height:25px;">';
+			  temp+='<td><strong>លរ/No.</div></strong></td>';
+			  temp+='<td><strong>ផលិតផល/Product</strong></td>';
+			  temp+='<td><strong>ចំនួនស្តុក/Stock Qty</strong></td>';
+			  temp+='<td><strong>តម្លៃ/Price</strong></td>';
+			  temp+='<td><strong>ចំនួនស្នើ/Request Qty</strong></td>';
+			  temp+='<td><strong>ចំនួនទទួល/Received Qty</strong></td>';
+			  temp+='<td><strong>សម្គាល់/Note</strong></td>';
+		  temp+='</tr>';
+	<?php if(!empty($this->detail)){
+			foreach($this->detail as $key=> $rs){
+	?>
+	  temp+='<tr class="" style="text-align:center; height:25px;">';
+		  temp+='<td><?php echo $key+1;?></td>';
+		  temp+='<td align="left"><?php echo $rs['pro_name'];?></td>';
+		  temp+='<td><?php echo $rs['qty_curr'];?></td>';
+		  temp+='<td><?php echo number_format($rs['price'],2);?></td>';
+		  temp+='<td><?php echo $rs['qty_request'];?></td>';
+		  temp+='<td><?php echo $rs['qty_receive'];?></td>';
+		  temp+='<td><?php echo $rs['remark'];?></td>';
+     temp+='</tr>';
+	<?php }
+		for($index=count($this->detail);$index<3;$index++){
+	?>
+	temp+='<tr class="" style="text-align:center; height:25px;">';
+	  temp+='<td><?php echo $index+1;?>&nbsp;</td>';
+	  temp+='<td></td>';
+	  temp+='<td></td>';
+	  temp+='<td></td>';
+	  temp+='<td></td>';
+	  temp+='<td></td>';
+temp+='</tr>';
+		
+	<?php }}?>
+
+	dojo.byId('t_amountmoneytype').innerHTML = temp;
+}
+var url_getbranch = "<?php echo $this->url(array('module'=>'registrar','controller'=>'register','action'=>'getbranchinfo')); ?>";
+function getbranchinfo(){
+	branch_id = '<?php echo $this->row['branch_id'];?>';
+	if(branch_id != ""){
+		dojo.xhrPost({
+			url:url_getbranch,
+			content:{
+				'branch_id':branch_id,
+				},
+			handleAs:"json",
+			load: function(data){
+				dojo.byId('lbl_header').innerHTML=data;
+			},
+			error: function(err) {
+			}
+		});	
+	} 
+}
+</script>

@@ -1,0 +1,433 @@
+<?php
+	$tr = Application_Form_FrmLanguages::getCurrentlanguage();
+	echo $this->headTitle($tr->translate("RPT_STUDENT_SUMMARY")); 
+	$frm =  $this->form_search;
+	
+	$allGrade =$this->allGrade;
+	$arrayColors = array(
+		"#0b62a4",
+		"#00a65a",
+		"#f39c12",
+		"#db4343",
+		"#9b59b6",
+		"#56a9fb",
+		"#673ab7",
+		"#2196f3",
+		"#0fcc6d",
+		"#ed9c18"
+		
+	);
+	$dataDegreeInfo = [];
+	$dataBranchInfo = [];
+	$hideInactive= empty($this->search["hideInactive"]) ? 0 : $this->search["hideInactive"];
+?>	
+<style>
+.hover:hover{ background:#ccc;}
+table.content-data tr.style-head,
+table.tb-footer tr.style-head {
+   font-weight: bold !important;
+}
+svg {
+    position: relative !important;
+}
+</style>
+<div class="layout-wrapper-report">
+	<div id="mainContent" class="main-content-report">
+		<div class="report-preview">
+			<?php echo $this->controlReport?>
+			<div id="main-viewer" class="main-viewer portrait">
+				<div id="viewer" class="viewer portrait">
+					<div id="divPrint" class="content">
+						<link rel="stylesheet" href="<?php echo $this->baseUrl();?>/admin/build/css/report-style.css">
+						<link rel="stylesheet" href="<?php echo $this->baseUrl();?>/admin/build/css/report-style-screen.css">
+						<style>
+							@media print {
+								<?php if(!empty($this->printFormat)){ echo $this->printFormat; } ?>
+							}
+							.divBreak{
+								page-break-inside:always;
+								page-break-after:always;
+							}
+						</style>
+						<div class="divBreak" style="width:100%;">
+							<table border="0" style="background:#fff; margin: 0 auto; width: 100%; ">
+								<tr>
+									<td colspan="3"><?php echo $this->rsheader;?></td>
+								</tr>
+								<tr>
+									<td width="15%" align="center">
+									</td>
+									<td width="70%"  align="center">
+										<span style=" color:#4839bd; font-size:14px;font-family:'Times New Roman','Khmer OS Muol Light';"><?php echo $tr->translate("RPT_STUDENT_SUMMARY");?></span><br />
+										<span style=" color:#4839bd; font-size:12px;font-family:'Times New Roman','Khmer OS Muol Light';"><?php if (!empty($this->search['academic_year'])){ echo "For Academic Year";}?> <span id="academicDisplay"></span></span>
+									</td>
+									<td width="15%" align="center">
+									</td>
+								</tr>
+								<tr>
+									<td colspan="3" valign="top">
+										<div id="exportExcel">
+										<?php if (!empty($this->rs)){?>
+											<table class="content-data" cellpadding="1"  >
+												<thead>
+													<tr class="style-head">
+														<td class="widthCol-px-30">Location</td>
+														<?php 
+														if (!empty($allGrade)) foreach($allGrade AS $key => $grade){ 
+														$allGrade[$key]["totalSt"] =0;
+														$allGrade[$key]["activeSt"] =0;
+														$allGrade[$key]["inactiveSt"] =0;
+														
+														
+														$newArrDee = [
+															"grade"=>$grade["name"],
+															"total"=>0,
+														];
+														if($hideInactive!=1){
+															$newArrDee["inactive"] =0;
+														}
+														array_push($dataDegreeInfo,$newArrDee);
+														?>
+														<td><?php echo $grade["name"];?></td>
+														<?php } ?>
+														
+														<td class="background-bluegreen"><?php echo "M";?></td>
+														<td class="background-bluegreen"><?php echo "F";?></td>
+														<td class="background-bluegreen2">Total</td>
+													</tr>
+												</thead>
+											<?php 
+												$i=0;
+												$gTotal=0;
+												$gTotalM=0;
+												$gTotalF=0;
+												$gTotalInactive=0;
+												foreach($this->rs AS $key=>$row){  
+												$jsData = [];
+												if(!empty($row['jsData'])){
+													$jsData = json_decode($row['jsData'], true);
+												}
+												
+											?>
+												<tr class="style-rowdata hover" align="center"  >
+													<td align="left"><strong><?php echo $row['branchName'];?></strong></td>
+													<?php
+													$rowTotal = 0;
+													$rowTotalM = 0;
+													$rowTotalF = 0;
+													$rowTotalInactiveSt = 0;
+													$rowTotalActiveSt = 0;
+													if (!empty($allGrade)) foreach($allGrade AS $index => $grade){ 
+															$tGrSt = 0;
+															$strFilter =  (string) $grade['id'];
+															$arrRow = $jsData;
+															$rsCounting = array_filter($arrRow, function ($item) use ($strFilter) {
+																if ($item['grade'] == $strFilter) {
+																	return $item;
+																}
+																return;
+															});
+														$rsCounting = array_values($rsCounting);
+														//$tGrSt = empty($rsCounting[0]["totalSt"]) ? 0 :$rsCounting[0]["totalSt"];
+														$inactiveSt = empty($rsCounting[0]["inactiveSt"]) ? 0 :$rsCounting[0]["inactiveSt"];
+														$activeSt = empty($rsCounting[0]["activeSt"]) ? 0 :$rsCounting[0]["activeSt"];
+														$maleSt = empty($rsCounting[0]["totalM"]) ? 0 :$rsCounting[0]["totalM"];
+														$femaleSt = empty($rsCounting[0]["totalF"]) ? 0 :$rsCounting[0]["totalF"];
+														
+														
+														if($hideInactive==1){
+															$maleSt = empty($rsCounting[0]["activeStM"]) ? 0 :$rsCounting[0]["activeStM"];
+															$femaleSt = empty($rsCounting[0]["activeStF"]) ? 0 :$rsCounting[0]["activeStF"];
+														}
+														
+														$totalByGrad = $allGrade[$index]["activeSt"]+$activeSt;
+														$totalByGradInactive = $allGrade[$index]["inactiveSt"]+$inactiveSt;
+														
+														$allGrade[$index]["activeSt"] = $totalByGrad;
+														$allGrade[$index]["inactiveSt"] = $totalByGradInactive;
+														
+														$dataDegreeInfo[$index]["total"] = $totalByGrad;
+														if($hideInactive!=1){
+															$dataDegreeInfo[$index]["inactive"] =$totalByGradInactive;
+														}
+														
+														$rowTotalM = $rowTotalM + $maleSt;
+														$rowTotalF = $rowTotalF + $femaleSt;
+														
+														$rowTotal = $rowTotal + $activeSt;
+														$rowTotalActiveSt = $rowTotalActiveSt + $activeSt;
+														$rowTotalInactiveSt = $rowTotalInactiveSt + $inactiveSt;
+														
+														$gTotal = $gTotal + $activeSt;
+														$gTotalInactive = $gTotalInactive + $inactiveSt;
+														$gTotalM = $gTotalM + $maleSt;
+														$gTotalF = $gTotalF + $femaleSt;
+														
+														
+														
+													?>
+														<td align="center">
+															<?php echo sprintf('%02d', $activeSt);?>
+															<?php if($hideInactive!=1){ ?>
+															<span class="inactiveSt"> | <span class="text-color-red"><?php echo sprintf('%02d',$inactiveSt);?></span></span>
+															<?php } ?>
+														</td>
+													<?php } 
+													$newArray = [
+															"branch"=>$row['branchName'],
+															"total"=>$rowTotal,
+															"male"=>$rowTotalM,
+															"female"=>$rowTotalF,
+														];
+													array_push($dataBranchInfo,$newArray);
+													?>	
+													
+													<td class="background-bluegreen" align="center">
+														<strong>
+														<?php echo sprintf('%02d',$rowTotalM);?>
+														</strong>
+													</td>
+													<td class="background-bluegreen" align="center">
+														<strong>
+														<?php echo sprintf('%02d',$rowTotalF);?>
+														</strong>
+													</td>
+													<td class="background-bluegreen2" align="center">
+														<strong>
+														<?php echo $rowTotal;?>
+														<?php if($hideInactive!=1){ ?>
+														<span class="inactiveSt"> | <span class="text-color-red"><?php echo sprintf('%02d',$rowTotalInactiveSt);?></span></span>
+														<?php } ?>
+														</strong>
+													</td>
+												</tr>			
+												<?php }?>	
+												<tr class="footer-total height-px-50 border-top-double border-top-width-3px border-bottom-solid border-bottom-width-3px">
+													<td>Grand Total</td>
+													<?php 
+														if (!empty($allGrade)) foreach($allGrade AS $key => $grade){ 
+														?>
+														<td align="center">
+															<?php echo $grade["activeSt"];?>
+															<?php if($hideInactive!=1){ ?>
+																<span class="inactiveSt"> | <span class="text-color-red"><?php echo sprintf('%02d',$grade["inactiveSt"]);?></span></span>
+															<?php } ?>
+														</td>
+													<?php } ?>
+													
+													<td class="background-bluegreen" align="center">
+														<strong>
+														<?php echo sprintf('%02d',$gTotalM);?>
+														</strong>
+													</td>
+													<td class="background-bluegreen" align="center">
+														<strong>
+														<?php echo sprintf('%02d',$gTotalF);?>
+														</strong>
+													</td>
+													<td class="background-bluegreen2" align="center">
+														<strong>
+															<?php echo $gTotal;?>
+															<?php if($hideInactive!=1){ ?>
+																<span class="inactiveSt"> | <span class="text-color-red"><?php echo sprintf('%02d',$gTotalInactive);?></span></span>
+															<?php } ?>
+														</strong>
+													</td>
+												</tr>
+											</table> 
+											<?php }?>
+										</div>	
+									</td>
+								</tr>
+								
+							</table>
+						</div>
+						<div class="divBreak" style="width:100%;">
+							<table border="0" style="background:#fff; margin: 0 auto; width: 100%; ">
+								<tr>
+									<td colspan="3" height="30px" width="100%">
+									</td>
+								</tr>
+								<tr>
+									<td colspan="3" width="100%">
+										<table width="100%">
+											<tr>
+												<td width="50%">
+													<div class="card-chart">
+														<span class="chart-title text-color-blue" ><?php echo $tr->translate("TOTAL_STUDENT_STATISTIC");?></span>
+														<span class="chart-title-info text-color-blue academicDisplay"></span>
+														
+														<?php if($hideInactive!=1){ ?>
+															<div class="chart-legend text-color-blue">
+																<div class="chart-legend-item">
+																	<div class="chart-legend-color color-active"></div>
+																	<span><?php echo $tr->translate("Active");?></span>
+																</div>
+																<div class="chart-legend-item">
+																	<div class="chart-legend-color color-inactive"></div>
+																	<span><?php echo $tr->translate("Inactive");?></span>
+																</div>
+															</div>
+														<?php }else{ ?>
+															<div class="chart-legend">
+																<div class="chart-legend-item">
+																	<span>&nbsp;</span>
+																</div>
+																<div class="chart-legend-item">
+																</div>
+															</div>
+														<?php } ?>
+														<div id="bar-chart-degree" class="bar-chart"></div>
+													</div>
+												</td>
+												<td width="50%">
+													<div class="card-chart">
+														<span class="chart-title text-color-blue" ><?php echo $tr->translate("TOTAL_STUDENT_BY_BRANCH");?></span>
+														<span class="chart-title-info text-color-blue academicDisplay"></span>
+														
+														<div class="chart-legend text-color-blue">
+															<div class="chart-legend-item">
+																<div class="chart-legend-color color-total"></div>
+																<span>Total</span>
+															</div>
+															<div class="chart-legend-item">
+																<div class="chart-legend-color color-male"></div>
+																<span>M</span>
+															</div>
+															<div class="chart-legend-item">
+																<div class="chart-legend-color color-female"></div>
+																<span>F</span>
+															</div>
+														</div>
+															
+														<div id="bar-chart-branch" class="bar-chart"></div>
+													</div>
+												</td>
+											</tr>
+										</table>
+									</td>
+								</tr>
+							</table>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="right-panel-report" id="rightPanel">
+		<div class="card-box">
+			<div class="card-search-head col-sm-12 border-botom">
+				<div class="col-sm-6 text-left pd-0">
+					<h4 class="m-b-0">
+						<?php echo $tr->translate("SEARCH");?> 
+						<i class="fa fa-search "></i> 
+					</h4>
+				</div>
+				<div class="col-sm-6 text-right pd-0">
+					<button onclick="closeRightPanel()" title="<?php echo $tr->translate("CLOSED");?> " class="btn-close">
+						<i class="fa-solid fa-xmark"></i>
+					</button>
+				</div>
+			</div>
+			<form id='foundation_class' action="" dojoType="dijit.form.Form" method="post" enctype="application/x-www-form-urlencoded">
+				<div class="form-group">
+					<div class="col-md-12 col-sm-12 col-xs-12">
+						<?php echo $frm->getElement("branch_id");?>
+					</div>
+					<div class="col-md-12 col-sm-12 col-xs-12">
+						<?php echo $frm->getElement("academic_year");?>
+					</div>
+					<div class="col-md-12 col-sm-12 col-xs-12">
+						<?php echo $frm->getElement("hideInactive");?>
+					</div>
+					<div class="col-md-12 col-sm-12 col-xs-12">
+						<button class="button-class button-primary fullside" iconClass="glyphicon glyphicon-search" dojoType="dijit.form.Button" showLabel="true" name="search"  type="submit"><?php echo $tr->translate("SEARCH");?></button>
+					</div>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
+<link rel="stylesheet" href="<?php echo $this->baseUrl()."/"?>dashboard/plugins/morris/morris.css">
+<script src="<?php echo $this->baseUrl()."/"?>dashboard/plugins/morris/morris.min.js"></script>
+<script src="<?php echo $this->baseUrl()."/"?>dashboard/plugins/raphael/raphael-min.js"></script>
+<script src="<?php echo $this->baseUrl();?>/js/help.js"></script>
+<script type="text/javascript">
+
+dojo.require("dojo.NodeList");
+	dojo.require("dojo.NodeList-manipulate");
+	dojo.require("dojo.data.ItemFileWriteStore"); 
+	
+	dojo.ready(function(){
+		var branch_id = dijit.byId('branch_id');
+		branch_id.on('change', function(evt) {
+		});
+		dijit.byId('academic_year').set('value','<?php echo empty($this->search["academic_year"]) ? 0 : $this->search["academic_year"];?>'); 
+		dijit.byId('hideInactive').set('value','<?php echo empty($this->search["hideInactive"]) ? 0 : $this->search["hideInactive"];?>'); 
+		
+		$("#academicDisplay").html(dijit.byId('academic_year').attr("displayedValue"));
+		$(".academicDisplay").html(dijit.byId('academic_year').attr("displayedValue"));
+		
+		 setTimeout(function() {
+			setPrintOrientation('landscape');
+		}, 500);
+	});
+	function doPrintProfle(keyid) {
+		window.frames["print_frame"].document.body.innerHTML = dojo.byId(keyid).innerHTML;
+		window.frames["print_frame"].window.focus();
+		window.frames["print_frame"].window.print();
+		hideDialog();
+	}	
+
+	
+</script>
+
+<script>
+var arrColor = [
+		"#0b62a4",
+		"#00a65a",
+		"#f39c12",
+		"#db4343",
+		"#9b59b6",
+		"#56a9fb",
+		"#673ab7",
+		"#2196f3",
+		"#0fcc6d",
+		"#ed9c18"
+];
+$(document).ready(function () {
+	setTimeout(function() {
+		Morris.Bar({
+			element: "bar-chart-degree",
+			data: <?php echo json_encode($dataDegreeInfo)?>,
+			xkey: 'grade',
+			<?php if($hideInactive!=1){?>
+			ykeys: ['total','inactive'],
+			labels: ['Active Students','Inactive Students'],
+			barColors: ['#0b62a4', '#d9534f'],
+			<?php }else{?>
+			ykeys: ['total'],
+			labels: ['Total Students'],
+			barColors: ['#0b62a4'],
+			<?php }?>
+			hideHover: 'auto',
+			resize: true,
+			xLabelMargin : 0,
+		});
+		
+		Morris.Bar({
+			element: "bar-chart-branch",
+			data: <?php echo json_encode($dataBranchInfo)?>,
+			xkey: 'branch',
+			ykeys: ['total', 'male', 'female'],
+			labels: ['Total Students', 'Male Students', 'Female Students'],
+			barColors: [ '#7a92a3', '#0b62a4','#d9534f'],
+			hideHover: 'auto',
+			resize: true,
+			xLabelMargin : 0,
+		});
+		
+	}, 1000);
+});
+
+</script>

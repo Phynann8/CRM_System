@@ -1,0 +1,295 @@
+<?php
+	$tr = Application_Form_FrmLanguages::getCurrentlanguage();
+	echo $this->headTitle($tr->translate("PROGRAM_DASH"));
+	$lastestAcademic = $this->lastestAcademic;
+	
+	$arrayColors = array(
+		"#ff5e92",
+		"#ff0000",
+		"#8bc34a",
+		"#153c7f",
+		"#9b59b6",
+		"#56a9fb",
+		"#673ab7",
+		"#2196f3",
+		"#0fcc6d",
+		"#ed9c18",
+		
+	);
+	$totalClass=0;
+	$classList = $this->countClassList;
+	
+	$rsDegreeList = $this->rsDegreeList;
+?>
+<div class="card">
+	<div class="card-content collapse show">
+		<div class="p-5">
+			<div class="row g-6 mb-3">
+				<div class="col-md-6 col-sm-6 col-xs-12">
+					<div class="card border rounded-3">
+						<div class="card-header d-flex justify-content-between pb-0 border-0">
+							<h4 class="card-title mb-0">
+							<?php echo $tr->translate('GRADE');?>
+							</h4>
+						</div>
+						<div class="card-body ">
+							<div class="d-flex align-items-center mb-2">
+								<div class="w-100">
+									<div class="row gy-3">
+										<div class="col-md-6 col-6">
+										  <div class="d-flex align-items-center">
+											<div class="badge p-4 rounded bg-label-primary me-4 p-2"><i class="fa fa-book fa-lg"></i></div>
+											<div class="card-info mb-0 shadow-none">
+											  <h5 class="mb-0 mt-0"><?php echo empty($this->countAllGrade) ? "00" : sprintf('%02d', $this->countAllGrade); ?></h5>
+											  <small><?php echo $tr->translate('ALL');?></small>
+											</div>
+										  </div>
+										</div>
+										<div class="col-md-6 col-6">
+										  <div class="d-flex align-items-center">
+											<div class="badge p-4 rounded bg-label-danger me-4 p-2"><i class="fa fa-ban fa-lg"></i></div>
+											<div class="card-info mb-0 shadow-none">
+											  <h5 class="mb-0 mt-0"><?php echo empty($this->countDeactiveGrade) ? "00" : sprintf('%02d', $this->countDeactiveGrade); ?></h5>
+											  <small><?php echo $tr->translate('DEACTIVE');?></small>
+											</div>
+										  </div>
+										</div>
+									</div>
+								</div>
+							</div>
+							<small class="d-flex justify-content-between mb-0">
+								<a class="btn btn-primary btn-xs waves-effect waves-light" href="<?php echo $this->baseUrl()."/global/grade/add";?>">
+									<?php echo $tr->translate('ADD_NEW');?> <i class="fa fa-plus-square-o"></i>
+								</a>
+								<a class="btn-xs btn-text-primary waves-effect waves-light" href="<?php echo $this->baseUrl()."/global/grade";?>">
+									<?php echo $tr->translate('SHOW_ALL');?> <i class="fa fa-angle-right fa-xs"></i>
+								</a>
+							</small>
+						</div>
+						
+					</div>
+				</div>
+				<div class="col-md-6 col-sm-6 col-xs-12">
+					<div class="card border rounded-3">
+						<div class="card-header d-flex justify-content-between pb-0 border-0">
+							<h4 class="card-title mb-0">
+							<?php echo $tr->translate('ROOM');?>
+							</h4>
+						</div>
+						<div class="card-body">
+							<div class="d-flex align-items-center mb-2">
+								<div class="w-100">
+									<div class="row gy-3">
+										<div class="col-md-6 col-6">
+										  <div class="d-flex align-items-center">
+											<div class="badge p-4 rounded bg-label-primary me-4 p-2"><i class="fa fa-graduation-cap fa-lg"></i></div>
+											<div class="card-info mb-0 shadow-none">
+											  <h5 class="mb-0 mt-0"><?php echo empty($this->countAllRoom) ? "00" : sprintf('%02d', $this->countAllRoom); ?></h5>
+											  <small><?php echo $tr->translate('ALL');?></small>
+											</div>
+										  </div>
+										</div>
+										<div class="col-md-6 col-6">
+										  <div class="d-flex align-items-center">
+											<div class="badge p-4 rounded bg-label-danger me-4 p-2"><i class="fa fa-ban fa-lg"></i></div>
+											<div class="card-info mb-0 shadow-none">
+											  <h5 class="mb-0 mt-0"><?php echo empty($this->countDeactiveRoom) ? "00" : sprintf('%02d', $this->countDeactiveRoom); ?></h5>
+											  <small><?php echo $tr->translate('DEACTIVE');?></small>
+											</div>
+										  </div>
+										</div>
+									</div>
+								</div>
+							</div>
+							<small class="d-flex justify-content-between mb-0">
+								<a class="btn btn-primary btn-xs waves-effect waves-light" href="<?php echo $this->baseUrl()."/global/room/add";?>">
+									<?php echo $tr->translate('ADD_NEW');?> <i class="fa fa-plus-square-o"></i>
+								</a>
+								<a class="btn-xs btn-text-primary waves-effect waves-light" href="<?php echo $this->baseUrl()."/global/room";?>">
+									<?php echo $tr->translate('SHOW_ALL');?> <i class="fa fa-angle-right fa-xs"></i>
+								</a>
+							</small>
+						</div>
+					</div>
+				</div>
+			</div>
+			
+			<div class="row g-6">
+				<div class="col-md-6 col-sm-6 col-xs-12">
+					<div class="card">
+						<div class="card-header d-flex justify-content-between pb-0 border-0">
+							<div class="card-title mb-0">
+							  <h4 class="mb-1"><i class="fa fa-graduation-cap fa-md"></i> 
+							  <?php echo $tr->translate("DEGREE")?> 
+							  <strong class="text-primary">
+								<strong class="text-success">
+								<?php echo empty($this->countAllDegree) ? "00" : sprintf('%02d', $this->countAllDegree); ?>
+								</strong> / 
+								<?php echo empty($this->countAllDegree) ? "00" : sprintf('%02d', $this->countAllDegree); ?>
+							  </strong>
+							  </h4>
+							</div>
+							<a class="btn btn-primary btn-xs waves-effect waves-light" href="<?php echo $this->baseUrl()."/global/degree/add";?>">
+								<?php echo $tr->translate('ADD_NEW');?> <i class="fa fa-plus-square-o"></i>
+							</a>
+						</div>
+						<div class="card-body h-px-300 overflow-auto">
+							<div class="card-datatable dataTables_scrollBody table-responsive " style="position: relative;  width: 100%; ">
+								<table id="datatable-responsive" class=" nowrap dt-row-grouping table">
+									<thead>
+										<tr>
+											<th class="text-center" ><?PHP echo $tr->translate('NUM');?></th>
+											<th class="text-center" ><?PHP echo $tr->translate('DEGREE');?></th>
+											<th class="text-center" ><?PHP echo $tr->translate('AMT_GRADE');?></th>
+											<th class="text-center" ><?PHP echo $tr->translate('STATUS');?></th>
+										</tr>
+									</thead>
+									<tbody>
+									<?php if(!empty($this->rsDegreeList)) { ?>
+										<?php  
+										
+										foreach($this->rsDegreeList AS $key => $rowDegree){
+										?>
+										<tr>
+											<td class="items-no text-center"><?php echo ($key+1); ?></td>
+											<td class="">
+												<div>
+													<a class=" text-primary text-truncate fw-medium mb-0 text-wrap" href="<?php echo $this->baseUrl()."/global/province/edit/id/".$rowDegree["id"];?>">
+													<?php echo $rowDegree["titleKh"]; echo empty($rowDegree["shortcut"]) ? "" : " (".$rowDegree["shortcut"].")"; ?>
+													</a>
+													<div class="align-items-center mt-0">
+														<small class="d-block text-nowrap text-heading"><?php echo $rowDegree["titleEn"]; ?></small>
+													</div>
+												</div>
+											</td>
+											<td class="text-center">
+												<div class="d-flex align-items-center justify-content-center">
+													<div class="avatar me-1">
+														<span class="avatar-initial rounded bg-label-primary">
+														  <i class="ti ti-books ti-26px"></i>
+														</span>
+													</div>
+													<?php echo sprintf('%02d',$rowDegree["amtGrade"]); ?>
+												</div>
+											</td>
+											<td class="text-center">
+												<?php echo $rowDegree["status"]; ?>
+												<a title="<?php echo $tr->translate("EDIT")?>" href="<?php echo $this->baseUrl()."/global/degree/edit/id/".$rowDegree["id"];?>" class="" >
+													<span>
+														<i class="fa fa-pencil-square-o ti-md text-heading"></i>
+													</span>
+												</a>
+											</td>
+										</tr>
+										<?php } ?>
+									<?php }?>
+									</tbody>
+								</table>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="col-md-3 col-sm-3 col-xs-12">
+					<div class="card h-100">
+						<div class="card-header d-flex justify-content-between pb-0 border-0">
+							<div class="card-title mb-0">
+							  <h4 class="mb-1"><i class="fa fa-calendar fa-md"></i> <?php echo $tr->translate("ACADEMIC_YEAR")?></h4>
+							</div>
+							<a class="btn btn-primary btn-xs waves-effect waves-light" href="<?php echo $this->baseUrl()."/global/yearstudy/add";?>">
+								<?php echo $tr->translate('ADD_NEW');?> <i class="fa fa-plus-square-o"></i>
+							</a>
+						</div>
+						<div class="card-body p-0 pt-5">
+							<ul class="list-unstyled mb-0 h-px-300 overflow-auto">
+								<?php if(!empty($this->academicList)) foreach($this->academicList AS $k => $rsAca){
+										$bgRow = "bg-body";
+										if(($k%2)==0){
+											$bgRow = "";
+										}
+										$default="";
+										if($rsAca["isCurrent"]==1){
+											$default = '<i class="fa fa-check-circle-o text-success" ></i>';
+										}
+									?>
+								<li class="d-flex mb-2 p-0 align-items-center rounded <?php echo $bgRow;?>">
+									<div class="row w-100 align-items-center p-0">
+									  <div class="col-sm-2 mt-0">
+										<div class="avatar flex-shrink-0  ms-1">
+											<span class="badge p-4 rounded bg-label-primary"><?php echo $k+1;?></span>
+										</div>
+									  </div>
+									  <div class="col-sm-6 mb-1 mb-sm-0 mb-lg-1 mb-xxl-0">
+										<h6 class="mb-0 text-primary"><?php echo $rsAca["academicYearTitle"];?> <?php echo $default;?></h6>
+										<small class="fs-tiny mb-0"><?php echo $rsAca["degreeList"];?></small>
+									  </div>
+									  <div class="col-sm-2 d-flex justify-content-sm-center">
+										<?php echo $rsAca["status"];?>
+									  </div>
+									  <div class="col-sm-2 d-flex justify-content-sm-end">
+										<a title="<?php echo $tr->translate('EDIT');?> " class="btn btn-success btn-xs waves-effect waves-light" href="<?php echo $this->baseUrl()."/global/yearstudy/edit/id/".$rsAca["id"];?>">
+											<i class="fa fa-pencil-square-o"></i>
+										</a>
+									  </div>
+									</div>
+								</li>
+								<?php } ?>
+							</ul>
+						</div>
+					</div>
+				</div>
+				<div class="col-md-3 col-sm-3 col-xs-12">
+					<div class="card h-100">
+						<div class="card-header d-flex justify-content-between pb-0 border-0">
+							<div class="card-title mb-0">
+							  <h4 class="mb-1"><i class="fa fa-clock-o fa-md"></i> <?php echo $tr->translate("PART_TIME_LIST")?></h4>
+							</div>
+							<a class="btn btn-primary btn-xs waves-effect waves-light" href="<?php echo $this->baseUrl()."/global/parttimelist/add";?>">
+								<?php echo $tr->translate('ADD_NEW');?> <i class="fa fa-plus-square-o"></i>
+							</a>
+						</div>
+						<div class="card-body p-2 pt-5">
+							<ul class="list-unstyled mb-0 h-px-300 overflow-auto">
+								<?php if(!empty($this->sessionList)) foreach($this->sessionList AS $k => $rsSession){
+										$bgRow = "bg-body";
+										if(($k%2)==0){
+											$bgRow = "";
+										}
+									?>
+								<li class="d-flex mb-2 p-0 align-items-center rounded <?php echo $bgRow;?>">
+									<div class="row w-100 align-items-center p-0">
+									  <div class="col-sm-2 mt-0">
+										<div class="avatar flex-shrink-0 ms-1">
+											<span class="badge p-4 rounded bg-label-primary"><?php echo $k+1;?></span>
+										</div>
+									  </div>
+									  <div class="col-sm-6 mb-1 mb-sm-0 mb-lg-1 mb-xxl-0">
+										<h6 class="mb-0 text-primary"><i class="fa fa-university"></i><?php echo $rsSession["branchName"];?> <?php echo $rsSession["sessionTitle"];?></h6>
+										<small class="text-muted fs-tiny mb-0"><i><?php echo $rsSession["degreeList"];?></i></small>
+									  </div>
+									  <div class="col-sm-2 d-flex justify-content-sm-center">
+										<?php echo $rsSession["status"];?>
+									  </div>
+									  <div class="col-sm-2 d-flex justify-content-sm-end">
+										<a title="<?php echo $tr->translate('EDIT');?> " class="btn btn-success btn-xs waves-effect waves-light" href="<?php echo $this->baseUrl()."/global/parttimelist/edit/id/".$rsSession["id"];?>">
+											<i class="fa fa-pencil-square-o"></i>
+										</a>
+									  </div>
+									</div>
+								</li>
+								<?php } ?>
+							</ul>
+						</div>
+					</div>
+				</div>
+			</div>
+
+		</div>
+	</div>
+</div>
+
+
+<style>
+.global-action {
+    display: none;
+}
+</style>

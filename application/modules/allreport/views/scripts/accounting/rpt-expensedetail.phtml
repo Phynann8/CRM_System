@@ -1,0 +1,152 @@
+<?php
+	$tr = Application_Form_FrmLanguages::getCurrentlanguage();
+	echo $this->headTitle('ប័ណ្ណចំណាយ');
+	$base_url = Application_Form_FrmMessage::getUrl("/");
+	$dateFormat ="d/m/Y";
+	
+	$today = new DateTime();
+	$today->modify('+1 min');
+	$printDate =  "Printed ".$today->format($dateFormat." h:i");
+	$printDate.=  " ".strtoupper($today->format("a"));
+?>
+<style>
+	button#portraitBtn,
+	button#landscapeBtn,
+	button.btn-search {
+		display: none !important;
+	}
+</style>
+<div class="layout-wrapper-report">
+	<div id="mainContent" class="main-content-report">
+		<div class="report-preview">
+			<?php echo $this->controlReport?>
+			<div id="main-viewer" class="main-viewer portrait">
+				<div id="viewer" class="viewer portrait">
+					<div id="divPrint" class="content">
+						<link rel="stylesheet" href="<?php echo $this->baseUrl();?>/admin/build/css/report-style.css">
+						<link rel="stylesheet" href="<?php echo $this->baseUrl();?>/admin/build/css/report-style-screen.css">
+						<style>
+							table.collape.tablesorter {
+								white-space: nowrap;
+							}
+						</style>
+						<div id="divPrint1" style="width: 100%;height: 13cm ; padding: 0px; margin: 0px;">
+						<?php  echo $this->officailExpensereceipt;?>
+						</div>
+						<?php if(AMOUNT_RECEIPT>1){?>
+							
+							<div id="printblog2" class="content"></div>
+						 <?php }?>
+					</div>	
+				</div>	
+			</div>	
+		</div>	
+	</div>	
+</div>	
+<div class="dijitHidden" style="padding: 0px; margin: 0px;">
+	<?php if (!empty($this->detail)) {
+			foreach ($this->detail as $ind => $row) {
+		?>
+		<div id="service<?php echo $ind; ?>"><?php echo $row['service']; ?></div>
+		<div id="description<?php echo $ind; ?>"><?php echo $row['description']; ?></div>
+	<?php } ?>
+	<?php } ?>
+</div>
+<script type="text/javascript">
+dojo.ready(function(){
+	initiLizeData();
+	getbranchinfo();
+	cloneReceipt();
+	 setTimeout(function() {
+		setPrintOrientation('landscape',"A5",true);
+	}, 200);
+});	
+function cloneReceipt(){
+	loadingBlock();
+	setTimeout(function () {
+		 <?php if(AMOUNT_RECEIPT>1){?>
+		 	dojo.byId('printblog2').innerHTML = dojo.byId('divPrint1').innerHTML;
+		 <?php }?>
+        HideloadingBlock();
+    }, 500);
+}
+function initiLizeData(){
+	dojo.byId("bl_branch").innerHTML = '<?php echo preg_replace( "/\r|\n/", "", strip_tags(htmlspecialchars($this->row['branch_name'])));?>';
+	dojo.byId("lb_paymentmehtod").innerHTML =  '<?php echo preg_replace( "/\r|\n/", "", strip_tags(htmlspecialchars($this->row['payment_type'])));?>';
+	dojo.byId("lb_invoice").innerHTML =  '<?php echo preg_replace( "/\r|\n/", "", strip_tags(htmlspecialchars($this->row['external_invoice'])));?>';
+	dojo.byId("lb_paiddate").innerHTML  =  '<?php echo preg_replace( "/\r|\n/", "", strip_tags(htmlspecialchars(date($dateFormat,strtotime($this->row['date'])))));?>';
+	dojo.byId("lb_receipt_no").innerHTML =  '<?php echo preg_replace( "/\r|\n/", "", strip_tags(htmlspecialchars($this->row['invoice'])));?>';
+	dojo.byId("lb_bank").innerHTML =  '<?php echo preg_replace( "/\r|\n/", "", strip_tags(htmlspecialchars($this->row['bank_name'])));?>';
+	dojo.byId("lb_cheque").innerHTML =  '<?php echo preg_replace( "/\r|\n/", "", strip_tags(htmlspecialchars($this->row['cheque_no'])));?>';
+	dojo.byId("lb_note").innerHTML =  '<?php echo preg_replace( "/\r|\n/", "", strip_tags(htmlspecialchars($this->row['description'])));?>';
+	dojo.byId("lb_paynote").innerHTML =  '<?php echo preg_replace( "/\r|\n/", "", strip_tags(htmlspecialchars($this->row['title'])));?>';
+	dojo.byId("bl_supplier").innerHTML =  '<?php echo preg_replace( "/\r|\n/", "", strip_tags(htmlspecialchars($this->row['sup_name'])));?>';
+	dojo.byId("bl_suppliername").innerHTML =  '<?php echo preg_replace( "/\r|\n/", "", strip_tags(htmlspecialchars($this->row['sup_name'])));?>';
+	dojo.byId("bl_phone").innerHTML =  '<?php echo preg_replace( "/\r|\n/", "", strip_tags(htmlspecialchars($this->row['tel'])));?>';
+	dojo.byId("lb_receiver").innerHTML =  '<?php echo preg_replace( "/\r|\n/", "", strip_tags(htmlspecialchars($this->row['receiver'])));?>';
+	dojo.byId("lbl_printdate").innerHTML  =  '<?php echo preg_replace( "/\r|\n/", "", strip_tags(htmlspecialchars($printDate)));?>';
+	
+	temp='';
+	 temp='<table class="collape tablesorter"  align="center" style=" width: 100%; padding: 0px; margin: 0px; border-collapse: collapse; border: 1px solid #000; font-size:12px;font-family:Khmer OS Battambang !important;  " id="table">'
+		  temp+='<tr class="" style="text-align:center; height:25px;">';
+			  temp+='<td><strong>លរ/No.</div></strong></td>';
+			  temp+='<td><strong>ប្រភេទចំណាយ/Expense Type</strong></td>';
+			  temp+='<td><strong>ពណ៌នា/Description</strong></td>';
+			  temp+='<td><strong>តម្លៃ/Price</strong></td>';
+			  temp+='<td><strong>ចំនួន/Qty</strong></td>';
+			  temp+='<td><strong>ចំនួនប្រាក់/Amount</strong></td>';
+		  temp+='</tr>';
+	<?php if(!empty($this->detail)){
+			foreach($this->detail as $key=> $rs){
+	?>
+	
+	var thisItemName = $("#service<?php echo $key; ?>").html();
+	var description = $("#description<?php echo $key; ?>").html();
+	
+	  temp+='<tr class="" style="text-align:center; height:25px;">';
+		  temp+='<td><?php echo $key+1;?></td>';
+		  temp+='<td>'+thisItemName+'</td>';
+		  temp+='<td>'+description+'</td>';
+		  temp+='<td><?php echo number_format($rs['price'],2);?></td>';
+		  temp+='<td><?php echo $rs['qty'];?></td>';
+		  temp+='<td><?php echo number_format($rs['price']*$rs['qty'],2);?></td>';
+     temp+='</tr>';
+	<?php }
+		for($index=count($this->detail);$index<3;$index++){
+	?>
+	temp+='<tr class="" style="text-align:center; height:25px;">';
+	  temp+='<td><?php echo $index+1;?>&nbsp;</td>';
+	  temp+='<td></td>';
+	  temp+='<td></td>';
+	  temp+='<td></td>';
+	  temp+='<td></td>';
+	  temp+='<td></td>';
+temp+='</tr>';
+		
+	<?php }}?>
+	 temp+='<tr style="height: 22px;" align="center">';
+	 temp+='<td style="border:1px solid #fff !important;border-top:1px solid #000;" colspan="3"></td>';
+	 temp+='<td colspan="2" align="center" style="border-bottom:1px solid #fff !important;"><span style="font-family: Khmer OS Battambang;color:#000;font-size: 12px;">ចំណាយសរុប/Total Amount</td>';
+	 temp+='<td style="border:1px solid #000 !important;"><label id="lb_total_received"><strong>$ <?php echo number_format($this->row['total_amount'],2);?></strong></label></td>';
+	 temp+='</tr>';
+	dojo.byId('t_amountmoneytype').innerHTML = temp;
+}
+var url_getbranch = "<?php echo $this->url(array('module'=>'registrar','controller'=>'register','action'=>'getbranchinfo')); ?>";
+function getbranchinfo(){
+	branch_id = '<?php echo $this->row['branch_id'];?>';
+	if(branch_id != ""){
+		dojo.xhrPost({
+			url:url_getbranch,
+			content:{
+				'branch_id':branch_id,
+				},
+			handleAs:"json",
+			load: function(data){
+				dojo.byId('lbl_header').innerHTML=data;
+			},
+			error: function(err) {
+			}
+		});	
+	} 
+}
+</script>

@@ -1,0 +1,338 @@
+ <?php
+	$tr=Application_Form_FrmLanguages::getCurrentlanguage();
+	$this->headTitle($tr->translate("Dashboard Student Registration Management System"));
+	echo $this->headTitle();
+	
+	$parameterserch =  basename($_SERVER['REQUEST_URI']);
+	$urlsting = str_replace("&pages=".$this->currentPage,"",$parameterserch);
+	// echo $urlsting;exit();
+	$sign="?";
+	if (!empty($urlsting)){
+		$sign="&";
+	}
+	
+	$news = $this->news;
+	$notread = $this->notread;
+?>
+<link rel="stylesheet" href="<?php echo $this->baseUrl()."/"?>dashboard/plugins/morris/morris.css">
+<!-- Icons CSS -->
+<link href="<?php echo $this->baseUrl()."/"?>dashboard/css/icons.css" rel="stylesheet">
+<!-- Custom styles for this template -->
+<link href="<?php echo $this->baseUrl()."/"?>dashboard/css/style.css" rel="stylesheet">
+<style>
+.col-lg-6.capital-box {
+    min-height: 115px;
+}
+span.title-suppend {
+    display: block;
+    margin: 10px 0;
+    border-bottom: solid 2px #0f2a5b;
+    font-weight: bold;
+    color: #0f2a5b;
+}
+.profile_details .profile_view img.img-circle.img-responsive {
+    height: 125px;
+    width: 125px;
+}
+.blog-stu-droplist {
+    height: 290px;
+    overflow-y: auto;
+    width: 100%;
+    padding: 10px;
+}
+h4.brief {
+    font-size: 14px;
+}
+.profile_details .profile_view h2 {
+    font-size: 15px;
+}
+.profile_details .profile_view .left {
+    margin-top: 5px;
+}
+.media .profile_thumb {
+    padding: 9px 15px;
+}
+small.dashbd.badge.bg-green {
+    font-size: 10px;
+    line-height: 13px;
+    padding: 2px 6px;
+    position: absolute;
+    left: 12px;
+    top: 3px;
+    font-weight: 600;
+    z-index: 1;
+}
+article.media.event.unread {
+    background: #f2f1ff;
+    
+}
+article.announce {
+    margin-top: 3px;
+	padding: 10px;
+}
+a.pull-left.newsimage {
+    width: 100px;
+    height: 64px;
+}
+small.pull-right.showall-ann {
+    display: block;
+    padding: 5px 0;
+    margin: 0;
+    line-height: 24px;
+}
+.x_content.news-content {
+    height: 345px;
+    display: block;
+    overflow-y: auto;
+}
+ </style>
+<div id="page-wrapper">
+	<!-- Page content start -->
+	<div class="page-contentbar">
+		<!-- START PAGE CONTENT -->
+		<div id="page-right-content">
+			<div class="container">
+				 <div class="row">
+					<div class="col-lg-6">
+						<div class="x_panel">
+						<div class="card-box" style="    padding: 0;">
+							<div class="col-lg-12">
+								<div class="accounting-management text-center">
+									<div class="col-lg-6 capital-box" style="background:#17418e;; color: #fff">
+										<a title="<?php echo $tr->translate("FINDING_ALL_STUDENT_INFORMATION")?>" href="<?php echo $this->url(array('module'=>'home','controller'=>'searchstudentinfo','action'=>'index'), null, true);?>">
+											<span data-bind="text: txnRecorded"><h3><?php echo $tr->translate("FINDING_ALL_STUDENT_INFORMATION")?></h3></span>
+											<p class="month" style="text-align: center; margin: 0 auto;" data-bind="text: lang.lang.transactions_recorded">&nbsp;<?php echo $tr->translate("STUDENT_TOTAL")." : ".$this->rsamountstudent." ".$tr->translate("STUDENT_UNIT");?> &nbsp;<?php echo $tr->translate("NEW_STUDENT")." : ".$this->rsnewstudent." ".$tr->translate("STUDENT_UNIT");?></p>
+										</a>
+									</div>
+									<div class="col-lg-6 capital-box" style="background:#0077c5;; color: #fff">
+									<a title="<?php echo $tr->translate("RPT_STUDENT_DROPS");?>" href="<?php echo $this->url(array('module'=>'allreport','controller'=>'allstudent','action'=>'rpt-student-drop'), null, true);?>">
+										<span data-bind="text: txnRecorded"><h3><?php echo $tr->translate("STUDENT_DROP")." : ".$this->alltypedrop." ".$tr->translate("STUDENT_UNIT");?></h3></span>
+										<p class="month" style="text-align: center; margin: 0 auto;" data-bind="text: lang.lang.transactions_recorded">&nbsp;<?php echo $tr->translate("SUSPEND")." : ".$this->stu_suppend." ".$tr->translate("STUDENT_UNIT");?> &nbsp;<?php echo $tr->translate("DROPPED")." : ".$this->stu_stopped." ".$tr->translate("STUDENT_UNIT");?></p>
+									</a>
+									<br />
+								</div>
+								<div class="clearfix"></div>
+								</div>
+							</div>
+						</div>
+						<div class="card-box">
+							<form id="list" name="list" action="" dojoType="dijit.form.Form" method="GET">
+				          		<div class="x_panel searc-blog">
+				          			<div class="x_title">
+								    	<h2><i class="fa fa-search"></i> <?php echo $tr->translate("Special Discount")?></h2>
+										<span class="pull-right">
+										</span>
+										<div class="clearfix"></div>
+									</div>
+									<div class="x_content search">
+										<?php $frm = $this->frm_degree;?>
+										<div class="form-control">
+											<div class="search-list col-lg-4 col-md-4 col-sm-12 col-xs-12">
+											<?php echo $frm->getElement("advance_search");?>
+											</div>
+											<div class="search-list col-lg-3 col-md-3 col-sm-12 col-xs-12">
+											<?php echo $frm->getElement("dis_type");?>
+											</div>
+											<div class="search-list col-lg-3 col-md-3 col-sm-12 col-xs-12">
+											<?php echo $frm->getElement("status_type");?>
+											</div>
+											<div class="search-list col-lg-2 col-md-2 col-sm-12 col-xs-12">
+											<button iconclass="dijitIconSearch" name="search" dojoType="dijit.form.Button" showLabel="true" type="submit"><?php echo $tr->translate("SEARCH");?></button>
+											</div>
+											<div class="clearfix"></div>
+										</div>
+									</div>
+									<div class="x_content result">
+										<?php if (!empty($this->sepcialdiscount)) foreach ($this->sepcialdiscount as $key => $spdis){?>
+										<div class="col-md-12 col-sm-12 col-xs-12 profile_details">
+					                        <div class="well profile_view">
+					                          <div class="col-sm-12">
+					                            <h4 class="brief"><i><?php echo $spdis['status_type'];?></i></h4>
+					                            <div class="left col-xs-7">
+					                              <h2><?php echo $spdis['stu_name'];?></h2>
+					                              <p><strong><?php echo $tr->translate("REQUEST_NAME")?>: </strong> <?php echo $spdis['request_name'];?> </p>
+					                              <ul class="list-unstyled">
+					                                <li><i class="fa fa-phone"></i> <?php echo $tr->translate("PHONE")?> : <?php echo $spdis['phone'];?></li>
+					                                <li><i class="fa fa-pencil-square"></i> <?php echo $tr->translate("DISCOUNT_TYPE")?> : <?php echo $spdis['discount_type_title'];?></li>
+					                                <li><i class="fa fa-clock-o "></i> <?php echo $tr->translate("PERIOD")?>: <?php echo $spdis['duration']." ".$spdis['duration_type_title'];?></li>
+					                                <li><i class="fa fa-calendar"></i> <?php echo $tr->translate("EXPIRE_DATE")?>: <?php echo date("d/M/Y",strtotime($spdis['expired_date']));?></li>
+					                              </ul>
+					                            </div>
+					                            <div class="right col-xs-5 text-center">
+					                              <img src="<?php echo $this->baseUrl();?>/images/user.png" alt="" class="img-circle img-responsive">
+					                            </div>
+					                          </div>
+					                          <div class="col-xs-12 bottom text-center">
+					                            <div class="col-xs-12 col-sm-6 emphasis">
+					                            	<i class="fa fa-calendar"></i> <?php echo $tr->translate("ISSUE_DATE")?>: <?php echo date("d/M/Y",strtotime($spdis['create_date']));?>
+					                            </div>
+					                            <div class="col-xs-12 col-sm-6 emphasis">
+					                            &nbsp;
+					                            </div>
+					                          </div>
+					                        </div>
+					                      </div>
+					                     <?php }?>
+					                     <div class="clearfix"></div>
+          			
+          			 <?php 
+		             	if($this->countPages>1){ 
+							$statpage = $this->currentPage - 5;
+							$endpage = $this->currentPage + 5;
+						 	if ($this->currentPage<=5){
+						 		$statpage = 1;
+						 		$endpage =10;
+						 	}
+		                 if (!empty($this->countPages)){
+								 ?>
+								<div class="clearfix"></div>
+					            <div class="pagin text-center">
+					            	<nav aria-label="Page navigation example">
+									  <ul class="pagination">
+									  	<?php if($this->currentPage!=1){ ?>
+									  	<li class="page-item"><a class="page-link" href="<?php echo $urlsting.$sign."pages=1";?>"><?php echo $tr->translate('First');?></a></li>
+									    <li class="page-item"><a class="page-link" href="<?php echo $urlsting.$sign."pages=".$this->previousPage;?>"><?php echo $tr->translate('Previous');?></a></li>
+									    <?php }?>
+									     <?php  $i=0; for( $i=1; $i<=$this->countPages; $i++){?>
+					           			 	<?php if ($statpage<=$i && $endpage>=$i){?>
+									    <li class="page-item <?php if($i==$this->currentPage){ echo "active";}?>">
+									    	<a class="page-link" href="<?php echo $urlsting.$sign."pages=".$i;?>"><?php echo $i;?></a>
+									    </li>
+									    	<?php }
+										}?>
+										<?php if($this->countPages!= $this->currentPage){ ?>
+									    <li class="page-item"><a class="page-link" href="<?php echo $urlsting.$sign."pages=".$this->nextPage;?>"><?php echo $tr->translate('Next');?></a></li>
+									    <li class="page-item"><a class="page-link" href="<?php echo $urlsting.$sign."pages=".$this->countPages;?>"><?php echo $tr->translate('Last');?></a></li>
+									    <?php }?>
+									  </ul>
+									</nav>
+									<span><?php echo $tr->translate('Total Pages')." : ".$this->countPages." ".$tr->translate('Pages');?></span>
+					            </div>
+					       <?php }}?>
+									</div>
+				          		</div>
+			          		</form>
+						</div>
+						</div>
+					</div> <!-- end col -->	  
+					<div class="col-lg-6">
+						<?php if (!empty($this->studropnew)){?>
+						<div class="x_panel">
+							<div class="card-box" style=" margin: 0;    padding: 0;">
+								
+									<span class="title-suppend" data-bind="text: lang.lang.performance"><i class="fa fa-user-times" aria-hidden="true"></i> <?php echo $tr->translate("STUDENT_DROP_NEW");?>&nbsp;<?php echo count($this->studropnew)." ".$tr->translate("STUDENT_UNIT");?></span>
+									<div class="blog-stu-droplist">
+										<?php if (!empty($this->studropnew)) foreach ($this->studropnew as $drop){?>
+										<div class="profile_details" title="<?php echo $drop['stu_khname'];?> <?php echo $drop['stu_enname']." ".$drop['last_name'];?>">
+					                        <div class="well profile_view">
+					                          <div class="col-sm-12">
+					                          <?php 
+					                          $style='';
+					                          if (!empty($drop['branch_photo'])){
+					                          	if (file_exists(PUBLIC_PATH.'/images/'.$drop['branch_photo'])) {
+					                          		$style="background: url(/elt/trunk/public/images/".$drop['branch_photo'].");  background-repeat: no-repeat; background-size: 100%;";
+					                          	}
+					                          }
+					                          ?>
+					                          	<div class="bg-style-drop" style="<?php echo $style;?>"></div>
+					                            <h4 class="brief"><i><?php echo $drop['type_drop'];?><br /><small><?php echo $drop['branch_name'];?></small></i></h4>
+					                            <div class="left col-xs-7">
+					                              <h2><?php echo $drop['stu_khname'];?></h2>
+					                              <h2><?php echo $drop['stu_enname']." ".$drop['last_name'];?></h2>
+					                              <p><strong><?php echo $tr->translate("STUDENT_CODE")?>: </strong> <?php echo $drop['stu_code'];?> </p>
+					                              <ul class="list-unstyled">
+					                             	<li><i class="fa fa-graduation-cap"></i> <?php echo $tr->translate("ACADEMIC_YEAR")?>: <?php echo $drop['academic'];?></li>
+					                                <li><i class="fa fa-magic"></i> <?php echo $tr->translate("DEGREE")?>: <?php echo $drop['degree'];?></li>
+					                                <li><i class="fa fa-building"></i> <?php echo $tr->translate("GRADE")?>: <?php echo $drop['group_name'];?></li>
+					                                <li><i class="fa fa-phone"></i> <?php echo $tr->translate("PHONE")?>: <?php echo $drop['tel'];?></li>
+					                              </ul>
+					                            </div>
+					                            <div class="right col-xs-5 text-center">
+					                            	<?php $photo = $this->baseUrl()."/images/no-profile.png";
+						                       			if (!empty($drop['photo'])){
+						                       				if (file_exists(PUBLIC_PATH."/images/photo/".$drop['photo'])){
+						                       					$photo = $this->baseUrl().'/images/photo/'.$drop['photo'];
+						                       				}
+						                       			}
+						                       		?>
+					                              <img src="<?php echo $photo;?>" alt="" class="img-circle img-responsive">
+					                            </div>
+					                          </div>
+					                          <div class="col-xs-12 bottom text-center">
+					                            <div class="col-xs-12 col-sm-6 emphasis">
+					                              <?php echo $tr->translate("STOP_DATE");?> <?php echo date("d/M/Y",strtotime($drop['date_stop']));?>
+					                            </div>
+					                            <div class="col-xs-12 col-sm-6 emphasis">
+					                            	<?php 
+					                            	$sex="btn-primary";
+					                            	$sexTitle=$tr->translate("MALE");
+					                            	if ($drop['sex']==2){
+					                            		$sex="btn-danger";
+					                            		$sexTitle=$tr->translate("FEMALE");
+					                            	}?>
+					                              <button type="button" title="<?php echo $sexTitle;?>" class="btn <?php echo $sex;?> btn-xs"> <i class="fa fa-user">
+					                                </i>
+					                              </button>
+					                              <a class="btn btn-info btn-xs" href="<?php echo $this->baseUrl()."/home/searchstudentinfo/student-detail/id/".$drop['stu_id']."?droplink=true&drid=".$drop['id'];?>"><i class="fa fa-user"> </i> <?php echo $tr->translate("View Profile")?></a>
+					                            </div>
+					                          </div>
+					                        </div>
+				                      </div>
+				                      <?php }?>
+									</div>
+									
+								</div>
+							</div>
+							<?php }?>
+								
+								<div class="x_panel">
+				                  <div class="x_title">
+				                    <h2><i class="fa fa-bullhorn" aria-hidden="true"></i><small class="dashbd badge bg-green"><?php if ($notread>0){ echo $notread;}?></small> &nbsp;&nbsp;<?php echo $tr->translate("NEWS");?> 
+				                    </h2>
+				                    <small class="pull-right showall-ann"> <a href="<?php echo $this->baseUrl()."/home/index/allnews"?>">
+						                         <i class="fa fa-hand-o-right" aria-hidden="true"></i>
+						                          <strong><?php echo $tr->translate("SHOW_ALL");?></strong>
+						                        </a>
+						             </small>
+				                    <div class="clearfix"></div>
+				                  </div>
+				                  <div class="x_content news-content">
+				                  	 <?php if(!empty($news)){?>
+					                  		<?php foreach($news as $key=> $announ){
+				                          	$url = $this->url(array('module'=>'home','controller'=>'index','action'=>'news'), null, true)."/id/".$announ['id'];
+					                          	$images = $this->baseUrl().'/images/no-photo.png';
+					                          	if (!empty($announ['image_feature'])){
+					                          		if (file_exists(PUBLIC_PATH.'/images/news/'.$announ['image_feature'])) {
+					                          			$images = $this->baseUrl().'/images/news/'.$announ['image_feature'];
+					                          		}
+					                          	}
+				                          	?>
+				                    <article title="<?php echo $announ['title'];?>" class=" announce media event <?php if ($announ['is_read']!=1){ echo 'unread';}?>">
+				                      <a class="pull-left newsimage" href="<?php echo $url;?>">
+				                      	<img src="<?php echo $images;?>" />
+				                      </a>
+				                      <div class="media-body">
+				                        <a class="title" href="<?php echo $url;?>"><?php echo $announ['title'];?></a><br />
+				                        <small class="red"><?php echo date("d/M/Y",strtotime($announ['publish_date']));?></small>
+				                        <p><?php echo  mb_substr(strip_tags($announ['description']),0,70, "utf-8")."...";?></p>
+				                      </div>
+				                    </article>
+				                    	<?php }?>
+				                    	<div class="clearfix"></div>
+				                    <?php }?>
+				                  </div>
+				                </div>
+					</div> <!-- end col -->	  
+				</div> <!-- end row -->
+                 <div class="row-fluid">
+					<div style="margin-top: 10px; margin-left: 0;" align="center">
+						<p>© 2018<span data-bind="text: lang.lang.all_rights_reserved"><a href="http://www.cam-app.com" target="_blank" > Cam App Teachnology</a>. All rights reserved.</span></p>
+					</div>	
+				</div>       
+			</div>
+		</div>
+		<!-- END PAGE CONTENT -->
+	</div>
+
+</div>
+

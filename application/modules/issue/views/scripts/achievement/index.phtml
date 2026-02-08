@@ -1,0 +1,212 @@
+<?php
+	$tr = Application_Form_FrmLanguages::getCurrentlanguage();
+	echo $this->headTitle($tr->translate("STUDENT_ACHIEVEMENT"));
+	$frm =  $this->frm;
+	
+	$urlEdit = $this->baseUrl()."/issue/achievement/edit/id/";
+	$urlAchievementLetter = $this->baseUrl()."/allreport/score/achievement-letter/id/";
+?>
+<div class="card pb-10 pt-10 pl-10 pr-10">
+	<div class="card-content collapse show">
+		<div class="card-box">
+       		<div class="col-sm-12 border-botom">
+		    	<div class="col-sm-8 pd-0">
+	    			<h4 class="m-b-0"><i class="material-icons-outlined">emoji_events</i>&nbsp;&nbsp;&nbsp;<?php echo $tr->translate('STUDENT_ACHIEVEMENT');?></h4>
+    			</div>
+    			<div class="col-sm-4 text-right">
+    			</div>
+    		</div>
+    	</div>
+		<div class="card-box">
+			<form id="list" name="list" action="" dojoType="dijit.form.Form" method="post">
+				<div class="form-group">
+					<div class="col-md-2 col-sm-2 col-xs-12">
+                   		<?php echo $frm->getElement("adv_search");?>
+                   </div>
+                   <div class="col-md-2 col-sm-2 col-xs-12">
+                   		<?php echo $frm->getElement("branch_id");?>
+                   </div>
+				   <div class="col-md-2 col-sm-2 col-xs-12">
+                   		<?php echo $frm->getElement("academic_year");?>
+                   </div>
+                   <div class="col-md-2 col-sm-2 col-xs-12">
+                   		<input id="group" />
+                   </div>
+				   <div class="col-md-2 col-sm-2 col-xs-12">
+                   		<?php echo $frm->getElement('status');?>
+                   </div>
+			   </div>
+			   <div class="form-group">
+                   <div class="col-md-2 col-sm-2 col-xs-12">
+                   		<?php echo $frm->getElement('start_date');?>
+                   </div>
+				   <div class="col-md-2 col-sm-2 col-xs-12">
+                   		<?php echo $frm->getElement('end_date');?>
+                   </div>
+                   <div class="col-md-1 col-sm-1 col-xs-12">
+                   		<button class="button-class button-primary" iconClass="glyphicon glyphicon-search" dojoType="dijit.form.Button" showLabel="true" type="submit"><?php echo $tr->translate("SEARCH");?></button>
+						<input type="hidden" name="recordcopy" id="recordcopy" dojoType="dijit.form.TextBox" />
+                   </div>
+				   <div class="col-md-1 col-sm-1 col-xs-12">
+						<button dojoType="dijit.form.Button" id="printselected" class="button-class button-warning" iconClass="glyphicon glyphicon-print" type="button" onclick="getSelectedValues();">
+							<?php echo $tr->translate('Print Achievement') ?>
+						</button>
+					</div>
+                </div>
+			</form>
+		</div>
+		<div class="card-box">
+			<?php echo $this->list;?>
+		</div>
+	</div>
+</div>
+<script src="<?php echo $this->baseUrl();?>/js/help.js"></script>
+<script src="<?php echo $this->baseUrl();?>/admin/js/extra-plug.js"></script>
+<script type="text/javascript">
+	dojo.require("dojo.data.ItemFileWriteStore");  
+	dojo.require("dijit.form.DateTextBox");
+
+var group_store  = getDataStorefromJSON('id','name',<?php print_r(Zend_Json::encode(array()));?> );
+dojo.ready(function(){
+	new dijit.form.FilteringSelect({
+		store: group_store,
+	    queryExpr: "*${0}*",
+		autoComplete: false,                     
+		required: true,                      
+	    id: "group",
+	    name: "group",  
+	    class: 'fullside', 
+	    readonly:false,
+	    required:false,
+	    placeHolder:"<?php echo $tr->translate("SELECT_GROUP");?>",          
+	    onChange: function() {  
+	    }
+	}, "group");
+	var branch_id = dijit.byId('branch_id');
+	 branch_id.on('change', function(evt) {
+		getAllGroupByBranch();
+	});
+	var academic_year = dijit.byId('academic_year');
+	academic_year.on('change', function(evt) {
+		getAllGroupByBranch();
+	});
+	getAllGroupByBranch();
+}); 
+var oldBranch='<?php echo $this->search['branch_id'];?>';
+
+url_getgroup = '<?php echo $this->url(array('module'=>'foundation','controller'=>'group','action'=>'getallgroup'));?>';
+function getAllGroupByBranch(){
+	dijit.byId('group').reset();
+	branch_id = dijit.byId('branch_id').get('value');
+	if(branch_id=='' || branch_id==-1){
+		var group_store  = getDataStorefromJSON('id','name',<?php print_r(Zend_Json::encode(array()));?> );
+		dijit.byId('group').set('store',group_store);  
+		dijit.byId('branch_id').focus();
+		return false;
+	}
+	academic_year = dijit.byId('academic_year').get('value');
+	
+	dojo.xhrPost({
+		url: url_getgroup,
+		content:{
+			'branch_id':branch_id,
+			'academic_year':academic_year,
+			'noaddnew':1,
+			'forfilter':1
+			},
+		handleAs:"json",
+		load: function(data) {
+			group_store  = getDataStorefromJSON('id','name', data);
+			dijit.byId('group').set('store',group_store);   
+			if(oldBranch == branch_id ){
+		    	 dijit.byId('group').set('value','<?php echo $this->search['group'];?>'); 
+		    }
+		},
+		error: function(err) {
+		}
+	});
+}
+
+	var row=0;
+	var url="";
+	$(function(){
+		$.contextMenu({
+			selector: '.context-menu-one', 
+			selectableSubMenu:true,
+			callback: function(key, options) {
+				var newPageTitle="";
+				var actionType=1;
+				var m = "clicked: " + key;
+				if(key=="edit"){
+					url='<?php echo $urlEdit;?>';
+					actionType=2;
+				}else if(key=="achievementLetter"){
+					url='<?php echo $urlAchievementLetter;?>';
+					newPageTitle="<?php echo $tr->translate("achievementLetter");?>";
+				}else if(key=="download"){
+					downloadImage();
+					actionType=3;
+				}
+
+				// if(actionType==1){
+				// 	addTab(newPageTitle,url+row+'?inFrame=true');
+				// }else if(actionType==2){
+				// 	gotoAction();
+				// }
+
+				gotoAction();
+			},
+			items: {
+				"edit": {name: "<?php echo $tr->translate("EDIT");?>", icon: "edit", accesskey: "e"},
+				
+				"achievementLetter": {name: "<?php echo $tr->translate("PREVIEW");?>", icon: "fa-picture-o",},
+				"download": {name: "<?php echo $tr->translate("DOWNLOAD");?>", icon: "fa-download"},
+			}
+		});
+	});
+	function setrowdata(index){
+		row = index;
+	}
+	var recordid ='';
+	function gotoAction(){
+		window.open(url+row,'_blank');
+	}
+	
+	function downloadImage(){
+		loadingBlock();
+		url = "<?php echo $this->baseUrl();?>/allreport/score/ajaxachievementletter";
+		var contentDataCondiction = { 
+					'value': row,
+			};
+		downloadAsImage(url,contentDataCondiction);
+		setTimeout(function() {
+			HideloadingBlock();
+		}, 700);
+	}
+
+	function getSelectedValues() {
+		let checkboxes = document.querySelectorAll('.del:checked'); // Select checked checkboxes
+		let values = [];
+		
+		checkboxes.forEach((checkbox) => {
+			values.push(checkbox.value); // Get value of each checked checkbox
+		});
+		select_id = values.join(",");
+		
+		if(select_id != '') {
+			//addTab("<?php echo $tr->translate("achievementLetter");?>",'<?php echo $urlAchievementLetter; ?>'+ select_id+'?inFrame=true');
+			window.location.href = '<?php echo $urlAchievementLetter;?>'+select_id;
+  		} else if (select_id == '') {
+  			alert('Please select record you want to print');
+  			return false;
+  		}
+	}
+
+	function checkall(){
+		if ($('#check_all').is(':checked')) {
+			$(".del").prop('checked', true);
+		}else{
+			$(".del").prop('checked', false);
+		}
+	}
+</script>

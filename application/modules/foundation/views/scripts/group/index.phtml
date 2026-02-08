@@ -1,0 +1,344 @@
+<?php
+	$tr = Application_Form_FrmLanguages::getCurrentlanguage();
+	echo $this->headTitle($tr->translate('GROUP'));
+	$formList = new Application_Form_Frmtable();	
+    $frm =  $this->form_search;
+    $urlCopy = $this->baseUrl()."/foundation/group/copy/id/";
+    $urlEdit = $this->baseUrl()."/foundation/group/edit/id/";
+     $urlDelete = $this->baseUrl()."/foundation/group/delete/id/";
+    $urlStudentGroup = $this->baseUrl()."/allreport/allstudent/rpt-student-group/id/";
+    $urlAttList = $this->baseUrl()."/allreport/studentattendance/rpt-att-list/id/";
+    $urlTotalAtt = $this->baseUrl()."/allreport/studentattendance/rpt-totalattendance/id/";
+    $urlStudentList = $this->baseUrl()."/allreport/allstudent/rpt-student-list/id/";
+    $urlAssesment = $this->baseUrl()."/allreport/score/rpt-assessmentterm/id/";
+    $urlscoresemester = $this->baseUrl()."/allreport/score/rpt-resultbysemester/id/";
+    $urloutstanding1 = $this->baseUrl()."/allreport/score/semester-outstanding-student/id/";
+    $urlscoreyear = $this->baseUrl()."/allreport/score/rpt-resultbyyear/id/";
+    $urloutstandingyear = $this->baseUrl()."/allreport/score/yearly-outstanding-student/id/";//
+?>
+<div class="card pb-10 pt-10 pl-10 pr-10">
+	<div class="card-content collapse show">
+		<div class="card-box">
+       		<div class="col-sm-12 border-botom">
+		    	<div class="col-sm-8 pd-0">
+	    			<h4 class="m-b-0"><i class="fa fa-server " aria-hidden="true"></i>&nbsp;&nbsp;&nbsp;<?php echo $tr->translate('GROUP_INFO');?></h4>
+    			</div>
+    			<div class="col-sm-4 text-right">
+    			</div>
+    		</div>
+    	</div>
+		<div class="card-box">
+			<form id="list" name="list" action="<?php echo $this->url(array('module'=>'foundation','controller'=>'group','action'=>'index')); ?>" dojoType="dijit.form.Form" method="post">
+				<div class="form-group">
+                   <div class="col-md-2 col-sm-3 col-xs-12">
+                   		<?php echo $frm->getElement("adv_search");?>
+                   </div>
+                   <div class="col-md-2 col-sm-3 col-xs-12">
+                   		<?php echo $frm->getElement("branch_id");?>
+                   </div>
+                   <div class="col-md-2 col-sm-2 col-xs-12">
+                  		<?php echo $frm->getElement("academic_year");?>
+                   </div>
+                   <div class="col-md-2 col-sm-2 col-xs-12">
+                   		<?php echo $frm->getElement("degree");?>
+                   </div>
+                   <div class="col-md-2 col-sm-2 col-xs-12">
+                   		<input id="grade" />
+                   </div>
+				   <div class="col-md-2 col-sm-3 col-xs-12">
+				 		<input id="partTimeList" />
+                	</div>
+                </div>
+                <div class="form-group">
+                	<div class="col-md-2 col-sm-3 col-xs-12">
+                		<?php echo $frm->getElement("teacher");?>
+                	</div>
+                	<div class="col-md-2 col-sm-3 col-xs-12">
+                		<?php echo $frm->getElement("is_pass");?>
+                	</div>
+                	<div class="col-md-2 col-sm-2 col-xs-12">
+                		<?php echo $frm->getElement("status");?>
+                	</div>
+                	<div class="col-md-2 col-sm-2 col-xs-12">
+                		<input type="hidden" name="recordcopy" id="recordcopy" dojoType="dijit.form.TextBox" />	
+	                   	<button class="button-class button-primary" iconClass="glyphicon glyphicon-search" dojoType="dijit.form.Button" showLabel="true" type="submit"><?php echo $tr->translate("SEARCH");?></button>
+                	</div>
+                </div>
+			</form>
+		</div>
+		<div class="card-box">
+			<?php echo $this->list?>
+		</div>
+	</div>
+</div>
+
+<div class="dijitHidden">
+	<div data-dojo-type="dijit.Dialog" data-dojo-props="title:'<?php echo $tr->translate('DELETE_RECORD_TITLE');?>'"  id="deleteForm" style="width:350px;" >
+		<div class="card pb-10 pt-10 pl-10 pr-10">
+			<form id="voidFormInfo"  name="data" action="" dojoType="dijit.form.Form" method="post">
+				<div class="card-box">
+					<div class="form-group">
+						<div class="col-md-12 col-sm-12 col-xs-12" id="contentInfoPop">
+						</div>
+						<input type="hidden" dojoType="dijit.form.TextBox" name="id" id="id" />
+					</div>
+					<div class="form-group">
+						<div class="col-sm-12 border-top mt-20 ptb-10 text-center">
+							<p class="message-title text-primary"><?php echo $tr->translate('DO_YOU_WANT_TO_DELETE_THIS_RECORD');?></p>
+														
+							<input onclick="dijit.byId('deleteForm').hide();" type="button" value="1" label="<?php echo $tr->translate('NO');?>" id="busyButton" dojoType="dijit.form.Button" class="button-class button-danger" iconClass="glyphicon glyphicon-remove" /> 
+							<input onclick="deleteGroup();" type="button" value="1" label="<?php echo $tr->translate('CONFIRM');?>" id="okButton" dojoType="dijit.form.Button" class="button-class button-primary" iconClass="glyphicon glyphicon-ok" /> 
+						</div>
+					</div>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
+
+<script src="<?php echo $this->baseUrl();?>/js/help.js"  type="text/javascript"></script>
+<script type="text/javascript">
+dojo.require("dojo.data.ItemFileWriteStore"); 
+dojo.ready(function(){
+
+	new dijit.form.FilteringSelect({
+		queryExpr: "*${0}*",
+		autoComplete: false, 
+		required: false,
+		id: "grade",
+		name: "grade",           
+		class: 'fullside',  
+		placeHolder:"<?php echo $tr->translate("SELECT_GRADE");?>",          
+		onChange: function() {  
+		}
+	}, "grade");
+
+	new dijit.form.FilteringSelect({
+		autoComplete: false,
+		queryExpr:'*${0}*',                        
+		required: false,
+		id: "partTimeList",
+		name: "partTimeList",           
+		class: "fullside", 
+		placeHolder:"<?php echo $tr->translate('SELECT_PARTTIME_SHIFT');?>",          
+		onChange: function() {  
+		}
+	}, "partTimeList");
+
+	var branch_id = dijit.byId('branch_id');
+	 branch_id.on('change', function(evt) {
+  });
+
+  var degree = dijit.byId('degree');
+	 degree.on('change', function(evt) {
+		 getPartTimeListByDregree();
+    });
+
+	getallGrade();
+	getPartTimeListByDregree();
+	<?php if (!empty($this->search['academic_year'])){?>
+		dijit.byId('academic_year').set('value',<?php echo $this->search['academic_year'];?>);
+	<?php }?>
+});
+
+var urlGetParttime = '<?php echo $this->url(array('module'=>'global','controller'=>'parttimelist','action'=>'get-parttime')); ?>';
+function getPartTimeListByDregree(){
+	degree = dijit.byId('degree').get('value');
+	branchId = dijit.byId('branch_id').get('value');
+	if(degree==''){
+		return false;
+	}
+	dojo.xhrPost({
+		url: urlGetParttime,
+		content:{
+			'degree':degree,
+			'branchId':branchId,
+			},
+		handleAs:"json",
+		load: function(data) {
+			partTimeListStore  = getDataStorefromJSON('id','name', data);
+			dijit.byId('partTimeList').set('store',partTimeListStore);  
+			<?php if (!empty($this->search['partTimeList'])){?>
+				dijit.byId('partTimeList').set('value',<?php echo $this->search['partTimeList'];?>);
+			<?php }?>
+		},
+		error: function(err) {
+		}
+	});
+}
+
+var url_dept = '<?php echo $this->url(array('module'=>'global','controller'=>'grade','action'=>'get-grade')); ?>';
+function getallGrade(){
+	dept_id = dijit.byId('degree').get('value');
+	if(dept_id=='' || dept_id==-1){return false;}
+		dojo.xhrPost({
+			url:url_dept,
+			content:{
+				'dept_id':dept_id,
+				'noaddnew':1
+				},
+			handleAs:"json",
+			load: function(data) {
+				dijit.byId('grade').attr('value','');
+				grade_store  = getDataStorefromJSON('id','name', data);
+			    dijit.byId('grade').set('store',grade_store); 
+			    dijit.byId('grade').attr('value','<?php echo $this->adv_search['grade']?>');    
+			},
+			error: function(err) {
+			}
+		});
+}
+
+	function copyRecord(url){
+		 id = dijit.byId('recordcopy').get('value');
+		 if(id!=''){
+			window.location.href = url+'/id/'+id;
+		 }else{
+			alert('Please select record you want to copy');
+			return false;
+		 }
+	}
+	function setValue(index){
+		var recordcopy = $('input[name=copy]:checked').val();
+		dijit.byId('recordcopy').attr('value',recordcopy);
+	}
+	var row=0;
+	var url="";
+	$(function(){
+		$.contextMenu({
+			selector: '.context-menu-one', 
+			selectableSubMenu:true,
+			callback: function(key, options) {
+				var newPageTitle="";
+				var actionType=1;
+				var m = "clicked: " + key;
+				if(key=="edit"){
+					url='<?php echo $urlEdit;?>';
+					actionType=2;
+				}else if(key=="copy"){
+					url='<?php echo $urlCopy;?>';
+					actionType=2;
+				}else if(key=="delete"){
+					getGroupInfo();
+					url='<?php echo $urlDelete;?>';
+					actionType=2;
+				}else if(key=="rpt-student-group"){
+					url='<?php echo $urlStudentGroup;?>';
+					newPageTitle="<?php echo $tr->translate("STUDENT_LIST_REPORT");?>";
+				}else if(key=="rpt-att-list"){
+					url='<?php echo $urlAttList;?>';
+					newPageTitle="<?php echo $tr->translate("STUDENT_ATTENDANT_LIST");?>";
+				}else if(key=="rpt-totalattendance"){
+					url='<?php echo $urlTotalAtt;?>';
+					newPageTitle="<?php echo $tr->translate("TOTAL_ATTENDANT_LIST");?>";
+				}else if(key=="rpt-student-list"){
+					url='<?php echo $urlStudentList;?>';
+					newPageTitle="<?php echo $tr->translate("STUDENT_LIST");?>";
+				}
+
+				if(actionType==1){
+					addTab(newPageTitle,url+row+'?inFrame=true');
+				}else if(key!="delete"){
+					gotoAction();
+				}
+			},
+			items: {
+				"edit": {name: "<?php echo $tr->translate("EDIT");?>", icon: "edit", accesskey: "e"},
+				"copy": {name: "<?php echo $tr->translate("COPY");?>", icon: "copy"},
+				"delete": {name: "<?php echo $tr->translate("DELETE");?>", icon: "delete"},
+				"list": {
+	                "name": "<?php echo $tr->translate("LIST");?>", 
+	                icon: "fa-solid fa-clipboard-list",
+	                "items": {
+	                	"rpt-student-group": {name: "<?php echo $tr->translate("STUDENT_LIST_REPORT");?>", icon: "fa-solid fa-clipboard-list",},
+	    				"rpt-student-list": {name: "<?php echo $tr->translate("STUDENT_LIST");?>", icon: "fa-solid fa-clipboard-list"},
+	    				"rpt-att-list": {name: "<?php echo $tr->translate("STUDENT_ATTENDANT_LIST");?>", icon: "fa-solid fa-clipboard-list"},
+	    				"rpt-totalattendance": {name: "<?php echo $tr->translate("TOTAL_ATTENDANT_LIST");?>", icon: "fa-solid fa-clipboard-list"},
+	                }
+	            },
+			}
+		});
+	});
+	function setrowdata(index){
+		row = index;
+	}
+	var recordid ='';
+	function gotoAction(){
+		window.open(url+row,'_blank');
+	}
+
+	function triggerDelete(id) {
+		row = id;
+		getGroupInfo();
+	}
+
+
+	var urlGroupInfo = '<?php echo $this->url(array('module'=>'foundation','controller'=>'group','action'=>'get-group-info')); ?>';
+	function getGroupInfo(){
+		
+		dojo.xhrPost({
+			url: urlGroupInfo,
+			content:{
+				'groupId':row,
+				},
+			handleAs:"json",
+			load: function(data) {
+				if(data==0){
+
+					alert("<?php echo $tr->translate('Cannot delete, it is already used!'); ?>");
+					
+				}else{
+
+					dijit.byId('deleteForm').show();
+
+					dijit.byId('id').set('value',row);
+					var strinfo="";
+					if(data!=""){
+						strinfo+='<small >'+data.branchName+'</small>';
+						strinfo+='<h3 class="text-primary">'+data.group_code+'</h3>';
+						strinfo+='<p><?php echo $tr->translate("DEGREE");?>: <strong>'+data.degreeName+'</strong></p>';
+						strinfo+='<p><?php echo $tr->translate("GRADE");?>: <strong>'+data.gradeName+'</strong></p>';
+						strinfo+='<p><?php echo $tr->translate("STATUS");?>: <strong>'+data.processingRecord+'</strong></p>';
+						strinfo+='<p><?php echo $tr->translate("CREATE_DATE");?>: <strong>'+data.date+'</strong></p>';
+					}
+					$( "#contentInfoPop" ).html( strinfo );
+
+				}
+				
+				
+			},
+			error: function(err) {
+			}
+		});
+	}
+
+
+	var deleteTmpUrl = '<?php echo $this->url(array('module'=>'foundation','controller'=>'group','action'=>'delete')); ?>';
+	function deleteGroup(){
+		if(dijit.byId('voidFormInfo').validate()){
+			
+			loadingBlock();
+			dojo.xhrPost({
+				url: deleteTmpUrl,
+				form: dojo.byId("voidFormInfo"),
+				handleAs:"json",
+				load: function(data){
+					dijit.byId('voidFormInfo').reset();
+					dijit.byId('deleteForm').hide();
+					if(data==1){
+						alert("<?php echo $tr->translate("DELETE_SUCCESS");?>");
+					}else {
+						alert("<?php echo $tr->translate("DELETE_FAILED");?>");
+					}
+					location.reload();
+					HideloadingBlock();
+				},
+				error: function(err){
+					dijit.byId('voidFormInfo').reset();
+					dijit.byId('deleteForm').hide();
+					HideloadingBlock();
+				}
+			});
+		}
+	}
+</script> 

@@ -1,0 +1,536 @@
+<?php
+	$tr = Application_Form_FrmLanguages::getCurrentlanguage();
+	$reportTitle = $tr->translate('REPORT_LIST_STUDENTS');
+	$this->headTitle($reportTitle); 
+	echo $this->headTitle(''); 
+	$frm =  $this->form_search;
+	
+	$dateFormat ="d/m/Y";
+	$dateFormatExport ="d/M/Y";
+?>
+<style>
+.hover:hover{ background:#ccc;}
+.line-height{line-height:20px !important;}
+.table-width{width:40% !important}
+.hover:hover{ background:#ccc;}
+table.content-data tr.style-head,
+table.content-data-main tr.style-head,
+table.tb-footer tr.style-head {
+   font-weight: bold !important;
+}
+</style>
+<div class="layout-wrapper-report">
+	<div id="mainContent" class="main-content-report">
+		<div class="report-preview">
+			<?php echo $this->controlReport?>
+			<div id="divPrint" class="">
+				<link rel="stylesheet" href="<?php echo $this->baseUrl();?>/admin/build/css/report-style.css">
+				<link rel="stylesheet" href="<?php echo $this->baseUrl();?>/admin/build/css/report-style-screen.css">
+						
+				<style>
+							:root{
+							  --sheet-scale:1;
+							  --header-height:30mm;
+							  --footer-height:12mm;
+							  --content-pad:8mm;
+							}
+							*{box-sizing:border-box}
+							body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial;background:#f4f6f8;color:#111}
+							select,input[type=number],input[type=text]{padding:6px;border-radius:6px;border:1px solid #dfe6ee;background:#fff}
+							.btn{padding:6px 10px;border-radius:8px;border:1px solid #d0d7df;background:#fff;cursor:pointer}
+							.btn.primary{background:#2563eb;color:#fff;border-color:#2563eb}
+
+							.viewer{display:flex;justify-content:center;padding:22px;flex-wrap:wrap;gap:20px}
+							.sheet{background:#fff;box-shadow:0 8px 24px rgba(12,20,40,.08);transform:scale(var(--sheet-scale));transform-origin:top center;position:relative;overflow:hidden;display:none}
+							.sheet.a4.portrait{width:210mm;height:297mm}
+							.sheet.a4.landscape{width:297mm;height:210mm}
+
+							.sheet.active{display:block}
+
+							.page-header{
+								position:absolute;top:0;
+								left:0;right:0; 
+								padding: 5px; 
+								display:flex;
+								justify-content:space-between;
+								align-items:center;   
+								border-bottom: none; 
+								margin: 0 !important;
+								min-height: 50px;
+							}
+							.page-footer{
+								position:absolute;bottom:0;left:0;
+								right:0;
+								height:var(--footer-height);
+								padding:6px 10mm;
+								
+								display:flex;
+								justify-content:space-between;
+								align-items:center;font-size:12px;
+							}
+							.page-content{position:absolute;top:var(--header-height);bottom:var(--footer-height);left:0;right:0;padding:var(--content-pad);overflow:hidden}
+
+							h1{font-size:16px;margin:0}
+							.meta{font-size:12px;color:#6b7280}
+
+							table{
+								width:100%;
+								border-collapse:collapse;
+								font-size:12px;
+								font-family: 'Times New Roman', 'Khmer OS Battambang';
+							}
+							@media print{
+							  .toolbar{display:none}
+							  .viewer{padding:0;display:block}
+							  .sheet{box-shadow:none;margin:0;transform:none;page-break-after:always;display:block !important}
+							}
+							
+							.signFooter table td {
+								text-align: center;
+							}
+							@media print {
+								<?php if(!empty($this->printFormat)){ echo $this->printFormat; } ?>
+							}
+						  </style>
+				<div id="viewer" class="viewer ">
+				</div>	
+			</div>
+			<!-- templates -->
+			<template id="headerTpl">
+				<div class="page-header">
+					<div class="text-h12px text-size-12px" style="width:100%;text-align: center;">
+						<span class="text-h12px text-size-12px text-bold" style="font-family: 'Times New Roman','Khmer OS Battambang'; "><?php echo $reportTitle; ?></span><br />
+						<div id="lblBranchId" class="lblBranchId"></div>
+						<span class="text-h12px text-size-12px" style="font-family: 'Times New Roman','Khmer OS Battambang'; "><?php if(!empty($this->search['start_date'])){?><?php echo date($dateFormat,strtotime($this->search['start_date']));?> <?php echo $tr->translate("TO");?> <?php echo date($dateFormat,strtotime($this->search['end_date']));}?> </span>
+					</div>
+				</div>
+			</template>
+			<template id="footerTpl">
+				<div class="page-footer">
+				  <div></div>
+				  <div><span data-bind="page">1</span> / <span data-bind="pages">1</span></div>
+				</div>
+			</template>
+		</div>	
+	</div>
+	<div class="right-panel-report" id="rightPanel">
+		<div class="card-box">
+			<div class="card-search-head col-sm-12 border-botom">
+				<div class="col-sm-6 text-left pd-0">
+					<h4 class="m-b-0">
+						<?php echo $tr->translate("SEARCH");?> 
+						<i class="fa fa-search "></i> 
+					</h4>
+				</div>
+				<div class="col-sm-6 text-right pd-0">
+					<button onclick="closeRightPanel()" title="<?php echo $tr->translate("CLOSED");?> " class="btn-close">
+						<i class="fa-solid fa-xmark"></i>
+					</button>
+				</div>
+			</div>
+			<form  id='foundation_class' action="<?php echo $this->url(array('module'=>'allreport','controller'=>'allstudent','action'=>'rpt-student')); ?>" dojoType="dijit.form.Form" method="post" enctype="application/x-www-form-urlencoded">
+				<div class="form-group">
+					<div class="col-md-12 col-sm-12 col-xs-12">
+						<?php echo $frm->getElement("title");?>
+					</div>
+					<div class="col-md-12 col-sm-12 col-xs-12">
+						<?php echo $frm->getElement("branch_id");?>
+					</div>
+					<div class="col-md-12 col-sm-12 col-xs-12">
+						<input id="study_year" />
+					</div>
+					<div class="col-md-12 col-sm-12 col-xs-12">
+							<input id="group" />
+						</div>
+					<div class="col-md-12 col-sm-12 col-xs-12">
+						<?php echo $frm->getElement("degree");?>
+					</div>
+					<div class="col-md-12 col-sm-12 col-xs-12">
+						<input id="grade" />
+						<?php //echo $frm->getElement("grade");?>
+					</div>
+					<div class="col-md-12 col-sm-12 col-xs-12">
+						<input id="session" />
+						<?php //echo $frm->getElement("session");?>
+					</div>
+					<div class="col-md-12 col-sm-12 col-xs-12">
+						<?php echo $frm->getElement("study_type");?>
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="col-md-6 col-sm-6 col-xs-12">
+						<?php echo $frm->getElement("start_date");?>
+					</div>
+					<div class="col-md-6 col-sm-6 col-xs-12">
+						<?php echo $frm->getElement("end_date");?>
+					</div>
+				</div>
+					<div class="col-md-12 col-sm-12 col-xs-12">
+						<button class="button-class button-primary fullside" iconClass="glyphicon glyphicon-search" dojoType="dijit.form.Button" showLabel="true" name="search"  type="submit"><?php echo $tr->translate("SEARCH");?></button>
+					</div>
+				</div>
+			</form>
+		</div>	
+	</div>	
+</div>	
+
+<script src="<?php echo $this->baseUrl();?>/js/help.js"></script>
+<script src="<?php echo $this->baseUrl();?>/admin/js/global.js"  type="text/javascript"></script>
+<script type="text/javascript">
+
+dojo.require("dojo.data.ItemFileWriteStore"); 
+
+var academic_store= getDataStorefromJSON('id','name',<?php print_r(Zend_Json::encode(array()));?> );
+var group_store  = getDataStorefromJSON('id','name',<?php print_r(Zend_Json::encode(array()));?> );
+dojo.ready(function(){
+	new dijit.form.FilteringSelect({
+		queryExpr: "*${0}*",
+		autoComplete: false,                     
+		required: false,                        
+		id: "grade",
+		name: "grade",  
+		class: 'fullside',  
+		placeHolder:"<?php echo $tr->translate("SELECT_GRADE");?>",          
+		onChange: function() {  
+
+		}
+	}, "grade");
+	
+	new dijit.form.FilteringSelect({
+		queryExpr: "*${0}*",
+		autoComplete: false,                     
+		required: false,                        
+		id: "session",
+		name: "session",  
+		class: 'fullside',  
+		placeHolder:"<?php echo $tr->translate("SELECT_SESSION");?>",          
+		onChange: function() {  
+
+		}
+	}, "session");
+	
+	new dijit.form.FilteringSelect({
+		store: academic_store,
+		queryExpr: "*${0}*",
+		autoComplete: false,                     
+		required: false,                     
+		id: "study_year",
+		name: "study_year",
+		class: "fullside", 		
+		placeHolder:"<?php echo $tr->translate("SELECT_ACADEMIC_YEAR");?>",          
+		onChange: function() {  
+			academic_year = dijit.byId('study_year').get('value');
+		}
+	}, "study_year");
+	new dijit.form.FilteringSelect({
+		store: group_store,
+	    queryExpr: "*${0}*",
+		autoComplete: false,                     
+		required: true,                      
+	    id: "group",
+	    name: "group",  
+	    class: 'fullside', 
+	    readonly:false,
+	    required:false,
+	    placeHolder:"<?php echo $tr->translate("SELECT_GROUP");?>",          
+	    onChange: function() {  
+		    
+	    }
+	}, "group");
+	
+	 var branch_id = dijit.byId('branch_id');
+	 branch_id.on('change', function(evt) {
+		 getAllAcademicByBranch();
+		 getAllGroupByBranch();
+    });
+	
+	var degree = dijit.byId('degree');
+	degree.on('change', function(evt) {
+		getAllSession();
+  	});
+	
+	 getAllAcademicByBranch();
+	 getAllGroupByBranch();
+	 getallGrade();
+	 getAllSession();
+	 
+	 setTimeout(function() {
+		//setPrintOrientation('landscape');
+		let branchId = dijit.byId("branch_id").get('value');
+		if(branchId!=""){
+			
+			let branchLable = dijit.byId("branch_id").attr('displayedValue');
+			$('.lblBranchId').html(branchLable);
+		}
+	}, 500);
+});
+var url_dept = '<?php echo $this->url(array('module'=>'global','controller'=>'grade','action'=>'get-grade')); ?>';
+function getallGrade(){
+	getAllGroupByBranch();  
+	dept_id = dijit.byId('degree').get('value');
+	if(dept_id=='' || dept_id==-1){return false;}
+		dojo.xhrPost({
+			url:url_dept,
+			content:{
+				'dept_id':dept_id,
+				'noaddnew':1
+				},
+			handleAs:"json",
+			load: function(data) {
+				dijit.byId('grade').attr('value','');
+				grade_store  = getDataStorefromJSON('id','name', data);
+			    dijit.byId('grade').set('store',grade_store); 
+			    dijit.byId('grade').attr('value','<?php echo $this->search['grade']?>');  
+			},
+			error: function(err) {
+			}
+	});
+}
+var url_getSession = '<?php echo $this->url(array('module'=>'global','controller'=>'parttimelist','action'=>'get-parttime')); ?>';
+function getAllSession(){
+	dijit.byId('session').set('value',''); 
+	degree = dijit.byId('degree').get('value');
+	if(degree==''){
+		sessionStore  = getDataStorefromJSON('id','name',<?php print_r(Zend_Json::encode(array()));?> );
+		dijit.byId('session').set('store',sessionStore);  
+		return false;
+	}
+	dojo.xhrPost({
+		url:url_getSession,
+		content:{
+			'degree':degree,
+		},
+		handleAs:"json",
+		load: function(data) {
+			sessionStore  = getDataStorefromJSON('id','name', data);
+			dijit.byId('session').set('store',sessionStore);  
+			<?php if(!empty($this->search['session'])){ ?>
+			dijit.byId('session').set('store','<?php echo $this->search['session']?>');  
+			<?php } ?>
+		},
+		error: function(err) {
+		}
+	});
+}
+
+
+url_getacademic= '<?php echo $this->url(array('module'=>'foundation','controller'=>'group','action'=>'get-academicyear'));?>';
+var oldBranch = "<?php echo $this->search['branch_id']?>";
+function getAllAcademicByBranch(){
+	dijit.byId('study_year').reset();
+	branch_id = dijit.byId('branch_id').get('value');
+	if(branch_id=='' || branch_id==-1){
+		var academic_store  = getDataStorefromJSON('id','name',<?php print_r(Zend_Json::encode(array()));?> );
+		dijit.byId('study_year').set('store',academic_store);  
+		dijit.byId('branch_id').focus();
+		return false;
+	}
+	
+	contentData = {
+		'branch_id':branch_id
+	}
+	selectedId = '';
+	if(oldBranch==branch_id){
+		selectedId = '<?php echo $this->search['study_year']?>';
+	}
+	getAllYear(url_getacademic,contentData,selectedId,'study_year');
+
+}
+url_getgroup = '<?php echo $this->url(array('module'=>'foundation','controller'=>'group','action'=>'getallgroup'));?>';
+function getAllGroupByBranch(){
+	dijit.byId('group').reset();
+	branch_id = dijit.byId('branch_id').get('value');
+	if(branch_id=='' || branch_id==-1){
+		var group_store  = getDataStorefromJSON('id','name',<?php print_r(Zend_Json::encode(array()));?> );
+		dijit.byId('group').set('store',group_store);  
+		dijit.byId('branch_id').focus();
+		return false;
+	}
+	dojo.xhrPost({
+		url: url_getgroup,
+		content:{
+			'branch_id':branch_id,
+			'noaddnew':1
+			},
+		handleAs:"json",
+		load: function(data) {
+		    group_store  = getDataStorefromJSON('id','name', data);
+		    dijit.byId('group').set('store',group_store);   
+		    if(oldBranch==branch_id){
+		    	dijit.byId('group').set('value','<?php echo $this->search['group']?>');  
+		    }
+		},
+		error: function(err) {
+			alert(err);
+		}
+	});
+}
+</script>
+
+<script>
+
+const rows = <?php echo json_encode($this->rs);?>;
+
+    function todayStr(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
+
+    const orientation = document.getElementById('orientation');
+   
+    const rebuildBtn = document.getElementById('rebuild');
+    const viewer11 = document.getElementById('viewer');
+    const prevBtn = document.getElementById('prevPage');
+    const nextBtn = document.getElementById('nextPage');
+    const pageIndicatorII = document.getElementById('pageIndicator');
+	let orientationValue = 'portrait';
+	let initialRowsPerPage = 45;
+
+    const zoomPercent = document.getElementById('zoomPercent');
+    function setScale(s){ s = Math.max(0.4, Math.min(2, s)); document.documentElement.style.setProperty('--sheet-scale', String(s)); zoomPercent.textContent = Math.round(s*100) + '%' }
+    function getScale(){ return Number(getComputedStyle(document.documentElement).getPropertyValue('--sheet-scale')) || 1 }
+    document.getElementById('zoomIn').addEventListener('click', ()=>setScale(getScale()+0.1));
+    document.getElementById('zoomOut').addEventListener('click', ()=>setScale(getScale()-0.1));
+    document.getElementById('zoomReset').addEventListener('click', ()=>setScale(1));
+
+    const pageStyle = document.createElement('style'); document.head.appendChild(pageStyle);
+    function updatePageStyle(){ 
+		const m = 12; 
+		const orient = orientationValue; 
+		pageStyle.textContent = `@page{size:A4 ${orient};margin:${m}mm}`;
+		
+	}
+
+    let totalPagesII = 0;
+    let currentPageII = 1;
+    let indexRow = 0;
+	
+    function makeTableHTML(rowsSubset){
+  let html = `<table width="100%" class="content-data-main text-color-black text-h12px text-size-9px bd-dark-grey" cellpadding="2" border="1" >
+										<thead>
+											<tr style="white-space:nowrap;" class="style-head bd-black bd-w1px style-head bg-head hpx-25" align="center" >
+												<th class="text-center w-px-30" rowspan="2"><?php echo $tr->translate("NUM");?></th>
+												<th class="text-center" rowspan="2"><?php echo $tr->translate("BRANCH_NAME");?></th>
+												<th class="text-center" colspan="6"><?php echo $tr->translate("STUDENT_INFO");?></th>
+
+												<th class="text-center" colspan="3"><?php echo $tr->translate("STUDY_INFO");?></th>
+												<th class="text-center" colspan="6"><?php echo $tr->translate("PARENT_INFO");?></th>
+												<th class="text-center w-px-80" rowspan="2"><?php echo $tr->translate("CURRENT_ADDRESS");?></th>	
+												<th class="text-center w-px-60" rowspan="2" ><?php echo $tr->translate("CONTACT_NO");?></th>				
+												<th class="text-center" rowspan="2"><?php echo $tr->translate("STATUS");?></th>
+											</tr>
+											<tr style="white-space:nowrap;" class="style-head bd-black bd-w1px style-head bg-head hpx-25 " align="center" >
+
+												<th class="text-center" ><?php echo $tr->translate("STUDENT_ID");?></th>
+												<th class="text-center" ><?php echo $tr->translate("STUDENT_NAMEKHMER");?></th>
+												<th class="text-center" ><?php echo $tr->translate("NAME_ENGLISH");?></th>
+												<th class="text-center" ><?php echo $tr->translate("SEX");?></th>
+												<th class="text-center" ><?php echo $tr->translate("NATIONALITY");?></th>
+												<th class="text-center" ><?php echo $tr->translate("DATE_OF_BIRTH");?></th>
+
+												<th class="text-center"><?php echo $tr->translate("DEGREE");?></th>
+												<th class="text-center w-px-70"><?php echo $tr->translate("GRADE");?></th>
+												<th class="text-center"><?php echo $tr->translate("SESSION");?></th>
+
+												<th class="text-center w-px-70"><?php echo $tr->translate("FATHER_NAME");?></th>
+												<th class="text-center w-px-60"><?php echo $tr->translate("OCCUPATION");?></th>
+												<th class="text-center w-px-60"><?php echo $tr->translate("CONTACT_NO");?></th>											
+												<th class="text-center w-px-70"><?php echo $tr->translate("MOTHER_NAME");?></th>
+												<th class="text-center w-px-60"><?php echo $tr->translate("OCCUPATION");?></th>
+												<th class="text-center w-px-60"><?php echo $tr->translate("CONTACT_NO");?></th>	
+											</tr>											
+										</thead>
+    <tbody>`;
+  rowsSubset.forEach(r => {
+	  
+			indexRow++;								
+    html += `<tr>
+      <td>${indexRow}</td>
+      <td>${r.branch_name}</td>
+      <td>${r.stu_code}</td>
+      <td>${r.stu_khname}</td>
+      <td style="text-align:right">${r.nationality}</td>
+      <td style="text-align:right">${r.nationality}</td>
+      <td style="text-align:right">${r.nationality}</td>
+      <td style="text-align:right">${r.nationality}</td>
+      <td style="text-align:right">${r.nationality}</td>
+      <td style="text-align:right">${r.nationality}</td>
+      <td style="text-align:right">${r.nationality}</td>
+      <td style="text-align:right">${r.nationality}</td>
+    </tr>`;
+  });
+  html += '</tbody></table>';
+  html += `<div class="signFooter"><?php echo $this->rsfooteracc;?></div>`;
+  return html;
+}
+
+function buildPages(){indexRow = 0;
+  viewer11.innerHTML = '';
+  const frag = document.createDocumentFragment(); // append all at once
+
+  const orientClass = orientationValue === 'landscape' ? 'landscape' : 'portrait';
+  const rowsPerPage = initialRowsPerPage; // adjust if needed
+  const totalPageCount = Math.ceil(rows.length / rowsPerPage);
+
+  for (let i = 0; i < totalPageCount; i++){
+    const subset = rows.slice(i * rowsPerPage, (i + 1) * rowsPerPage);
+
+    const wrapper = document.createElement('div');
+    wrapper.className = `sheet a4 ${orientClass} ${i === 0 ? 'active' : ''}`;
+
+    // header
+    const hdr = $('#headerTpl')[0].content.firstElementChild.cloneNode(true);
+     wrapper.appendChild(hdr);
+
+    // content
+    const pageContent = document.createElement('div');
+    pageContent.className = 'page-content';
+    pageContent.innerHTML = makeTableHTML(subset); // <-- optimized
+    wrapper.appendChild(pageContent);
+
+    // footer
+    const ftr = $('#footerTpl')[0].content.firstElementChild.cloneNode(true);
+    ftr.querySelector('[data-bind="page"]').textContent = i + 1;
+    ftr.querySelector('[data-bind="pages"]').textContent = totalPageCount;
+    wrapper.appendChild(ftr);
+
+    frag.appendChild(wrapper);
+  }
+	setTimeout(function() {
+		let headerHeight=$('.page-header').height();
+			$(".page-content").css("top", headerHeight);
+	}, 500);
+  viewer11.appendChild(frag);
+
+  totalPagesII = totalPageCount;
+  currentPageII = 1;
+  updateActivePage();
+}
+
+    function updateActivePage(){
+      const pages = viewer11.querySelectorAll('.sheet');
+      pages.forEach((p,i)=> p.classList.toggle('active', i === currentPageII-1));
+	  $("#pageIndicatorValue").val(currentPageII);
+      pageIndicatorII.textContent = ` / ${totalPagesII}`;
+      prevBtn.disabled = currentPageII === 1;
+      nextBtn.disabled = currentPageII === totalPagesII;
+    }
+
+    prevBtn.addEventListener('click', ()=>{ if(currentPageII>1){ currentPageII--; updateActivePage(); }});
+    nextBtn.addEventListener('click', ()=>{ if(currentPageII<totalPagesII){ currentPageII++; updateActivePage(); }});
+
+	document.getElementById('portraitBtn').onclick = () => {
+		orientationValue = 'portrait';
+		initialRowsPerPage=45;
+		buildPages(); updatePageStyle();
+	};
+	document.getElementById('landscapeBtn').onclick = () => {
+		orientationValue = 'landscape';
+		initialRowsPerPage=25;
+		buildPages(); updatePageStyle();
+		
+	};
+   
+    rebuildBtn.addEventListener('click', buildPages);
+
+    setScale(1);
+    updatePageStyle();
+    buildPages();
+  </script>

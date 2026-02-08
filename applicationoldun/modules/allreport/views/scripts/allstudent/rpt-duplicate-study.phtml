@@ -1,0 +1,332 @@
+<?php
+$tr = Application_Form_FrmLanguages::getCurrentlanguage();
+echo $this->headTitle($tr->translate('RPT_DUPLICATED_STUDY_INFO'));
+$base_url = Application_Form_FrmMessage::getUrl("/");
+$frm = $this->form_search;
+
+$key = new Application_Model_DbTable_DbKeycode();
+$keySetting = $key->getKeyCodeMiniInv(TRUE);
+$studyInfoSetting=empty($keySetting['study_info_setting']) ? 1 : $keySetting['study_info_setting'];
+
+?>
+<div class="layout-wrapper-report">
+	<div id="mainContent" class="main-content-report">
+		<div class="report-preview">
+			<?php echo $this->controlReport?>
+			<div id="main-viewer" class="main-viewer portrait">
+				<div id="viewer" class="viewer portrait">
+					<div id="divPrint" class="content">
+						<link rel="stylesheet" href="<?php echo $this->baseUrl();?>/admin/build/css/report-style.css">
+						<link rel="stylesheet" href="<?php echo $this->baseUrl();?>/admin/build/css/report-style-screen.css">
+						<style>
+							@media print {
+								<?php if(!empty($this->printFormat)){ echo $this->printFormat; } ?>
+							}
+							.text-warning {
+								color: #ff9800 !important;
+							}
+						</style>
+						<table style="margin: 0 auto; width: 100%;" cellpadding="0">
+							<tr>
+								<td ><?php echo $this->rsheader; ?></td>
+							</tr>
+							<tr>
+								<td width="100%" align="center">
+									<span style="font-weight:200;color:#4839bd; font-size: 12px;font-family:Times New Roman,'Khmer OS Muol Light';"><?php echo $tr->translate("RPT_DUPLICATED_STUDY_INFO"); ?></span>
+								</td>
+							</tr>
+							<tr>
+								<td valign="top" id="exportExcel">
+									<table class="content-data bd-dark-grey bd-w1px text-color-black text-h16px text-size-12px" cellpadding="3" border="1">
+										<thead>
+											<tr class="bg-head style-head bd-black bd-w1px text-h16px hpx-25 text-bold">
+												<td scope="col"><?php echo $tr->translate("NUM"); ?></td>
+												<td scope="col"><?php echo $tr->translate("BRANCH"); ?></td>
+												<td scope="col"><?php echo $tr->translate("STUDENT_ID"); ?></td>
+												<td scope="col"><?php echo $tr->translate("STUDENT_NAME"); ?></td>
+												<td scope="col"><?php echo $tr->translate("AMT_DUPLICATE"); ?></td>
+												<td scope="col"><?php echo $tr->translate("STUDY_GROUP"); ?></td>
+												<td scope="col"><?php echo $tr->translate("ACTION"); ?></td>
+											</tr>
+										</thead>
+										<tbody>
+											<?php 
+											$i = 0;
+											if(!empty($this->studentRs)) foreach($this->studentRs As $row){
+												$i++;
+												
+												$strStudyInfo="";
+												if($studyInfoSetting!=1){
+													$strStudyInfo = ' <strong class="text-warning">'.$row['mainGradeTypeTitle'].'</strong>';
+												}
+											?>
+												<tr id="rowRecord<?php echo $i; ?>" class='hover padding'>
+													<td align="center" data-label="<?php echo $tr->translate("NUM"); ?>"><?php echo $i; ?></td>
+													<td data-label="<?php echo $tr->translate("BRANCH"); ?>"><?php echo $row["branchName"]; ?></td>
+													<td data-label="<?php echo $tr->translate("STU_CODE"); ?>" class="studentCode<?php echo $i; ?>">
+														<?php echo $row["studentCode"]; ?>
+														<input type="hidden" name="studentId<?php echo $i; ?>" id="studentId<?php echo $i; ?>" value="<?php echo $row["studentId"]; ?>" dojoType="dijit.form.TextBox" />
+														<input type="hidden" name="is_maingrade<?php echo $i; ?>" id="is_maingrade<?php echo $i; ?>" value="<?php echo $row["is_maingrade"]; ?>" dojoType="dijit.form.TextBox" />
+													</td>
+													<td data-label="<?php echo $tr->translate("STUDENT_NAME"); ?>" class="studentName<?php echo $i; ?>"><?php echo $row["studentNameKh"]; ?></td>
+													<td data-label="<?php echo $tr->translate("AMT_DUPLICATE"); ?>" align="center"><?php echo $row["cnt"]; ?></td>
+													<td data-label="<?php echo $tr->translate("STUDY_GROUP"); ?>"><?php echo $row["groupCode"];  ?> <span id="classInfoType<?php echo $i; ?>"><?php echo $strStudyInfo;?></span></td>
+													<td data-label="<?php echo $tr->translate("ACTION"); ?>" align="center">
+														<a class="btn btn-xs btn-round rounded-pill btn-primary " onClick="getDuplicateStudentInfo(<?php echo $i; ?>);" href="javascript:void(0);">
+															<small><i class="fa fa-eye"></i> <?php echo $tr->translate("ADJUST"); ?></small>
+														</a>
+													</td>
+												</tr>
+											<?php } ?>
+										</tbody>
+									</table>
+								</td>
+							</tr>
+						</table>
+					</div>	
+				</div>	
+			</div>	
+		</div>	
+	</div>
+	<div class="right-panel-report" id="rightPanel">
+		<div class="card-box">
+			<div class="card-search-head col-sm-12 border-botom">
+				<div class="col-sm-6 text-left pd-0">
+					<h4 class="m-b-0">
+						<?php echo $tr->translate("SEARCH");?> 
+						<i class="fa fa-search "></i> 
+					</h4>
+				</div>
+				<div class="col-sm-6 text-right pd-0">
+					<button onclick="closeRightPanel()" title="<?php echo $tr->translate("CLOSED");?> " class="btn-close">
+						<i class="fa-solid fa-xmark"></i>
+					</button>
+				</div>
+			</div>
+			<form id='foundation_class' action="" dojoType="dijit.form.Form" method="post" enctype="application/x-www-form-urlencoded">
+				<div class="form-group">
+					<div class="col-md-12 col-sm-12 col-xs-12">
+						<?php echo $frm->getElement("adv_search"); ?>
+					</div>
+					<div class="col-md-12 col-sm-12 col-xs-12">
+						<?php echo $frm->getElement("branch_id"); ?>
+					</div>
+					<div class="col-md-12 col-sm-12 col-xs-12">
+						<?php echo $frm->getElement("degree"); ?>
+					</div>
+					<div class="col-md-12 col-sm-12 col-xs-12">
+						<button class="button-class button-primary fullside" iconClass="glyphicon glyphicon-search"
+							dojoType="dijit.form.Button" showLabel="true"
+							type="submit"><?php echo $tr->translate("SEARCH"); ?></button>
+					</div>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>	
+<div class="dijitHidden">
+	<div data-dojo-type="dijit.Dialog" style="width:700px;" id="popupStudentInfo" >
+		<form style="background-color: buttonface;" id='frmAdjustment' dojoType="dijit.form.Form" method="post" enctype="application/x-www-form-urlencoded">
+			<div class="card-blogform">
+				<div class="card-body">
+				  <div class="form-group">
+						<div class="d-flex"> 
+							<div class="settings-main-icon ">
+								<i class="material-icons-outlined">
+								school
+								</i>
+							</div> 
+							<div class="col-md-10 col-sm-10 col-xs-12"> 
+								<h4 class="modal-title text-primary studentCode"></h4>
+								<small class="text-muted classInfo"></small>
+							</div> 
+						</div>
+					</div>
+					<div class="form-group" >
+						<table class="content-data" border="1" cellspacing="5" width="100%">
+							<thead  id="head-title" >
+								<tr class="style-head" align="center">
+									<td width="4%" ><?php echo $tr->translate("DEL");?></td>
+									<td width="4%" ><?php echo $tr->translate("NO");?></td>
+									<td ><?php echo $tr->translate("ACADEMIC_YEAR");?></td>
+									<td ><?php echo $tr->translate("GROUP_CODE");?></td>
+									<td ><?php echo $tr->translate("DEGREE");?></td>
+									<td ><?php echo $tr->translate("GRADE");?></td>
+									<td width="20%"><?php echo $tr->translate("OPTION");?></td>
+									
+								</tr>
+							</thead>
+							<tbody id="tableDuplicateInfo" >
+							</tbody>
+						</table>
+					</div>
+					
+					
+					<div class="clearfix"></div>
+					<div class="card-box">
+						<div class="col-sm-12 border-top mt-20 ptb-10 text-center">
+							<input type="hidden" name="rowId" id="rowId" value="0" dojoType="dijit.form.TextBox" />
+							<input type="hidden" name="studentId" id="studentId" value="" dojoType="dijit.form.TextBox" />
+							<input type="hidden" name="isMaingrade" id="isMaingrade" value="0" dojoType="dijit.form.TextBox" />
+							<input type="hidden" name="identity" id="identity" value="" dojoType="dijit.form.TextBox" />
+							<input type="hidden" name="removeIdentity" id="removeIdentity" value="" dojoType="dijit.form.TextBox" />
+							<input type="button" class="button-class button-danger" iconClass="glyphicon glyphicon-off" value="ចាកចេញ" label="<?php echo $tr->translate('CLOSE');?>" id="hideStudentType" name="hideStudentType" dojoType="dijit.form.Button" onclick="hideDialogPopup('popupStudentInfo');"/>
+							<input type="button" class="button-class button-primary" iconClass="glyphicon glyphicon-floppy-disk" value="save" label="<?php echo $tr->translate('SAVE');?>" id="saveStudentType" name="saveStudentType" dojoType="dijit.form.Button" onclick="adjustmentStudentInfo();"/>
+						</div>
+					</div>
+			
+				</div>
+			</div>
+		</form>
+	</div>
+</div>
+<script src="<?php echo $this->baseUrl(); ?>/js/help.js"></script>
+<script src="<?php echo $baseurl;?>/js/help.js"></script>
+<script type="text/javascript">
+	dojo.require("dojo.NodeList-manipulate");
+	dojo.require("dojo.data.ItemFileWriteStore");
+	
+	document.addEventListener("DOMContentLoaded", function(e) {
+		setTimeout(function() {
+			setPrintOrientation('portrait');
+		}, 500);
+	});	
+
+	var stringOption='';
+	stringOption+='<option value="1"><?php echo $tr->translate("IS_CURRENT_CLASS");?></option>';
+	stringOption+='<option value="0"><?php echo $tr->translate("COMPLETED_CLASS");?></option>';
+	
+	var col = 0;
+	tmp = '';
+	temp='';
+	function getDuplicateStudentInfo(index){
+		var urlGetDuplicate = '<?php echo $this->url(array('module'=>'allreport','controller'=>'allstudent','action'=>'get-stu-duplicate'));?>';
+		var studentId = dijit.byId('studentId'+index).get('value');
+		var isMaingrade = dijit.byId('is_maingrade'+index).get('value');
+		
+		dijit.byId('rowId').set('value',index); 
+		dijit.byId('studentId').set('value',studentId); 
+		dijit.byId('isMaingrade').set('value',isMaingrade); 
+		dojo.query("#tableDuplicateInfo").append("");
+		$("#identity").val("");
+		$("#identity").val("");
+		$("#removeIdentity").val("");
+		
+		dojo.xhrPost({
+			url: urlGetDuplicate,
+			content:{
+				'studentId':studentId,
+				'isMaingrade':isMaingrade,
+				},
+			handleAs:"json",
+			load: function(data){
+				$(".studentCode").html($(".studentCode"+index).html()+'/ '+$(".studentName"+index).html());
+				
+				<?php if($studyInfoSetting!=1){?>
+				$(".classInfo").html(" <?php echo $tr->translate("STUDY_INFO");?> "+$("#classInfoType"+index).html());
+				<?php } ?>
+				template='';
+				var no = 0;
+				if(data!=""){
+					var identity ="";
+					for(var i=0;i<data.length;i++) {
+						col++;no++;
+						template+='<tr class="rowData hover" id="row'+col+'">';
+							template+='<td data-label="<?php echo $tr->translate("DEL");?>" align="center" class="removCol'+col+'"><span title="<?php echo $tr->translate("REMOVE_RECORD");?>" class="removeRow" onclick="deleteRecord('+col+')" ><i class="glyphicon glyphicon-trash" aria-hidden="true"></i></span></td>';
+							template+='<td data-label="<?php echo $tr->translate("N_O");?>" align="center">'+no+'</td>';
+							template+='<td data-label="<?php echo $tr->translate("ACADEMIC_YEAR");?>" align="center">';
+							template+='<small>'+data[i].statusStudent+'</small><br />';
+							template+=data[i].academicYear;
+							template+='<input type="hidden" name="detailId'+col+'" id="detailId'+col+'" value="'+data[i].gd_id+'" dojoType="dijit.form.TextBox" />';
+							template+='</td>';
+							template+='<td data-label="<?php echo $tr->translate("GROUP_CODE");?>" align="center">'+data[i].groupCode+'</td>';
+							template+='<td data-label="<?php echo $tr->translate("DEGREE");?>" align="center">'+data[i].degreeTitle+'</td>';
+							template+='<td data-label="<?php echo $tr->translate("GRADE");?>" align="center">'+data[i].gradeTitle+'</td>';
+							template+='<td data-label="<?php echo $tr->translate("OPTION");?>" align="center">';
+								template+='<select placeholder="<?php echo $tr->translate('SELECT_TEACHER');?>" queryExpr="*${0}*" autoComplete="false" dojoType="dijit.form.FilteringSelect" class="fullside" id="isCurrent'+col+'" name="isCurrent'+col+'" >';
+								template+=stringOption; 
+								template+='</select>';
+							template+='</td>';
+						template+="</tr>";
+						if(identity!=""){
+							identity = identity+','+col;
+						}else{
+							identity = col;
+						}
+						
+					}
+					$("#identity").val(identity);
+					
+					dojo.query("#tableDuplicateInfo").append(template);
+					dojo.html.set(dojo.byId("tableDuplicateInfo"),template , {
+						 parseContent: true,
+					});
+					
+				}
+				dijit.byId("popupStudentInfo").show();
+			},
+			error: function(err) {
+			}
+		});
+		
+	}
+	function hideDialogPopup(popupContentId) {		
+		dijit.byId(popupContentId).hide();
+	}
+	
+	function deleteRecord(index) {
+		
+		var removeIdentity = $('#removeIdentity').val();
+		if(removeIdentity!=""){
+			removeIdentity = removeIdentity+','+dijit.byId('detailId'+index).get('value');
+		}else{
+			removeIdentity = dijit.byId('detailId'+index).get('value');
+		}
+		$('#removeIdentity').val(removeIdentity);
+		
+		var identity = $('#identity').val();
+		var arrays = identity.split(',');
+		for(var i=0;i<arrays.length;i++) {
+			if(arrays[i] == index) arrays.splice(i,1);
+		}
+		
+		var strings = arrays.join(',');
+		$('#identity').val(strings);
+		dojo.query("#row"+index).remove();
+		
+		
+		
+		var newIde = $('#identity').val();
+		var newArr = newIde.split(',');
+		if(newArr.length==1){
+			$(".removCol"+newIde).html("");
+		}
+	}
+	
+	
+	function adjustmentStudentInfo(){
+		var urlSumbitAdjustment = '<?php echo $this->url(array("module"=>"allreport","controller"=>"allstudent","action"=>"submit-adjustment")); ?>';
+		if(dijit.byId('frmAdjustment').validate()){
+			loadingBlock();
+			dojo.xhrPost({
+				url: urlSumbitAdjustment,
+				form: dojo.byId("frmAdjustment"),
+				handleAs:"json",
+				load: function(data) {
+					if(data==1){
+						alert('<?php echo $tr->translate('INSERT_SUCCESS'); ?>!');
+						var rowId = dijit.byId('rowId').get('value');
+						dojo.query("#rowRecord"+rowId).remove();
+						dijit.byId("popupStudentInfo").hide();
+						//window.location.href = "<?php echo $this->baseUrl(); ?>/allreport/allstudent/rpt-duplicate-study";
+					}else{
+						alert('<?php echo $tr->translate('INSERT_FAIL'); ?>!');
+					}
+					HideloadingBlock();
+				},
+				error: function(err) {
+				}
+			});
+		}
+	}
+</script>

@@ -1,0 +1,579 @@
+<?php
+	$tr = Application_Form_FrmLanguages::getCurrentlanguage();
+	
+	$pageTitle = $tr->translate('preAttendanceReport');
+	echo $this->headTitle($pageTitle); 
+	$frm =  $this->form_search;
+	$moringTimeFrom = date("H:i",strtotime("5:00"));
+	$moringTimeTo = date("H:i",strtotime("12:30"));
+	
+	$afternoonFrom = date("H:i",strtotime("12:00"));
+	$afternoonTo = date("H:i",strtotime("18:00"));
+	
+	$dateFormat ="d/m/Y";
+?>	
+<div class="layout-wrapper-report">
+	<div id="mainContent" class="main-content-report">
+		<div class="report-preview">
+			<?php echo $this->controlReport?>
+			<div id="main-viewer" class="main-viewer portrait">
+				<div id="viewer" class="viewer portrait">
+					<div id="divPrint" class="content">
+						<link rel="stylesheet" href="<?php echo $this->baseUrl();?>/admin/build/css/report-style.css">
+						<link rel="stylesheet" href="<?php echo $this->baseUrl();?>/admin/build/css/report-style-screen.css">
+						<style>
+							@media print {
+								<?php if(!empty($this->printFormat)){ echo $this->printFormat; } ?>
+							}
+							td span,
+							.content-data span{
+								 line-height: inherit;
+							}
+						</style>
+					<?php if($this->search["format"]==1){?>
+						<style>
+						.main-report{
+							page-break-before: always;
+						}
+						</style>
+						<?php
+							if(!empty($this->absenteeRs)){
+							$i = 0;
+							$groupId = "-";
+							 foreach($this->absenteeRs as $key => $rs){ 
+
+								$date = new DateTime($rs['attendanceDate']);
+								$attendanceDate =  $date->format("d-M-Y");
+								$attendanceTime =  $date->format("h:i:s A");
+								
+								
+								$morningIn="";
+								$morningOut="";
+								$afternoonIn="";
+								$afternoonOut="";
+								if(!empty($rs['jsDetail'])){
+									$jsDetail = json_decode($rs['jsDetail'], TRUE);
+									if(!empty($jsDetail)) foreach($jsDetail AS $scTr){
+										$scDate = new DateTime($scTr['date']);
+										$scTime =  $scDate->format("H:i");
+										if($scTr["type"]=="1"){
+											if(($moringTimeFrom<=$scTime) AND ($scTime<=$moringTimeTo) ){
+												if($morningIn==""){
+													if($scTr["status"]!=1){
+														if($scTr["status"]==3){
+															$morningIn= $tr->translate("P");
+														}else if($scTr["status"]==4){
+															$morningIn= $tr->translate("L")." - ".$scDate->format("h:i:s A");
+														}
+													}else{
+														$morningIn=$scDate->format("H:i:s A");
+													}
+												}
+											}
+											if($afternoonFrom<=$scTime AND $scTime<=$afternoonTo){
+												if($afternoonIn==""){
+													if($scTr["status"]!=1){
+														if($scTr["status"]==3){
+															$afternoonIn= $tr->translate("P");
+														}else if($scTr["status"]==4){
+															$afternoonIn= $tr->translate("L")." - ".$scDate->format("h:i:s A");
+														}
+													}else{
+														$afternoonIn=$scDate->format("H:i:s A");
+													}
+												}
+											}
+										}else if($scTr["type"]=="2"){
+											if(($moringTimeFrom<=$scTime) AND ($scTime<=$moringTimeTo) ){
+												if($morningOut==""){
+													if($scTr["status"]!=1){
+														if($scTr["status"]==5){
+															$morningOut= $tr->translate("EL")." - ".$scDate->format("h:i:s A");
+														}
+													}else{
+														$morningOut=$scDate->format("H:i:s A");
+													}
+												}
+											}
+											if($afternoonFrom<=$scTime AND $scTime<=$afternoonTo){
+												if($afternoonOut==""){
+													if($scTr["status"]!=1){
+														if($scTr["status"]==5){
+															$afternoonOut= $tr->translate("EL")." - ".$scDate->format("h:i:s A");
+														}
+													}else{
+														$afternoonOut=$scDate->format("H:i:s A");
+													}
+												}
+											}
+										}
+									}
+								}
+								
+								$time = "";
+								$morningIn = empty($morningIn) ? "A" : $morningIn;
+								$afternoonIn = empty($afternoonIn) ? "A" : $afternoonIn;
+								
+								$mornigClass="";
+								$afternoonClass="";
+								
+								$groupShiftStr = empty($rs['groupShiftStr']) ? "-1" : $rs['groupShiftStr'];
+								$groupShiftStrExp = explode(",", $groupShiftStr);
+								if(count($groupShiftStrExp)>1){
+									$groupShiftStr = 0; //assign as Full Day
+								}else{
+									if($groupShiftStr==1){ //Morning
+										$afternoonClass="bg-col-blue";
+										$afternoonIn="";
+									}else if($groupShiftStr==2){ //Afternoon
+										$mornigClass="bg-col-blue";
+										$morningIn="";
+									}
+								}
+						?>
+								<?php if($groupId != $rs['groupId']){ $i = 0;?>
+									<?php if($key>0){ ?>
+														</tbody>
+													</table>
+												</td>
+											</tr>
+											<tr>
+												<td colspan="3" style="border:1px solid #fff;">
+													<?php echo $this->rsfooter;?>
+												</td>
+											</tr>
+										</table>
+									<?php } ?>
+									<table class="main-report" border="0" style="background:#fff; margin: 0 auto; width: 100%; ">
+										<tr>
+											<td colspan="3"><?php echo $this->rsheader;?></td>
+										</tr>
+										<tr>
+											<td width="20%" align="right">
+											</td>
+											<td width="60%" align="center">
+												<span class="title-report" ><?php echo $pageTitle;?></span><br/>
+												<span class="report-info" ><?php echo $rs['groupCode']; echo empty($rs['academicYear']) ? "" : " ".$rs['academicYear']; ?></span><br/>
+												<span class="report-info" ><?php echo date($dateFormat,strtotime($this->search['end_date']));?></span>
+											</td>
+											<td width="20%" align="right">
+											</td>
+										</tr>
+										<tr>
+											<td colspan="3">
+												<table class="content-data  bd-dark-grey text-color-black text-h16px text-size-12px" cellpadding="2" border="1" >
+													<tbody>
+														<tr class="styleheader bg-head text-bold hpx-20" align="center">
+															<th rowspan="3"><?php echo $tr->translate("NUM");?></th>
+															<th colspan="3"><?php echo $tr->translate("STUDENT_INFO");?></th>
+															<th colspan="4"><?php echo $tr->translate("ATTENDANCE_INFO");?></th>
+														</tr>
+														<tr class="styleheader bg-head text-bold" align="center">
+															<th rowspan="2"><?php echo $tr->translate("STUDENT_ID");?></th>
+															<th rowspan="2"><?php echo $tr->translate("STUDENT_NAMEKHMER");?></th>
+															<th rowspan="2"><?php echo $tr->translate("SEX");?></th>
+															
+															<th colspan="2"><?php echo $tr->translate("MORNING");?></th>
+															<th colspan="2"><?php echo $tr->translate("AFTERNOON");?></th>
+															
+														</tr>
+														<tr class="styleheader bg-head text-bold" align="center">
+															<th class="w-px-80"><?php echo $tr->translate("IN");?></th>
+															<th class="w-px-80"><?php echo $tr->translate("OUT");?></th>
+															<th class="w-px-80"><?php echo $tr->translate("IN");?></th>
+															<th class="w-px-80"><?php echo $tr->translate("OUT");?></th>
+														</tr>
+								<?php } $i++;  	?>
+												<tr class="style-rowdata">
+													<td align="center"><?php echo $i;?></td>
+													<td align="center" style="white-space:nowrap;"><?php echo $rs['studentCode'];?></td>
+													<td style="white-space:nowrap;"><?php echo $rs['stuNameKh'];?></td>
+													<td align="center" ><?php echo $rs['genderTitle'];?></td>
+													
+													<td align="center" class="<?php echo $mornigClass;?>"><?php echo $morningIn;?></td>
+													<td align="center" class="<?php echo $mornigClass;?>"><?php echo $morningOut;?></td>
+													<td align="center" class="<?php echo $afternoonClass;?>"><?php echo $afternoonIn;?></td>
+													<td align="center" class="<?php echo $afternoonClass;?>"><?php echo $afternoonOut;?></td>
+												</tr>
+								
+								<?php $groupId = $rs['groupId']; ?>
+							<?php } ?>
+											</tbody>
+										</table>
+									</td>
+								</tr>
+								<tr>
+									<td colspan="3" style="border:1px solid #fff;">
+										<?php echo $this->rsfooter;?>
+									</td>
+								</tr>
+							</table>
+						<?php } ?>
+					<?php }else {?>
+						<table border="0" style="background:#fff; margin: 0 auto; width: 100%; ">
+							<tr>
+								<td colspan="3"><?php echo $this->rsheader;?></td>
+							</tr>
+							<tr>
+								<td width="20%" align="right">
+								</td>
+								<td width="60%" align="center">
+									<span class="title-report" ><?php echo $pageTitle;?></span><br/>
+									<span ><?php echo date($dateFormat,strtotime($this->search['end_date']));?></span>
+								</td>
+								<td width="20%" align="right">
+								</td>
+							</tr>
+							<tr>
+								<td colspan="3">
+									<div id="exportExcel">
+										<table class="content-data bd-dark-grey text-color-black text-h16px text-size-12px" cellpadding="2" border="1" >
+											<tbody>
+												<tr class="styleheader bg-head text-bold hpx-20" align="center">
+													<th rowspan="3"><?php echo $tr->translate("NUM");?></th>
+													<th colspan="3"><?php echo $tr->translate("STUDENT_INFO");?></th>
+													<th colspan="4"><?php echo $tr->translate("ATTENDANCE_INFO");?></th>
+												</tr>
+												<tr class="styleheader bg-head text-bold" align="center">
+													<th rowspan="2"><?php echo $tr->translate("STUDENT_ID");?></th>
+													<th rowspan="2"><?php echo $tr->translate("STUDENT_NAMEKHMER");?></th>
+													<th rowspan="2"><?php echo $tr->translate("SEX");?></th>
+													
+													<th colspan="2"><?php echo $tr->translate("MORNING");?></th>
+													<th colspan="2"><?php echo $tr->translate("AFTERNOON");?></th>
+													
+													
+												</tr>
+												<tr class="styleheader bg-head text-bold" align="center">
+													<th class="w-px-80"><?php echo $tr->translate("IN");?></th>
+													<th class="w-px-80"><?php echo $tr->translate("OUT");?></th>
+													<th class="w-px-80"><?php echo $tr->translate("IN");?></th>
+													<th class="w-px-80"><?php echo $tr->translate("OUT");?></th>
+												</tr>
+												<?php 
+												$i = 0;
+												$groupId = "-";
+												
+												if(!empty($this->absenteeRs)) foreach($this->absenteeRs as $key => $rs){ $i++; 
+													
+													$date = new DateTime($rs['attendanceDate']);
+													$attendanceDate =  $date->format("d-M-Y");
+													$attendanceTime =  $date->format("h:i:s A");
+													
+													$morningIn="";
+													$morningOut="";
+													$afternoonIn="";
+													$afternoonOut="";
+													if(!empty($rs['jsDetail'])){
+														$jsDetail = json_decode($rs['jsDetail'], TRUE);
+														if(!empty($jsDetail)) foreach($jsDetail AS $scTr){
+															$scDate = new DateTime($scTr['date']);
+															$scTime =  $scDate->format("H:i");
+															if($scTr["type"]=="1"){
+																if(($moringTimeFrom<=$scTime) AND ($scTime<=$moringTimeTo) ){
+																	if($morningIn==""){
+																		if($scTr["status"]!=1){
+																			if($scTr["status"]==3){
+																				$morningIn= $tr->translate("P");
+																			}else if($scTr["status"]==4){
+																				$morningIn= $tr->translate("L")." - ".$scDate->format("h:i:s A");
+																			}
+																		}else{
+																			$morningIn=$scDate->format("H:i:s A");
+																		}
+																	}
+																}
+																if($afternoonFrom<=$scTime AND $scTime<=$afternoonTo){
+																	if($afternoonIn==""){
+																		if($scTr["status"]!=1){
+																			if($scTr["status"]==3){
+																				$afternoonIn= $tr->translate("P");
+																			}else if($scTr["status"]==4){
+																				$afternoonIn= $tr->translate("L")." - ".$scDate->format("h:i:s A");
+																			}
+																		}else{
+																			$afternoonIn=$scDate->format("H:i:s A");
+																		}
+																	}
+																}
+															}else if($scTr["type"]=="2"){
+																if(($moringTimeFrom<=$scTime) AND ($scTime<=$moringTimeTo) ){
+																	if($morningOut==""){
+																		if($scTr["status"]!=1){
+																			if($scTr["status"]==5){
+																				$morningOut= $tr->translate("EL")." - ".$scDate->format("h:i:s A");
+																			}
+																		}else{
+																			$morningOut=$scDate->format("H:i:s A");
+																		}
+																	}
+																}
+																if($afternoonFrom<=$scTime AND $scTime<=$afternoonTo){
+																	if($afternoonOut==""){
+																		if($scTr["status"]!=1){
+																			if($scTr["status"]==5){
+																				$afternoonOut= $tr->translate("EL")." - ".$scDate->format("h:i:s A");
+																			}
+																		}else{
+																			$afternoonOut=$scDate->format("H:i:s A");
+																		}
+																	}
+																}
+															}
+														}
+													}
+													
+													$time = "";
+													$morningIn = empty($morningIn) ? "A" : $morningIn;
+													$afternoonIn = empty($afternoonIn) ? "A" : $afternoonIn;
+													
+													$mornigClass="";
+													$afternoonClass="";
+													
+													$groupShiftStr = empty($rs['groupShiftStr']) ? "-1" : $rs['groupShiftStr'];
+													$groupShiftStrExp = explode(",", $groupShiftStr);
+													if(count($groupShiftStrExp)>1){
+														$groupShiftStr = 0; //assign as Full Day
+													}else{
+														if($groupShiftStr==1){ //Morning
+															$afternoonClass="bg-col-blue";
+															$afternoonIn="";
+														}else if($groupShiftStr==2){ //Afternoon
+															$mornigClass="bg-col-blue";
+															$morningIn="";
+														}
+													}
+												?>
+												<?php if($groupId != $rs['groupId']){ ?>
+												<tr class="style-rowdata">
+													<td class="text-bold" colspan="8" align="left" ><?php echo $rs['academicYear']." ".$rs['groupCode'];?></td>
+												</tr>
+												<?php } ?>
+												<tr class="style-rowdata">
+													<td align="center"><?php echo $i;?></td>
+													<td align="center" style="white-space:nowrap;"><?php echo $rs['studentCode'];?></td>
+													<td style="white-space:nowrap;"><?php echo $rs['stuNameKh'];?></td>
+													<td align="center" ><?php echo $rs['genderTitle'];?></td>
+													
+													<td align="center" class="<?php echo $mornigClass;?>"><?php echo $morningIn;?></td>
+													<td align="center" class="<?php echo $mornigClass;?>"><?php echo $morningOut;?></td>
+													<td align="center" class="<?php echo $afternoonClass;?>"><?php echo $afternoonIn;?></td>
+													<td align="center" class="<?php echo $afternoonClass;?>"><?php echo $afternoonOut;?></td>
+												</tr>
+												<?php $groupId = $rs['groupId']; 
+												} ?>
+											</tbody>	
+										</table>	
+									</div>	
+								</td>
+							</tr>
+							<tr>
+								<td colspan="3">&nbsp;</td>
+							</tr>
+							<tr>
+								<td colspan="3" style="border:1px solid #fff;">
+									<?php echo $this->rsfooter;?>
+								</td>
+							</tr>
+						</table>
+					<?php }?>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="right-panel-report" id="rightPanel">
+		<div class="card-box">
+			<div class="card-search-head col-sm-12 border-botom">
+				<div class="col-sm-6 text-left pd-0">
+					<h4 class="m-b-0">
+						<?php echo $tr->translate("SEARCH");?> 
+						<i class="fa fa-search "></i> 
+					</h4>
+				</div>
+				<div class="col-sm-6 text-right pd-0">
+					<button onclick="closeRightPanel()" title="<?php echo $tr->translate("CLOSED");?> " class="btn-close">
+						<i class="fa-solid fa-xmark"></i>
+					</button>
+				</div>
+			</div>
+			<form  id='foundation_class' action="" dojoType="dijit.form.Form" method="post" enctype="application/x-www-form-urlencoded">
+				<script type="dojo/method" event="onSubmit">
+					if(this.validate()) {
+						start_date=dijit.byId("start_date").get("value");
+						if(start_date=='' || start_date==null){
+							alert("Please select start date");
+							dijit.byId("start_date").focus();
+							return false;
+						}
+						return true;
+					}else {
+						return false;
+					}
+				</script>
+				<div class="card-box">
+					<div class="form-group">
+						<div class="col-md-12 col-sm-12 col-xs-12">
+							<?php echo $frm->getElement("adv_search");?>
+						</div>
+						<div class="col-md-12 col-sm-12 col-xs-12">
+							<?php echo $frm->getElement("branch_id");?>
+						</div>
+						<div class="col-md-12 col-sm-12 col-xs-12">
+							<?php echo $frm->getElement("academic_year");?>
+						</div>
+						<div class="col-md-12 col-sm-12 col-xs-12">
+							<input id="group" />
+						</div>
+					</div>
+					<div class="form-group">
+						<div class="col-md-6 col-sm-6 col-xs-12">
+							<?php echo $frm->getElement("degree");?>
+						</div>
+						<div class="col-md-6 col-sm-6 col-xs-12">
+							<input id="grade" />
+						</div>
+					</div>
+					<div class="form-group">						
+						<div class="col-md-6 col-sm-6 col-xs-12">
+							<?php echo $frm->getElement("queryOption");?>
+						</div>
+						<div class="col-md-6 col-sm-6 col-xs-12">
+							<?php echo $frm->getElement("shift");?>
+						</div>
+					</div>
+					<div class="form-group">
+						<div class="col-md-6 col-sm-6 col-xs-12">
+							<?php echo $frm->getElement("format");?>
+						</div>
+						<div class="col-md-6 col-sm-6 col-xs-12">
+							<?php echo $frm->getElement("end_date");?>
+						</div>
+					</div>
+					<div class="form-group">
+						<div class="col-md-12 col-sm-12 col-xs-12">
+							<button class="button-class button-primary fullside" iconClass="glyphicon glyphicon-search" dojoType="dijit.form.Button" showLabel="true" name="search"  type="submit"><?php echo $tr->translate("SEARCH");?></button>
+						</div>
+					</div>
+				 </div>
+			</form>
+		</div>
+	</div>
+</div>
+<script src="<?php echo $this->baseUrl();?>/js/help.js"></script>
+<script type="text/javascript">
+dojo.require("dojo.data.ItemFileWriteStore"); 
+
+var group_store  = getDataStorefromJSON('id','name',<?php print_r(Zend_Json::encode(array()));?> );
+var teacher_store  = getDataStorefromJSON('id','name',<?php print_r(Zend_Json::encode(array()));?> );
+dojo.ready(function(){
+	
+	new dijit.form.FilteringSelect({
+		store: group_store,
+	    queryExpr: "*${0}*",
+		autoComplete: false,                     
+	    id: "group",
+	    name: "group",  
+	    class: 'fullside', 
+	    readonly:false,
+	    required:false,
+	    placeHolder:"<?php echo $tr->translate("SELECT_GROUP");?>",          
+	    onChange: function() {  
+		    
+	    }
+	}, "group");
+	
+	new dijit.form.FilteringSelect({
+		queryExpr: "*${0}*",
+		autoComplete: false,                     
+		required: false,                        
+		id: "grade",
+		name: "grade",  
+		class: 'fullside',  
+		placeHolder:"<?php echo $tr->translate("SELECT_GRADE");?>",          
+		onChange: function() {  
+		}
+	}, "grade");
+	
+	 var branch_id = dijit.byId('branch_id');
+	 branch_id.on('change', function(evt) {
+		 getAllGroupByBranch();
+    });
+	 var academic_year = dijit.byId('academic_year');
+	 academic_year.on('change', function(evt) {
+		 getAllGroupByBranch();
+    });
+	 getallGrade();
+	 getAllGroupByBranch();
+	<?php if(!empty($this->search['queryOption'])){?>
+	 dijit.byId('queryOption').attr('value','<?php echo $this->search['queryOption']?>'); 
+	<?php } ?> 
+	<?php if(!empty($this->search['academic_year'])){?>
+	 dijit.byId('academic_year').attr('value','<?php echo $this->search['academic_year']?>');
+	<?php } ?> 	 
+	 setTimeout(function() {
+		setPrintOrientation('portrait');
+	}, 500);
+});
+var oldBranch = "<?php echo $this->search['branch_id']?>";
+url_getgroup = '<?php echo $this->url(array('module'=>'foundation','controller'=>'group','action'=>'getallgroup'));?>';
+function getAllGroupByBranch(){
+	dijit.byId('group').reset();
+	branch_id = dijit.byId('branch_id').get('value');
+	if(branch_id=='' || branch_id==-1){
+		var group_store  = getDataStorefromJSON('id','name',<?php print_r(Zend_Json::encode(array()));?> );
+		dijit.byId('group').set('store',group_store);  
+		dijit.byId('branch_id').focus();
+		return false;
+	}
+	degree = dijit.byId('degree').get('value');
+	if(degree=='' || degree==-1){degree ="";}
+	grade = dijit.byId('grade').get('value');
+	if(grade=='' || grade==-1){grade ="";}
+	academic_year = dijit.byId('academic_year').get('value');
+	if(academic_year=='' || academic_year==-1){academic_year ="";}
+	
+	dojo.xhrPost({
+		url: url_getgroup,
+		content:{
+			'branch_id':branch_id,
+			'degree':degree,
+			'grade':grade,
+			'academic_year':academic_year,
+			'noaddnew':1,'forfilter':1
+			},
+		handleAs:"json",
+		load: function(data) {
+		    group_store  = getDataStorefromJSON('id','name', data);
+		    dijit.byId('group').set('store',group_store);   
+		    if(oldBranch==branch_id){
+		    	dijit.byId('group').set('value','<?php echo $this->search['group']?>');  
+		    }
+		},
+		error: function(err) {
+		}
+	});
+}
+var url_dept = '<?php echo $this->url(array('module'=>'global','controller'=>'grade','action'=>'get-grade')); ?>';
+function getallGrade(){
+	getAllGroupByBranch();  
+	dept_id = dijit.byId('degree').get('value');
+	if(dept_id=='' || dept_id==-1){return false;}
+		dojo.xhrPost({
+			url:url_dept,
+			content:{
+				'dept_id':dept_id,
+				'noaddnew':1
+				},
+			handleAs:"json",
+			load: function(data) {
+				dijit.byId('grade').attr('value','');
+				grade_store  = getDataStorefromJSON('id','name', data);
+			    dijit.byId('grade').set('store',grade_store); 
+			    dijit.byId('grade').attr('value','<?php echo $this->search['grade']?>');  
+			},
+			error: function(err) {
+			}
+		});
+}
+</script>

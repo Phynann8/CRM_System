@@ -1,0 +1,303 @@
+<?php
+	$tr = Application_Form_FrmLanguages::getCurrentlanguage();
+	$_dbgb = new Application_Model_DbTable_DbGlobal();
+	echo $this->headTitle($tr->translate('SINGLE_IDPRINT'));
+	$type=$this->rs[0]['card_type'];//CARD_TYPE;  // tyep=1 for ELT , type=2 for good will , type=3 for New World
+	
+	$displayBy = 1;
+	$validDateLabel="";
+	$issueDateLabel="";
+	if (!empty($bg)){
+		$displayBy = $bg['display_by'];
+		$prefix = $bg['card_prefix'];
+		$validDate = $bg['valid'];
+		$issueDate = $bg['issue'];
+		$issueDateLabel = date("F j, Y",strtotime($issueDate));
+		$issueDateLabel = date("F j, Y",strtotime($validDate));
+	}
+				
+	$defaultProfile = $this->baseUrl().'/images/no-profile.png';
+?>	
+<style>
+
+div#tt .tabs-panels .panel-body.panel-body-noheader.panel-body-noborder {
+    overflow: auto;
+    background: #fff;
+}
+
+.ptss__toggle-btn {
+    display: none;
+}
+section.inputmask {
+    box-shadow: none !important;
+    border: 0 !important;
+}
+button.button-class.btn-primary {
+    padding: 10px;
+    border-radius: 7px;
+    margin-top: 10px;
+    font-size: 14px;
+}
+
+</style>
+<div align="center" style="width:100%  !important; padding: 0px;margin:0px;">
+	<button id="printBtn" class="button-class btn-primary"><?php echo $tr->translate("PRINT");?> <i class="fa fa-print"></i></button>
+</div>
+<div style="width:21cm !important;height:12.7cm;padding: 0px;margin:0px;">
+		<div id="divPrint1" >
+			<style>
+					.bgcard{
+						background-image: url('<?php echo $this->baseUrl()."/images/card/bgsizepvccard.jpg";?>');background-size: 100%;
+						background-repeat: no-repeat;
+						width: 100%;
+						height: 100%;
+						position: relative;	
+						margin: 0;
+						padding: 0;
+					}	
+					
+					@page {
+						margin: 0;
+					 }
+					.card-content-student-print{
+						background-image: url('<?php echo $this->baseUrl()."/images/card/student_card_bg.jpg";?>');
+						background-size: 100%;background-repeat: no-repeat;
+						transform: rotateZ(-90deg);	
+						
+						position: absolute;
+						left: 169px;	
+						font-family: 'Times New Roman', 'sans-serif', 'Khmer OS Battambang';						
+					}
+				<?php if(!empty($this->groupByBranchAndSchool)) foreach($this->groupByBranchAndSchool as $bck){
+					$image = $this->baseUrl().'/images/card/default_card_bg.jpg';
+					$color = "000000";
+					$dep = empty($bck['degree_id'])?0:$bck['degree_id'];
+					$bg = $_dbgb->getCardBackground($bck['branch_id'],1,$bck['schoolOption'],$dep);
+					if(!empty($bg['background'])){
+						
+						if (file_exists(PUBLIC_PATH."/images/card/".$bg['background'])){
+							$image = $this->baseUrl().'/images/card/'.$bg['background'];
+						}
+						
+						if (!empty($bg['colorcode'])){
+							$color = str_replace("#", "", $bg['colorcode']);
+						}
+					}
+				?>
+					
+					.card-content-student-print<?php echo $dep;?>{
+						background-image: url('<?php echo $image;?>');
+						 background-size: 100%;background-repeat: no-repeat;
+											
+					}
+					
+					.name-card-block ul.list-data li.sdudent-id.color-{
+						color:#<?php echo $color;?>;
+					}
+				<?php }?>
+					.profile-card-block {
+						position: relative;
+					}
+					.profile-card-block .photo {
+						text-align: center;
+						width: 100%;
+						position: absolute;
+						top: 73px;
+						left: -0.58px;
+					}
+					.photo img {
+						width: 78px;
+						height: 98px;
+					}
+					.name-card-block {
+						position: relative;
+					}
+					span.stuNameValue {
+						position: absolute;
+						top: 174px;
+						display: block;
+						width: 100%;
+						text-align: center;
+						font-weight: 600;
+						font-size: 14px;
+					}	
+					.name-card-block ul.list-data {
+						list-style-type: none;
+						padding: 0;
+						width: 60%;
+						margin: 0;
+						position: absolute;
+						text-align: left;
+						top: 217px !important;
+						left: 48px;
+						color: #01049f;
+						font-weight: bold;
+						font-size: 12px;
+					}
+					.name-card-block ul.list-data li{
+						line-height: 6px;	    
+					}
+					.name-card-block ul.list-data li.sdudent-id{
+						margin-top:13px;
+						/*color: #01731b;*/
+						color: #01049f;
+					}
+					.foot-left-block {
+						position: relative;
+						width: 100%;
+					}
+					.qrimages {
+						position: absolute;
+						top: 253px;
+						left: -30px;
+						width: 100%;
+						text-align: center;
+					}
+					.qrimages svg,
+					.qrimages img {
+						width: 29%;
+						text-align: center;
+					}
+						.validdate {
+						position: relative;
+					}
+					.validdate .exp_date {
+						color: #01049f;
+						position: absolute;
+						top: 243px;
+						right: 5px;
+						font-size: 5px;
+						font-weight: 700 !important;
+					}
+					
+					.card-content-student-print.blogCard1 {
+						top: -34px;
+					}
+					.card-content-student-print.blogCard2 {
+						top: 195px;
+				
+					}
+					@media print{@page {size: portrait;}}
+					
+				</style>
+			<div id="cards" class='bgcard'>
+				
+			</div>
+		
+	</div>
+</div>
+<script type="text/javascript">
+	$(document).ready(function() {
+		setTimeout(function () {
+			generateCards();
+		}, 1000);
+	});
+	$("#printBtn").on("click", function () {
+	  var frame = $('<iframe />');
+		frame.css({ position: "absolute", top: "-9999px" });
+		$("body").append(frame);
+
+		var doc = frame[0].contentWindow.document;
+		doc.open();
+		doc.write("<html><head><title>Print</title></head><body>");
+		doc.write($("#divPrint1").html());
+		doc.write("</body></html>");
+		doc.close();
+
+		setTimeout(function () {
+			frame[0].contentWindow.focus();
+			frame[0].contentWindow.print();
+			frame.remove();
+		}, 150);
+	});
+	
+	var displayBy = <?php echo $displayBy;?>;
+	var list = <?php echo Zend_Json::encode($this->rs);?>;
+	 function generateCards() {
+		 loadingBlock();
+		$("#cards").empty();
+		$.each(list, function (i, item) {
+			var svg = generateSvgQR(item.qrUrl);
+			var thisPhoto = '<?php echo $defaultProfile;?>';
+			var stuName = item.en_name;
+			if(displayBy==2){
+				stuName = item.stu_khname;
+			}
+			
+			var classPartBlock="blogCard1";
+			if( i%2==0){
+				classPartBlock="blogCard2";
+			}
+			var card = $(
+			
+			'<div class="card-content-student-print card-content-student-print'+item.degree_id+' '+classPartBlock+'" style=" display:block;line-height: 16.285px;width: 209px;height: 329px;color: #3f3f95; border:.5px solid #e6e6e661;">'+
+						'<div class="profile-card-block">'+
+							'<div class="photo">'+
+								'<img id="photo'+i+'" src="'+thisPhoto+'">'+
+							'</div>'+
+						'</div>'+
+						'<div class="name-card-block">'+
+							'<span class="stuNameValue">' + escapeHtml(stuName) + '</span>'+
+							'<ul class="list-data">'+
+								'<li><span class="title_value">' + escapeHtml(item.group_name) + '</span></li>'+
+								'<li class="sdudent-id color-card1card1"><span class="title_value">' + escapeHtml(item.stu_code) + '</span></li>'+
+							'</ul>'+
+						'</div>'+
+						'<div class="validdate">'+
+								'<span class="exp_date"></span>'+
+							'</div>'+
+							'<div class="foot-left-block">'+
+							'<div class="qrimages">'+
+								svg+
+							'</div>'+
+						'</div>'+
+						'<div class="foot-right-block">'+
+						'</div>'+
+					'</div>'
+			  
+			);
+
+			$("#cards").append(card);
+			loadImage(item.photoUrl,$("#photo"+i));
+		  });
+		setTimeout(function () {
+			
+			HideloadingBlock();
+	    }, 1000);
+    }
+function loadImage(url, elem) {
+    checkImage(url, function(ok) {
+        if (!ok) {
+            elem.attr("src", '<?php echo $defaultProfile;?>');
+        } else {
+            elem.attr("src", url);
+        }
+    });
+}
+function checkImage(url, callback) {
+    var img = new Image();
+    img.onload = function () { callback(true); };
+    img.onerror = function () { callback(false); };
+    img.src = url;
+}  
+  
+/* Generate SVG QR using qrcode-generator lib */
+function generateSvgQR(text) {
+  var qr = qrcode(0, "M");
+  qr.addData(text);
+  qr.make();
+  return qr.createSvgTag(4, 4); // scale = 4, 10 = padding (quiet zone)
+}
+/* escape HTML to avoid injection */
+function escapeHtml(s) {
+  return (s + "").replace(/[&<>"]/g, function (m) {
+    return ({
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      "\"": "&quot;"
+    })[m];
+  });
+}
+
+</script>

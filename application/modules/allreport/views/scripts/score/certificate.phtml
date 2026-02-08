@@ -1,0 +1,437 @@
+<?php 
+$tr = Application_Form_FrmLanguages::getCurrentlanguage();
+echo $this->headTitle($tr->translate('PRINT_CERTIFICATE'));
+$_dbgb = new Application_Model_DbTable_DbGlobal();
+$month = array("01"=>"មករា","02"=>"កុម្ភៈ","03"=>"មីនា","04"=>"មេសា","05"=>"ឧសភា","06"=>"មិថុនា","07"=>"កក្កដា","08"=>"សីហា","09"=>"កញ្ញា","10"=>"តុលា","11"=>"វិច្ឆិកា","12"=>"ធ្នូ",);
+
+?>
+<style>
+	button#portraitBtn,
+	button#landscapeBtn,
+	button.btn-export,
+	button.btn-search {
+		display: none !important;
+	}
+</style>
+<div class="layout-wrapper-report">
+	<div id="mainContent" class="main-content-report">
+		<div class="report-preview">
+			<?php echo $this->controlReport?>
+			<div id="main-viewer" class="main-viewer portrait">
+				<div id="viewer" class="viewer portrait">
+					<div id="divPrint" class="content">
+						<link rel="stylesheet" href="<?php echo $this->baseUrl();?>/admin/build/css/report-style.css">
+						<link rel="stylesheet" href="<?php echo $this->baseUrl();?>/admin/build/css/report-style-screen.css">
+						<?php 
+							$imageBackground = $this->baseUrl().'/images/card/certificate/certificate.jpg';
+							if (!empty($setting['background'])) {
+								if (file_exists(PUBLIC_PATH . "/images/background/" . $setting['background'])) {
+									$imageBackground = $this->baseUrl() . '/images/background/' . $setting['background'];
+								}
+							} 
+							if($this->rs['type']==1){ //for khmer  ?>
+
+							<style>
+								.certificate{
+									background-image: url('<?php echo $imageBackground;?>');
+									background-size: 100%;
+									background-repeat: no-repeat;
+									position: relative;
+									/*border:solid 1px #ccc;*/
+									top:13px;
+									display:inline-block; 
+									line-height: 23px;   
+									width: 28cm; 
+									height:20cm;   
+									color: #3f3f95; 
+									font-family: 'Times New Roman', sans-serif,'Khmer OS Muol Light';
+								}
+								.one-row-certif{
+									text-align:center; 
+									margin: 0 auto; 
+									padding: 0;
+								}
+									
+								span.value{
+									 font-size: 16px;
+									 display: inline-block;
+										 color: #283d84;
+								}
+								span.student_name {
+									position: absolute;
+									top:<?php echo empty($setting['name_top'])?'287':$setting['name_top'];?>px;
+									left:<?php echo empty($setting['name_left'])?'190':$setting['name_left'];?>px;
+									min-width: 220px;
+									text-align: center;
+								}
+								
+								span.gender {
+									position: absolute;
+									top:<?php echo empty($setting['gender_top'])?'287':$setting['gender_top'];?>px;
+									left:<?php echo empty($setting['gender_left'])?'440':$setting['gender_left'];?>px;
+									min-width: 70px;
+									text-align: center;
+								}
+									
+								span.dob {
+									position: absolute;
+									top: <?php echo empty($setting['date_top'])?'319':$setting['date_top'];?>px;
+									left: <?php echo empty($setting['date_left'])?'248':$setting['date_left'];?>px;
+									min-width: 220px;
+									text-align: center;
+								}
+								
+								span.dept {
+									position: absolute;
+									top: <?php echo empty($setting['grade_top'])?'380':$setting['grade_top'];?>px;
+									left: <?php echo empty($setting['grade_left'])?'106':$setting['grade_left'];?>px;
+									min-width: 410px;
+									text-align: center;
+								}
+								span.duration {
+									position: absolute;
+									top: <?php echo empty($setting['duration_top'])?'413':$setting['duration_top'];?>px;
+									left: <?php echo empty($setting['duration_left'])?'208':$setting['duration_left'];?>px;
+									font-size: 14px;
+									min-width: 295px;
+									text-align: center;
+									font-family: 'Times New Roman','Khmer OS Battambang';
+									font-weight: 500;
+								}
+								span.student_name_eng {
+									position: absolute;
+									top:<?php echo empty($setting['name_eng_top'])?'287':$setting['duration_top'];?>px;
+									right: <?php echo empty($setting['name_eng_left'])?'190':$setting['name_eng_left'];?>px;
+									min-width: 220px;
+									text-align: center;
+									font-weight: bold;
+								}
+								span.gender_eng {
+									position: absolute;
+									top: <?php echo empty($setting['gender_eng_top'])?'287':$setting['gender_eng_top'];?>px;
+									right: <?php echo empty($setting['gender_eng_left'])?'101':$setting['gender_eng_left'];?>px;
+									min-width: 60px;
+									text-align: center;
+									font-weight: bold;
+								}
+								span.dob_eng {
+									position: absolute;
+									top: <?php echo empty($setting['date_eng_top'])?'319':$setting['date_eng_top'];?>px;
+									right: <?php echo empty($setting['date_eng_left'])?'125':$setting['date_eng_left'];?>px;
+									min-width: 300px;
+									text-align: center;
+									font-weight: bold;
+								}
+								
+								span.dept_eng {
+									position: absolute;
+									top: <?php echo empty($setting['grade_eng_top'])?'379':$setting['grade_eng_top'];?>px;
+									right: <?php echo empty($setting['grade_eng_left'])?'106':$setting['grade_eng_left'];?>px;
+									min-width: 410px;
+									text-align: center;
+									font-weight: bold;
+								}
+								
+								span.duration_eng {
+									position: absolute;
+									top: <?php echo empty($setting['duration_eng_top'])?'413':$setting['duration_eng_top'];?>px;
+									right: <?php echo empty($setting['duration_eng_left'])?'115':$setting['duration_eng_left'];?>px;
+									font-size: 14px;
+									min-width: 330px;
+									text-align: center;
+									font-family: 'Times New Roman','Khmer OS Battambang';
+									font-weight: 500;
+								}
+								.profile-card-block .photo {
+									width: initial;
+									position: absolute;
+									left: 476px;
+									border: solid 1px #4a4a4a;
+									bottom: 113px;
+								}
+								.photo img {
+									width: 100px;
+									height: 127px;
+								}
+								span.issue_date {
+									position: absolute;
+									bottom: <?php echo empty($setting['issue_date_top'])?'87':$setting['issue_date_top'];?>px;
+									right: <?php echo empty($setting['issue_date_left'])?'436':$setting['issue_date_left'];?>px;
+									font-size: 14px;
+									min-width: 110px;
+									text-align: center;
+									font-family: 'Times New Roman','Khmer OS Battambang';
+									font-weight: bold;
+								}
+								* {
+									margin: 0;
+									padding: 0;
+								}
+								
+								body{padding:0;margin:0}
+
+								@media print{
+									@page{
+										page: A4;
+										size: landscape;
+										margin:0;
+										padding:0;
+									}
+									body {
+										-webkit-print-color-adjust: exact; /* Ensures colors and backgrounds are printed */
+										print-color-adjust: exact; /* Standard version for color printing */
+									}
+									.certificate{
+										background-image: url('<?php echo $imageBackground;?>');
+										background-size: 100%;
+										background-repeat: no-repeat;
+										position: relative;
+										/*border:solid 1px #ccc;*/
+										top:13px;
+										display:inline-block; 
+										line-height: 23px;   
+										width: 28cm; 
+										height:20cm;   
+										color: #3f3f95; 
+										font-family: 'Times New Roman', sans-serif,'Khmer OS Muol Light';
+									}
+									
+								}
+							</style>
+							<div class="one-row-certif" >
+								<div class="certificate">
+									<span class="value student_name"><?php echo $this->rs['stu_khname'];?></span>
+									<span class="value gender"><?php echo $this->rs['sexkh'];?></span>
+									<span class="value dob"><?php echo $_dbgb->getNumberInkhmer(date("d",strtotime($this->rs['dob'])))."-".$month[date("m",strtotime($this->rs['dob']))]."-".$_dbgb->getNumberInkhmer(date("Y",strtotime($this->rs['dob'])));?></span>
+									<span class="value dept"><?php echo $this->rs['dept_kh'];?></span>
+									<span class="value duration"><?php if(!empty($this->rs['from_date']) AND $this->rs['from_date'] != "0000-00-00"){ echo $_dbgb->getNumberInkhmer(date("d",strtotime($this->rs['from_date'])))." ".$month[date("m",strtotime($this->rs['from_date']))]." ".$_dbgb->getNumberInkhmer(date("Y",strtotime($this->rs['from_date'])))." ដល់ ".$_dbgb->getNumberInkhmer(date("d",strtotime($this->rs['to_date'])))." ".$month[date("m",strtotime($this->rs['to_date']))]." ".$_dbgb->getNumberInkhmer(date("Y",strtotime($this->rs['to_date']))); }?></span>
+									<span class="value student_name_eng"><?php echo strtoupper($this->rs['stu_name']);?></span>
+									<span class="value gender_eng"><?php echo $this->rs['sex'];?></span>
+									<span class="value dob_eng"><?php echo date("d",strtotime($this->rs['dob']))."-".date("F",strtotime($this->rs['dob']))."-".date("Y",strtotime($this->rs['dob']));?></span>
+									<span class="value dept_eng"><?php echo $this->rs['dept_eng'];?></span>
+									<span class="value duration_eng"><?php if(!empty($this->rs['from_date'])  AND $this->rs['from_date'] != "0000-00-00"){ echo date("d",strtotime($this->rs['from_date']))."-".date("F",strtotime($this->rs['from_date']))."-".date("Y",strtotime($this->rs['from_date']))." To ".date("d",strtotime($this->rs['to_date']))."-".date("F",strtotime($this->rs['to_date']))."-".date("Y",strtotime($this->rs['to_date'])); }?></span>
+									<?php if(!empty($this->rs['issue_date'])  AND $this->rs['issue_date'] != "0000-00-00"){?>
+									<span class="value issue_date"><?php echo date("d/F/Y",strtotime($this->rs['issue_date']));?></span>
+									<?php }?>
+									<?php 
+									if(!empty($this->rs['photo'])){
+										if (file_exists(PUBLIC_PATH."/images/photo/".$this->rs['photo'])){
+											$image = $this->baseUrl().'/images/photo/'.$this->rs['photo'];
+											?>
+											<div class="profile-card-block">
+												<div class="photo">
+													<img  src="<?php echo $image;?>" alt="profile-image" >
+												</div>
+											</div>
+									<?php 	
+										}
+									}?>
+								</div>
+							</div>
+							<?php }else{?>
+									<style>
+											.certificate{
+												background-image: url('<?php echo $imageBackground;?>');
+												background-size: 100%;
+												background-repeat: no-repeat;
+												position: relative;
+												/*border:solid 1px #ccc;*/
+												top:13px;
+												display:inline-block; 
+												line-height: 23px;   
+												width: 28cm; 
+												height:20cm;   
+												color: #3f3f95; 
+												font-family: 'Times New Roman', sans-serif,'Khmer OS Muol Light';
+											}
+											.one-row-certif{
+												text-align:center; 
+												margin: 0 auto; 
+												padding: 0;
+											}
+												
+											span.value{
+												 font-size: 16px;
+												 display: inline-block;
+													 color: #283d84;
+											}
+											span.student_name {
+												position: absolute;
+												top:<?php echo empty($setting['name_top'])?'287':$setting['name_top'];?>px;
+												left:<?php echo empty($setting['name_left'])?'190':$setting['name_left'];?>px;
+												min-width: 220px;
+												text-align: center;
+											}
+											
+											span.gender {
+												position: absolute;
+												top:<?php echo empty($setting['gender_top'])?'287':$setting['gender_top'];?>px;
+												left:<?php echo empty($setting['gender_left'])?'440':$setting['gender_left'];?>px;
+												min-width: 70px;
+												text-align: center;
+											}
+												
+											span.dob {
+												position: absolute;
+												top: <?php echo empty($setting['date_top'])?'319':$setting['date_top'];?>px;
+												left: <?php echo empty($setting['date_left'])?'248':$setting['date_left'];?>px;
+												min-width: 220px;
+												text-align: center;
+											}
+											
+											span.dept {
+												position: absolute;
+												top: <?php echo empty($setting['grade_top'])?'380':$setting['grade_top'];?>px;
+												left: <?php echo empty($setting['grade_left'])?'106':$setting['grade_left'];?>px;
+												min-width: 410px;
+												text-align: center;
+											}
+											span.duration {
+												position: absolute;
+												top: <?php echo empty($setting['duration_top'])?'413':$setting['duration_top'];?>px;
+												left: <?php echo empty($setting['duration_left'])?'208':$setting['duration_left'];?>px;
+												font-size: 14px;
+												min-width: 295px;
+												text-align: center;
+												font-family: 'Times New Roman','Khmer OS Battambang';
+												font-weight: 500;
+											}
+											span.student_name_eng {
+												position: absolute;
+												top:<?php echo empty($setting['name_eng_top'])?'287':$setting['duration_top'];?>px;
+												right: <?php echo empty($setting['name_eng_left'])?'190':$setting['name_eng_left'];?>px;
+												min-width: 220px;
+												text-align: center;
+												font-weight: bold;
+											}
+											span.gender_eng {
+												position: absolute;
+												top: <?php echo empty($setting['gender_eng_top'])?'287':$setting['gender_eng_top'];?>px;
+												right: <?php echo empty($setting['gender_eng_left'])?'101':$setting['gender_eng_left'];?>px;
+												min-width: 60px;
+												text-align: center;
+												font-weight: bold;
+											}
+											span.dob_eng {
+												position: absolute;
+												top: <?php echo empty($setting['date_eng_top'])?'319':$setting['date_eng_top'];?>px;
+												right: <?php echo empty($setting['date_eng_left'])?'125':$setting['date_eng_left'];?>px;
+												min-width: 300px;
+												text-align: center;
+												font-weight: bold;
+											}
+											
+											span.dept_eng {
+												position: absolute;
+												top: <?php echo empty($setting['grade_eng_top'])?'379':$setting['grade_eng_top'];?>px;
+												right: <?php echo empty($setting['grade_eng_left'])?'106':$setting['grade_eng_left'];?>px;
+												min-width: 410px;
+												text-align: center;
+												font-weight: bold;
+											}
+											
+											span.duration_eng {
+												position: absolute;
+												top: <?php echo empty($setting['duration_eng_top'])?'413':$setting['duration_eng_top'];?>px;
+												right: <?php echo empty($setting['duration_eng_left'])?'115':$setting['duration_eng_left'];?>px;
+												font-size: 14px;
+												min-width: 330px;
+												text-align: center;
+												font-family: 'Times New Roman','Khmer OS Battambang';
+												font-weight: 500;
+											}
+											.profile-card-block .photo {
+												width: initial;
+												position: absolute;
+												left: 476px;
+												border: solid 1px #4a4a4a;
+												bottom: 113px;
+											}
+											.photo img {
+												width: 100px;
+												height: 127px;
+											}
+											span.issue_date {
+												position: absolute;
+												bottom: 87px;
+												right: 436px;
+												font-size: 14px;
+												min-width: 110px;
+												text-align: center;
+												font-family: 'Times New Roman','Khmer OS Battambang';
+												font-weight: bold;
+											}
+											body{padding:0;margin:0}
+
+											@media print{
+												@page{
+													page: A4;
+													size: landscape;
+													margin:0;
+													padding:0;
+												}
+												body {
+													-webkit-print-color-adjust: exact; /* Ensures colors and backgrounds are printed */
+													print-color-adjust: exact; /* Standard version for color printing */
+												}
+												.certificate{
+													background-image: url('<?php echo $imageBackground;?>');
+													background-size: 100%;
+													background-repeat: no-repeat;
+													position: relative;
+													/*border:solid 1px #ccc;*/
+													top:13px;
+													display:inline-block; 
+													line-height: 23px;   
+													width: 28cm; 
+													height:20cm;   
+													color: #3f3f95; 
+													font-family: 'Times New Roman', sans-serif,'Khmer OS Muol Light';
+												}
+												
+											}
+										</style>
+										<div class="one-row-certif" >
+											<div class="certificate">
+												<span class="value student_name"><?php echo $this->rs['stu_khname'];?></span>
+												<span class="value gender"><?php echo $this->rs['sexkh'];?></span>
+												<span class="value dob"><?php echo $_dbgb->getNumberInkhmer(date("d",strtotime($this->rs['dob'])))."-".$month[date("m",strtotime($this->rs['dob']))]."-".$_dbgb->getNumberInkhmer(date("Y",strtotime($this->rs['dob'])));?></span>
+												<span class="value dept"><?php echo $this->rs['dept_kh'];?></span>
+												<span class="value duration"><?php if(!empty($this->rs['from_date']) AND $this->rs['from_date'] != "0000-00-00"){ echo $_dbgb->getNumberInkhmer(date("d",strtotime($this->rs['from_date'])))." ".$month[date("m",strtotime($this->rs['from_date']))]." ".$_dbgb->getNumberInkhmer(date("Y",strtotime($this->rs['from_date'])))." ដល់ ".$_dbgb->getNumberInkhmer(date("d",strtotime($this->rs['to_date'])))." ".$month[date("m",strtotime($this->rs['to_date']))]." ".$_dbgb->getNumberInkhmer(date("Y",strtotime($this->rs['to_date']))); }?></span>
+												<span class="value student_name_eng"><?php echo strtoupper($this->rs['stu_name']);?></span>
+												<span class="value gender_eng"><?php echo $this->rs['sex'];?></span>
+												<span class="value dob_eng"><?php echo date("d",strtotime($this->rs['dob']))."-".date("F",strtotime($this->rs['dob']))."-".date("Y",strtotime($this->rs['dob']));?></span>
+												<span class="value dept_eng"><?php echo $this->rs['dept_eng'];?></span>
+												<span class="value duration_eng"><?php if(!empty($this->rs['from_date'])  AND $this->rs['from_date'] != "0000-00-00"){ echo date("d",strtotime($this->rs['from_date']))."-".date("F",strtotime($this->rs['from_date']))."-".date("Y",strtotime($this->rs['from_date']))." To ".date("d",strtotime($this->rs['to_date']))."-".date("F",strtotime($this->rs['to_date']))."-".date("Y",strtotime($this->rs['to_date'])); }?></span>
+												<?php if(!empty($this->rs['issue_date'])  AND $this->rs['issue_date'] != "0000-00-00"){?>
+												<span class="value issue_date"><?php echo date("d/F/Y",strtotime($this->rs['issue_date']));?></span>
+												<?php }?>
+												<?php 
+												if(!empty($this->rs['photo'])){
+													if (file_exists(PUBLIC_PATH."/images/photo/".$this->rs['photo'])){
+														$image = $this->baseUrl().'/images/photo/'.$this->rs['photo'];
+														?>
+														<div class="profile-card-block">
+															<div class="photo">
+																<img  src="<?php echo $image;?>" alt="profile-image" >
+															</div>
+														</div>
+												<?php 	
+													}
+												}?>
+											</div>
+										</div>
+							<?php }?>
+					</div>					
+				</div>					
+			</div>					
+		</div>					
+	</div>					
+</div>	
+<script>
+document.addEventListener("DOMContentLoaded", function(e) {
+  setTimeout(function() {
+		setPrintOrientation('landscape','A4',true);
+	}, 500);
+});	
+</script>

@@ -1,0 +1,210 @@
+<?php
+	$tr = Application_Form_FrmLanguages::getCurrentlanguage();
+	echo $this->headTitle($tr->translate('RPT_CATE_EXPENSE')); 
+	$frm=$this->form_search;
+	$dateFormat ="d/m/Y";
+	//print_r($this->rowMethod);
+?>
+
+<div class="layout-wrapper-report">
+	<div id="mainContent" class="main-content-report">
+		<div class="report-preview">
+			<?php echo $this->controlReport?>
+			<div id="main-viewer" class="main-viewer portrait">
+				<div id="viewer" class="viewer portrait">
+					<div id="divPrint" class="content">
+						<link rel="stylesheet" href="<?php echo $this->baseUrl();?>/admin/build/css/report-style.css">
+						<link rel="stylesheet" href="<?php echo $this->baseUrl();?>/admin/build/css/report-style-screen.css">
+						<style>
+							@media print {
+								<?php if(!empty($this->printFormat)){ echo $this->printFormat; } ?>
+							}
+							div.doth-line{
+							   border-bottom: 1px dotted #000;
+							   display:block;margin:0px 15px;
+							 }	
+						</style>
+						<div class="print-style " style="margin: 0 auto;width: 100%">
+							<table  class="content-data text-color-black text-h16px text-size-12px" style="width: 100% margin: 0 auto;white-space: nowrap;width: 100%">
+								<tr>
+									<td colspan="3"><?php echo $this->rsheader;?></td>
+								</tr>
+								<tr>
+									<td width="15%" align="center"></td>
+									<td width="70%" align="center">
+										<div><?php echo $tr->translate('RPT_CATE_EXPENSE')?></div>
+										<div id="lblBranchId"></div>
+										<div><?php 
+											echo !empty($this->search['start_date'])? date($dateFormat,strtotime($this->search["start_date"])).'&nbsp;'.$tr->translate('TO').'&nbsp;'.date($dateFormat,strtotime($this->search["end_date"])):date("d-M-Y");
+										?></div>
+									</td>
+									<td width="15%" align="center"></td>
+								</tr>
+								<tr>
+									<td colspan="3" id="exportExcel">
+										<table width="100%" cellpadding="0" cellspacing="0" border="0">
+											<thead>
+												<tr class="text-bold bg-ligt-blues">
+													<td width="25%"></td>
+													<td width="15%"><?php echo $tr->translate('CATE_EXPENSE')?></td>
+													<td width="25%"></td>
+													<td width="35%" align="left" style=""><?php echo $tr->translate('TOTAL_EXPENSE')?></td>
+												</tr>
+											</thead>
+											<?php
+												
+												$parent="";
+												$total_expense = 0;
+												if(!empty($this->row)) foreach ($this->row as $expense_cate){
+													$total_expense = $total_expense +$expense_cate['total_expense'];
+											?>
+											<?php if ( $expense_cate['parentId']!=0 AND $parent != $expense_cate['parentId']){?>
+												<tr>
+													<td >&nbsp;</td>
+													<td >&nbsp;<strong><?php echo $expense_cate['parent_name'];?></strong>&nbsp;</td>
+													<td>&nbsp;</td>
+													<td>&nbsp;</td>
+													<?php $parent = $expense_cate['parentId'];?>
+												</tr>
+											<?php }?>
+											<?php if ( $expense_cate['parentId']==0){?>
+												<tr>
+													<td colspan="2" align="right">&nbsp;<?php echo $expense_cate['expCategoryTitle'];?>&nbsp;</td>
+													<td><div class="doth-line"></div></td>
+													<td align="left">$&nbsp;<?php echo number_format($expense_cate['total_expense'],2);?>&nbsp;</td>
+												</tr>
+											<?php }else{?>
+												<tr>
+													<td >&nbsp;</td>
+													<td align="right"><?php echo $expense_cate['expCategoryTitle'];?></td>
+													<td><div class="doth-line"></div></td>
+													<td align="left">$&nbsp;<?php echo number_format($expense_cate['total_expense'],2);?>&nbsp;</td>
+												</tr>
+											<?php }?>
+											<?php }?>
+											<tr >
+												<td colspan="2"></td>
+												<td align="center" valign="top"><strong>GRAND TOTAL</strong></td>
+												<td align="left" valign="top" >
+													<strong style="border-bottom: 2px double #000;">$&nbsp;<?php echo number_format($total_expense,2);?></strong>
+												<br />
+												<br />
+												</td>
+											</tr>
+											<?php if(!empty($this->rowMethod)) { foreach ($this->rowMethod as $expense_method){?>
+											<tr>
+												<td colspan="2"></td>
+												<td align="center" valign="top"><strong><?php echo $expense_method['paymentTitle']; ?></strong></td>
+												<td align="left" valign="top">
+													<strong >$&nbsp;<?php echo number_format($expense_method['total_expense'],2);?></strong>
+												</td>
+											</tr>
+											<?php } } ?>
+
+											<tr >
+												<td colspan="4">
+													<br />
+												</td>
+											</tr>
+
+											<?php if($total_expense>0){?>
+											<tr>
+												<td colspan="4">
+													<table width="100%" style="font-weight:bold;">
+														<tr style="text-align: center;">
+															<td width="25%"></td>
+															<td width="25%"></td>
+															<td width="25%">Date........./........../........</td>
+															<td width="25%"></td>
+														</tr>
+													</table>
+												</td>
+											</tr>
+											<tr >
+												<td colspan="4">
+													<br />
+												</td>
+											</tr>
+											<tr>
+												<td colspan="4">
+													<table width="100%" style="font-weight:bold;">
+														<tr style="text-align: center;">
+															<td width="25%">Approved by</td>
+															<td width="25%">Checked by</td>
+															<td width="25%">Head Cashier</td>
+															<td width="25%">Cashier</td>
+														</tr>
+													</table>
+												</td>
+											</tr>
+											<?php }?>
+										</table>
+									</td>
+								</tr>
+							</table>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="right-panel-report" id="rightPanel">
+		<div class="card-box">
+			<div class="card-search-head col-sm-12 border-botom">
+				<div class="col-sm-6 text-left pd-0">
+					<h4 class="m-b-0">
+					<?php echo $tr->translate("SEARCH");?> 
+					<i class="fa fa-search "></i> 
+					</h4>
+				</div>
+				<div class="col-sm-6 text-right pd-0">
+					<button onclick="closeRightPanel()" title="<?php echo $tr->translate("CLOSED");?> " class="btn-close">
+						<i class="fa-solid fa-xmark"></i>
+					</button>
+				</div>
+			</div>
+			<form  id='foundation_class' action="" dojoType="dijit.form.Form" method="post" enctype="application/x-www-form-urlencoded">
+				<div class="form-group">
+					<div class="col-md-12 col-sm-12 col-xs-12">
+					   <?php echo $frm->getElement("adv_search");?>
+					</div>
+					<div class="col-md-12 col-sm-12 col-xs-12">
+						<?php echo $frm->getElement("branch_id");?>
+					</div>
+					<!-- <div class="col-md-12 col-sm-12 col-xs-12">
+						<?php //echo $frm->getElement("expenseCategory");?>
+					</div>
+					<div class="col-md-12 col-sm-12 col-xs-12">
+						<?php //echo $frm->getElement("displayCategory");?>
+					</div> -->
+					<div class="col-md-12 col-sm-12 col-xs-12">
+						<?php echo $frm->getElement("start_date");?>
+					</div>
+					<div class="col-md-12 col-sm-12 col-xs-12">
+						<?php echo $frm->getElement("end_date");?>
+					</div>
+					<div class="col-md-12 col-sm-12 col-xs-12">
+						<button class="button-class button-primary fullside" iconClass="glyphicon glyphicon-search" dojoType="dijit.form.Button" showLabel="true" name="search"  type="submit"><?php echo $tr->translate("SEARCH");?></button>
+					</div>
+				</div>
+			</form>	
+		</div>
+	</div>
+</div>
+<script>
+	dojo.require("dojo.data.ItemFileWriteStore");
+	require(["dojo/ready"], function (ready) {
+		ready(function () {
+			let branchId = dijit.byId("branch_id").get('value');
+			if(branchId!=""){
+				
+				let branchLable = dijit.byId("branch_id").attr('displayedValue');
+				$('#lblBranchId').html(branchLable);
+			}
+			
+			setTimeout(function() {
+				setPrintOrientation('portrait');
+			}, 500);
+		});
+	});
+</script>

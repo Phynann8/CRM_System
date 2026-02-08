@@ -1,0 +1,632 @@
+<?php
+	$tr = Application_Form_FrmLanguages::getCurrentlanguage();
+	$this->headTitle($tr->translate('STUDENT_LIST_REPORT')); 
+	echo $this->headTitle();
+	$dbgb = new Application_Model_DbTable_DbGlobal();
+	$base_url = Application_Form_FrmMessage::getUrl("/");
+	$frm =  $this->form_search;
+	$urlCertifyKhmer = $this->baseUrl()."/allreport/allstudent/certify-khmer/id/";
+	$urlCertifyEnglish = $this->baseUrl()."/allreport/allstudent/certify-english/id/";
+
+	$urlAction = $this->url(array('module'=>'allreport','controller'=>'allstudent','action'=>'rpt-student-list'));
+
+?>	
+<style>
+.hide{visibility:visible !important;}
+.hover:hover{ background:#ccc;}
+table.content-data tr.style-head,
+table.tb-footer tr.style-head {
+   font-weight: bold !important;
+}
+
+@media screen {
+    table.content-data {
+        width: 100%;
+        table-layout: auto;          /* flexible for viewing */
+        border-collapse: collapse;
+        font-size: 10px;             /* slightly larger text for screen */
+        white-space: normal;
+        line-height: 18px;
+        margin-bottom: 20px;
+        background: #fff;
+        border: 1px solid #000;
+    }
+
+    table.content-data th {
+        background: #f4f4f4;
+        color: #222;
+        padding: 8px 6px;
+        font-weight: bold;
+        border: 1px solid #000;
+        text-align: center;
+    }
+
+    table.content-data td {
+        padding: 6px 8px;
+        border: 1px solid #000;
+        background: #fff;
+        vertical-align: top;
+        white-space: normal;
+    }
+
+    /* Hover row highlight */
+    table.content-data tbody tr:hover {
+        background: #fafafa;
+    }
+
+    /* Allow scroll if table wide */
+    .report-container {
+        width: 100%;
+        overflow-x: auto;
+    }
+
+    /* Make header area cleaner on screen */
+    .report-header,
+    .branch-info,
+    .title-line {
+        font-size: 12px;
+        line-height: 18px;
+        margin: 0;
+        padding: 2px 0;
+    }
+
+    .logo-img {
+        max-height: 80px;
+    }
+}
+
+</style>
+<div class="layout-wrapper-report">
+	<div id="mainContent" class="main-content-report">
+		<div class="report-preview">
+			<?php echo $this->controlReport?>
+			<div id="main-viewer" class="main-viewer portrait">
+				<div id="viewer" class="viewer portrait">
+					<div id="divPrint" class="content">
+						<link rel="stylesheet" href="<?php echo $this->baseUrl();?>/admin/build/css/report-style.css">
+						<link rel="stylesheet" href="<?php echo $this->baseUrl();?>/admin/build/css/report-style-screen.css">
+						<style>
+							@media print {
+								<?php if(!empty($this->printFormat)){ echo $this->printFormat; } ?>
+							}
+						</style>
+						
+						<style>
+						/* custom-style.css */
+							
+							.cheader {
+								height: 30px;
+								font-weight: bold;
+								background: #ccc;
+								white-space: nowrap;
+							}
+							table{
+								page-break-inside: auto;
+								font-family: 'Battambang', 'Times New Roman';
+							}
+							#header {
+								display: table-header-group;
+								page-break-inside: avoid;
+								page-break-after: auto;
+							}
+							table.content-data {
+								border-collapse: collapse;
+								width: 100%;
+								border: 1px solid #000;
+								font-size: 10px;
+								line-height: 16px;
+								white-space: nowrap;
+								color: #000;
+								margin: 0 auto;
+							}
+							table.content-data thead tr.style-head {
+								line-height: 18px;
+								height: 20px;
+								text-align: center;
+							}
+							table.content-data tr.style-rowdata {
+								font-size: 10px;
+								height: 17px;
+							}
+							.report-wrapper {
+								background: #fff;
+								width: 100%;
+								color: #040404;
+							}
+							.logo-cell {
+								width: 40%;
+								text-align: center;
+							}
+							.logo-img {
+								max-height: 90px;
+							}
+							.spacer-cell {
+								width: 20%;
+							}
+							.nationality-cell {
+								width: 40%;
+								text-align: center;
+							}
+							.title-line {
+								font-size: 12px;
+								font-family: 'Times New Roman', 'Khmer OS Muol Light';
+							}
+							.style-img {
+								height: 10px;
+							}
+							.branch-info {
+								font-size: 12px;
+								font-family: 'Times New Roman', 'Khmer OS Muol Light';
+							}
+							.report-title {
+								font-family: 'Times New Roman', 'Khmer OS Muol Light';
+								text-align: center;
+								font-size: 12px;
+							}
+							.report-header {
+								font-size: 12px;
+							}
+							.report-year {
+								font-size: 12px;
+							}
+							.wrap-cell {
+								padding: 1px 2px;
+								font-size: 90%;
+								line-height: 12px;
+								text-align: left;
+								width: 150px;
+								min-width: 150px;
+								white-space: normal;
+								overflow-wrap: break-word;	
+							}
+							.text-center {
+								text-align: center;
+							}
+							.text-left {
+								text-align: left;
+							}
+							.footer-border {
+							border: 1px solid #fff;
+							}
+
+							.summary-table {
+							width: 33%;
+							color: #000;
+							font-family: 'Times New Roman', 'Khmer OS Battambang';
+							font-size: 12px;
+							}
+
+							.summary-cell {
+							vertical-align: top;
+							width: 33%;
+							text-align: left;
+							}
+
+							.nowrap {
+							white-space: nowrap;
+							}
+
+							.signature-table {
+							width: 100%;
+							color: #000;
+							font-family: 'Battambang', 'Times New Roman';
+							font-size: 12px;
+							}
+
+							.signature-cell {
+							width: 35%;
+							text-align: center;
+							vertical-align: top;
+							}
+
+							.signature-spacer {
+							width: 30%;
+							}
+
+							.teacher-name {
+							font-family: 'Khmer MEF2';
+							font-size: 12px;
+							}
+
+							.role-label {
+							font-family: 'Times New Roman', 'Khmer OS Muol Light';
+							}
+
+						</style>
+					
+						<form action="<?php echo $this->url(array('module'=>'allreport','controller'=>'allstudent','action'=>'submitlist')); ?>" dojoType="dijit.form.Form" method="post" enctype="application/x-www-form-urlencoded">
+						<table class="report-wrapper">
+							<?php
+								$logo = $this->baseUrl().'/images/logo.png';
+								if (!empty($this->rr['branch_logo'])){
+								if (file_exists(PUBLIC_PATH."/images/logo/".$this->rr['branch_logo'])){
+									$logo = $this->baseUrl().'/images/logo/'.$this->rr['branch_logo'];
+								}
+								}
+							?>
+							<tr>
+								<td class="logo-cell"></td>
+								<td class="spacer-cell"></td>
+								<td class="nationality-cell">
+									<span class="title-line"><?php echo $tr->translate("NATIONALITY_OFKINGDOM");?></span><br />
+									<span class="title-line"><?php echo $tr->translate("NATION_RELIGION_KING");?></span>
+									<div><img class="style-img" src="<?php echo $this->baseUrl()."/images/style.png";?>" /></div>
+								</td>
+							</tr>
+							<tr>
+								<td colspan="2" class="branch-info">
+									<span class="branch-line"><?php echo $this->branchInfo['centereys']; ?></span><br />
+									<span class="branch-line"><?php echo $this->branchInfo['officeeys']; ?></span><br>
+									<span class="branch-line"><?php echo $this->branchInfo['school_namekh']." ".$this->branchInfo['branch_namekh']; ?></span>
+								</td>
+								<td></td>
+							</tr>
+							<tr>
+								<td colspan="3" class="report-title">
+								<span class="report-header"><?php echo $tr->translate("STUDENT_LIST_REPORT");?></span>
+								<div>ថ្នាក់ <?php echo $this->rr['group_code']; ?></div>
+								<div class="report-year">
+									<span><?php echo $tr->translate("ACADEMIC_YEAR");?></span>
+									<?php 
+										$yearValue = $this->rr['academic'];
+										list($fromYear, $toYear) = explode("-", $yearValue);
+									?>
+									<?php echo $dbgb->getNumberInkhmer(date($fromYear)); ?>-
+									<?php echo $dbgb->getNumberInkhmer(date($toYear)); ?>
+								</div>
+								</td>
+							</tr>
+							<tr>
+								<td colspan="3" id="exportExcel">
+									<table class="content-data bd-black" cellpadding="5" border="1">
+										<colgroup>
+											<col class="wpx-10">
+											<col class="wpx-120">
+											<col class="wpx-120">
+											<col class="wpx-120">
+
+											<col class="wpx-50">
+											<col class="wpx-50">
+											<col class="wpx-100">
+											<col class="wpx-150">
+
+											<col class="wpx-50">
+											<col class="wpx-50">
+											<col class="wpx-50">
+											<col class="wpx-50">
+
+											<col class="wpx-30">
+											<col class="wpx-30">
+
+											<col class="wpx-50">
+											<col class="wpx-50">
+											<col class="wpx-50">
+											<col class="wpx-50">
+											
+										</colgroup>
+										<thead>
+											<tr class="style-head bd-black bd-w1px">
+												<td rowspan="2"><?php echo $tr->translate("NUM");?></td>
+												<td colspan="7"><?php echo $tr->translate("STUDENT_INFO");?></td>
+												<td colspan="4"><?php echo $tr->translate("PARENT_INFO");?></td>
+												<td colspan="6"><?php echo $tr->translate("CURRENT_ADDRESS");?></td>
+											</tr>
+											<tr class="style-head bd-black bd-w1px">
+												<td><?php echo $tr->translate("STUDENT_ID");?></td>
+												<td><?php echo $tr->translate("STUDENT_NAMEKHMER");?></td>
+												<td><?php echo $tr->translate("NAME_ENGLISH");?></td>
+												<td><?php echo $tr->translate("SEX");?></td>
+												<td><?php echo $tr->translate("NATIONALITY");?></td>
+												<td><?php echo $tr->translate("DATE_OF_BIRTH");?></td>
+												<td><?php echo $tr->translate("POB");?></td>
+
+												<td><?php echo $tr->translate("FATHER_NAME");?></td>
+												<td><?php echo $tr->translate("OCCUPATION");?></td>
+												<td><?php echo $tr->translate("MOTHER_NAME");?></td>
+												<td><?php echo $tr->translate("OCCUPATION");?></td>
+
+												<td><?php echo $tr->translate("NUMBER_HOME");?></td>
+												<td><?php echo $tr->translate("STREET");?></td>
+												<td><?php echo $tr->translate("VILLAGE");?></td>
+												<td><?php echo $tr->translate("COMMUNE");?></td>
+												<td><?php echo $tr->translate("DISTRICT");?></td>
+												<td><?php echo $tr->translate("CITY_PROVINCE");?></td>
+											</tr>
+										</thead>
+										<tbody>
+										<?php $i=0; $male=0; $femle=0; $str='';
+											foreach ($this->rs as $key=> $row){ $i++;
+											$str .= ($key == 0) ? ($key+1) : ",".($key+1);
+										?>
+										<tr class="style-rowdata hover context-menu-one" oncontextmenu="setrowdata(<?php echo $row['stu_id'];?>);return false;" id="<?php echo "row".$i?>" align="left">
+											<td class="text-center"><?php echo $i;?></td>
+											<td><?php echo $row['stu_code']?></td>
+											<td class="text-left"><?php echo $row['kh_name'];?></td>
+											<td class="text-left"><?php echo $row['last_name'].' '.$row['en_name'];?></td>
+											<td class="text-center"><?php echo $row['sex'];
+											if($row['gender']==1){ $male++; } else { $femle++; }
+											?></td>
+											<td class="text-center"><?php echo $row['nation'];?></td>
+											<td class="text-center">
+											<?php
+												$format = 'd/m/Y';
+												$dateString = $row["dob"];
+												$date = new DateTime($dateString);
+												$dob = $date->format($format);
+												echo ($row['dob']=='00-00-0000')?'':$dob;
+											?>
+											</td>
+											<td class="wrap-cell"> <?php echo $row['pob'];?> </td>
+
+											<td><?php echo $row['father_khname'];?></td>
+											<td><?php echo $row['father_job'];?></td>
+											<td><?php echo $row['mother_khname'];?></td>
+											<td><?php echo $row['mother_job'];?></td>
+										
+											<td><?php if (!empty($row['home_num'])){ echo $row['home_num'];}?></td>
+											<td><?php if (!empty($row['street_num'])){ echo $row['street_num'];}?></td>
+											<td><?php if (!empty($row['village_name'])){ echo $row['village_name'];}?></td>
+											<td><?php if (!empty($row['commune_name'])){ echo $row['commune_name'];}?></td>
+											<td><?php if (!empty($row['district_name'])){ echo $row['district_name'];}?></td>
+											<td><?php if (!empty($row['province'])){ echo $row['province'];}?></td>
+										</tr>
+										<?php } ?>
+										</tbody>
+									</table>
+								</td>
+							</tr>
+							<tr>
+								<td colspan="3" class="footer-border">
+									<table class="summary-table">
+										<tr>
+											<td class="summary-cell text-left">
+												<span><?php echo $tr->translate("STUDENT_TOTAL");?></span> : 
+												<?php echo $i;?><span><?php echo $tr->translate("STUDENT_UNIT");?></span>
+											</td>
+											<td class="summary-cell text-left">
+												<span><?php echo $tr->translate("FEMALE");?></span> : 
+												<span><?php echo $femle." ".$tr->translate("STUDENT_UNIT");?></span>
+											</td>
+											<td class="summary-cell text-left nowrap">
+												<span><?php echo $tr->translate("MALE");?></span> : 
+												<?php echo $male;?> <span><?php echo $tr->translate("STUDENT_UNIT");?></span>
+											</td>
+										</tr>
+									</table>
+									<input type="hidden" name="identity" id="identity" value="<?php echo $str;?>" />
+									<input type="hidden" name="group_id" id="group_id" value="<?php echo !empty($this->rr['id'])?$this->rr['id']:'';?>" />
+								</td>
+							</tr>
+							<tr>
+								<td colspan="3">
+									<table class="signature-table">
+										<tr>
+											<td class="signature-cell"></td>
+											<td class="signature-spacer"></td>
+											<td class="signature-cell text-center">
+											<?php $moment = date("Y-m-d");
+											$lunar = new Application_Model_DbTable_DbLunaCalendar($moment); ?>
+											<span class="">
+												<?php echo $lunar->toLunarDate('ថ្ងៃW dN  ខែm ឆ្នាំa ព.ស. b'); ?>
+											</span>
+											<span>
+												រាជធានីភ្នំពេញ, ថ្ងៃទី
+												<?php echo $dbgb->getNumberInkhmer(date("d")); ?> ខែ
+												<?php echo $dbgb->getMonthInkhmer(date("m")); ?> ឆ្នាំ
+												<?php echo $dbgb->getNumberInkhmer(date("Y")); ?>
+											</span>
+											<br />
+											<span class="role-label"><?php echo $tr->translate("TEACHER_ROOM");?></span>
+											</td>
+										</tr>
+										<tr>
+											<td class="signature-cell"></td>
+											<td class="signature-cell text-center">
+											<span><?php echo $tr->translate("CHECKANDAPPROVED");?></span><br />
+											<span class="role-label"><?php echo $tr->translate("PRINCIPAL");?></span>
+											</td>
+											<td class="signature-cell text-center teacher-name">
+											<br /><br /><?php echo !empty($this->rr['teacher_name_kh'])?$this->rr['teacher_name_kh']:'';?>
+											</td>
+										</tr>
+										<tr>
+											<td class="signature-cell text-center">
+											<span><?php echo $tr->translate("CHECKANDAPPROVED");?></span><br />
+											<span class="role-label">ប្រធាន<?php echo $this->branchInfo['officeeys']; ?></span>
+											</td>
+											<td class="signature-spacer"></td>
+											<td class="signature-cell"></td>
+										</tr>
+									</table>
+								</td>
+							</tr>
+						</table>
+					</form>
+				</div>	
+			</div>	
+		</div>	
+	</div>	
+</div>
+	<div class="right-panel-report" id="rightPanel">
+		<div class="card-box">
+			<div class="card-search-head col-sm-12 border-botom">
+				<div class="col-sm-6 text-left pd-0">
+					<h4 class="m-b-0">
+						<?php echo $tr->translate("SEARCH");?> 
+						<i class="fa fa-search "></i> 
+					</h4>
+				</div>
+				<div class="col-sm-6 text-right pd-0">
+					<button onclick="closeRightPanel()" title="<?php echo $tr->translate("CLOSED");?> " class="btn-close">
+						<i class="fa-solid fa-xmark"></i>
+					</button>
+				</div>
+			</div>
+			<form  id='foundation_class' action="<?php echo $urlAction.'?inFrame='.$this->inFrame; ?>" dojoType="dijit.form.Form" method="post" enctype="application/x-www-form-urlencoded">
+				<script type="dojo/method" event="onSubmit">			
+						if(this.validate()) {
+							loadingBlock();
+							return true;
+						}else {
+							return false;
+						}
+				</script>
+				<div class="form-group">
+					<div class="col-md-12 col-sm-12 col-xs-12">
+						<?php echo $frm->getElement("adv_search");?>
+					</div>
+					<div class="col-md-12 col-sm-12 col-xs-12">
+						<?php echo $frm->getElement("branch_id");?>
+					</div>
+					<div class="col-md-12 col-sm-12 col-xs-12">
+						<?php echo $frm->getElement("academic_year");?>
+					</div>
+				</div>
+				<div class="form-group">
+					 <div class="col-md-12 col-sm-12 col-xs-12">
+						<?php echo $frm->getElement("study_type");?>
+					</div>
+					<div class="col-md-12 col-sm-12 col-xs-12">
+						<?php echo $frm->getElement("stuOrderBy");?>
+					</div>
+					<div class="col-md-12 col-sm-12 col-xs-12">
+						<button class="button-class button-primary fullside" iconClass="glyphicon glyphicon-search" dojoType="dijit.form.Button" showLabel="true" name="search"  type="submit"><?php echo $tr->translate("SEARCH");?></button>
+					</div>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>	
+<script src="<?php echo $this->baseUrl();?>/js/help.js"></script>
+
+<script type="text/javascript">
+dojo.require("dojo.NodeList-manipulate");
+dojo.require("dojo.data.ItemFileWriteStore"); 
+
+var academic_store= getDataStorefromJSON('id','name',<?php print_r(Zend_Json::encode(array()));?> );
+var group_store  = getDataStorefromJSON('id','name',<?php print_r(Zend_Json::encode(array()));?> );
+dojo.ready(function(){
+
+	new dijit.form.FilteringSelect({
+		store: group_store,
+	    queryExpr: "*${0}*",
+		autoComplete: false,                     
+	    id: "group",
+	    name: "group",  
+	    class: 'fullside', 
+	    readonly:false,
+	    required:false,
+	    placeHolder:"<?php echo $tr->translate("SELECT_GROUP");?>",          
+	    onChange: function() {  
+		    
+	    }
+	}, "group");
+
+	<?php if (!empty($this->rr['branch_id'])){?>
+	dijit.byId('branch_id').set('value','<?php echo $this->rr['branch_id']?>');  
+	<?php }?>
+	
+	 var branch_id = dijit.byId('branch_id');
+	 branch_id.on('change', function(evt) {
+		 getAllGroupByBranch();
+    });
+	 var academic_year = dijit.byId('academic_year');
+	 academic_year.on('change', function(evt) {
+		 getAllGroupByBranch();
+    });
+	getAllGroupByBranch();
+	setTimeout(function() {
+		setPrintOrientation('landscape');
+	}, 500);
+});
+var oldBranch = "<?php echo $this->search['branch_id']?>";
+url_getgroup = '<?php echo $this->url(array('module'=>'foundation','controller'=>'group','action'=>'getallgroup'));?>';
+function getAllGroupByBranch(){
+	dijit.byId('group').reset();
+	branch_id = dijit.byId('branch_id').get('value');
+	if(branch_id=='' || branch_id==-1){
+		var group_store  = getDataStorefromJSON('id','name',<?php print_r(Zend_Json::encode(array()));?> );
+		dijit.byId('group').set('store',group_store);  
+		dijit.byId('branch_id').focus();
+		return false;
+	}
+	academic_year = dijit.byId('academic_year').get('value');
+	if(academic_year=='' || academic_year==-1){academic_year ="";}
+	
+	dojo.xhrPost({
+		url: url_getgroup,
+		content:{
+			'branch_id':branch_id,
+			'academic_year':academic_year,
+			'noaddnew':1,
+			'forfilter':1
+			},
+		handleAs:"json",
+		load: function(data) {
+		    group_store  = getDataStorefromJSON('id','name', data);
+		    dijit.byId('group').set('store',group_store);   
+		    if(oldBranch==branch_id){
+		    	dijit.byId('group').set('value','<?php echo $this->search['group']?>');  
+		    }else{
+		    	<?php if (!empty($this->rr['branch_id'])){?>
+		    	dijit.byId('group').set('value','<?php echo $this->rr['id']?>');  
+		    	<?php }?>
+		    }
+		},
+		error: function(err) {
+		}
+	});
+}
+
+function deleteRecord(index) {
+	var txt;
+	var r = confirm("<?php echo $tr->translate("Do you want to remove this student");?>?");
+	if (r == true) {
+		var identity = $('#identity').val();
+		var arrays = identity.split(',');
+		for(var i=0;i<arrays.length;i++) {
+		if(arrays[i] == index) arrays.splice(i,1);
+		}
+		var strings = arrays.join(',');
+		$('#identity').val(strings);
+		dojo.query("#row"+index).remove();
+	} else {
+	    return false;
+	}
+	
+	}
+</script>
+<script src="<?php echo $this->baseUrl();?>/js/help.js"></script>	
+<script type="text/javascript">
+var row=0;
+var url="";
+$(function(){
+	$.contextMenu({
+		selector: '.context-menu-one', 
+		callback: function(key, options) {
+		
+			var m = "clicked: " + key;
+			if(key=="certifykhmer"){
+				url='<?php echo $urlCertifyKhmer;?>';
+				newPageTitle="<?php echo $tr->translate("CERTIFY_KHMER");?>";
+			}else if(key=="certifyenglish"){
+				url='<?php echo $urlCertifyEnglish;?>';
+				newPageTitle="<?php echo $tr->translate("CERTIFY_ENGLIISH");?>";
+			} 
+			addTab(newPageTitle,url+row+'?inFrame=true');
+		//	gotoAction();
+		},
+		items: {
+			"certifykhmer": {name: "<?php echo $tr->translate("CERTIFY_KHMER");?>", icon: "fa-file-text-o",},
+			"certifyenglish": {name: "<?php echo $tr->translate("CERTIFY_ENGLIISH");?>", icon: "fa-file-text-o"},
+		}
+	});
+});
+function setrowdata(index){
+	row = index;
+}
+var recordid ='';
+function gotoAction(){
+	window.open(url+row);
+}
+</script>

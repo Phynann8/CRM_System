@@ -1,0 +1,550 @@
+<?php
+	$tr = Application_Form_FrmLanguages::getCurrentlanguage();
+	echo $this->headTitle($tr->translate("RPT_STUDENT_STATISTIC")); 
+	$frm =  $this->form_search;
+	$dbst = new Allreport_Model_DbTable_DbRptAllStudent();
+	
+?>	
+<style>
+.hover:hover{ background:#ccc;}
+table.content-data tr.style-head,
+table.tb-footer tr.style-head {
+   font-weight: bold !important;
+}
+svg {
+    position: relative !important;
+}
+</style>
+<div class="reportblog">
+	<div class="card-box">
+       	<div class="col-sm-12 border-botom">
+		   	<div class="col-sm-8 pd-0">
+	    		<h4 class="m-b-0"><i class="fa fa-file " aria-hidden="true"></i>&nbsp;&nbsp;&nbsp;<?php echo $tr->translate('RPT_STUDENT_STATISTIC');?></h4>
+    		</div>
+    		<div class="col-sm-4 text-right">
+    		</div>
+    	</div>
+    </div>
+		<form id='foundation_class' action="<?php echo $this->url(array('module'=>'allreport','controller'=>'allstudent','action'=>'rpt-student-statistic')); ?>" dojoType="dijit.form.Form" method="post" enctype="application/x-www-form-urlencoded">
+				<div class="form-group">
+	            	<div class="col-md-3 col-sm-3 col-xs-12">
+	            		<?php echo $frm->getElement("branch_id");?>
+	            	</div>
+	            	<div class="col-md-3 col-sm-3 col-xs-12">
+	            		<?php echo $frm->getElement("academic_year");?>
+	            	</div>
+	            	<div class="col-md-3 col-sm-3 col-xs-12">
+	            		<?php echo $frm->getElement("degree");?>
+	            	</div>
+	            	<div class="col-md-2 col-sm-2 col-xs-12">
+	            		<input id="grade" />
+	            	</div>
+	            	<div class="col-md-1 col-sm-1 col-xs-12"></div>
+	            </div>
+	            <div class="form-group">
+	            	<div class="col-md-3 col-sm-3 col-xs-12">
+	            		<?php echo $frm->getElement("session");?>
+	            	</div>
+	            	<div class="col-md-3 col-sm-3 col-xs-12">
+	            		<?php echo $frm->getElement("study_status");?>
+	            	</div>
+	            	<div class="col-md-3 col-sm-3 col-xs-12">
+		            	<button class="button-class button-primary" iconClass="glyphicon glyphicon-search" dojoType="dijit.form.Button" showLabel="true" name="search"  type="submit"><?php echo $tr->translate("SEARCH");?></button>
+		            </div>
+            	</div>
+		</form>
+		<div class="card-box">
+		<ul class="nav  md-pills pills-primary nav-tab" role="tablist">
+			<li class="nav-item active ">
+				<a class="nav-link" data-toggle="tab" href="#panel22" role="tab">
+					<i class="fa fa-bar-chart ml-2"></i> <?php echo $tr->translate("CHART"); ?>
+				</a>
+			</li>
+			<li class="nav-item " >
+				<a class="nav-link " data-toggle="tab" href="#panel21" role="tab"><i class="fa fa-file-text-o ml-2"></i>
+					<?php echo $tr->translate("REPORT"); ?></a>
+			</li>
+		</ul>
+	</div>
+	<!--/. Tab Menu -->
+	<div class="col-md-12">
+		<!-- Tab panels -->
+		<div class="tab-content vertical">
+			<!--Panel 1-->
+			<div class="tab-pane fade in  " id="panel21" role="tabpanel">
+				<div class="text-right">
+					<a class="qButton print" href="#" title="<?php echo $tr->translate("PRINT"); ?>"
+						onclick="doPrintProfle('divPrint');"><i class="fa fa-print" aria-hidden="true"></i></a>
+				</div>
+				<div id="divPrint">
+					<table border="0" style="background:#fff; margin: 0 auto; width: 100%; ">
+						<tr>
+							<td colspan="3"><?php echo $this->rsheader;?></td>
+						</tr>
+						<tr>
+							<td width="15%" align="center">
+							</td>
+							<td width="70%"  align="center">
+								<span style=" color:#4839bd; font-size:14px;font-family:'Times New Roman','Khmer OS Muol Light';"><?php echo $tr->translate("RPT_STUDENT_STATISTIC");?></span><br />
+								<span style=" color:#4839bd; font-size:12px;font-family:'Times New Roman','Khmer OS Muol Light';"><?php if (!empty($this->search['allacademicyear'])){ echo $tr->translate("STUDY_YEAR")." ".$this->search['allacademicyear'];}?></span>
+							</td>
+							<td width="15%" align="center">
+							</td>
+						</tr>
+					<style>
+							table tr th{
+								border: 1px solid #000;	
+								text-align: center;
+								padding: 3px 2px;
+							}
+							table {page-break-inside:auto }
+					
+							table.content-data{
+								border-collapse:collapse;
+								width:100%;
+								border:1px solid #4839bd; 
+								font-family:'Times New Roman','Khmer OS Battambang';
+								font-size:12px;
+								white-space: nowrap;
+								margin:0 auto;
+								color:#4839bd;
+								margin:0 auto;
+							}
+							table.content-data thead tr.style-head {
+							line-height: 25px; padding:1px 0px; white-space: nowrap;height: 20px; 
+								background: #ccd9ff;
+								text-align: center;
+							}
+							table.content-data tr.style-rowdata {
+								font-size:12px; 
+								height: 23px;
+							}
+							@media print {
+								@page {
+									page: A4;
+									size: portrait;;
+									margin: 0.5cm;
+								}
+							}
+					</style>
+						<tr>
+							<td colspan="3" valign="top">
+							<div id="exportExcel">
+							<?php if (!empty($this->rs)){?>
+								<table class="content-data" cellpadding="1"​  border="1" >
+									<thead>
+										<tr class="style-head">
+											<td rowspan="2"><?php echo $tr->translate("NUM");?></td>
+											<td colspan="9"><?php echo $tr->translate("STUDY_INFO");?>
+												<input type="hidden" name="id_selected" id="id_selected" dojoType="dijit.form.TextBox" />
+											</td>
+										</tr>
+										<tr class="style-head">
+											<td><?php echo $tr->translate("BRANCH");?></td>
+											<td><?php echo $tr->translate("ACADEMIC_YEAR");?></td>
+											<td><?php echo $tr->translate("DEGREE");?></td>
+											<td><?php echo $tr->translate("GRADE");?></td>
+											<td scope="col" >&nbsp;<?php echo $tr->translate("TOTAL_STUDENT");?>&nbsp;</td>
+											<td scope="col" >&nbsp;<?php echo $tr->translate("NEW_STUDENT");?>&nbsp;</td>
+											<td scope="col" >&nbsp;<?php echo $tr->translate("OLD_STUDENT");?>&nbsp;</td>
+											<td><?php echo $tr->translate("MALE");?></td>
+											<td><?php echo $tr->translate("FEMALE");?></td>
+										</tr>
+									</thead>
+								<?php 
+									$i=0;
+									$totalNew = 0;
+									$totalOld=0;
+									$totalStudent = 0;
+									$GrandtotalStudent = 0;
+									$GrandtotalMale=0;
+									$GrandtotalFemale=0;
+									$GrandtotalNew = 0;
+									$GrandtotalOld=0;
+									$totalDrop=0;
+									$totalStudying=0;
+									$totalMale=0;
+									$totalFemale=0;
+									$degree='';
+								if(!empty($this->rs)){
+									foreach($this->rs AS $key=>$row){  
+
+									$newStudent = $row['newStudent'];
+									$oldStudent = $row['oldStudent'];
+									$totalstu = $row['totalStu'];
+
+									$maleStu = $row['stuMale'];
+									$femaleStu = $row['stuFemale'];
+
+									$GrandtotalStudent =$GrandtotalStudent+$totalstu;
+									$GrandtotalMale =$GrandtotalMale+$maleStu;
+									$GrandtotalFemale =$GrandtotalFemale+$femaleStu;
+									$GrandtotalNew =$GrandtotalNew+$newStudent;
+									$GrandtotalOld =$GrandtotalOld+$oldStudent;
+								?>
+								
+							<?php if($degree!=$row['degree']){?>
+									<?php if ($key>0){ $i=0;  ?>
+									<tr align="center" class="hover" style="font-weight:bold;height:30px;font-size:14px;background:#dbdde5;">
+										<td colspan="5"><?php echo $tr->translate("TOTAL");?></td>
+										<td><?php echo $totalStudent;?></td>	
+										<td><?php echo $totalNew;?></td>	
+										<td><?php echo $totalOld;?></td>	
+										<td><?php echo $totalMale;?></td>
+										<td><?php echo $totalFemale;?></td>
+									</tr>
+							<?php  }} ?>
+									<tr class="style-rowdata hover" align="center"  >
+										<td><?php echo ++$i;?></td>
+										<td align="left">&nbsp;<?php echo $row['branch_name'];?>&nbsp;</td>
+										<td align="left">&nbsp;<?php echo $row['academic_year_name'];?>&nbsp;</td>
+										<td align="left">&nbsp;<?php echo $row['degree_name'];?></td>
+										<td align="left">&nbsp;<?php echo $row['grade_name'];?></td>
+										<td><?php echo $totalstu;?></td>	
+										<td><?php echo $newStudent;?></td>	
+										<td><?php echo $oldStudent;?></td>	
+										<td><?php echo $maleStu;?></td>	
+										<td><?php echo $femaleStu;?></td>		
+									</tr>
+										<?php if($degree!=$row['degree']){ 
+											if ($key>0){
+												$totalStudent = 0;
+												$totalMale=0;
+												$totalFemale=0;
+												$totalNew = 0;
+												$totalOld=0;
+											}
+										}
+										$totalstu = $row['totalStu'];
+										$totalStudent =$totalStudent+$totalstu;
+										$totalNew=$totalNew+$newStudent;
+										$totalOld = $totalOld+$oldStudent;
+										$totalMale = $totalMale+$maleStu;
+										$totalFemale = $totalFemale+$femaleStu;							
+									?>
+									<?php $degree=$row['degree'];?>					
+									<?php }} ?>	
+									<tr align="center" class="hover" style="font-weight:bold;height:30px;font-size:14px;background:#dbdde5;">
+										<td colspan="5"><?php echo $tr->translate("TOTAL");?></td>
+										<td><?php echo $totalStudent;?></td>	
+										<td><?php echo $totalNew;?></td>	
+										<td><?php echo $totalOld;?></td>	
+										<td><?php echo $totalMale;?></td>
+										<td><?php echo $totalFemale;?></td>
+									</tr>
+									<tr align="center" class="hover" style="font-weight:bold;height:30px;font-size:14px;background:#a3bbff;">
+										<td colspan="5"><?php echo $tr->translate("TOTAL_STUDENT");?></td>
+										<td><?php echo $GrandtotalStudent;?></td>	
+										<td><?php echo $GrandtotalNew;?></td>	
+										<td><?php echo $GrandtotalOld;?></td>	
+										<td><?php echo $GrandtotalMale;?></td>
+										<td><?php echo $GrandtotalFemale;?></td>
+									</tr>
+								</table> 
+								<?php }?>
+							</div>	
+							</td>
+						</tr>
+					</table>
+				</div>
+			</div>
+			<!--Panel 2-->
+			<div class="tab-pane fade in active " id="panel22" role="tabpanel">
+				<div class="text-right">
+					<a class="qButton print" href="#" title="<?php echo $tr->translate("PRINT"); ?>"
+						onclick="doPrintProfle('divPrintgrap');"><i class="fa fa-print" aria-hidden="true"></i></a>
+				</div>
+				<div id="divPrintgrap">
+					<style>
+						table { width: 100%; margin: 0 auto; border-collapse: collapse; }
+						table.content-data { border: 1px solid #4839bd; margin: 20px 0; }
+						table.content-data th, table.content-data td { text-align: center; padding: 5px; }
+						.bar-chart { 
+							height: 300px;
+							margin: 20px 0;
+							width: 100%;
+						}
+						svg text {
+							font-family: inherit !important;
+						}
+						.charTitle  {
+							font-size: 12px; 
+							font-family: 'Times New Roman', 'Khmer OS Muol Light';
+							text-align: center; 
+						}
+						.charTitleBottom {
+							font-family: 'Times New Roman', 'Khmer OS Battambang';
+							font-size: 12px;
+							text-align: center; 
+							margin-bottom: 30px;
+						}
+
+						/* Legend Styling */
+						.chart-legend {
+							font-size: 12px;
+							font-family: 'Times New Roman', 'Khmer OS Battambang';
+							display: flex;
+							justify-content: center;
+							margin-bottom: 10px;
+						}
+						.chart-legend-item {
+							display: flex;
+							align-items: center;
+							margin: 0 10px;
+						}
+						.chart-legend-color {
+							width: 15px;
+							height: 15px;
+							margin-right: 5px;
+							border: 1px solid #000;
+						}
+						.color-total { background-color: #0b62a4; }
+						.color-male { background-color: #7a92a3; }
+						.color-female { background-color: #d9534f; }
+
+						@media print {
+							svg text {
+								font-family: inherit !important;
+							}
+						}
+					</style>
+					 <table border="0" style="width: 100%; background: #fff;">
+						<tr>
+							<td colspan="3"><?php echo $this->rsheader; ?></td>
+						</tr>
+						<tr>
+							<td colspan="3" align="center">
+								<span style=" font-size:14px; font-family:'Times New Roman','Khmer OS Muol Light';">
+									<?php echo $tr->translate("CHART_STUDENT_STATISTIC"); ?>
+								</span><br>
+								<span style=" font-size:12px; font-family:'Times New Roman','Khmer OS Muol Light';">
+									<?php echo $tr->translate("ACADEMIC_YEAR").' : '; if(!empty($this->rs['0']['academic_year_name'])){ echo $this->rs['0']['academic_year_name'];  } ?>
+								</span>
+							</td>
+						</tr>
+						<tr style="height: 50px;">
+							<td colspan="3"></td>
+						</tr>
+
+						<?php
+							$chartDataByDegree = [];
+							$degreeTotals = []; // Store totals by degree
+
+							if (!empty($this->rs)) {
+								foreach ($this->rs as $key => $row) {
+									// Group data by degree
+									$degreeName = $row['degree_name'];
+									if (!isset($chartDataByDegree[$degreeName])) {
+										$chartDataByDegree[$degreeName] = [];
+										$degreeTotals[$degreeName] = [
+											'total' => 0,
+											'male' => 0,
+											'female' => 0
+										];
+									}
+									$chartDataByDegree[$degreeName][] = [
+										'grade' => $row['grade_name'], // Use 'grade_name' for grade labels
+										'total' => $row['totalStu'],  // Total students
+										'male' => $row['stuMale'],    // Male students
+										'female' => $row['stuFemale'] // Female students
+									];
+
+									// Update totals for the degree
+									$degreeTotals[$degreeName]['total'] += $row['totalStu'];
+									$degreeTotals[$degreeName]['male'] += $row['stuMale'];
+									$degreeTotals[$degreeName]['female'] += $row['stuFemale'];
+								}
+
+								// Generate charts and totals for each degree
+								$chartKey = 0;
+								foreach ($chartDataByDegree as $degreeName => $data) {
+									$chartKey++;
+							?>
+									<tr>
+										<td colspan="3" align="center">
+											<p class="charTitle"><?php echo $tr->translate("DEGREE") . ': ' . $degreeName; ?></p>
+											
+											<!-- Legend -->
+											<div class="chart-legend">
+												<div class="chart-legend-item">
+													<div class="chart-legend-color color-total"></div>
+													<span><?php echo $tr->translate("TOTAL_STUDENT");?></span>
+												</div>
+												<div class="chart-legend-item">
+													<div class="chart-legend-color color-male"></div>
+													<span><?php echo $tr->translate("MALE");?></span>
+												</div>
+												<div class="chart-legend-item">
+													<div class="chart-legend-color color-female"></div>
+													<span><?php echo $tr->translate("FEMALE");?></span>
+												</div>
+											</div>
+											<!-- Chart -->
+											<div id="bar-chart-<?php echo $chartKey; ?>" class="bar-chart"></div>
+											<!-- Totals for this degree -->
+											<p class="charTitleBottom">
+												<?php 
+													echo $tr->translate("TOTAL_STUDENT") . ' : ' . $degreeTotals[$degreeName]['total']; 
+													echo ' ( ' . $tr->translate("MALE") . ' : ' . $degreeTotals[$degreeName]['male']; 
+													echo ', ' . $tr->translate("FEMALE") . ' : ' . $degreeTotals[$degreeName]['female']. ')';
+												?>
+											</p>
+										</td>
+									</tr>
+									<script>
+										$(document).ready(function () {
+											setTimeout(function() {
+												Morris.Bar({
+													element: 'bar-chart-<?php echo $chartKey; ?>',
+													data: <?php echo json_encode($data); ?>,
+													xkey: 'grade',
+													ykeys: ['total', 'male', 'female'],
+													labels: ['Total Students', 'Male', 'Female'],
+													barColors: ['#0b62a4', '#7a92a3', '#d9534f'],
+													hideHover: 'auto',
+													resize: true
+												});
+											}, 1000);
+										});
+									</script>
+							<?php
+								}
+							}
+							?>
+
+						<!-- Donut Chart for Total Students by Degree -->
+						<tr style="height: 50px;">
+							<td colspan="3">
+								<div style="border: none; height: 1px; width: 100%; background-color: #a3a2a2;"></div>
+							</td>
+						</tr>
+						<tr>
+							<td colspan="3" align="center">
+								<h3 class="charTitle"><?php echo $tr->translate("TOTAL_STUDENTS_BY_DEGREE"); ?></h3>
+								<div id="donut-chart" style="height: 250px;"></div>
+							</td>
+						</tr>
+						<tr>
+							<td colspan="3" align="center">
+								<div class="chart-legend" style="margin-top: 20px;">
+									<?php
+									$colors = ['#0b62a4', '#7a92a3', '#d9534f', '#5cb85c', '#f0ad4e', '#6ec0ff','#22def1','#6607ff'];
+									$colorIndex = 0;
+
+									foreach ($degreeTotals as $degreeName => $data) {
+										$color = $colors[$colorIndex % count($colors)];
+										$colorIndex++;
+									?>
+										<div class="chart-legend-item" style="display: inline-block; margin-right: 20px;">
+											<div class="chart-legend-color" style="width: 20px; height: 20px; background-color: <?php echo $color; ?>; display: inline-block; vertical-align: middle; margin-right: 5px;"></div>
+											<span class="charTitleBottom">
+												<?php echo $degreeName . ': ' . $degreeTotals[$degreeName]['total'] ; ?>
+											</span>
+										</div>
+									<?php } ?>
+								</div>
+							</td>
+						</tr>
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	
+</div>
+<link rel="stylesheet" href="<?php echo $this->baseUrl()."/"?>dashboard/plugins/morris/morris.css">
+<script src="<?php echo $this->baseUrl()."/"?>dashboard/plugins/morris/morris.min.js"></script>
+<script src="<?php echo $this->baseUrl()."/"?>dashboard/plugins/raphael/raphael-min.js"></script>
+<script src="<?php echo $this->baseUrl();?>/js/help.js"></script>
+<script type="text/javascript">
+
+	dojo.require("dojo.NodeList");
+	dojo.require("dojo.NodeList-manipulate");
+	dojo.require("dojo.data.ItemFileWriteStore"); 
+
+
+	dojo.ready(function(){
+
+		new dijit.form.FilteringSelect({
+			queryExpr: "*${0}*",
+			autoComplete: false,                     
+			required: false,                        
+			id: "grade",
+			name: "grade",  
+			class: 'fullside',  
+			placeHolder:"<?php echo $tr->translate("SELECT_GRADE");?>",          
+			onChange: function() {  
+				getAllGroupByBranch();
+			}
+		}, "grade");
+		getallGrade();
+		
+		var branch_id = dijit.byId('branch_id');
+		branch_id.on('change', function(evt) {
+		});
+		dijit.byId('academic_year').attr('value','<?php echo empty($this->search["academic_year"]) ? 0 : $this->search["academic_year"];?>'); 
+		
+	});
+	var oldBranch = "<?php echo $this->search['branch_id']?>";
+	var url_dept = '<?php echo $this->url(array('module'=>'global','controller'=>'grade','action'=>'get-grade')); ?>';
+	function getallGrade(){
+		dept_id = dijit.byId('degree').get('value');
+		if(dept_id=='' || dept_id==-1){return false;}
+			dojo.xhrPost({
+				url:url_dept,
+				content:{
+					'dept_id':dept_id,
+					'noaddnew':1
+					},
+				handleAs:"json",
+				load: function(data) {
+					dijit.byId('grade').attr('value','');
+					grade_store  = getDataStorefromJSON('id','name', data);
+					dijit.byId('grade').set('store',grade_store); 
+					dijit.byId('grade').attr('value','<?php echo $this->search['grade']?>');  
+				},
+				error: function(err) {
+				}
+			});
+	}
+
+	function doPrintProfle(keyid) {
+		window.frames["print_frame"].document.body.innerHTML = dojo.byId(keyid).innerHTML;
+		window.frames["print_frame"].window.focus();
+		window.frames["print_frame"].window.print();
+		hideDialog();
+	}	
+
+	
+</script>
+
+<script>
+    $(document).ready(function () {
+        // Prepare data for Donut chart
+        const donutData = [
+            <?php
+			 $colorIndex = 0;
+			 foreach ($degreeTotals as $degreeName => $data) {
+				$color = $colors[$colorIndex % count($colors)];
+                $colorIndex++;
+				 ?>
+                {
+                    label: "<?php echo $degreeName; ?>",
+                    value: <?php echo $degreeTotals[$degreeName]['total']; ?>
+                },
+            <?php } ?>
+        ];
+
+        // Render Morris Donut chart
+        Morris.Donut({
+            element: 'donut-chart',
+            data: donutData,
+			colors: <?php echo json_encode($colors); ?>,
+            resize: true,
+            formatter: function (x) {
+                return x + "<?php echo $tr->translate("STUDENT_UNIT"); ?>";
+            }
+        });
+    });
+</script>

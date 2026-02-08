@@ -1,0 +1,192 @@
+<?php
+	$tr = Application_Form_FrmLanguages::getCurrentlanguage();
+	echo $this->headTitle($tr->translate('RPT_FEE')); 
+	$frm=$this->form_search;
+	$classHideHeight=classHideHeight;
+?>
+<div class="layout-wrapper-report">
+	<div id="mainContent" class="main-content-report">
+		<div class="report-preview">
+			<?php echo $this->controlReport?>
+			<div id="main-viewer" class="main-viewer portrait">
+				<div id="viewer" class="viewer portrait">
+					<div id="divPrint" class="content">
+						<link rel="stylesheet" href="<?php echo $this->baseUrl();?>/admin/build/css/report-style.css">
+						<link rel="stylesheet" href="<?php echo $this->baseUrl();?>/admin/build/css/report-style-screen.css">
+						<style>
+							@media print {
+								<?php if(!empty($this->printFormat)){ echo $this->printFormat; } ?>
+								
+								.hide{visibility: visible; height: <?php echo $classHideHeight;?>;}
+							}
+						</style>
+						<table  style="background:#fff; margin: 0 auto; ;white-space: nowrap;width: 100%">
+							<tr>
+								<td colspan="3"><?php echo $this->rsheader;?></td>
+							</tr>
+							<tr>
+								<td>&nbsp;</td>
+							</tr>
+							<tr >
+								<td width="15%" align="center">
+								</td>
+								<td width="70%" align="center">
+									<strong style="font-weight:normal;color:#000; font-size: 16px;font-family:Times New Roman,'Khmer OS Muol Light';"><?php echo $tr->translate('RPT_FEE')?></strong><br />
+								</td>
+								<td width="15%" align="center">
+								</td>
+							</tr>
+							<tr>
+								<td>&nbsp;</td>
+							</tr>
+							<tr>
+								<td colspan="3" id="exportExcel">
+									<table class="content-data text-color-black text-h16px text-size-12px" width="100%" border="1" align="center"  >
+										<thead>
+											<tr class="style-head text-bold bg-ligt-blues">
+												<td scope="col"><?php echo $tr->translate('N_O')?></td>
+												<td scope="col"><?php echo $tr->translate('BRANCH')?></td>
+												<td scope="col"><?php echo $tr->translate('ACADEMIC_YEAR')?></td>
+												<td scope="col"><?php echo $tr->translate('TYPE_STUDY')?></td>
+												<td scope="col"><?php echo $tr->translate('TYPE')?></td>
+												<td scope="col"><?php echo $tr->translate('DEGREE')?></td>
+												<td scope="col"><?php echo $tr->translate('GRADE')?></td>
+												<td scope="col"><?php echo $tr->translate('MONTHLY')?></td>
+												<td scope="col"><?php echo $tr->translate('TERM')?></td>
+												<td scope="col"><?php echo $tr->translate('SEMESTER')?></td>
+												<td scope="col"><?php echo $tr->translate('YEAR')?></td>
+												<td scope="col"><?php echo $tr->translate('ONE_PAYMENT_ONLY')?></td>
+												<td scope="col"><?php echo $tr->translate('NOTE')?></td>
+											</tr>
+										</thead>
+									<?php $i=0; if(!empty($this->rs)){foreach ($this->rs AS $row) { $i++;?>
+										<tr class="hover style"  >
+											<td align="center" data-label="<?php echo $tr->translate("N_O");?>" ><?php echo $i;?></td>
+											<td data-label="<?php echo $tr->translate("BRANCH");?>" ><?php echo @$row['branch_id'];?></td>
+											<td data-label="<?php echo $tr->translate("ACADEMIC_YEAR");?>"><?php echo @$row['academic'];?></td>
+											<td data-label="<?php echo $tr->translate("TYPE_STUDY");?>" ><?php echo @$row['study_type'];?></td>
+											<td data-label="<?php echo $tr->translate("TYPE");?>" ><?php echo @$row['generation'];?></td>
+											<td data-label="<?php echo $tr->translate("DEGREE");?>" align="left" >&nbsp;&nbsp;<?php echo @$row['degree'];?></td>	
+											<td data-label="<?php echo $tr->translate("GRADE");?>" align="left" >&nbsp;&nbsp;<?php echo @$row['class'];?></td>	
+											<td data-label="<?php echo $tr->translate("MONTHLY");?>" ><?php echo $row['monthly']>0?number_format(@$row['monthly'],0):"";?></td>
+											<td align="center" data-label="<?php echo $tr->translate("TERM");?>" ><?php echo number_format(@$row['quarter'],0);?></td>
+											<td align="center" data-label="<?php echo $tr->translate("SEMESTER");?>" ><?php echo number_format(@$row['semester'],0);?></td>
+											<td align="center" data-label="<?php echo $tr->translate("YEAR");?>" ><?php echo number_format(@$row['year'],0);?></td>
+											<td data-label="<?php echo $tr->translate("ONE_PAYMENT_ONLY");?>" ><?php echo $row['one_payment']>0?number_format(@$row['one_payment'],0):"";?></td>
+											<td data-label="<?php echo $tr->translate("NOTE");?>" ><?php echo @$row['remark'];?></td>
+										</tr>
+									<?php }}?>	
+									</table>	
+								</td>
+							</tr>
+						</table>
+					</div>	
+				</div>	
+			</div>	
+		</div>	
+	</div>
+	<div class="right-panel-report" id="rightPanel">
+		<div class="card-box">
+			<div class="card-search-head col-sm-12 border-botom">
+				<div class="col-sm-6 text-left pd-0">
+					<h4 class="m-b-0">
+						<?php echo $tr->translate("SEARCH");?> 
+						<i class="fa fa-search "></i> 
+					</h4>
+				</div>
+				<div class="col-sm-6 text-right pd-0">
+					<button onclick="closeRightPanel()" title="<?php echo $tr->translate("SEARCH");?> " class="btn-close">
+						<i class="fa-solid fa-xmark"></i>
+					</button>
+				</div>
+			</div>
+			<form  id='foundation_class' action="<?php echo $this->url(array('module'=>'allreport','controller'=>'accounting','action'=>'rpt-fee')); ?>" dojoType="dijit.form.Form" method="post" enctype="application/x-www-form-urlencoded">
+				<div class="form-group">
+					<div class="col-md-12 col-sm-12 col-xs-12">
+						<?php echo $frm->getElement('adv_search')?>
+					</div>
+					<div class="col-md-12 col-sm-12 col-xs-12">
+						<?php echo $frm->getElement('branch_id')?>
+					</div>
+					<div class="col-md-12 col-sm-12 col-xs-12">
+						<?php echo $frm->getElement('academic_year')?>
+					</div>
+					<div class="col-md-12 col-sm-12 col-xs-12">
+						<?php echo $frm->getElement('type_study')?>
+					</div>
+					<div class="col-md-12 col-sm-12 col-xs-12">
+						<?php echo $frm->getElement('generation')?>
+					</div>
+					<div class="col-md-12 col-sm-12 col-xs-12">
+						<?php echo $frm->getElement('school_option')?>
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="col-md-6 col-sm-6 col-xs-12">
+						<?php echo $frm->getElement('degree')?>
+					</div>
+					<div class="col-md-6 col-sm-6 col-xs-12">
+						<input id="grade" />
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="col-md-12 col-sm-12 col-xs-12">
+						<?php echo $frm->getElement('finished_status')?>
+					</div>
+					<div class="col-md-2 col-sm-2 col-xs-12">
+						<button class="button-class button-primary fullside" iconClass="glyphicon glyphicon-search" dojoType="dijit.form.Button" showLabel="true" name="search"  type="submit"><?php echo $tr->translate("SEARCH");?></button>
+					</div>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
+	
+<script src="<?php echo $this->baseUrl();?>/js/help.js"></script>
+<script type="text/javascript">
+	dojo.require("dojo.data.ObjectStore");
+	dojo.require("dojo.data.ItemFileWriteStore"); 
+	
+	dojo.ready(function(){ 
+		new dijit.form.FilteringSelect({
+			queryExpr: "*${0}*",
+			autoComplete: false,                     
+			required: false,                        
+			id: "grade",
+			name: "grade",  
+			class: 'fullside',  
+			placeHolder:"<?php echo $tr->translate("SELECT_GRADE");?>",          
+		}, "grade");
+		getallGrade();
+		
+		var branch_id = dijit.byId('branch_id');
+			branch_id.on('change', function(evt) {
+		});
+		setTimeout(function() {
+			setPrintOrientation('portrait');
+		}, 500);
+	});
+
+	var grade_store  = getDataStorefromJSON('id','name', <?php print_r(array())?> );
+	var url_dept = '<?php echo $this->url(array('module'=>'global','controller'=>'grade','action'=>'get-grade')); ?>';
+	function getallGrade(){
+		dept_id = dijit.byId('degree').get('value');
+		if(dept_id=='' || dept_id==-1){return false;}
+			dojo.xhrPost({
+				url:url_dept,
+				content:{
+					'dept_id':dept_id,
+					'noaddnew':1
+					},
+				handleAs:"json",
+				load: function(data) {
+					dijit.byId('grade').attr('value','');
+					grade_store  = getDataStorefromJSON('id','name', data);
+				    dijit.byId('grade').set('store',grade_store); 
+				    dijit.byId('grade').attr('value','<?php echo $this->search['grade']?>');  
+				},
+				error: function(err) {
+				}
+			});
+	}
+</script>

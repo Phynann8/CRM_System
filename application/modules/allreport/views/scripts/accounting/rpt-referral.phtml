@@ -1,0 +1,375 @@
+<?php
+	$tr = Application_Form_FrmLanguages::getCurrentlanguage();
+	$pageTitle = $tr->translate("RPT_REFERRAL");
+	echo $this->headTitle($pageTitle); 
+	$frm =  $this->form_search;
+	$dateFormat ="d/m/y";
+	$dateFormatExport ="d/M/Y";
+?>	
+<div class="layout-wrapper-report">
+	<div id="mainContent" class="main-content-report">
+		<div class="report-preview">
+			<?php echo $this->controlReport?>
+			<div id="main-viewer" class="main-viewer portrait">
+				<div id="viewer" class="viewer portrait">
+					<div id="divPrint" class="content">
+						<link rel="stylesheet" href="<?php echo $this->baseUrl();?>/admin/build/css/report-style.css">
+						<link rel="stylesheet" href="<?php echo $this->baseUrl();?>/admin/build/css/report-style-screen.css">
+						<style>
+							@media print {
+								<?php if(!empty($this->printFormat)){ echo $this->printFormat; } ?>
+							}
+						</style>
+						<table border="0" style="background:#fff; margin: 0 auto; width: 100%; ">
+							<tr>
+								<td colspan="3"><?php echo $this->rsheader;?></td>
+							</tr>
+							<tr>
+								<td width="15%" align="center"></td>
+								<td width="70%"  align="center">
+									<span class="text-color-black text-size-14px" style=" font-family:'Times New Roman','Khmer OS Muol Light';"><?php echo $pageTitle;?></span><br />
+									<?php if(!empty($this->search["start_date"])){?>
+									<span class="text-color-black text-size-12px" style=" font-family:'Times New Roman','Khmer OS Muol Light';"><?php echo date($dateFormat,strtotime($this->search["start_date"]))?> to <?php echo date($dateFormat,strtotime($this->search["end_date"]));?></span>
+									<?php } ?>
+								</td>
+								<td width="15%" align="center"></td>
+							</tr>
+							<tr>
+								<td id="exportExcel" colspan="3" valign="top">
+									<table class="content-data bd-dark-grey bd-w1px text-color-black text-h16px bd-t-double bd-t-w4px text-size-12px" border="1" cellpadding="1"  >
+										<thead>
+											<tr class="style-head bd-black bd-w1px text-h16px hpx-25">
+												<td class="widthCol-px-30" rowspan="2">
+													No
+												</td>
+												<td  rowspan="2">Branch</td>
+												<td  colspan="5" class="text-bold">New Student</td>
+												<td  rowspan="2">Branch</td>
+												<td  colspan="6" class="text-bold">Existing Student</td>
+											</tr>
+											<tr class="style-head bd-black bd-w1px text-h16px hpx-25">
+												<td>Date</td>
+												<td>Receipt</td>
+												<td class="bg-ligt-green">Referred To</td>
+												<td>Student Name</td>
+												<td class="bg-ligt-blues">Referred By</td>
+												
+												<td>Date</td>
+												<td>Receipt</td>
+												<td class="bg-ligt-blues">Referred By</td>
+												<td colspan="2">Student Name</td>
+												<td class="bg-ligt-green">Referred To</td>
+											</tr>
+										</thead>
+										<tbody id="tableBody">
+										<?php 
+										$i=0;
+										
+										$amtRefTo=0;
+										$tPriceRefTo=0;
+										
+										$amtRefBy = 0;
+										$tPriceRefBy=0;
+										
+										
+										if(!empty($this->rs)){?>
+											<?php 
+												
+												foreach($this->rs As $row){ 
+													$i++;
+													$refToCreateDate="";
+													$refToCreateDateExp="";
+													$refToReceiptNo="";
+													$refFromStuCode="";
+													$refToStuCode="";
+													$refToNameKh="";
+													if(!empty($row['refToCreateDate'])){
+														$refToCreateDate = date($dateFormat, strtotime($row['refToCreateDate']));
+														$refToCreateDateExp = date($dateFormatExport, strtotime($row['refToCreateDate']));
+														$refToStuCode = $row["refToStuCode"];
+														$refToNameKh = $row["refToNameKh"];
+														$refToReceiptNo = $row["refToReceiptNo"];
+														$refFromStuCode = $row["refFromStuCode"];
+														
+														$priceReferBy =  empty($row["refByFee"]) ? 0 : $row["refByFee"];
+														$amtRefBy++;
+														$tPriceRefBy = $tPriceRefBy+$priceReferBy;
+													
+													}
+													$priceReferTo = empty($row["refToFee"]) ? 0 : $row["refToFee"];
+													$amtRefTo++;
+													$tPriceRefTo = $tPriceRefTo+$priceReferTo;
+												?>
+												<tr class="hover text-size-12px">
+													<td align="center"><?php echo $i; ?></td>
+													<td align="center" ondblclick="editReferredTo('<?php echo $i; ?>')" id="refMBr<?php echo $i; ?>"><?php echo $row["branchName"]?></td>
+													<td align="center" class="hideExport" ondblclick="editReferredTo('<?php echo $i; ?>')" id="refMDate<?php echo $i; ?>"><?php echo date($dateFormat, strtotime($row['refFromCreateDate'])); ?></td>
+													<td class="showExport" style="display:none;" ><?php echo date($dateFormatExport, strtotime($row['refFromCreateDate'])); ?></td>
+													<td align="center" ondblclick="editReferredTo('<?php echo $i; ?>')" id="refMReceipt<?php echo $i; ?>"><?php echo $row["refFromReceiptNo"]?></td>
+													<td ondblclick="editReferredTo('<?php echo $i; ?>')">
+														<span id="refMByTo<?php echo $i; ?>"><?php echo $row["refFromStuCode"]?></span>
+														<input type="hidden" name="ptdId<?php echo $i; ?>" id="ptdId<?php echo $i; ?>" value="<?php echo $row['detailId']; ?>" dojoType="dijit.form.TextBox" />
+													</td>
+													<td ondblclick="editReferredTo('<?php echo $i; ?>')" id="refMByName<?php echo $i; ?>"><?php echo $row["refFromNameKh"]?></td>
+													<td ondblclick="editReferredTo('<?php echo $i; ?>')" id="refMByStu<?php echo $i; ?>"><?php echo $row["refToStuCode"]?></td>
+													
+													<td align="center" <?php if(!empty($row['refToCreateDate'])){ ?> ondblclick="editReferredBy('<?php echo $i; ?>')"<?php } ?> id="refSBr<?php echo $i; ?>"><?php echo $row["refByBrName"]?></td>
+													<td align="center" class="hideExport" <?php if(!empty($row['refToCreateDate'])){ ?> ondblclick="editReferredBy('<?php echo $i; ?>')"<?php } ?> id="refSDate<?php echo $i; ?>"><?php echo $refToCreateDate; ?></td>
+													<td align="center" class="showExport" style="display:none;"  ><?php echo $refToCreateDateExp; ?></td>
+													<td align="center" <?php if(!empty($row['refToCreateDate'])){ ?> ondblclick="editReferredBy('<?php echo $i; ?>')"<?php } ?> id="refSRecept<?php echo $i; ?>"><?php echo $refToReceiptNo; ?></td>
+													<td <?php if(!empty($row['refToCreateDate'])){ ?> ondblclick="editReferredBy('<?php echo $i; ?>')"<?php } ?> >
+														<span id="refSBy<?php echo $i; ?>"><?php echo $refToStuCode;?></span>
+														<input type="hidden" name="ptdRefSId<?php echo $i; ?>" id="ptdRefSId<?php echo $i; ?>" value="<?php echo $row['rfsDetailId']; ?>" />
+													</td>
+													<td <?php if(!empty($row['refToCreateDate'])){ ?> ondblclick="editReferredBy('<?php echo $i; ?>')"<?php } ?> id="refSToName<?php echo $i; ?>" colspan="2"><?php echo $refToNameKh;?></td>
+													<td <?php if(!empty($row['refToCreateDate'])){ ?> ondblclick="editReferredBy('<?php echo $i; ?>')"<?php } ?> id="refSToStu<?php echo $i; ?>"><?php echo $refFromStuCode; ?></td>
+												</tr>
+											<?php } ?>
+										<?php } ?>
+										
+										<?php if(!empty($this->subRs)){?>
+											<?php 
+												foreach($this->subRs As $row){ 
+													$i++;
+													
+													$refToCreateDate = date($dateFormat, strtotime($row['refToCreateDate']));
+													$refToCreateDateExp = date($dateFormatExport, strtotime($row['refToCreateDate']));
+													$refToStuCode = $row["refToStuCode"];
+													$refToNameKh = $row["refToNameKh"];
+													$refToReceiptNo = $row["refToReceiptNo"];
+													$refFromStuCode = $row["refFromStuCode"];
+														
+													$priceReferBy =  empty($row["refByFee"]) ? 0 : $row["refByFee"];
+													$amtRefBy++;
+													$tPriceRefBy = $tPriceRefBy+$priceReferBy;
+												?>
+												<tr class="hover text-size-12px">
+													<td align="center"><?php echo $i; ?></td>
+													<td></td>
+													<td align="center"></td>
+													<td align="center"></td>
+													<td class="text-bold"></td>
+													<td></td>
+													<td class="text-bold"></td>
+													
+													<td align="center" ondblclick="editReferredBy('<?php echo $i; ?>')" id="refSBr<?php echo $i; ?>"><?php echo $row["branchName"]?></td>
+													<td align="center" class="hideExport" ondblclick="editReferredBy('<?php echo $i; ?>')" id="refSDate<?php echo $i; ?>"><?php echo $refToCreateDate; ?></td>
+													<td align="center" class="showExport" style="display:none;" ><?php echo $refToCreateDateExp; ?></td>
+													<td align="center" ondblclick="editReferredBy('<?php echo $i; ?>')" id="refSRecept<?php echo $i; ?>"><?php echo $refToReceiptNo; ?></td>
+													<td ondblclick="editReferredBy('<?php echo $i; ?>')">
+														<span id="refSBy<?php echo $i; ?>"><?php echo $refToStuCode;?></span>
+														<input type="hidden" name="ptdId<?php echo $i; ?>" id="ptdId<?php echo $i; ?>" value="<?php echo $row['rfsDetailId']; ?>" dojoType="dijit.form.TextBox" />
+													</td>
+													<td ondblclick="editReferredBy('<?php echo $i; ?>')" id="refSToName<?php echo $i; ?>" colspan="2"><?php echo $refToNameKh;?></td>
+													<td ondblclick="editReferredBy('<?php echo $i; ?>')" id="refSToStu<?php echo $i; ?>" ><?php echo $refFromStuCode; ?></td>
+												</tr>
+											<?php } ?>
+										<?php } ?>
+										<tr>
+											<td colspan="14" class="bd-w0px bd-white bd-r-w1px bd-l-w1px">&nbsp;</td>
+										</tr>
+										<?php 
+											$tPriceRefTo = abs($tPriceRefTo);
+											$tPriceRefBy = abs($tPriceRefBy);
+										?>
+										<tr>
+											<td align="right" colspan="11" class="bd-white bd-r-w1px">
+												<strong>Referred To</strong>
+											</td>
+											<td align="center" class="wpx-50 bd-white bd-r-w1px">
+												<?php echo $amtRefTo;?>
+											</td>
+											<td align="right" class="bd-white bd-r-w1px">
+												<?php echo number_format($tPriceRefTo,2);?>
+											</td>
+											<td class="bd-white bd-r-w1px">&nbsp;</td>
+										</tr>
+										<tr>
+											<td align="right" colspan="11" class="bd-white bd-r-w1px">
+												<strong>Referred By</strong>
+											</td>
+											<td align="center" class="wpx-50 bd-white bd-r-w1px">
+												<?php echo $amtRefBy;?>
+											</td>
+											<td align="right" class="bd-white bd-r-w1px">
+												<?php echo number_format($tPriceRefBy,2);?>
+											</td>
+											<td class="bd-white bd-r-w1px">&nbsp;</td>
+										</tr>
+										<tr>
+											<td align="right" colspan="11" class="bd-white bd-r-w1px">
+												<strong>Total</strong>
+											</td>
+											<td align="center" class="wpx-50  bd-white bd-r-w1px">
+												<?php echo $amtRefTo+$amtRefBy;?>
+											</td>
+											<td align="right" class="bd-white bd-r-w1px">
+												<?php echo number_format(($tPriceRefTo+$tPriceRefBy),2);?>
+											</td>
+											<td class="bd-white bd-r-w1px">&nbsp;</td>
+										</tr>
+												
+										</tbody>
+									</table>
+									
+								</td>
+							</tr>
+						</table>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="right-panel-report" id="rightPanel">
+		<div class="card-box">
+			<div class="card-search-head col-sm-12 border-botom">
+				<div class="col-sm-6 text-left pd-0">
+					<h4 class="m-b-0">
+						<?php echo $tr->translate("SEARCH");?> 
+						<i class="fa fa-search "></i> 
+					</h4>
+				</div>
+				<div class="col-sm-6 text-right pd-0">
+					<button onclick="closeRightPanel()" title="<?php echo $tr->translate("CLOSED");?> " class="btn-close">
+						<i class="fa-solid fa-xmark"></i>
+					</button>
+				</div>
+			</div>
+			<form  action="" dojoType="dijit.form.Form" method="post">
+				<div class="form-group">
+					<div class="col-md-12 col-sm-12 col-xs-12">
+						<?php echo $frm->getElement("adv_search");?>
+					</div>
+					<div class="col-md-12 col-sm-12 col-xs-12">
+						<?php echo $frm->getElement("branch_id");?>
+					</div>
+					<div class="col-md-12 col-sm-12 col-xs-12">
+						<?php echo $frm->getElement("start_date");?>
+					</div>
+					<div class="col-md-12 col-sm-12 col-xs-12">
+						<?php echo $frm->getElement("end_date");?>
+					</div>
+					<div class="col-md-12 col-sm-12 col-xs-12">
+						<button class="button-class button-primary fullside" iconClass="glyphicon glyphicon-search" dojoType="dijit.form.Button" showLabel="true" type="submit"><?php echo $tr->translate("SEARCH");?></button>
+					</div>
+				</div>
+			</form>
+		 </div>
+	</div>
+</div>
+
+<div class="dijitHidden">
+	<div data-dojo-type="dijit.Dialog" data-dojo-props="title:'<?php echo $tr->translate('EDIT_REFERED');?>'"  id="updateForm" style="width:550px;" >
+		<div class="card pb-10 pt-10 pl-10 pr-10">
+			<div class="d-flex justify-content-between align-items-center mb-1">
+				<h6 class="fw-normal mb-0 ">
+					<i class="fa fa-university  ti-26px me-1"></i>
+					<span class="modal-top-left"></span>
+				</h6>
+				<div>
+					<span class="d-block rounded bg-label-primary  p-1 mb-2">
+						<i class="fa fa-briefcase ti-26px me-1"></i>
+						<span class="modal-top-right"></span>
+					</span>
+				</div>
+			</div>
+			<div class="text-center mb-6">
+			  <h4 class="modal-title text-primary mb-1"></h4>
+			  <h4 class="modal-title-sub mb-1"></h4>
+			  <p class="modal-title-desc"></p>
+			</div>
+			<form id="validateFormInfo"  name="data" action="" dojoType="dijit.form.Form" method="post">
+				<div class="card-box">
+					<div class="form-group">
+					   <label class="control-label col-md-5 col-sm-5 col-xs-12" ><?php echo $tr->translate('NOTE');?> :
+					   </label>
+					   <div class="col-md-7 col-sm-7 col-xs-12">
+							<input  class="fullside" type="text" required dojoType="dijit.form.ValidationTextBox" name="referedNote" id="referedNote" placeholder="<?php echo $tr->translate("NOTE");?>" />
+					   </div>
+					   <input type="hidden" dojoType="dijit.form.TextBox" name="detailId" id="detailId"  />
+					   <input type="hidden" dojoType="dijit.form.TextBox" name="paymentId" id="paymentId"  />
+					</div>
+					<div class="form-group">
+						<div class="col-sm-12 border-top mt-20 ptb-10 text-center">
+							<input onclick="updateValidate();" type="button" value="1" label="<?php echo $tr->translate('EDIT');?>" id="busyButton" dojoType="dijit.form.Button" 
+							class="button-class button-primary" iconClass="glyphicon glyphicon-floppy-disk" /> 
+						</div>
+					</div>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function(e) {
+  setTimeout(function() {
+		setPrintOrientation('portrait');
+	}, 500);
+});	
+
+function editReferredTo(index){
+	var detailId = dijit.byId("ptdId"+index).get("value")
+	dijit.byId('detailId').set('value',detailId);
+	
+	
+	$(".modal-title").html($("#refMByTo"+index).html());
+	$(".modal-title-sub").html($("#refMByName"+index).html());
+	$(".modal-title-desc").html('<i class="fa-solid fa-calendar-days"></i> '+$("#refMDate"+index).html());
+	
+	$(".modal-top-left").html($("#refMBr"+index).html());
+	$(".modal-top-right").html($( "#refMReceipt"+index).html());
+	
+	dijit.byId('referedNote').set('value',$( "#refMByStu"+index).html());
+	dijit.byId('updateForm').show();
+}
+
+function editReferredBy(index){
+	
+	var detailId = dijit.byId("ptdId"+index).get("value")
+	dijit.byId('detailId').set('value',detailId);
+	
+	
+	$(".modal-title").html($("#refSBy"+index).html());
+	$(".modal-title-sub").html($("#refSToName"+index).html());
+	$(".modal-title-desc").html('<i class="fa-solid fa-calendar-days"></i> '+$("#refSDate"+index).html());
+	
+	$(".modal-top-left").html($("#refSBr"+index).html());
+	$(".modal-top-right").html($( "#refSRecept"+index).html());
+	
+	dijit.byId('referedNote').set('value',$( "#refSToStu"+index).html());
+	dijit.byId('updateForm').show();
+}
+
+var urlUpdateRefered = '<?php echo $this->url(array('module'=>'allreport','controller'=>'accounting','action'=>'updatereferred')); ?>';
+function updateValidate(){
+	if(dijit.byId('validateFormInfo').validate()){
+		if(confirm("<?php echo $tr->translate("Do you want to edit referred");?>")){
+	}else{
+		dijit.byId('validateFormInfo').reset();
+		dijit.byId('updateForm').hide();
+		return false;
+	}
+		loadingBlock();
+		dojo.xhrPost({
+			url: urlUpdateRefered,
+			form: dojo.byId("validateFormInfo"),
+			handleAs:"json",
+			load: function(data){
+				dijit.byId('validateFormInfo').reset();
+				dijit.byId('updateForm').hide();
+				if(data==1){
+					alert("<?php echo $tr->translate("SUCCESS");?>");
+				}
+				location.reload();
+				HideloadingBlock();
+			},
+			error: function(err){
+				dijit.byId('validateFormInfo').reset();
+				dijit.byId('updateForm').hide();
+				HideloadingBlock();
+			}
+		});
+	}
+}			
+  
+</script>

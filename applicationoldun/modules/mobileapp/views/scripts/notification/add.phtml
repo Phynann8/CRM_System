@@ -1,0 +1,407 @@
+<?php 
+$tr = Application_Form_FrmLanguages::getCurrentlanguage();
+echo $this->headTitle($tr->translate('ADD_NOTIFICATION'));
+$countlang = count($this->lang);
+
+$image = $this->baseUrl().'/images/newsevent/default.jpg';
+$imageUrl = $this->baseUrl().'/images/newsevent/';
+?>
+<script>
+dojo.require("dijit/Editor");
+</script>
+
+<style>
+body, #dijitEditorBody {
+    height: 100%;
+    width: 102%;
+    overflow: auto;
+    background: #fff !important;
+    border: 1px solid #bcf;
+}
+.dijitEditor {
+    border: solid 1px #ccd9ff;
+}
+</style>
+<div class="card">
+	<div class="card-content collapse show">
+		<form  id='add_room' action="" dojoType="dijit.form.Form" method="post" enctype="multipart/form-data">
+			<script type="dojo/method" event="onSubmit">			
+			if(this.validate()) {
+                //loadingBlock();
+				return true;
+			}else {
+				return false;
+			}
+			</script>
+			<div class="card-box">
+	        	<div class="col-sm-12 border-botom">
+			    	<div class="col-sm-8 pd-0">
+			    		<h4 class="m-b-0"><i class="fa fa-bell-o" aria-hidden="true"></i>&nbsp;&nbsp;&nbsp;<?php echo $tr->translate('ADD_NOTIFICATION');?></h4>
+		    		</div>
+		    		<div class="col-sm-4 text-right">
+		    		</div>
+	    		</div>
+	    	</div>
+	    	<div class="card-box mb-10">
+				<div class="col-md-4 col-sm-4 col-xs-12">
+					
+					<div class="form-group">
+					   <label class="control-label col-md-5 col-sm-5 col-xs-12" ><?php echo $tr->translate("BRANCH");?> :</label>
+					   <div class="col-md-7 col-sm-7 col-xs-12">
+							<select class="fullside" name="branchId" id="branchId" dojoType="dijit.form.FilteringSelect" onchange="getallstudentname();">
+								<?php if(!empty($this->rsbranch))foreach($this->rsbranch as $rs){?>
+								<option value="<?php echo $rs['id']?>"><?php echo $rs['name'];?></option>
+								<?php }?>
+							</select>
+					   </div>
+					</div>
+					<div class="form-group">
+						<label class="control-label col-md-5 col-sm-5 col-xs-12" >
+							<?php echo $tr->translate("NORTIFICATION_OPT");?>
+					   </label>
+						<div class="col-md-7 col-sm-7 col-xs-12">
+							<select name="opt_notification" id="opt_notification" class="fullside" onChange="Checkchange();" dojoType="dijit.form.FilteringSelect" >
+								<option value="1"><?php echo $tr->translate("FOR_ALL");?></option>
+								<option value="4"><?php echo $tr->translate("DEGREE");?></option>
+								<option value="2"><?php echo $tr->translate("GROUP");?></option>
+								<option value="3"><?php echo $tr->translate("STUDENT");?></option>
+								<option value="5"><?php echo $tr->translate("TEACHER");?></option>
+							</select>
+						 </div>
+					</div>
+					<div class="form-group">
+						<label class="control-label col-md-5 col-sm-5 col-xs-12" >
+							<?php echo $tr->translate("DEGREE");?>
+					   </label>
+						<div class="col-md-7 col-sm-7 col-xs-12">
+							<select name="degree" id="degree" class="fullside" dojoType="dijit.form.FilteringSelect" onChange="getAllGroupByBranch(); getallstudentname();" >
+								<option value="0"><?php echo $tr->translate("PLEASE_SELECT");?></option>
+								<?php if(!empty($this->rsDegree))foreach($this->rsDegree as $rs){?>
+								<option value="<?php echo $rs['id'];?>"><?php echo $rs['name'];?></option>
+								<?php }?>
+							</select>
+						 </div>
+					</div>
+					<div class="form-group">
+					   <label class="control-label bold col-md-5 col-sm-5 col-xs-12" id="lblNameControl" ><?php echo $tr->translate("GROUP");?> :</label>
+					   <div class="col-md-7 col-sm-7 col-xs-12">
+							<input id="groupId" />
+					   </div>
+					</div>
+					<div class="form-group">
+					   <label class="control-label bold col-md-5 col-sm-5 col-xs-12" id="lblNameControl" ><?php echo $tr->translate("STUDENT_NAME");?> :</label>
+					   <div class="col-md-7 col-sm-7 col-xs-12">
+							<input id="studentId" />
+					   </div>
+					</div>
+					<div class="form-group">
+					   <div class="form-group">
+						   <label class="control-label col-md-5 col-sm-5 col-xs-12" >
+								<?php echo $tr->translate("PUBLISH_DATE");?>
+						   </label>
+							<div class="col-md-7 col-sm-7 col-xs-12">
+							<input  constraints="{datePattern:'dd/MM/yyyy'}" type="text" class="fullside" dojoType="dijit.form.DateTextBox" name="public_date" id="public_date"  value="<?php echo date("Y-m-d");?>" >
+						   </div>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="custom-switch">
+							<input type="checkbox" checked id="status" name="status" class="custom-switch-input">
+							<span class="custom-switch-indicator custom-radius"></span>
+							<a href="javascript:void(0);" class="tx-14 mb-0 me-2"><?php echo $tr->translate('STATUS') ?></a>
+						</label>
+					</div>
+					<div class="form-group">
+						<label class="custom-switch">
+							<input type="checkbox" checked id="push_notify" name="push_notify" class="custom-switch-input">
+							<span class="custom-switch-indicator custom-radius"></span>
+							<a href="javascript:void(0);" class="tx-14 mb-0 me-2"><?php echo $tr->translate('PUSH_NOTIFICATION') ?></a>
+						</label>
+					</div>
+					<div class="form-group">
+						<div class="col-md-12 col-sm-12 col-xs-12">
+							<img class="image_view" id="image_view" src="<?php echo $image;?>" alt=""  />
+							<p style="padding: 10px 0;text-align: center;margin-bottom: 0;/* background: #454545; */margin-top: 10px;color: #000;"><?php echo $tr->translate('IMAGES')?> (640 X 420px)</p>
+							<div class="button_browse">
+								<span><?php echo $tr->translate('Image Feature')?><span> &nbsp; <i class="fa fa-camera" aria-hidden="true"></i></span></span>
+								<input class="btn_borwse_image"  type="file" id="photo" name="photo" >
+							</div>
+						</div>
+					</div>
+			 </div>
+	        	<div class="col-md-8 col-sm-8 col-xs-12">
+	        		<?php if ($countlang>1){?>
+			    	<div class="card-box">
+			    		 <ul class="nav  md-pills pills-primary nav-tab" role="tablist">
+			    		 	<?php $alias=''; foreach($this->lang as $key=> $rs){
+		                      	$alias = str_replace(' ','',$rs['title']);?>
+				            <li class="nav-item <?php if ($key<1){echo "active";}?>">
+				                <a class="nav-link " data-toggle="tab" href="<?php echo "#".$alias;?>" role="tab"><i class="fa fa-flag ml-2"></i> <?php echo $tr->translate(strtoupper($rs['title']));?></a>
+				            </li>
+				            <?php }?>
+				        </ul>
+				    </div>
+				    <?php }?>
+				    <?php if ($countlang>1){?>
+				    <div class="col-md-12">
+				        <!-- Tab panels -->
+				        <div class="tab-content vertical">
+				         <?php $alias=''; foreach($this->lang as $key=> $rs){
+		                      	$alias = str_replace(' ','',$rs['title']);?>
+					        <!--Panel <?php echo $key+1?>-->
+					        <div class="tab-pane fade <?php if ($key<1){echo "active in";}?>" id="<?php echo $alias;?>" role="tabpanel">
+					        	<div class="col-md-12 col-sm-12 col-xs-12">
+					                <div class="form-group">
+					                   <label class="control-label col-md-5 col-sm-5 col-xs-12" ><?php echo $tr->translate("TITLE_IN_".strtoupper($rs['title']));?>
+					                   </label>
+					                   <div class="col-md-7 col-sm-7 col-xs-12">
+					                   		<input   type="text" dojoType="dijit.form.ValidationTextBox" required="required" name="title<?php echo str_replace(' ','',$rs['title']);?>"  id="title<?php echo str_replace(' ','',$rs['title']);?>" value="" class="fullside" placeholder="<?php echo $tr->translate("TITLE_IN_".strtoupper($rs['title']));?>" />
+					                   </div>
+					                </div>
+					                <div class="form-group">
+					                   <label class="control-label col-md-12 col-sm-12 col-xs-12" ><?php echo $tr->translate('CONTENT_'.strtoupper($rs['title']))?><span class="required">*</span>
+					                   </label>
+					                   <div class="col-md-12 col-sm-12 col-xs-12">
+					                 	  <textarea class="ckeditor"   style="min-height:400px; height:400px;" id="description<?php echo str_replace(' ','',$rs['title']);?>" name="description<?php echo str_replace(' ','',$rs['title']);?>"></textarea>
+					                   </div>
+					                </div>
+					          	</div>
+					        </div>
+					        <?php }?>
+					   </div>
+					</div>
+					<?php }else{?>
+					 <div class="col-md-12">
+						 <?php $alias=''; foreach($this->lang as $key=> $rs){
+		                      	$alias = str_replace(' ','',$rs['title']);?>
+				        	<div class="col-md-12 col-sm-12 col-xs-12">
+				                <div class="form-group">
+				                   <label class="control-label col-md-5 col-sm-5 col-xs-12" ><?php echo $tr->translate("TITLE_IN_".strtoupper($rs['title']));?>
+				                   </label>
+				                   <div class="col-md-7 col-sm-7 col-xs-12">
+				                   		<input   type="text" dojoType="dijit.form.ValidationTextBox" required="required" name="title<?php echo str_replace(' ','',$rs['title']);?>"  id="title<?php echo str_replace(' ','',$rs['title']);?>" value="" class="fullside" placeholder="<?php echo $tr->translate("TITLE_IN_".strtoupper($rs['title']));?>" />
+				                   </div>
+				                </div>
+				                <div class="form-group">
+				                   <label class="control-label col-md-12 col-sm-12 col-xs-12" ><?php echo $tr->translate('CONTENT_'.strtoupper($rs['title']))?><span class="required">*</span>
+				                   </label>
+				                   <div class="col-md-12 col-sm-12 col-xs-12">
+				                 	  <textarea class="ckeditor"   style="min-height:400px; height:400px;" id="description<?php echo str_replace(' ','',$rs['title']);?>" name="description<?php echo str_replace(' ','',$rs['title']);?>"></textarea>
+				                   </div>
+				                </div>
+				          	</div>
+				        <?php }?>
+					 </div>
+					<?php }?>
+		            </div>
+		            
+			</div>
+			<div class="card-box">
+               	<div class="col-md-12 col-sm-12 col-xs-12 border-top mt-20 ptb-10 text-center">
+               		<input class="button-class button-danger" iconClass="glyphicon glyphicon-repeat" type="reset" value="សំអាត" label="សម្អាត" dojoType="dijit.form.Button"/>
+					<input class="button-class button-primary" iconClass="glyphicon glyphicon-floppy-remove" type="submit" value="save_close" name="save_close" id="save_close" label="<?php echo $tr->translate('SAVE_CLOSE');?>" dojoType="dijit.form.Button" />
+					<input class="button-class button-primary" iconClass="glyphicon glyphicon-floppy-disk" type="submit" value="save_new" name="save_new" id="save_new" label="<?php echo $tr->translate('SAVE_NEW');?>" dojoType="dijit.form.Button" />
+               	</div>
+            </div>
+		</form>
+	</div>
+</div>
+<script src="<?php echo $this->baseUrl();?>/js/help.js"  type="text/javascript"></script>
+<script>
+dojo.require("dijit.form.DateTextBox");
+dojo.require("dojo.data.ItemFileWriteStore");  
+dojo.require("dojo.NodeList-manipulate");
+
+
+require(["dojo/ready"], function(ready){
+	new dijit.form.FilteringSelect({
+		autoComplete: false,
+		queryExpr: "*${0}*",                     
+		id: "groupId",
+		name: "groupId",   
+		required:false,   		
+		class: 'fullside', 
+		placeHolder:"<?php echo $tr->translate("SELECT_GROUP");?>",          
+		onChange: function(){  
+			getallstudentname();
+		}
+	}, "groupId");
+	
+	new dijit.form.FilteringSelect({
+		autoComplete: false,
+		queryExpr: "*${0}*",                     
+		id: "studentId",
+		name: "studentId",   
+		required:false, 
+		class: 'fullside', 
+		placeHolder:"<?php echo $tr->translate("SELECT_STUDENT_NAME");?>",          
+		onChange: function(){  
+			
+		}
+	}, "studentId");
+	
+	ready(function(){
+		Checkchange();
+		
+	});
+});
+
+url_getgroup = '<?php echo $this->url(array('module'=>'foundation','controller'=>'group','action'=>'getallgroup'));?>';
+function getAllGroupByBranch(){
+	dijit.byId('groupId').reset();
+	branchId = dijit.byId('branchId').get('value');
+	if(branchId=='' || branchId==-1){
+		var groupStore  = getDataStorefromJSON('id','name',<?php print_r(Zend_Json::encode(array()));?> );
+		dijit.byId('groupId').set('store',groupStore);  
+		dijit.byId('branchId').focus();
+		return false;
+	}
+	academicYear ="";
+	degree = dijit.byId("degree").get("value");
+	if(degree=='' || degree=="-1"){
+		degree=0;	
+	}
+	
+	dojo.xhrPost({
+		url: url_getgroup,
+		content:{
+			'branch_id':branchId,
+			'academic_year':academicYear,
+			'degree':degree,
+			'noaddnew':1,
+			'forfilter':1
+			},
+		handleAs:"json",
+		load: function(data) {
+			groupStore  = getDataStorefromJSON('id','name', data);
+			dijit.byId('groupId').set('store',groupStore);   
+		},
+		error: function(err) {
+		}
+	});
+}
+
+function getallstudentname(){//
+	url_data = '<?php echo $this->url(array('module'=>'registrar','controller'=>'register','action'=>'getliststudenturl')); ?>';
+
+	dijit.byId("studentId").reset();
+	branchId = dijit.byId("branchId").attr("value");
+	if(branchId==''){
+		dijit.byId("branchId").focus();
+		return false;
+	}
+	groupId = dijit.byId("groupId").get("value");
+	if(groupId=='' || groupId=="-1"){
+		groupId=0;	
+	}
+	degree = dijit.byId("degree").get("value");
+	if(degree=='' || degree=="-1"){
+		degree=0;	
+	}
+	dojo.xhrPost({
+		url:url_data,
+		content:{
+			'student_name':1,
+			'branch_id':branchId,
+			'branchId':branchId,
+			'customerType':1,
+			'joinGroup':1,
+			'groupId':groupId,
+			'degree':degree,
+			'issueResult':1//for get student test get result
+		},
+		handleAs:"json",
+		load: function(data) {
+		    dijit.byId('studentId').set('store',getDataStorefromJSON('id','name', data));  
+		},
+		error: function(err) {
+		}
+	}); 
+}
+
+function Checkchange(){
+	
+		
+		dijit.byId('branchId').set('required',false); 
+		dijit.byId('branchId').set('readOnly',false);
+		
+		dijit.byId('degree').set('required',false); 
+		dijit.byId('degree').set('readOnly',false);
+		
+		dijit.byId('groupId').set('required',false); 
+		dijit.byId('groupId').set('readOnly',false);
+		
+		dijit.byId('studentId').set('required',false); 
+		dijit.byId('studentId').set('readOnly',false); 
+		
+	  if (dijit.byId("opt_notification").get('value')==1){
+		  dijit.byId('branchId').reset();
+		  dijit.byId('degree').reset();
+		  dijit.byId('groupId').reset();
+		  dijit.byId('studentId').reset();
+		  
+		  dijit.byId('degree').set('required',false); 
+		  dijit.byId('degree').set('readOnly',true);
+		  
+		  dijit.byId('groupId').set('required',false); 
+		  dijit.byId('groupId').set('readOnly',true); 
+		  
+		  dijit.byId('studentId').set('required',false); 
+		  dijit.byId('studentId').set('readOnly',true); 
+	  }else if (dijit.byId("opt_notification").get('value')==2){
+		  getAllGroupByBranch();
+		  dijit.byId('groupId').reset();
+		  dijit.byId('studentId').reset();
+		  
+		  dijit.byId('studentId').set('required',false); 
+		  dijit.byId('studentId').set('readOnly',true);
+		  
+	  }else if (dijit.byId("opt_notification").get('value')==3){
+		  getAllGroupByBranch();
+		  getallstudentname();
+		  dijit.byId('studentId').set('required',true); 
+		  dijit.byId('studentId').set('readOnly',false);
+		  
+		  
+	  }else if (dijit.byId("opt_notification").get('value')==4){
+		  
+		  dijit.byId('groupId').reset();
+		  dijit.byId('studentId').reset();
+		  
+		  dijit.byId('groupId').set('required',false); 
+		  dijit.byId('groupId').set('readOnly',true); 
+		  
+		  dijit.byId('studentId').set('required',false); 
+		  dijit.byId('studentId').set('readOnly',true); 
+	}else if (dijit.byId("opt_notification").get('value')==5){
+		dijit.byId('degree').reset();
+		  dijit.byId('groupId').reset();
+		  dijit.byId('studentId').reset();
+		  
+		  dijit.byId('degree').set('required',false); 
+		  dijit.byId('degree').set('readOnly',true);
+		  
+		  dijit.byId('groupId').set('required',false); 
+		  dijit.byId('groupId').set('readOnly',true); 
+		  
+		  dijit.byId('studentId').set('required',false); 
+		  dijit.byId('studentId').set('readOnly',true); 
+	}
+
+	  
+}
+</script>
+<script>
+	function readURL(input) {
+	    if (input.files && input.files[0]) {
+	        var reader = new FileReader();
+	        reader.onload = function (e) {
+	            $('#image_view').attr('src', e.target.result);
+	        }
+	        reader.readAsDataURL(input.files[0]);
+	    }
+	}
+	$("#photo").change(function(){
+	    readURL(this);
+	});
+ </script>

@@ -1,0 +1,736 @@
+<?php
+
+	$tr = Application_Form_FrmLanguages::getCurrentlanguage();
+	$pageTitle = $tr->translate("TEACHER_DASHBOARD");
+	echo $this->headTitle($pageTitle);
+	$base_url = Application_Form_FrmMessage::getUrl("/");
+	$frm =  $this->form_search;
+	$dbgb = new Application_Model_DbTable_DbGlobal();
+	$urlDelete = $this->baseUrl()."/issue/dashboardscore/delete/id/";
+	//print_r($this->row);
+
+	//print_r($this->row);
+	
+	$currentLang = $dbgb->currentlang();
+	$monthKH = array(
+		"1" => "January", "2" => "February", "3" => "March", "4" => "April", "5" => "May", "6" => "June", "7" => "July", "8" => "August", "9" => "September", "10" => "October", "11" => "November", "12" => "December"
+	);
+	if ($currentLang == 1) {
+		$monthKH = array(
+			"1" => "មករា",
+			"2" => "កុម្ភៈ",
+			"3" => "មីនា",
+			"4" => "មេសា",
+			"5" => "ឧសភា",
+			"6" => "មិថុនា",
+			"7" => "កក្កដា",
+			"8" => "សីហា",
+			"9" => "កញ្ញា",
+			"10" => "តុលា",
+			"11" => "វិច្ឆិកា",
+			"12" => "ធ្នូ"
+		);
+	}
+?>
+
+<style>
+
+	ul {
+	display: inline;
+	margin: 0;
+	padding: 0;
+	}
+	ul.sub_list li:hover{
+		background-color: #cccccc;
+	}
+	ul.sub_list li{
+		float: left;
+		list-style: none;
+	}
+	ul.bg-color li{
+		background-color: #cccccc;
+		padding: 3px;
+		border-radius: 3px;
+	}
+	ul.bg-head li{
+		background-color: #575f69;
+		padding: 4px;
+		border-radius: 3px;
+	}
+	ul.bg li{
+		background-color: white;
+		padding: 3px;
+		border-radius: 3px;
+	}	
+	.btn-sm {
+		padding: 0px 10px;
+		font-size: 10px;
+		line-height: 1.5;
+		border-radius: 3px;
+	}
+	
+	.score-dashboard .col-md-6.col-sm-6.col-xs-12.classListSubject {
+		height: 480px;
+		overflow: auto;
+	}
+	.card.border-top-2 {
+		border-top-width: 2px!important;
+	}
+	.head-td {
+		background: #ffffff !important;
+		color: black !important ;
+		font-family: 'Khmer OS Battambang','Times New Roman', Times, serif;
+		font-size: 12px;
+	}
+	.table>tbody>tr>td, .table>tfoot>tr>td, .table>thead>tr>td {
+		padding: 1px 1px;
+		font-family: 'Khmer OS Battambang','Times New Roman';
+		font-size: 12px;
+	}
+
+</style>
+	<link href="<?php echo $base_url;?>admin/build/css/external-template.css" rel="stylesheet">
+	<div class="row"> 
+		<div class="col-md-12 col-sm-12 col-xs-12">
+			<div class="card mb-1 pb-3 ">
+				<div class="card-header pb-1"> 
+					<h3 class="card-title mb-1 "><?php echo $tr->translate("SEARCH"); ?></h3> 
+				</div>
+				<div class="card-content">
+					<div class="card-body">
+						<form id="list" name="list" action="" dojoType="dijit.form.Form" method="post">
+							<script type="dojo/method" event="onSubmit">			
+								if(this.validate()) {
+									academic_year=dijit.byId('academic_year').get('value');
+									if(academic_year=='' || academic_year==0){
+										alert('<?php echo $tr->translate('PLEASE_SELECT_YEAR');?>!');
+										dijit.byId('academic_year').focus(); 
+										return false;
+									}
+
+									settingEntryId=dijit.byId('settingEntryId').get('value');
+									if(settingEntryId=='' || settingEntryId==0){
+										alert('<?php echo $tr->translate('SELECT_SETTING');?>!');
+										dijit.byId('settingEntryId').focus(); 
+										return false;
+									}
+
+									exam_type=dijit.byId('exam_type').get('value');
+									if(exam_type=='' || exam_type==0){
+										alert('<?php echo $tr->translate('SELECT_EXAM_TYPE');?>!');
+										dijit.byId('exam_type').focus(); 
+										return false;
+									}else if(exam_type==2){
+										for_semester=dijit.byId('for_semester').get('value');
+										if(for_semester=='' || for_semester==0){
+											alert('<?php echo $tr->translate('SELECT_SEMESTER');?>!');
+											dijit.byId('for_semester').focus(); 
+											return false;
+										}
+									}else if(exam_type==1){
+										for_month=dijit.byId('for_month').get('value');
+										if(for_month=='' || for_month==0){
+											alert('<?php echo $tr->translate('CHOOSE_MONTH');?>!');
+											dijit.byId('for_month').focus(); 
+											return false;
+										}
+									}else if(exam_type==4){
+										for_term=dijit.byId('for_term').get('value');
+										if(for_term=='' || for_term==0){
+											alert('<?php echo $tr->translate('SELECT_TERM_EXAM');?>!');
+											dijit.byId('for_term').focus(); 
+											return false;
+										}
+									}
+									loadingBlock();
+									return true;
+								}else {
+									return false;
+								}
+							</script>
+							<div class="form-group">
+								<div class="col-md-2 col-sm-2 col-xs-12">
+									<?php echo $frm->getElement("branch_id");?>
+								</div>
+							   <div class="col-md-2 col-sm-2 col-xs-12">
+									<?php echo $frm->getElement("academic_year");?>
+							   </div>
+							    <div class="col-md-2 col-sm-2 col-xs-12">
+									<input id="settingEntryId" />
+									<input type="hidden" name="degreeList" id="degreeList" dojoType="dijit.form.TextBox" value="">
+							   </div>
+							   <div class="col-md-2 col-sm-2 col-xs-12">
+									<?php echo $frm->getElement("degree");?>
+							   </div>
+							   <div class="col-md-2 col-sm-2 col-xs-12">
+									<input id="grade" />
+							   </div>
+						   </div>
+							<div class="form-group"> 
+								<div class="col-md-2 col-sm-3 col-xs-12">
+									<?php echo $frm->getElement("exam_type");?>
+								</div>
+								<div class="col-md-2 col-sm-2 col-xs-12">
+									<?php echo $frm->getElement("for_semester");?>
+								</div>
+								<div class="col-md-2 col-sm-2 col-xs-12">
+									<?php echo $frm->getElement("for_month");?>
+								</div>
+								<div class="col-md-2 col-sm-2 col-xs-12">
+									<?php echo $frm->getElement("for_term");?>
+								</div>
+								<div class="col-md-2 col-sm-2 col-xs-12">
+									<?php echo $frm->getElement("teacher");?>
+								</div>
+							</div>
+							<div class="form-group"> 
+								<div class="col-md-2 col-sm-2 col-xs-12"> 
+									<input id="subjectId" /> 
+								</div>
+								<div class="col-md-2 col-sm-2 col-xs-12">
+									<?php echo $frm->getElement("issueScoreStatus");?>
+								</div>
+								<div class="col-md-2 col-sm-2 col-xs-12">
+									<?php echo $frm->getElement("scoreCombineStatus");?>
+								</div>
+								<div class="col-md-2 col-sm-2 col-xs-12">
+									<?php echo $frm->getElement("evaluationStatus");?>
+								</div>
+								<div class="col-md-2 col-sm-2 col-xs-12">
+									<button class="button-class button-primary" iconClass="glyphicon glyphicon-search" dojoType="dijit.form.Button" showLabel="true" type="submit"><?php echo $tr->translate("SEARCH");?></button>
+								</div>
+							</div>
+					   </form>
+				   </div>
+			   </div>
+			   <div class="card">
+					<div class="card-content collapse show">
+						<div class="card-box text-center">
+							<h4 style="font-family:'khmer os muol light';font-size:14px;text-align: center; color: #2c2c2c;padding:2px 0;">
+								<i style="font-size:18px;margin-right:10px;" class="fa fa-graduation-cap" aria-hidden="true"></i>
+								<?php echo $tr->translate("TEACHER_DASHBOARD");?>
+							</h4>
+							<h5 style="font-family:'khmer os muol light';font-size:12px;text-align: center; color: #2c2c2c;padding:2px 0;">
+								<i class="fa fa-calendar" aria-hidden="true"></i>
+								<?php 
+									$examlabel="";
+									if(!empty($this->search['exam_type'])){
+									
+										$examType  = $this->search['exam_type'];
+										$month	   = $this->search['for_month'];
+										$semester  = $this->search['for_semester'];
+										$term  	   = $this->search['for_term'];
+										$monthChar = empty($monthKH[$month]) ? "" : $monthKH[$month];
+										if($examType==1){
+											$examlabel =  $tr->translate("MONTHLY")." ".$monthChar; 
+										}elseif($examType==2){
+											if($semester==1){
+												$examlabel= $tr->translate("SEMESTER1");
+											}elseif($semester==2){
+												$examlabel= $tr->translate("SEMESTER2");
+											}
+										}elseif($examType==4){
+											if($term==1){
+												$examlabel= $tr->translate("TERM_I");
+											}elseif($term==2){
+												$examlabel= $tr->translate("TERM_II");
+											}elseif($term==3){
+												$examlabel= $tr->translate("TERM_III");
+											}
+										}
+									}
+									echo $examlabel;
+								?>
+							</h5>
+
+						</div>
+					</div>
+				</div>
+			   <div class="row score-dashboard"> 
+					<?php if(!empty($this->row)) foreach($this->row as $gindex =>$row){ 
+						$cardClass = "border-top-primary border-top-darken-1";
+						$bgClass = "border-primary bg-gradient-directional-primary";
+						if($this->search['exam_type']==2){
+							$cardClass = "border-top-warnings border-top-darken-1";
+							$bgClass = "border-warnings bg-gradient-directional-warnings";
+						}
+					?>
+					<div class="col-md-12 col-sm-12 col-xs-12 classListSubject"> 
+						<div class="card mb-1 <?php echo $cardClass; ?> border-top-2 ">
+							<div class="card-content">
+								<div class="row">
+									<div class="col-md-4 col-sm-4 col-xs-12">
+										<div class="d-flex align-items-center h-100 p-1 ">
+											<span class="font-medium-5 "><i class="glyphicon glyphicon-blackboard"></i> <?php  echo $row['group_code']; ?></span>,&nbsp;
+											<span class="font-medium-5" ><i class="fa fa-university" aria-hidden="true"></i> <?php  echo $row['room_name']; ?></span>,&nbsp;
+											<span class="font-medium-5" ><i class="glyphicon glyphicon-user"></i> <?php  echo $row['teacher']; ?></span>
+											<span class="font-large-2 text-center">
+												<?php 
+													$examType  = $this->search['exam_type'];
+													$month	   = $this->search['for_month'];
+													$semester  = $this->search['for_semester'];
+													$term  	   = $this->search['for_term'];
+													if($examType==1){
+													$examlabel =  $tr->translate("TEACHERSCORE")." : ".$tr->translate("MONTHLY")." ".$month; 
+													}elseif($examType==2){
+														if($semester==1){
+															$examlabel= $tr->translate("TEACHERSCORE")." : ".$tr->translate("SEMESTER1");
+														}elseif($semester==2){
+															$examlabel= $tr->translate("TEACHERSCORE")." : ".$tr->translate("SEMESTER2");
+														}
+													}elseif($examType==4){
+														if($term==1){
+															$examlabel= $tr->translate("TEACHERSCORE")." : ".$tr->translate("TERM_I");
+														}elseif($term==2){
+															$examlabel= $tr->translate("TEACHERSCORE")." : ".$tr->translate("TERM_II");
+														}elseif($term==3){
+															$examlabel= $tr->translate("TEACHERSCORE")." : ".$tr->translate("TERM_III");
+														}
+													}
+												?>
+											</span>
+										</div>
+									</div>
+									<div class="col-md-8 col-sm-8 col-xs-12 align-items-center h-100 p-1">
+										<span><i class="glyphicon glyphicon-list-alt"></i> <?php echo $tr->translate("RESULT_STATUS"); ?> : 
+											<?php if(!empty($row['scoreId'])){ ?>
+												<a class="btn btn-success btn-sm" role="button" aria-disabled="true">
+													<?php echo $tr->translate("RESULT_COMBINED"); ?>
+													<i class="fa fa-check-circle" aria-hidden="true"></i>
+												</a>
+											<?php }else{ ?>
+												<a class="btn btn-info btn-sm" role="button" aria-disabled="true">
+													<?php echo $tr->translate("RESULT_NOT_YET_COMBINED"); ?>
+													<i class="fa fa-spinner" aria-hidden="true"></i>
+												</a>
+											<?php } ?>
+										</span>,&nbsp;
+										<span><i class="fa fa-commenting-o" aria-hidden="true"></i> <?php echo $tr->translate("STUDENT_ASSESSMENT"); ?> : 
+											<?php if(!empty($row['assementId'])){ ?>
+												<a class="btn btn-success btn-sm" role="button" aria-disabled="true">
+													<?php echo $tr->translate("EVALUATED"); ?>
+													<i class="fa fa-check-circle" aria-hidden="true"></i>
+												</a>
+											<?php }else{ ?>
+												<a class="btn btn-info btn-sm" role="button" aria-disabled="true">
+													<?php echo $tr->translate("NOT_YET_EVALUATION"); ?>
+													<i class="fa fa-spinner" aria-hidden="true"></i>
+												</a>
+											<?php } ?>
+										</span>
+										<?php if($examType==1){ ?>
+											,
+											<span><i class="fa fa-file-pdf-o" aria-hidden="true"></i> <?php echo $tr->translate("RESULT_PREVIEW"); ?> : 
+												<a target="_blank" href="<?php echo $this->baseUrl()."/allreport/score/rpt-result-preview/id/".$row['id']."/gradingId/".$row['gradingId']."/examType/".$this->search['exam_type']."/for_month/".$this->search['for_month']."/for_semester/".$this->search['for_semester'];?>" 
+													class="btn btn-info btn-sm" role="button" aria-disabled="true">
+													<?php echo $tr->translate("PREVIEW"); ?>
+													<i class="fa fa-eye" aria-hidden="true"></i>
+												</a>
+											</span>
+										<?php } ?>
+									</div>
+								</div>
+								<div class="row d-flex">
+									<div class="col-xs-12 ">
+										<table class="table table-bordered ">
+											<thead class="bg-dark text-white ">
+												<tr class="head-td">
+													<th width="5%"><?php echo $tr->translate("NUM"); ?></th>
+													<th width="10%" ><?php echo $tr->translate("TEACHER"); ?></th>
+													<th width="15%" ><?php echo $tr->translate("SUBJECT"); ?></th>
+													<?php
+													
+													$criterrialList = json_decode($row["criterialList"], true);
+													if(!empty($criterrialList)) foreach($criterrialList as $cindex =>$cr){ 
+															
+													?>
+														<th width="20%" ><?php echo $cr['criterialTitle']; ?></th>
+													<?php } ?>
+													<?php if($examType!=4){ ?>
+														<th><?php echo $tr->translate("RESULT"); ?></th>
+													<?php } ?>
+												</tr>
+											</thead>
+											<tbody class="table-border-bottom-0 ">
+												<?php
+													$num=0;
+													$jsonSubjectList = json_decode($row["scoreSubjectTmpList"], true);
+												
+												//	print_r($jsonSubjectList);
+
+													if(!empty($jsonSubjectList)) foreach($jsonSubjectList as $sjindex =>$sj){
+
+														$subjectLang="";
+														if($sj["subject_lang"]== 2){
+															$subjectLang="(Eng)";
+														}
+														
+														$num++; 
+													?>
+														<tr class="hover">
+															<td class="text-center"> <?php echo $num; ?> </td>
+															<td> <?php echo $sj['teacher']; ?> </td>
+															<td> <?php echo $sj['shortcut'].$subjectLang; ?> </td>
+															<?php
+															   $arrayButtonColor= array(
+																'0'=> 'btn-primary',
+																'1'=> 'btn-info',
+																'2'=> 'btn-danger',
+																'3'=> 'btn-warning',
+																'4'=> 'btn-primary',
+																'5'=> 'btn-success',
+																'6'=> 'btn-danger',
+																'7'=> 'btn-info',
+																'8'=> 'btn-warning',
+															   );
+
+															if(!empty($criterrialList)) foreach($criterrialList as $cindex =>$cr){ 
+
+																	$criteriaClass = $arrayButtonColor[$cindex] ;
+																	$classCol = " col-md-12 col-sm-12 col-xs-12 ";
+																	if($cindex==0){
+																		$classCol = " col-md-6 col-sm-12 col-xs-12 ";
+																		
+																	}
+																?>
+																<td > 
+																	<?php 
+																		// json score temporary
+
+																		$filterSubjectId = $sj['subjectId'];  //  subjectId you want to filter by
+																		$filterCiteriaId = $cr['criteriaId'];  //  citeriaId you want to filter by
+																		// Filter the array
+																		$rsScoreTmp = array_filter($sj["jsonScoreTmp"] , function ($item) use ($filterSubjectId, $filterCiteriaId) {
+																			return $item['subjectId'] == $filterSubjectId && $item['citeriaId'] == $filterCiteriaId;
+																		});
+																		// Reset array keys for better readability
+																		$rsScoreTmp = array_values($rsScoreTmp);
+																	
+																		if(!empty($rsScoreTmp)) foreach($rsScoreTmp as $rstmp){ ?>
+																		<div class="<?php echo $classCol ; ?>">
+																			<div class="btn-group">
+																				<button class="btn <?php echo $criteriaClass  ; ?> btn-sm dropdown-toggle" type="button" id="dropdownMenuButton_<?php echo $rstmp['tmpId']; ?>" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+																					<span class="glyphicon glyphicon-chevron-down"></span>
+																					<?php 
+																						$format = 'd-M-y';
+																						$dateString = $rstmp['dateInput'];
+																						$date = new DateTime($dateString);
+																						$dateInput = $date->format($format);
+																						echo $dateInput;
+																					?>
+																				</button>
+																				<div class="dropdown-menu" aria-labelledby="dropdownMenuButton_<?php echo $rstmp['tmpId']; ?>">
+																					<a class="dropdown-item"  target="_blank" href="<?php echo $this->baseUrl()."/extreport/rpt-grading-list/id/".$rstmp['tmpId']."/fullcontrol/1";?>">
+																						<span><i class="fa fa-file-text-o" aria-hidden="true"></i>  <?php echo $tr->translate("VIEW"); ?></span>
+																					</a>
+																					<div class="dropdown-divider"></div>
+																					<a class="dropdown-item"  target="_blank" href="<?php echo $this->baseUrl()."/grading/edit/id/".$row['id']."/gradingRowId/".$rstmp['tmpId']."/fullcontrol/1";?>">
+																						<span><i class="fa fa-pencil-square-o" aria-hidden="true"></i>  <?php echo $tr->translate("EDIT"); ?></span>
+																					</a>
+																					<div class="dropdown-divider"></div>
+																					<a class="dropdown-item" onclick="setrowdata(<?php echo $rstmp['tmpId']; ?>)"><span><i class="fa fa-trash-o" aria-hidden="true"></i>  <?php echo $tr->translate("DELETE"); ?></span></a>
+																				</div>
+																			</div>
+																			
+																		</div>
+																	<?php } ?>
+																</td>
+																
+															<?php } ?>
+
+															<?php if($examType!=4){ ?>
+																<td width="10%" class="text-center"> 
+																	<?php 
+																		$gradingId = $sj['gradingId'];
+																		if( $gradingId > 0 ){ ?>
+																			<a target="_blank" href="<?php echo $this->baseUrl()."/extreport/rpt-score-list/id/".$gradingId;?>/fullcontrol/1"class="btn btn-success btn-sm" role="button" aria-disabled="true">
+																				<span class="glyphicon glyphicon-list-alt"></span>
+																				<?php 
+																					$format = 'd-M-y';
+																					$dateString = $sj['dateInput'];
+																					$date = new DateTime($dateString);
+																					$dateInput = $date->format($format);
+																					echo $dateInput;
+																				?>
+																			</a>
+																	<?php } ?>
+																</td>
+															<?php } ?>
+															
+														</tr>
+													<?php } ?>
+											</tbody>
+										</table>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+					<?php } ?>
+				</div>
+	
+			</div>
+		</div>
+	</div>
+	
+<div class="dijitHidden">
+	<div data-dojo-type="dijit.Dialog" data-dojo-props="title:'<?php echo $tr->translate('DELETE_RECORD_TITLE');?>'"  id="updateForm" style="width:350px;" >
+		<div class="card pb-10 pt-10 pl-10 pr-10">
+			<form id="voidFormInfo"  name="data" action="" dojoType="dijit.form.Form" method="post">
+				<div class="card-box">
+					<div class="form-group">
+						<div class="col-md-12 col-sm-12 col-xs-12" id="contentInfoPop">
+						</div>
+						<input type="hidden" dojoType="dijit.form.TextBox" name="id" id="id"  />
+					</div>
+					<div class="form-group">
+						<div class="col-sm-12 border-top mt-20 ptb-10 text-center">
+							<p class="message-title text-primary"><?php echo $tr->translate('DO_YOU_WANT_TO_DELETE_THIS_RECORD');?></p>
+														
+							<input onclick="dijit.byId('updateForm').hide();" type="button" value="1" label="<?php echo $tr->translate('NO');?>" id="busyButton" dojoType="dijit.form.Button" class="button-class button-danger" iconClass="glyphicon glyphicon-remove" /> 
+							<input onclick="deleteScore();" type="button" value="1" label="<?php echo $tr->translate('CONFIRM');?>" id="okButton" dojoType="dijit.form.Button" class="button-class button-primary" iconClass="glyphicon glyphicon-ok" /> 
+						</div>
+					</div>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
+
+<script src="<?php echo $this->baseUrl();?>/js/help.js"></script>
+<script type="text/javascript">
+	dojo.require('dijit.form.DateTextBox');
+	dojo.require("dojo.data.ItemFileWriteStore"); 
+	dojo.ready(function(){
+
+		var settingEntryStore  = getDataStorefromJSON('id','name',<?php print_r(Zend_Json::encode(array()));?> );
+
+		new dijit.form.FilteringSelect({
+			queryExpr: "*${0}*",
+			autoComplete: false, 
+			required: false,
+			id: "grade",
+			name: "grade",           
+			class: 'fullside',  
+			placeHolder:"<?php echo $tr->translate("SELECT_GRADE");?>",          
+			onChange: function() {  
+			}
+		}, "grade");
+		new dijit.form.FilteringSelect({
+			queryExpr: "*${0}*",
+			autoComplete: false, 
+			required:false,            
+			id: "subjectId",
+			name: "subjectId",           
+			class: 'fullside', 
+			placeHolder:"ជ្រើសមុខវិជ្ជា/Select Subject",          
+			onChange: function() {
+			}
+		}, "subjectId");
+
+		new dijit.form.FilteringSelect({
+			store:settingEntryStore,
+			queryExpr: "*${0}*",
+			autoComplete: false,                      
+			required: false,               
+			id: "settingEntryId",
+			name: "settingEntryId",   
+			class: 'fullside', 
+			placeHolder:"<?php echo $tr->translate("SELECT_SETTING");?>",
+			onChange: function() {  
+				getSettingInfo();
+			}
+		}, "settingEntryId");
+
+		<?php if(!empty($this->search['academic_year'])){?>
+		dijit.byId('academic_year').attr('value','<?php echo $this->search['academic_year'];?>'); 
+		<?php } ?>
+
+		getAllSubject();
+		getallGrade();
+		getAllSettingEntry();
+
+		var academic_year = dijit.byId('academic_year');
+		academic_year.on('change', function(evt) {
+			getAllSettingEntry();
+		});
+
+	});
+
+	urlGetSubjectStore = '<?php echo $this->url(array('module'=>'issue','controller'=>'scoretmp','action'=>'getsubjectlist'));?>';
+	function getAllSubject(){
+		dijit.byId('subjectId').reset();
+		var subjectStore  = getDataStorefromJSON('id','name',<?php print_r(Zend_Json::encode(array()));?> );
+		dijit.byId('subjectId').set('store',subjectStore); 
+
+		group     = '';
+
+		dojo.xhrPost({
+			url: urlGetSubjectStore,
+			content:{
+				'groupId':group,
+				},
+			handleAs:"json",
+			load: function(data) {
+				subjectStore  = getDataStorefromJSON('id','name', data);
+				dijit.byId('subjectId').set('store',subjectStore); 
+				dijit.byId('subjectId').attr('value','<?php echo $this->search['subjectId']?>');      
+			},
+			error: function(err) {
+			}
+		});
+	}
+
+	var url_dept = '<?php echo $this->url(array('module'=>'global','controller'=>'grade','action'=>'get-grade')); ?>';
+	function getallGrade(){
+		dept_id = dijit.byId('degree').get('value');
+		if(dept_id=='' || dept_id==-1){return false;}
+			dojo.xhrPost({
+				url:url_dept,
+				content:{
+					'dept_id':dept_id,
+					'itemsType':1,
+					'noaddnew':1
+					},
+				handleAs:"json",
+				load: function(data) {
+					dijit.byId('grade').attr('value','');
+					grade_store  = getDataStorefromJSON('id','name', data);
+					dijit.byId('grade').set('store',grade_store); 
+					dijit.byId('grade').attr('value','<?php echo $this->search['grade']?>');    
+				},
+				error: function(err) {
+					alert(err);
+				}
+			});
+	}
+
+	function setrowdata(index){
+		
+		row = index;
+		getGetTmpGrading(row);
+	}
+	var urlTmpGrading = '<?php echo $this->url(array('module'=>'issue','controller'=>'scoretmp','action'=>'getinfo')); ?>';
+	function getGetTmpGrading(row){
+		
+		dojo.xhrPost({
+			url: urlTmpGrading,
+			content:{
+				'gradingTmpId':row,
+				},
+			handleAs:"json",
+			load: function(data) {
+				
+				if(data==0){
+					alert("<?php echo $tr->translate("Can't Delete! ");?>");
+				}else{
+					dijit.byId('id').set('value',row);
+					dijit.byId('updateForm').show();
+					var strinfo="";
+					if(data!=""){
+						strinfo+='<small >'+data.branchName+'</small>';
+						strinfo+='<h3 class="text-primary">'+data.title+' ('+data.subjectName+')</h3>';
+						strinfo+='<p><?php echo $tr->translate("STUDENT_GROUP");?>: <strong>'+data.groupCode+'</strong> '+data.examType+' '+data.for_month+'</p>';
+						strinfo+='<p><?php echo $tr->translate("TEACHER");?>: <strong>'+data.taecherName+'</strong></p>';
+						strinfo+='<p><?php echo $tr->translate("CREATE_DATE");?>: <strong>'+data.createDate+'</strong></p>';
+					}
+					$( "#contentInfoPop" ).html( strinfo );
+				}
+			},
+			error: function(err) {
+			}
+		});
+	}
+
+	var urlGetEntrySetting = '<?php echo $this->url(array('module'=>'issuesetting','controller'=>'scoreentrysetting','action'=>'get-setting'));?>';
+	function getAllSettingEntry() {
+		dijit.byId('settingEntryId').reset();
+		dijit.byId('exam_type').set('value', 1);
+		dijit.byId('for_month').set('value', 0);
+		dijit.byId('for_semester').set('value', 0);
+		dijit.byId('for_term').set('value', 0);
+		
+		var branchId = dijit.byId('branch_id').get('value');
+		if (branchId == '' || branchId == -1) {
+			var settingEntryStore = getDataStorefromJSON('id', 'name', <?php print_r(Zend_Json::encode(array())); ?>);
+			dijit.byId('settingEntryId').set('store', settingEntryStore);
+			dijit.byId('branch_id').focus();
+			return false;
+		}
+		var academicYear = dijit.byId('academic_year').get('value');
+		dojo.xhrPost({
+			url: urlGetEntrySetting,
+			content: {
+				'branchId': branchId,
+				'academicYear': academicYear,
+			},
+			handleAs: "json",
+			load: function(data) {
+				settingEntryStore = getDataStorefromJSON('id', 'name', data);
+				dijit.byId('settingEntryId').set('store', settingEntryStore);
+				dijit.byId('settingEntryId').attr('value','<?php echo $this->search['settingEntryId']?>');    
+			},
+			error: function(err) {}
+		});
+	}
+
+
+	function getSettingInfo(){
+		var urlGetEntrySettingInfo = '<?php echo $this->url(array('module'=>'issuesetting','controller'=>'scoreentrysetting','action'=>'get-settinginfo'));?>';
+	
+		var branchId = dijit.byId('branch_id').get('value');
+		if (branchId == '' || branchId == -1) {
+			dijit.byId('branch_id').focus();
+			return false;
+		}
+		var settingEntryId = dijit.byId('settingEntryId').get('value');
+		dojo.xhrPost({
+			url: urlGetEntrySettingInfo,
+			content: {
+				'branchId': branchId,
+				'settingEntryId': settingEntryId,
+			},
+			handleAs: "json",
+			load: function(data) {
+				if(data){
+					dijit.byId('degreeList').set('value', data.degreeId);
+					dijit.byId('exam_type').set('value', data.examType);
+					dijit.byId('for_month').set('value', data.forMonth);
+					dijit.byId('for_semester').set('value', data.forSemester);
+					dijit.byId('for_term').set('value', data.forTerm);
+				}
+			},
+			error: function(err) {}
+		});
+	}
+
+	var deleteTmpUrl = '<?php echo $this->url(array('module'=>'issue','controller'=>'dashboardscore','action'=>'delete')); ?>';
+	function deleteScore(){
+		if(dijit.byId('voidFormInfo').validate()){
+			
+			loadingBlock();
+			dojo.xhrPost({
+				url: deleteTmpUrl,
+				form: dojo.byId("voidFormInfo"),
+				handleAs:"json",
+				load: function(data){
+					dijit.byId('voidFormInfo').reset();
+					dijit.byId('updateForm').hide();
+					if(data==1){
+						alert("<?php echo $tr->translate("DELETE_SUCCESS");?>");
+					}else if(data==2){//not permission
+						alert("<?php echo $tr->translate("RECORD_NOTFUND");?>");
+					}
+					location.reload();
+					HideloadingBlock();
+				},
+				error: function(err){
+					dijit.byId('voidFormInfo').reset();
+					dijit.byId('updateForm').hide();
+					HideloadingBlock();
+				}
+			});
+		}
+	}
+
+</script>

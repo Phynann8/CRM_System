@@ -1,0 +1,1872 @@
+
+<?php
+	$tr = Application_Form_FrmLanguages::getCurrentlanguage();
+	$this->headTitle($tr->translate('STUDENT_INFO')." ".$this->rs['stu_khname']);
+	echo $this->headTitle(''); 
+	$url_copy =$this->url(array('module'=>'foundation','controller'=>'register','action'=>'copy'));
+	$formList = new Application_Form_Frmtable();
+	$frm =  $this->form_search;
+	$photo= $this->frm_techer;
+	$db_global = new Application_Model_DbTable_DbGlobal();
+	
+	$key = new Application_Model_DbTable_DbKeycode();
+	$keySetting = $key->getKeyCodeMiniInv(TRUE);
+	$studyInfoSetting=empty($keySetting['study_info_setting']) ? 1 : $keySetting['study_info_setting'];
+	$multiProgramClass="d-none";
+	if($studyInfoSetting !=1){ 
+		$multiProgramClass = "";
+	}
+	
+	$studentHasDocument=0;	
+	$urlStuInfo = $this->baseUrl()."/home/searchstudentinfo/student-detail/id/";
+?>
+<style>	
+.text-success {
+    color: #00a86b !important;
+}		
+ .bold{
+		font-weight:bold;
+  }
+.image-box {
+    text-align: center;
+}
+.image-box img {
+    width: 120px;
+    height: 130px;
+}
+.account-image {
+    border: solid 1px #eee;
+    width: 120px;
+    margin: 0 auto;
+} 
+.add-link {
+    padding: 10px 15px;
+    display: block;
+}
+
+label.title {
+	font-weight: bold !important;
+}
+
+.report-frame {
+	min-height: 26cm;
+    margin: 0 auto;
+    padding: 0.5cm 0.5cm 0cm 0.5cm;
+    border: solid 1px #c2c2c2;
+    border-radius: 5px;
+}
+.nav.nav-tab li.nav-item a.nav-link {
+	overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+ul.nav.verticle-tab li.nav-item a.nav-link i {
+    width: auto;
+}
+.p-0{
+	padding:0 !important;
+}
+
+table.content-data{
+	border-collapse:collapse;
+	width:100%;
+	border:1px solid #000; 
+	font-family:'Times New Roman','Khmer OS Battambang';
+	font-size:13px;
+	white-space: nowrap;
+}
+table.content-data thead tr.style-head {
+   line-height: 25px; padding:1px 0px; white-space: nowrap;height: 22px; 
+	background: #ccd9ff;
+}
+table.content-data tr.style-rowdata {
+	font-size:12px; 
+	height: 23px;
+}
+.m-b-0{
+	display: flex;
+	justify-content: flex-start; /* or center, space-around, etc */
+    align-items: start;
+}
+.duplicate{
+	position: relative;
+	
+}
+.copy-icon,.copy-icon-name{
+	  font-size: 14px;
+ }
+ .copy-success,.copy-success-name {
+	 display: none;
+      color: white;
+	  background-color: black;
+	  position: absolute;
+      margin-left: 10px;
+      font-size: 13px;
+	  border-radius: 3px;
+	  padding: 3px;
+    }
+	.bd-solid{
+		border-top: 1px solid #fff;  border-left: 1px solid #fff; border-right: 1px solid #fff;
+	}
+</style>	
+	
+<div class="card">
+	<div class="card-content collapse show">
+		<div class="card-box">
+               	<div class="col-sm-12 border-botom">
+		    		<div class="col-sm-8 pd-0">
+		    			<h4 class="m-b-0">
+							<i class="fa fa-graduation-cap" aria-hidden="true"></i>&nbsp;&nbsp;&nbsp;
+							<?php echo $tr->translate('STUDENT_INFO');?> 
+							<span class="ml-10 mr-5"><i class="fa fa-map-marker" ></i> <?php echo $this->rs['branchName']?></span>
+							<span class="duplicate ml-10 mr-10" data-studentid="<?php echo $this->rs['stu_code']?>">
+								<?php echo $this->rs['stu_code']?>
+								<span><i class="glyphicon glyphicon-duplicate copy-icon" aria-hidden="true"></i></span>
+								<span class="copy-success">Copied</span>
+							</span>
+							<span class="duplicate-name" data-studentname="<?php echo $this->rs['stu_khname']?>">
+								<?php echo$this->rs['stu_khname'];?>
+								<span><i class="glyphicon glyphicon-duplicate copy-icon-name" aria-hidden="true"></i></span>
+								<span class="copy-success-name">Copied</span>
+							</span>
+						</h4>
+	    			</div>
+	    			<div class="col-sm-4 text-right pd-0">
+	    				<span style="display: inline-block;">
+	    					<a class="add-link addsign" href="<?php echo $this->baseUrl()?>/home/searchstudentinfo">
+	    					<i class="fa fa-arrow-circle-left" aria-hidden="true"></i>&nbsp;<?php echo $tr->translate("GO_BACK")?></a>
+	    				</span>
+	    			</div>
+	    		</div>
+	    	</div>
+			<div class="card-box">
+		    	<div class="row g-3">
+					<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+						<ul class="nav nav-tabs bar_tabs" role="tablist">
+							<li role="presentation" class="active">
+								<a class="nav-link " data-toggle="tab" href="#panel21" role="tab"><i class="fa fa-graduation-cap ml-2"></i> <?php echo $tr->translate("STUDENT_INFO");?></a>
+							</li>
+							<li role="presentation">
+								<a class="nav-link" data-toggle="tab" href="#panel23" role="tab">
+								<i class="fa fa-money ml-2"></i> <?php echo $tr->translate("PAYMENT_HISTORY");?>
+								</a>
+							</li>
+							<li role="presentation">
+								<a class="nav-link" data-toggle="tab" href="#discipline" role="tab">
+								<i class="fa fa-briefcase ml-2"></i> <?php echo $tr->translate("STUDENT_AFFAIR");?>
+								</a>
+							</li>
+						</ul>
+					</div>
+			    </div>
+			    <!--/. Tab Menu -->
+			    <div class="col-md-12">
+			        <!-- Tab panels -->
+			        <div class="tab-content vertical">
+				        <div class="tab-pane fade in active" id="panel21" role="tabpanel">
+							<div class="row g-3">
+								<div class="col-lg-2 col-md-2 col-sm-2 col-xs-12 p-0">
+									<ul class="nav verticle-tab md-pills pills-primary nav-tab" role="tablist">
+										<li class="nav-item active">
+											<a class="nav-link " data-toggle="tab" href="#studentProfileii" role="tab" title="<?php echo $tr->translate("STUDENT_PROFILE");?>">
+												<i class="fa fa-graduation-cap"></i> <?php echo $tr->translate("STUDENT_PROFILE");?>
+											</a>
+										</li>
+										<li class="nav-item">
+											<a class="nav-link" data-toggle="tab" href="#studentHistory" role="tab" title="<?php echo $tr->translate("STUDY_HISTORY");?>">
+											<i class="fa fa-history ml-2"></i> <?php echo $tr->translate("STUDY_HISTORY");?></a>
+										</li>
+										<li class="nav-item">
+											<a class="nav-link" data-toggle="tab" href="#studentTestInfo" role="tab" title="<?php echo $tr->translate("TEST_INFO");?>">
+											<i class="fa fa-laptop ml-2"></i> <?php echo $tr->translate("TEST_INFO");?></a>
+										</li>
+									</ul>
+								</div>
+								<div class="col-lg-10 col-md-10 col-sm-10 col-xs-12 p-0">
+									<div class="tab-content">
+										<div role="tabpanel" class="tab-pane fade active in" id="studentProfileii" aria-labelledby="profile-tab">
+											<div class="text-right">
+												<a class="qButton print" href="#" title="<?php echo $tr->translate("PRINT");?>" onclick="doPrintProfle('divPrintProfileii');" ><i class="fa fa-print" aria-hidden="true"></i></a>
+											</div>
+											<div class="card-box " id="divPrintProfileii">
+												<style>
+													#divPrintProfileii {
+														width: 210mm;
+														min-height: 296mm;
+														font-family: 'Times New Roman', 'Khmer OS Battambang';
+														margin: 0 auto;
+													}
+													.report-frame h2,
+													.report-frame h3,
+													.report-frame h4,
+													.report-frame h5{
+														margin:0 !important;
+														padding:0 !important;
+														font-weight:normal !important;
+													}
+													.report-frame.card-profile {
+														background: #fff;
+														background-image: url('<?php echo $this->baseUrl()."/images/background/profile-bg.jpg";?>');
+														background-position: center;
+														background-repeat: no-repeat;
+														background-size: cover;
+														position: relative;
+														display: inline-block;
+														line-height: 24px;
+														left: -4px;
+														color: #0c2276;
+														width: 210mm;
+														min-height: 296mm;
+														height: 297mm;
+														font-family: 'Times New Roman', 'Khmer OS Battambang';
+														margin: 0 auto;
+													}
+													
+													.divided {
+														width: 100%;
+														height: 4px;
+														background: #143b7c;
+														margin: 20px 0;
+														border-radius: 10px;
+													}
+													.semi-divided{
+														border-bottom: 1px dashed #0c2276;
+														margin: 20px 0;
+													}
+													
+													img.d-block.profile-card {
+														width: 105px;
+														/* height: 225px; */
+														border-radius: 5px;
+														margin-bottom: 20px;
+													}
+									
+													@media print {
+														@page {
+															page: A4;
+															size: portrait;;
+															margin: 0.8cm;
+														}
+													}
+													h3.section {
+														font-size: 16px;
+														line-height: 20px;
+														margin-bottom: 5px !important;
+														display: block;
+														font-weight: bold !important;
+														padding-left: 35px !important;
+														position: relative;
+													}
+													h3.section:before {
+														content: '\269C';
+														display: block;
+														width: 30px;
+														position: absolute;
+														left: 0px;
+														top: 4px;
+														text-align: center;
+														font-size: 26px;
+													}
+													h5.row-info {
+														font-size: 13px;
+														line-height: 20px;
+														margin-bottom: 2px !important;
+													}
+													table.content-data-profile {
+														font-family: 'Times New Roman','Khmer OS Battambang';
+														font-size: 12px;
+														line-height: 20px;
+													}
+													table.content-data-profile td{
+														vertical-align: top;
+													}
+													table.content-data-profile td, 
+													table.content-data-profile span {
+														color: #143b7c !important;
+													}
+													
+													h3.studentName{
+														font-family: 'Times New Roman','Khmer OS Battambang';
+														font-size:18px;
+														font-weight: bold !important;
+														line-height: 20px;
+													}
+													h3.studentName.studentNameKh{
+														font-family: 'Times New Roman','Khmer OS Muol Light';
+														font-weight:normal !important;
+														line-height: 30px;
+													}
+													.left-stuinfo {
+														width: 100%;
+														text-align: left;
+														margin-top: 20px;
+													}
+													.padding-10{padding:20px 0px;}
+													@media print{
+														@page{
+															page: A4;
+															margin:0;
+															padding:0;
+														}
+														body {
+															-webkit-print-color-adjust: exact; /* Ensures colors and backgrounds are printed */
+															print-color-adjust: exact; /* Standard version for color printing */
+														}
+														.gallery1.btn{
+															display:none;
+														}
+													}
+													table a{
+														color: inherit !important;
+														text-decoration:none;
+													}
+													.text-bold{
+														font-weight:bold;
+													}
+												</style>
+												<div class="report-frame card-profile" style="margin: 0 auto;min-height: 27cm; padding: 0.5cm;">
+													<table class="content-data-profile" width="100%" > 
+														<tr class="head">
+														   <td colspan="2" align="center">
+																<h2 style="font-size:18px; line-height:32px; font-weight: initial;font-family:'Khmer OS Muol Light';" >ប្រវត្តិរូបសង្ខេប</h2>
+																<h2 class="" style="font-size:18px;font-weight: bold;font-family:'Times New Roman','Khmer OS Muol Light';" >Student Profile</h2>
+														   </td>
+														</tr>
+														<tr>
+															<td>&nbsp;</td>
+														</tr>
+														<tr>
+															<td  valign="top" width="30%" align="center">
+																<?php 
+																	$photo = $this->baseUrl().'/images/no-profile.png';
+																	if ($this->rs['sex']==2){
+																		$photo = $this->baseUrl()."/images/no-profile-female.png";
+																	}
+																	if (!empty($this->rs['photo'])){
+																		if (file_exists(PUBLIC_PATH."/images/photo/".$this->rs['photo'])){
+																			$photo = $this->baseUrl().'/images/photo/'.$this->rs['photo'];
+																		}
+																	}
+																?>
+																<img src="<?php echo $photo; ?>" alt="user image" class="d-block profile-card">
+																<h3 class="studentName"><?php echo $this->rs['stu_code'];?></h3>
+																<h3 class="studentName studentNameKh"><?php echo $this->rs['stu_khname'];?></h3>
+																<h3 class="studentName"><?php echo $this->rs['last_name']." ".$this->rs['stu_enname'];?></h3>
+															
+																<div class="left-stuinfo padding-10">
+																	<h3 class="section">ព័ត៌មានសិស្ស <br/>Student Information </h3>
+																	<h5 class="row-info">ភេទ : <?php echo ($this->rs['sex']==1) ? $tr->translate("MALE") : $tr->translate("FEMALE"); ?></h5>
+																	<h5 class="row-info">សញ្ជាតិ : <?php echo $this->rs["nationality"]; ?></h5>
+																	<h5 class="row-info">ថ្ងៃ-ខែ-ឆ្នាំកំណើត : <?php if (!empty($this->rs['studentDob']) AND $this->rs['studentDob'] !="0000-00-00" AND $this->rs['studentDob'] !="1970-01-01"){ echo date("d/m/Y",strtotime($this->rs['studentDob']));}?></h5>
+																	<h5 class="row-info">ទីកន្លែងកំណើត : <?php echo $this->rs["pob"]; ?></h5>
+																	
+																	<div class="padding-10"></div>
+																	
+																	<h3 class="section">ព័ត៌មានទំនាក់ទំនង <br/>Contact Information</h3>
+																	<h5 class="row-info">លេខទូរសព្ទ : <?php echo $this->rs["tel"]; ?></h5>
+																	<h5 class="row-info">អ៊ីម៉ែល : <?php echo $this->rs["email"]; ?></h5>
+																	<h5 class="row-info">អាស័យដ្ឋានបច្ចុប្បន្ន : 
+																	<?php 
+																		if(!empty($this->rs["home_num"])){ echo "ផ្ទះលេខ ".$this->rs["home_num"];}
+																		if(!empty($this->rs["street_num"])){ echo " ផ្លូវលេខ ".$this->rs["street_num"];}
+																		if(!empty($this->rs["village_name"])){ echo " ភូមិ ".$this->rs["village_name"];}
+																		if(!empty($this->rs["commune_name"])){ echo " ឃុំ/សង្កាត់  ".$this->rs["commune_name"];}
+																		if(!empty($this->rs["district_name"])){ echo " ស្រុក/ខណ្ឌ ".$this->rs["district_name"];}
+																		if(!empty($this->rs["province_name"])){ echo " រាជធានី/ខេត្ត ".$this->rs["province_name"];}
+																	 ?>
+																	</h5>
+																	<div class="divided"></div>
+																</div>
+															</td>
+															<td valign="top"align="left">
+																<h3 class="section">ព័ត៌មានការសិក្សា <br/>Study Information</h3>
+																<?php if($studyInfoSetting==1){?>
+																<table style="width: 100%;">
+																	<tr>
+																		<td width="33%"><h5 class="row-info"><?php echo $tr->translate("STUDY_YEAR");?> : <strong><?php echo $this->rs["academicYear"]; ?></strong></h5></td>
+																		<td width="33%"><h5 class="row-info"><?php echo $tr->translate("DEGREE");?> : <strong><?php echo $this->rs["degreeTitle"]; ?></strong></h5></td>
+																		<td width="33%"><h5 class="row-info"><h5 class="row-info"><?php echo $tr->translate("CLASS");?> : <strong><?php echo empty($this->rs["group_name"]) ? $this->rs["gradeTitle"] : $this->rs["group_name"]; ?></strong></h5></td>
+																	</tr>
+																	<tr>
+																		<td><h5 class="row-info"><?php echo $tr->translate("SESSION");?> : <?php echo $this->rs["sessionTitle"]; ?></h5></td>
+																		<td><h5 class="row-info"><?php echo $tr->translate("ROOM_NAME");?> : <?php echo $this->rs["roomName"]; ?></h5></td>
+																	</tr>
+																</table>
+																<?php }else{ ?>
+																<table class="padd" width="100%" border="1" align="center" style="border:1px solid #4839bd;border-collapse:collapse;white-space:nowrap;font-family: 'Khmer OS Battambang';">
+																		<thead>
+																			<tr style="text-align:center;background-color: #ccd9ff;line-height: 30px;font-weight: bold;font-size:12px; height: 22px; align="center" >
+																				<td><?php echo $tr->translate('N_O');?></td>
+																				<td><?php echo $tr->translate('STUDY_YEAR');?></td>
+																				<td><?php echo $tr->translate('DEGREE');?></td>
+																				<td><?php echo $tr->translate('CLASS');?></td>
+																				<td><?php echo $tr->translate('SESSION');?></td>
+																				<td><?php echo $tr->translate('ROOM_NAME');?></td>
+																			</tr>
+																		</thead>
+																		<tbody>
+																		<?php 		
+																			$i=0;
+																			if(!empty($this->rsStudentRerecord)){ 
+																				foreach($this->rsStudentRerecord as $rs){  $i++;
+																		?>
+																			<tr class="hover" style="font-size:12px; height: 22px;" align="center">
+																				<td><?php echo $i;?></td>
+																				<td><?php echo $rs['academic_year']; ?></td>
+																				<td align="center"><?php echo $rs['degree_name']; ?></td>
+																				<td align="center"><?php echo empty($rs['group_name']) ? $rs['gradeTitle'] : $rs['group_name']; ?></td>
+																				<td><?php echo $rs['session'];?></td>
+																				<td align="left"><?php echo $rs['room_name']; ?></td>
+																			</tr>
+																		<?php } 
+																		}?>
+																		</tbody>
+																	</table>
+																<?php } ?>
+																
+																<div class="divided"></div>
+																
+																<h3 class="section">ព័ត៌មានមាតាបិតា <br/>Parent Information</h3>
+																<table style="width: 100%;">
+																	<tr>
+																		<td width="33%"><h5 class="row-info">ឪពុក : <strong><?php echo $this->rs["father_khname"]; ?></strong></h5></td>
+																		<td width="33%"><h5 class="row-info">អក្សរឡាតាំង : <strong><?php echo $this->rs["father_enname"]; ?></strong></h5></td>
+																		<td width="33%"><h5 class="row-info"><h5 class="row-info">សញ្ជាតិ : <?php echo $this->rs["father_nation"]; ?></h5></td>
+																	</tr>
+																	<tr>
+																		<td><h5 class="row-info">ថ្ងៃ-ខែ-ឆ្នាំកំណើត : <?php if (!empty($this->rs['father_dob']) AND $this->rs['father_dob'] !="0000-00-00" AND $this->rs['father_dob'] !="1970-01-01"){ echo date("d/m/Y",strtotime($this->rs['father_dob']));}?></h5></td>
+																		<td><h5 class="row-info">មុខរបរ : <?php echo $this->rs["fath_job"]; ?></h5></td>
+																		<td><h5 class="row-info">លេខទូរសព្ទ : <?php echo $this->rs["father_phone"]; ?></h5></td>
+																	</tr>
+																	<tr>
+																		<td width="33%"><h5 class="row-info">ម្ដាយ : <strong><?php echo $this->rs["mother_khname"]; ?></strong></h5></td>
+																		<td width="33%"><h5 class="row-info">អក្សរឡាតាំង : <strong><?php echo $this->rs["mother_enname"]; ?></strong></h5></td>
+																		<td width="33%"><h5 class="row-info"><h5 class="row-info">សញ្ជាតិ : <?php echo $this->rs["mother_nation"]; ?></h5></td>
+																	</tr>
+																	<tr>
+																		<td><h5 class="row-info">ថ្ងៃ-ខែ-ឆ្នាំកំណើត : <?php if (!empty($this->rs['mother_dob']) AND $this->rs['mother_dob'] !="0000-00-00" AND $this->rs['mother_dob'] !="1970-01-01"){ echo date("d/m/Y",strtotime($this->rs['mother_dob']));}?></h5></td>
+																		<td><h5 class="row-info">មុខរបរ : <?php echo $this->rs["moth_job"]; ?></h5></td>
+																		<td><h5 class="row-info">លេខទូរសព្ទ : <?php echo $this->rs["mother_phone"]; ?></h5></td>
+																	</tr>
+																</table>
+																
+																<div class="semi-divided"></div>
+																
+																<h3 class="section">ព័ត៌មានអាណាព្យាបាល  <br/>Guardian Information</h3>
+																<table style="width: 100%;">
+																	<tr>
+																		<td width="33%"><h5 class="row-info">អាណាព្យាបាល : <strong><?php echo $this->rs["guardian_khname"]; ?></strong></h5></td>
+																		<td width="33%"><h5 class="row-info">អក្សរឡាតាំង : <strong><?php echo $this->rs["guardian_enname"]; ?></strong></h5></td>
+																		<td width="33%"><h5 class="row-info"><h5 class="row-info">សញ្ជាតិ : <?php echo $this->rs["guardian_nation"]; ?></h5></td>
+																	</tr>
+																	<tr>
+																		<td><h5 class="row-info">ថ្ងៃ-ខែ-ឆ្នាំកំណើត : <?php if (!empty($this->rs['guardian_dob']) AND $this->rs['guardian_dob'] !="0000-00-00" AND $this->rs['guardian_dob'] !="1970-01-01"){ echo date("d/m/Y",strtotime($this->rs['guardian_dob']));}?></h5></td>
+																		<td><h5 class="row-info">មុខរបរ : <?php echo $this->rs["guard_job"]; ?></h5></td>
+																		<td></td>
+																	</tr>
+																	<tr>
+																		<td><h5 class="row-info">លេខទូរសព្ទ : <?php echo $this->rs["guardian_tel"]; ?></h5></td>
+																	</tr>
+																</table>
+
+																<?php if(!empty($this->siblingsInfo)){?>
+																<div class="semi-divided"></div>
+																<h3 class="section">ព័ត៌មានបងប្អូនបង្កើត <br/>Siblings Information</h3>
+																<table class="padd" width="100%" border="1" align="center" style="border:1px solid #4839bd;border-collapse:collapse;white-space:nowrap;font-family: 'Khmer OS Battambang';">
+																	<thead>
+																		<tr style="text-align:center;background-color: #ccd9ff;line-height: 30px;font-weight: bold;font-size:12px; height: 22px; align="center" >
+																			<td><?php echo $tr->translate('N_O');?></td>
+																			<td style="width: 100px;"><?php echo $tr->translate('STUDENT_ID');?></td>
+																			<td><?php echo $tr->translate('NAME');?></td>
+																			<td><?php echo $tr->translate('ACADEMIC_YEAR');?></td>
+																			<td><?php echo $tr->translate('CLASS');?></td>
+																			<td><?php echo $tr->translate('SESSION');?></td>
+																			<td><?php echo $tr->translate('ROOM_NAME');?></td>
+																		</tr>
+																	</thead>
+																	<tbody>
+																		<?php $n=0; foreach($this->siblingsInfo AS $siblings){ $n++;?>
+																			<tr class="hover" style="font-size:12px; height: 22px;" align="center">
+																				<td><?php echo $n;?></td>
+																				<td><a class="text-bold" href="javascript:void(0);" onclick="addTab('<?php echo $siblings['stu_khname'];?>','<?php echo $urlStuInfo.$siblings['stu_id'].'?inFrame=true'?>');"><?php echo $siblings['stu_code']; ?></a></td>
+																				<td align="left"><a class="text-bold" href="javascript:void(0);" onclick="addTab('<?php echo $siblings['stu_khname'];?>','<?php echo $urlStuInfo.$siblings['stu_id'].'?inFrame=true'?>');"><?php echo $siblings['stu_khname']; ?></a></td>
+																				<td align="center"><?php echo $siblings['academicYear'];?></td>
+																				<td align="center"><?php echo empty($siblings['group_name']) ? $siblings['gradeTitle'] : $siblings['group_name']; ?></td>
+																				<td><?php echo $siblings['sessionTitle'];?></td>
+																				<td align="left"><?php echo $siblings['roomName']; ?></td>
+																			</tr>
+																		<?php } ?>
+																	</tbody>
+																</table>
+																<?php } ?>
+																
+																<div class="semi-divided"></div>
+																
+																<h3 class="section">ព័ត៌មានផ្សេងៗ <br/>Other Information</h3>
+																<table style="width: 100%;">
+																	<tr>
+																		<td width="33%"><h5 class="row-info">កម្រិតភាសាបរទេស : <?php echo $this->rs["lang_level"]; ?></h5></td>
+																		<td width="33%"><h5 class="row-info">មកពីសាលា : <?php echo $this->rs["prevSchoolName"]; ?></h5></td>
+																		<td width="33%"><h5 class="row-info">ស្គាល់តាមរយះ : <?php echo $this->rs["know_by"]; ?></h5></td>
+																	</tr>
+																	<tr>
+																		<td><h5 class="row-info">អ្នកឧបត្ថម : <?php echo $this->rs["sponser"]; ?></h5></td>
+																		<td><h5 class="row-info">លេខទូរសព្ទ : <?php echo $this->rs["sponser_phone"]; ?></h5></td>
+																		<td></td>
+																	</tr>
+																</table>
+																<?php if(!empty($this->document)){ ?>
+																<div class="divided"></div>
+																<h3 class="section">ព័ត៌មានឯកសារ  <br/>Document Information</h3>
+																<table width="100%" border="1" style="color: #4839bd; border: 1px solid #4839bd;border-collapse:collapse;line-height: 24px;white-space:nowrap;">
+																	<tbody>
+																		<tr align="center" style="text-align:center;background-color: #ccd9ff;line-height: 30px;font-weight: bold;font-size:12px; height: 22px; align=">
+																			<td><?php echo $tr->translate("N_O");?></td>
+																			<td><?php echo $tr->translate("DOCUMENT_TYPE");?></td>
+																			<td><?php echo $tr->translate("DATE_GIVE");?></td>
+																			<td><?php echo $tr->translate("RECEIVED");?></td>
+																			<td><?php echo $tr->translate("DATE_GIVE_BACK");?></td>
+																		</tr>
+																		<?php
+																		
+																		$i=0;
+																		foreach($this->document as $rs){$i++;
+																			$extensionFile="";
+																			$linkDoc="#";
+																			if($rs['is_receive']==1){
+																				if (!empty($rs['attachment_file'])){
+																					if (file_exists(PUBLIC_PATH."/images/document/student/".$rs['attachment_file'])){
+																						$linkDoc = $this->baseUrl().'/images/document/student/'.$rs['attachment_file'];
+																						$explodeArr = explode(".", $rs['attachment_file']);
+																						$extensionFile = strtolower(end($explodeArr));
+																						$studentHasDocument=1;
+																					}
+																				}
+																			}
+																		?>
+																		<tr style="font-size:13px;height:23px;">
+																			<td align="center"><?php echo $i;?></td>
+																			<td>
+																				<?php echo $rs['document_type'];  ?>
+																			</td>
+																			<td align="center"><?php echo date("d/m/Y",strtotime($rs['date_give']));?></td>
+																			<td align="center"><?php if($rs['is_receive']==1){echo $tr->translate("RECEIVED");}else{echo $tr->translate("NOT_RECEIVED");}?></td>
+																			<td align="center"><?php if($rs['is_receive']==1){ echo '<a class="gallery1 btn btn-primary btn-xs" href="'.$linkDoc.'" onclick="getScheduleSettingInfo(5,2);"><i class="fa fa-eye"></i> '.$tr->translate("VIEW").'</a>'; }else{echo date("d/m/Y",strtotime($rs['date_end']));}?></td>
+																		</tr>
+																		<?php }?>
+																	</tbody>
+																</table>
+																<?php } ?>
+															</td>
+														</tr>
+													</table>
+														
+												</div>
+											</div>
+										</div>
+										
+										<div role="tabpanel" class="tab-pane fade" id="studentHistory" aria-labelledby="history-tab">
+											<div class="text-right">
+												<a class="qButton print" href="#" title="<?php echo $tr->translate("PRINT");?>" onclick="doPrintProfle('divPrintStudyHistory');" ><i class="fa fa-print" aria-hidden="true"></i></a>
+											</div>
+											<div class="card-box report-frame" id="divPrintStudyHistory">
+												<div class="col-md-12 col-sm-12 col-xs-12">
+													<?php echo $this->rsheader;?>
+													<table class="padd" width="100%" border="1" align="center" style="border:1px solid #000;border-collapse:collapse;white-space:nowrap;font-family: 'Khmer OS Battambang';">
+														<thead>
+															<tr> 
+																<td colspan="12" align="center" class="bd-solid">
+																	<span style="color:#000; font-size: 14px;font-family: 'Times New Roman','Khmer OS Muol light';"><?php echo $tr->translate("STUDY_HISTORY");?></span><br />
+																</td>
+															</tr> 
+															<tr> 
+																<td colspan="12" align="center" class="bd-solid">
+																	&nbsp; 
+																</td>
+															</tr> 
+															<tr style="text-align:center;background-color: #ccd9ff;line-height: 30px;font-weight: bold;font-size:12px; height: 22px; align="center" >
+																<td><?php echo $tr->translate('N_O');?></td>
+																<td><?php echo $tr->translate('STUDY_YEAR');?></td>
+																<td><?php echo $tr->translate('STUDENT_GROUP');?></td>
+																<td><?php echo $tr->translate('DEGREE');?></td>
+																<td><?php echo $tr->translate('GRADE');?></td>
+																<td><?php echo $tr->translate('SESSION');?></td>
+																<td><?php echo $tr->translate('ROOM_NAME');?></td>
+																<td><?php echo $tr->translate('Entry Type');?></td>
+																<td><?php echo $tr->translate('Entry Date');?></td>
+																<td><?php echo $tr->translate('STATUS');?></td>
+																<td><?php echo $tr->translate('DISCOUNT');?></td>
+															</tr>
+														</thead>
+														<style> 
+															td{padding:0 2px; }
+															.hover:hover{background: #ccc;}
+														</style>
+														<tbody>
+														<?php 
+														$i=0;
+														$isSet=0;
+														if(!empty($this->study_history)){ foreach($this->study_history as $rs){ $i++;
+														
+														$colorStyle="";
+														$stringPass= $rs['groupStatus'];
+														 if($rs['stop_type']==1){
+															$stringPass= $tr->translate('STOP');
+															$colorStyle='style="color:red"';
+														 }else if ($rs['stop_type']==2){
+															$stringPass= $tr->translate('SUSPEND');
+														}else if ($rs['stop_type']==3){
+															if($rs['is_pass']==0){
+																$stringPass= $tr->translate('GRADUATE');
+															}
+														}else{
+															if($rs['is_current']!=1){
+																if(!empty($rs['movementStatus'])){
+																	$stringPass= $rs['movementStatus'];
+																}
+															}
+														}
+															if($rs['branch_id']==$this->rs['oBranchId'] AND $isSet==0){ 
+																$isSet=1;
+															 ?>
+															<tr>
+																<td colspan="11" align="center" class="bd-solid bold">
+																	<?= $this->rs['oBranchName'] ?>
+																	(<?= $this->rs['old_stu_code'] ?>)
+																</td>
+															</tr>
+															<?php }?>
+
+															<tr class="hover" style="font-size:12px; color:#000; height: 22px;<?php if($rs['stop_type']==2){echo 'color:red';}?>" align="center">
+																<td><?php echo $i;?></td>
+																<td>&nbsp;<?php echo $rs['academic_id']; ?>&nbsp;</td>
+																<td align="left">&nbsp;<?php echo $rs['group_code']; ?>&nbsp;</td>
+																<td align="left">&nbsp;<?php echo $rs['degree']; ?>&nbsp;</td>
+																<td align="left">&nbsp;<?php echo $rs['grade']; ?>&nbsp;</td>
+																<td><?php echo $rs['shift'];?></td>
+																<td align="left">&nbsp;<?php echo $rs['room_name']; ?>&nbsp;</td>
+																<td><?=$rs['is_newstudent']==1?"Enrolled":$rs['entryType'];?></td>
+																<td><?=$rs['entryDate'];?></td>
+																<td <?php echo $colorStyle;  ?> ><?php echo $stringPass;  ?> </td>
+																<td align="left" ><?php echo $rs['discountCode'];echo !empty($rs['discountValue'])?'-'.str_replace(".00","",$rs['discountValue'])."%":""; ?></td>
+															</tr>
+														<?php } }?>
+															
+														</tbody>
+													</table>
+												</div>
+											</div>
+										</div>
+										<div role="tabpanel" class="tab-pane fade" id="studentTestInfo" aria-labelledby="history-tab">
+											<div class="text-right">
+												<a class="qButton print" href="#" title="<?php echo $tr->translate("PRINT");?>" onclick="doPrintProfle('divPrintTest');" ><i class="fa fa-print" aria-hidden="true"></i></a>
+											</div>
+											<div class="card-box report-frame" id="divPrintTest">
+												<style>
+													table.content-data{
+														border-collapse:collapse;
+														width:100%;
+														border:1px solid #000; 
+														font-family:'Times New Roman','Khmer OS Battambang';
+														font-size:13px;
+														white-space: nowrap;
+													}
+													table.content-data thead tr.style-head {
+													line-height: 25px; padding:1px 0px; white-space: nowrap;height: 22px; 
+														background: #ccd9ff;
+													}
+													table.content-data tr.style-rowdata {
+														font-size:12px; 
+														height: 23px;
+													}
+												</style>
+												<div class="col-md-12 col-sm-12 col-xs-12">
+													<?php echo $this->rsheader;?>
+													<?php if(!empty($this->studentTestInfo)){?>
+													<table class="content-data" cellpadding="4"   border="1" >
+														<thead>
+															<tr> 
+																<td colspan="14" align="center" class="bd-solid">
+																	<span style="color:#000; font-size: 14px;font-family: 'Times New Roman','Khmer OS Muol light';"><?php echo $tr->translate("TEST_INFO");?></span><br />
+																</td>
+															</tr> 
+															<tr> 
+																<td colspan="14" align="center" class="bd-solid">
+																	&nbsp; 
+																</td>
+															</tr> 
+															<tr class="style-head" style="height: 20px;background:#ccd9ff; white-space: nowrap;" align="center">
+																<td rowspan="2">&nbsp;<?php echo $tr->translate("N_O"); ?>&nbsp;</td>
+																<td style="padding: 2px;overflow-wrap: break-word;" rowspan="2">&nbsp;
+																<?php echo $tr->translate("SERIAL"); ?>/<br /><?php echo $tr->translate("STUDENT_ID"); ?>&nbsp;</td>
+																<td rowspan="2">&nbsp;<?php echo $tr->translate("STUDENT_NAMEKHMER"); ?><br /><?php echo $tr->translate("NAME_ENGLISH"); ?>&nbsp;</td>
+																<td rowspan="2">&nbsp;<?php echo $tr->translate("SEX"); ?>&nbsp;</td>
+																<td rowspan="2">&nbsp;<?php echo $tr->translate("PHONE"); ?>&nbsp;</td>
+																<td rowspan="2">&nbsp;<?php echo $tr->translate("ACADEMIC_YEAR"); ?>&nbsp;</td>
+																<td rowspan="2">&nbsp;<?php echo $tr->translate("TEST_DATE"); ?>/<?php echo $tr->translate("TEST_TERM");?>&nbsp;</td>
+																<td colspan="3">&nbsp;<?php echo $tr->translate("RESULT"); ?>&nbsp;</td>
+																<td rowspan="2">&nbsp;<?php echo $tr->translate("NOTE"); ?>&nbsp;</td>
+																<td rowspan="2">&nbsp;<?php echo $tr->translate("USER"); ?>&nbsp;</td>
+																<td rowspan="2">&nbsp;<?php echo $tr->translate("RESULT"); ?>&nbsp;</td>
+																<td rowspan="2">&nbsp;<?php echo $tr->translate("STATUS"); ?>&nbsp;</td>
+															  </tr>
+															 <tr class="style-head" style="background:#ccd9ff; white-space: nowrap;" align="center">
+																<td>&nbsp;<?php echo $tr->translate("DEGREE"); ?><br /><?php echo $tr->translate("GRADE"); ?>&nbsp;</td>
+																<td>&nbsp;<?php echo $tr->translate("RESULT_DATE"); ?>&nbsp;</td>
+																<td style="line-height: 18px; padding: 2px;">&nbsp;<?php echo $tr->translate("RESULT_BY"); ?>&nbsp;</td>
+															 </tr>
+															
+														</thead>
+														<?php $updated_result=0; $i=0;  foreach($this->studentTestInfo as $rs){ $i++;?>
+															  <tr class="style-rowdata hover context-menu-one" oncontextmenu="setrowdata(<?php echo $rs['stu_id'];?>);return false;" align="left" style="height: 20px;" >
+																	<td  align="center"><?php echo $i;?></td>
+																	<td style="line-height: 18px; white-space: normal !important;max-width: 50px;width: 100px;padding: 2px;overflow-wrap: break-word;"><?php echo $rs['serial']; ?><br /><?php echo $rs['stu_code']; ?></td>
+																	<td align="left" style="padding: 2px;" ><?php echo $rs['stu_khname']; ?><br /><?php echo $rs['last_name']." ".$rs['stu_enname']; ?></td>
+																	<td align="center" valign="center"><?php echo $rs['sex']; ?></td>
+																	<td style="line-height: 16px;white-space: normal !important;max-width: 65px;width: 65px;padding: 2px;overflow-wrap: break-word;"><?php echo $rs['tel']; ?></td>
+																	<td valign="top" style="line-height:18px;white-space: nowrap; !important;width: 120px;padding: 2px;"><?php echo $rs['academic']; ?></td>
+																	<td valign="top" style="padding: 2px;"><?php echo date('d-M-Y', strtotime($rs['create_date_exam'])); ?><br /><?php echo $rs['study_term'];?></td>
+																	<td valign="top" style="padding: 2px;"><?php if ($rs['updated_result_de']==1){ echo $rs['degree_result_title']; }?><?php if ($rs['updated_result_de']==1){ echo "<br />".$rs['grade_result_title']; }?></td>
+																	<td valign="top" style="padding: 2px;"><?php if ($rs['updated_result_de']==1){ echo date('d-M-Y', strtotime($rs['result_date'])); }?></td>
+																	<td valign="top">&nbsp;<?php echo $rs['result_by'];?>&nbsp;</td>	
+																	<td valign="top" style="padding: 2px; max-width:150px;white-space:normal !important; overflow-wrap: break-word;"><?php echo $rs['note_result']; ?></td>
+																	<td valign="center" style="padding: 2px;"><?php echo $rs['user_id'];?></td>								    
+																	<td valign="top" style="line-height: 18px; padding: 2px; <?php if($rs['updated_result_de']==0){echo " color:red;";}?>" ><?php echo $rs['result_status']; ?></td>
+																	<td valign="top" style="line-height: 18px; padding: 2px; <?php if($rs['is_registered']==0){echo " color:red;";}?>"><?php if ($rs['is_registered']==1){ echo $tr->translate("REGISTERED");}else{ echo $tr->translate("Not Yet Register");}?></td>							    
+															  </tr>
+															 
+															  
+															  <?php 
+																if($rs['updated_result_de']==1){
+																	$updated_result = $updated_result + 1;
+																}
+															  ?>
+														  <?php  }?>
+													</table>
+													<?php echo $this->rsfooter;?>
+													 <?php  }?>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+				        </div>
+				        <!--/. Panel 1-->
+				        
+				        <!--Panel 3-->
+				        <div class="tab-pane fade in " id="panel23" role="tabpanel">
+							<div class="row g-3">
+								<div class="col-lg-2 col-md-2 col-sm-2 col-xs-12 p-0">
+									<ul class="nav verticle-tab md-pills pills-primary nav-tab" role="tablist">
+										<li class="nav-item active">
+											<a class="nav-link " data-toggle="tab" href="#studentPaymentHistory" role="tab" title="<?php echo $tr->translate("PAYMENT_HISTORY");?>">
+												<i class="fa fa-money"></i> <?php echo $tr->translate("PAYMENT_HISTORY");?>
+											</a>
+										</li>
+										<li class="nav-item">
+											<a class="nav-link" data-toggle="tab" href="#studentService" role="tab" title="<?php echo $tr->translate("SERVICE");?>">
+											<i class="fa fa-star ml-2"></i> <?php echo $tr->translate("SERVICE");?></a>
+										</li>
+										<li class="nav-item">
+											<a class="nav-link" data-toggle="tab" href="#studentCredit" role="tab" title="<?php echo $tr->translate("CREDITMEMO");?>">
+											<i class="glyphicon glyphicon-credit-card ml-2"></i> <?php echo $tr->translate("CREDIT_MEMO");?></a>
+										</li>
+									</ul>
+								</div>
+								<div class="col-lg-10 col-md-10 col-sm-10 col-xs-12 p-0">
+									
+									<div class="row top_tiles">
+										<div class="animated flipInY col-lg-3 col-md-3 col-sm-6 col-xs-12">
+											<div class="tile-stats">
+											  <div class="icon"><i class="fa fa-star"></i></div>
+											  <div class="count"><?PHP echo sprintf('%02d',count($this->service)); ?></div>
+											  <h3><?php echo $tr->translate("SERVICE");?></h3>
+											</div>
+										</div>
+										<div class="animated flipInY col-lg-3 col-md-3 col-sm-6 col-xs-12">
+											<div class="tile-stats">
+											  <div class="icon"><i class="glyphicon glyphicon-credit-card"></i></div>
+											  <div class="count text-success"><?PHP echo number_format($this->rs["walletBalance"],2); ?></div>
+											  <h3><?php echo $tr->translate("WALLET_BALANCE");?></h3>
+											</div>
+										</div>
+									</div>
+									<div class="tab-content">
+										<div role="tabpanel" class="tab-pane fade active in" id="studentPaymentHistory" aria-labelledby="payment-history-tab">
+											<div class="text-right">
+												<a class="qButton print" href="#" title="<?php echo $tr->translate("PRINT");?>" onclick="doPrintProfle('divPrintPayment');" ><i class="fa fa-print" aria-hidden="true"></i></a>
+											</div>
+											<div class="card-box report-frame" id="divPrintPayment">
+												<div class="col-md-12 col-sm-12 col-xs-12">
+													<?php 
+														$total=0;
+														$total_balance = 0;
+														$total_receive = 0;
+													?>	
+													<table class="padd" width="100%" border="1" align="center" style="border:1px solid #000;border-collapse:collapse;white-space:nowrap;font-family: 'Khmer OS Battambang';">
+														
+														  <thead>
+																<tr> 
+																   <td colspan="19" align="center" class="bd-solid">
+																		<span style="color:#000; font-size: 14px;font-family: 'Times New Roman','Khmer OS Muol light';"><?php echo $tr->translate("PAYMENT_HISTORY");?></span><br />
+																   </td>
+															   </tr> 
+															   <tr> 
+																   <td colspan="19" align="center" class="bd-solid">
+																	 &nbsp; 
+																   </td>
+															   </tr> 
+															  <tr style="text-align:center;background-color: #ccd9ff;line-height: 30px;font-weight: bold;font-size:11px; height: 20px; " align="center" >
+																<td><?php echo $tr->translate('N_O');?></td>
+																<td><?php echo $tr->translate('SERVICE_CATE');?></td>
+																<td><?php echo $tr->translate('SERVICE_NAME');?></td>
+																<td><?php echo $tr->translate('PAID_DATE');?></td>
+																<td><?php echo $tr->translate('RECEIPT_NO');?></td>
+																<td><?php echo $tr->translate('PAYMENT_TERM');?></td>
+																<td><?php echo $tr->translate('QTY');?></td>
+																<td><?php echo $tr->translate('PRICE');?></td>
+																<td><?php echo $tr->translate('OTHER_FEE');?></td>
+																<td><?php echo $tr->translate('Disc Type');?></td>
+																<td><?php echo $tr->translate('DISCOUNT');?></td>
+																<td><?php echo $tr->translate('PAID_AMOUNT');?></td>
+																<td><?php echo $tr->translate('BALANCE');?></td>
+																<td><?php echo $tr->translate('VALIDATE');?></td>
+																<td><?php echo $tr->translate('REMARK');?></td>
+																<td><?php echo $tr->translate('STATUS');?></td>
+																<td><?php echo $tr->translate('USER');?></td>
+																<td><?php echo $tr->translate('DETAIL');?></td>
+															  </tr>
+														 </thead>
+														<style> 
+															td{padding:0 2px; }
+															.hover:hover{background: #ccc;}
+														</style>
+														  <?php $i=0;
+														  $isSet=0;
+														  if(!empty($this->row)){ foreach($this->row as $rs){ $i++;?>
+															<?php if($rs['branch_id']==$this->rs['oBranchId'] AND $isSet==0){ 
+																$isSet=1;
+															 ?>
+															<tr>
+																<td colspan="18" align="center" class="bd-solid bold">
+																	<?= $this->rs['oBranchName'] ?>
+																	(<?= $this->rs['old_stu_code'] ?>)
+																</td>
+															</tr>
+															<?php }?>
+
+														  <tr class="hover" style="font-size:10px; color:#000; height: 18px;" align="center">
+															<td <?php if($rs['is_void']==1){echo 'style="color:red;"'; }?>><?php echo $i;?></td>
+															<td style="text-align:left"><?php echo $rs['category']; ?></td>
+															<td style="text-align:left"><?php echo $rs['title']; ?></td>
+															<td><?php echo date('d/m/Y', strtotime($rs['create_date']));?></td>
+															<td align="center" <?php if($rs['is_void']==1){echo 'style="color:red;"'; }?>>
+																<a target="_blank" href="<?php echo $this->url(array('module'=>'allreport','controller'=>'accounting','action'=>'rptreceiptdetail','id'=>$rs['payment_id']))?>">
+																	<?php echo $rs['receipt_number']; ?>
+																</a>
+															</td>
+															<td class="text-left"><?php echo  !empty($rs['term_installment'])?$rs['term_installment']:$rs['payment_term']; ?></td>
+															<td><?php echo number_format($rs['qty'],0);?></td>
+															<td class="text-right"><?php echo number_format($rs['fee'],2); ?></td>
+															<td><?php if($rs['extra_fee']>0){echo $rs['extra_fee'];}?></td>
+															<td><?php echo $rs['discount_type']; ?> </td>
+															<td><?php if($rs['discount_percent']>0){echo $rs['discount_percent'].' %';}
+																  if($rs['discount_amount']>0){
+																	echo $rs['discount_amount'];
+																   }
+																?>
+															</td>
+															<td class="text-right" <?php if($rs['is_void']==1){echo 'style="color:red;"'; }?>><?php echo number_format($rs['paidamount'],2);?></td>
+															<td ><?php echo number_format($rs['balance'],2);?></td>
+															<td><?php if($rs['is_onepayment']==0){ echo empty($rs['start_date'])?"":date('d/m/y', strtotime($rs['start_date']))."-".date('d/m/y', strtotime($rs['validate'])); }?></td>
+															<td style="font-size: 9px;"><?php echo $rs['note']; ?></td>
+															<td <?php if($rs['is_void']==1){echo 'style="color:red;"'; }?>><?php echo $rs['void_status']; ?></td>
+															<td><?php echo $rs['user']; ?></td>
+															<td><a target="_blank" href="<?php echo $this->url(array('module'=>'allreport','controller'=>'accounting','action'=>'rptreceiptdetail','id'=>$rs['payment_id']))?>"><?php echo $tr->translate('DETAIL');?></a></td>
+														  </tr>
+														  <?php 
+															if($rs['is_void']==0){
+																$total = $rs['paidamount'] + $total;
+															}
+														  ?> 
+														  <?php } }?>
+														</table>
+													<div style="height:100px;">
+													</div>
+												</div>
+											</div>
+										</div>
+										<div role="tabpanel" class="tab-pane fade" id="studentService" aria-labelledby="service-tab">
+											<div class="text-right">
+												<a class="qButton print" href="#" title="<?php echo $tr->translate("PRINT");?>" onclick="doPrintProfle('divPrintService');" ><i class="fa fa-print" aria-hidden="true"></i></a>
+											</div>
+											<div class="card-box report-frame" id="divPrintService">
+												<div class="col-md-12 col-sm-12 col-xs-12">
+													<?php 
+														$total=0;
+														$total_balance = 0;
+														$total_receive = 0;
+													?>
+													<table class="padd" width="100%" border="1" align="center" style="border:1px solid #000;border-collapse:collapse;white-space:nowrap;font-family: 'Khmer OS Battambang';">
+														<thead>
+															<tr> 
+																<td colspan="6" align="center" class="bd-solid">
+																	<span style="color:#000; font-size: 14px;font-family: 'Times New Roman','Khmer OS Muol light';"><?php echo $tr->translate("SERVICE_TYPE");?></span><br />
+																</td>
+															</tr> 
+															<tr> 
+																<td colspan="6" align="center" class="bd-solid">
+																	&nbsp; 
+																</td>
+															</tr> 
+															<tr style="text-align:center;background-color: #ccd9ff;line-height: 30px;font-weight: bold;font-size:13px; height: 30px; align="center" >
+																<td><?php echo $tr->translate('N_O');?></td>
+																<td><?php echo $tr->translate('SERVICE_CATE');?></td>
+																<td><?php echo $tr->translate('SERVICE_NAME');?></td>
+																<td><?php echo $tr->translate('VALIDATE');?></td>
+																<td><?php echo $tr->translate('NOTE');?></td>
+																<td></td>
+															</tr>
+														</thead>
+														<style> 
+															td{padding:0 2px; }
+															.hover:hover{background: #ccc;} 
+															.text-red {
+																color: #f72929;
+															}
+															.text-bold{
+																font-weight:bold;
+															}
+															table.content-data td span {
+																line-height: inherit;
+															}
+															.noted {
+																word-wrap: break-word;
+																word-break: break-all;
+																font-size: 8px;
+																line-height: 10px !important;
+																white-space: normal;
+																max-width: 100px;
+																display: block;
+															}
+														</style>
+														  <?php $i=0;
+														  if(!empty($this->service)){
+															  foreach($this->service as $rs){ 
+															  $i++;
+															  $stopTypeTitle = "-";
+															  $startDate = empty($rs['startDate'])?"":date('d/m/Y', strtotime($rs['startDate']));
+															  $endDate = empty($rs['endDate'])?"":date('d/m/Y', strtotime($rs['endDate']));
+															  
+															  $validDate = $startDate;
+															  $validDate = empty($validDate) ? $endDate : $startDate." - ".$endDate;
+															  
+															  $stopType = empty($rs['stop_type']) ? 0 : $rs['stop_type'];
+															  if($stopType!=0){
+																  $stopTypeTitle = '<span class="text-red">'.$rs['stopTypeTitle']."</span>";
+															  }
+															  ?>
+														  <tr class="hover" style="font-size:12px; color:#000; height: 25px;" align="center">
+															<td><?php echo $i;?></td>
+															<td style="text-align:left"><?php echo $rs['categoryTitle']; ?></td>
+															<td style="text-align:left"><?php echo $rs['itemTitle']; ?></td>
+															<td><?php echo $validDate; ?></td>
+															<td><span class="noted"><?php echo $rs['note']; ?></span></td>
+															<td><?php echo $stopTypeTitle; ?></td>
+														  </tr>
+														  <?php } }?>
+														</table>
+												</div>
+											</div>
+										</div>
+										<div role="tabpanel" class="tab-pane fade" id="studentCredit" aria-labelledby="credit-tab">
+											<div class="text-right">
+												<a class="qButton print" href="#" title="<?php echo $tr->translate("PRINT");?>" onclick="doPrintProfle('divPrintCredit');" ><i class="fa fa-print" aria-hidden="true"></i></a>
+											</div>
+											<div class="card-box report-frame" id="divPrintCredit">
+												<style> 
+													table.content-data{
+														border-collapse:collapse;
+														width:100%;
+														border:1px solid #000; 
+														font-family:'Times New Roman','Khmer OS Battambang';
+														font-size:12px;
+														white-space: nowrap;
+														margin:0 auto;
+														color:#000;
+														margin:0 auto;
+													}
+													table.content-data  tr.style-head {
+														line-height: 25px; 
+														padding:1px 0px; 
+														white-space: nowrap;
+														height: 22px; 
+														background: #CCD9FF;
+														text-align: center;
+													}
+													table.content-data tr td{
+														padding: 2px;
+													}
+													table.content-data tr.style-rowdata {
+														font-size:12px; 
+														height: 23px;
+													}
+													
+													
+													span.text-green {
+														color: #037d2d;
+													}
+													span.text-red {
+														color: #f72929;
+													}
+													.text-bold{
+														font-weight:bold;
+													}
+													table.content-data td span {
+														line-height: inherit;
+													}
+													
+													.noted {
+														word-wrap: break-word;
+														word-break: break-all;
+														font-size: 8px;
+														line-height: 10px !important;
+														white-space: normal;
+														max-width: 100px;
+														display: block;
+													}
+												</style>
+												<div class="col-md-12 col-sm-12 col-xs-12">
+													<table class="padd" width="100%" border="0" align="center" >
+														<tr> 
+															<td align="center" class="bd-solid">
+																<span style="color:#000; font-size: 14px;font-family: 'Times New Roman','Khmer OS Muol light';"><?php echo $tr->translate("CREDIT_TRANSACTION");?></span><br />
+															</td>
+														</tr> 
+														<tr> 
+															<td align="center" class="bd-solid">
+																&nbsp; 
+															</td>
+														</tr> 
+														<tr> 
+															<td>
+																<table class="content-data" border="1">
+																	<tr class="style-head" align="center">
+																		<td><?php echo $tr->translate('N_O');?></td>
+																		<td><?php echo $tr->translate("#.Tran");?></td>
+																		<td><?php echo $tr->translate("DATE");?></td>
+																		<td><?php echo $tr->translate("TOTAL_AMOUNT");?></td>
+																		<td><?php echo $tr->translate("VALIDATE");?></td>
+																		<td><?php echo $tr->translate("FROM");?></td>
+																		<td><?php echo $tr->translate("REASON");?></td>
+																	</tr>
+																	<?php $i=0;
+																	  
+																		if(!empty($this->studentCredit)){
+																			foreach($this->studentCredit as $rs){ $i++;
+																		  
+																			$cashType = empty($rs['cashType']) ? 1 : $rs['cashType'];
+											
+																			$amountLabel=" <span class=\"text-red text-bold\"> ";
+																			$amountLabel.=number_format($rs["total_amount"],2);
+																			$amountLabel.=" </span> ";
+																			$validate=$rs['creditTypeTitle'];
+																			
+																			$from="";
+																			if($cashType ==1){
+																				$amountLabel=" <span class=\"text-green text-bold\"> ";
+																				$amountLabel.=number_format($rs["total_amount"],2);
+																				$amountLabel.=" </span> ";
+																				
+																				
+																				if( !empty($rs['fromStu']) ){								
+																					$from= "TF - ".$rs['fromStudentNameKh'];
+																				}
+																				if( $rs['creditType']!=1 ){	
+																					$validate=date("d-M-Y",strtotime($rs['end_date']));
+																				}
+																			}else{
+																				$validate="-";
+																				if( !empty($rs['refTransaction']) ){								
+																					$from= "ref #".$rs['refTransaction'];
+																				}
+																			}
+																			$incomeConnected="";
+																			if($rs['depositIncomeId']>0){
+																				$incomeConnected= $tr->translate("deposit")." ref #".$rs['incInvoice'];
+																			}
+											
+																		?>
+																		<tr class="hover" align="center">
+																			<td><?php echo $i;?></td>
+																			<td align="center"><?php echo $rs['transaction_no']; ?></td>
+																			<td><?php echo date("d-M-Y",strtotime($rs['date'])); ?></td>
+																			<td align="right"><?php echo $amountLabel;?></td>
+																			<td align="center"><?php echo $validate; ?></td>
+																			<td align="center">
+																				<?php echo $from; ?>
+																				<?php if($incomeConnected!=""){ echo "<small>".$incomeConnected."</small>"; }?>
+																			</td>
+																			<td><span class="noted"><?php echo $rs['prob']; ?></span></td>
+																		</tr>
+																	 
+																	  <?php } }?>
+																</table>
+															</td>
+														</tr>
+														  
+													</table>
+												</div>
+											</div>
+										</div>
+										
+									</div>
+								</div>
+							</div>
+							
+				        </div>
+				        <!--/. Panel 3-->
+				        
+						<!--Panel 6-->
+				        <div class="tab-pane fade in " id="discipline" role="tabpanel">
+							<div class="row g-3">
+								<div class="col-lg-2 col-md-2 col-sm-2 col-xs-12 p-0">
+									<ul class="nav verticle-tab md-pills pills-primary nav-tab" role="tablist">
+										<li class="nav-item active">
+											<a class="nav-link" data-toggle="tab" href="#studentCalendar" role="tab" title="<?php echo $tr->translate("RPT_RESCHEDULE_BYGROUP");?>">
+											<i class="fa fa-calendar ml-2"></i> <?php echo $tr->translate("RPT_RESCHEDULE_BYGROUP");?></a>
+										</li>
+										<li class="nav-item ">
+											<a class="nav-link " data-toggle="tab" href="#attendance" role="tab" title="<?php echo $tr->translate("STUDENT_ATTENDANCE");?>">
+												<i class="fa fa-book"></i> <?php echo $tr->translate("STUDENT_ATTENDANCE");?>
+											</a>
+										</li>
+										<li class="nav-item">
+											<a class="nav-link" data-toggle="tab" href="#mistake" role="tab" title="<?php echo $tr->translate("STUDENT_MISTAKE");?>">
+											<i class="fa fa-gavel ml-2"></i> <?php echo $tr->translate("STUDENT_MISTAKE");?></a>
+										</li>
+										<li class="nav-item ">
+											<a class="nav-link " data-toggle="tab" href="#studentAchievement" role="tab" title="<?php echo $tr->translate("STUDENT_ACHIEVEMENT");?>">
+												<i class="material-icons-outlined">emoji_events</i> <?php echo $tr->translate("STUDENT_ACHIEVEMENT");?>
+											</a>
+										</li>
+										
+									</ul>
+								</div>
+								<div class="col-lg-10 col-md-10 col-sm-10 col-xs-12 p-0">
+									<div class="tab-content ">
+										<div role="tabpanel" class="tab-pane fade active in" id="studentCalendar" aria-labelledby="calendar-tab">
+											<div class="card-box">
+												<div class="text-right">
+													<a class="qButton print" href="#" title="<?php echo $tr->translate("PRINT");?>" onclick="doPrintProfle('divPrintSchedule');" ><i class="fa fa-print" aria-hidden="true"></i></a>
+												</div>
+												<div class="col-md-12 col-sm-12 col-xs-12">
+													<?php
+														$tr = Application_Form_FrmLanguages::getCurrentlanguage();
+														$this->headTitle('Report Student Drop'); 
+														echo $this->headTitle(''); 
+														$frm =  $this->form_search;
+														$db_sub=new Allreport_Model_DbTable_DbRptStudentDrop();
+														
+														// $day = array(
+																// 1=>'Monday',
+																// 2 =>'Tuesday',
+																// 3 =>'Wednesday',
+																// 4=>'Thursday',
+																// 5=>'Friday',
+														// );
+														$day = $this->day;
+													?>	
+													<style>
+														table.main_table tr{line-height:22px !important;}
+														@media print {
+															@page {
+																page: A4;
+																size: landscape;
+																margin: 0.8cm;
+															}
+														}
+													</style>
+													<div class="report-frame"  style=" background: #fff; margin: 0 auto;min-height: 27cm;padding: 0.5cm;">	
+														<div id="divPrintSchedule">
+															<table style="background:#fff;   margin: 0 auto;width: 100%; font-family: 'Times New Roman','Kh Battambang','Khmer Battambang';">
+																<tr class="head">
+																	<td colspan="3" align="center">
+																		<?php echo $this->rsheader;?>
+																   </td>
+																</tr>
+																<tr class="head">
+																   <td colspan="3" align="center">
+																		<h2 style="color: #4839bd; font-size:13px;font-weight: initial;font-family:Times New Roman,'Khmer OS Muol Light';" ><?php echo $tr->translate("RPT_RESCHEDULE_BYGROUP");?></h2>
+																   </td>
+																</tr>
+															<style>
+																table tr th{
+																	border: 1px solid #000;	
+																}
+																.hover:hover{background: #ccc;}
+																table { page-break-inside:auto }
+																  tr{ page-break-inside:avoid; page-break-after:auto; }
+																#header {
+																  display: table-header-group;
+																  page-break-inside:avoid; page-break-after:auto;
+																}
+																tr.head_schedule th {
+																	padding: 5px 0;
+																	text-align: center;
+																}
+																tr.head_schedule {
+																	background-color: #ffdbdb;
+																}
+																thead tr th,tr.hover td,tr.head_schedule td {
+																		border: 1px solid #4839bd;
+																}
+																.green {
+																	color: #1ABB9C;
+																}
+																ul.subject {
+																	list-style: none;
+																	padding: 0;
+																	line-height: 18px;
+																	font-size:12px;
+																	margin: 0;
+																}
+																tr.line td{ border-bottom: 2px solid #000;padding-top: 5px; }
+																
+																@media print {
+																	@page {
+																		page:A4;
+																		margin: 0.8cm;
+																	}
+																}
+															</style>
+																<tr>
+																	<td colspan="3">
+																	<?php $title=0; $titles=0; $year='';$group='';$hour=''; if(!empty($this->re_row)) 
+																		foreach ($this->re_row As $rs){
+																		$timestudy = $db_sub->getTimeSchelduleByYGS($rs['year_id'],$rs['group_id']);
+																		
+																		$day = $db_global->getDaySchedule($rs['branch_id'],$rs['year_id'],$rs['group_id']);
+																		$amt_day = count($day);
+																		
+																		?>
+																		<table class="main_table" border="1" cellpadding="2" style="color: #4839bd; width:100%; border-collapse: collapse;white-space: normal;" >
+																			<thead>
+																				<tr>
+																					<td align="left" colspan="<?php echo $amt_day+1?>" style="border:1px solid #fff;border-bottom: solid 1px #4839bd;">
+																						<ul class="subject">
+																							<li><?php echo $tr->translate("GROUP");?>:&nbsp;<?php echo $rs['group_code']?></li>	
+																							<li><?php echo $tr->translate("ROOM");?>:&nbsp;<?php echo $rs['room_name']?></li>
+																						</ul>
+																					</td>
+																				</tr>
+																				<tr class="head_schedule" style="font-size:12px;" align="center" >
+																					<td rowspan="2" ><?php echo $tr->translate("TIME");?></td>
+																					<td colspan="<?php echo $amt_day?>"><?php echo $tr->translate("DAYS");?></td>
+																				</tr>
+																				<tr class="head_schedule" style="font-size:12px;" align="center" >
+																				<?php foreach ($day as $key => $days){?>
+																					<td ><?php echo $days['name'];?></td>
+																				<?php }?>
+																				</tr>
+																			</thead>
+																		<?php $session='';foreach($timestudy As $time){
+																			$timeString=$time['from_hour'].'-'.$time['to_hour'];
+																			if($time['from_hour']<=12){
+																				if($title==0){?>
+																				<tr>
+																					<td align="center"  colspan="<?php echo $amt_day+1?>" style="font-size:12px;padding: 2px;text-decoration: underline;border: solid 1px #4839bd;"><?php echo  $tr->translate("MORNING");?></td>
+																				</tr>
+																				<?php $title=1;}
+																			}else{
+																				if($titles==0){
+																			?>
+																				<tr>
+																					<td align="center"  colspan="<?php echo $amt_day+1?>" style="font-size:12px;padding: 2px;text-decoration: underline;border: solid 1px #4839bd;"><?php echo  $tr->translate("AFTERNOON");?></td>
+																				</tr>
+																			<?php $titles=1;}
+																				}
+																			?>
+																				<tr class="hover" style="font-size:12px; line-height: 17px;" align="center" >
+																					<td width="10%" align="center"><?php echo $time['times'];?></td>
+																					<?php foreach ($day as $key => $days){
+																						$subjecNteacher = $db_sub->getSubjectTeacherByScheduleAndGroup($rs['year_id'],$rs['group_id'],$timeString, $days['id'])
+																					?>
+																					<td width="<?php echo 90/$amt_day.'%';?>" >
+																						<?php 
+																						if (!empty($subjecNteacher)){
+																							if (!empty($subjecNteacher['subject_name'])){echo $subjecNteacher['subject_name'];}
+																							if (!empty($subjecNteacher['teacher_name'])){echo "<br/>".$subjecNteacher['teacher_name'];}
+																							if (!empty($subjecNteacher['teacher_phone'])){echo "<br/>".$subjecNteacher['teacher_phone'];}
+																							
+																						}?>
+																					</td>
+																					<?php }?>
+																				</tr>
+																		 <?php }?>
+																			 <tr>
+																				<td colspan="<?php echo $amt_day+1?>" style="line-height: 18px;font-size:12px;border-left: 1px solid #fff;border-right: 1px solid #fff;border-bottom: 1px solid #fff;">
+																					 <ul style="display: inline-table;">
+																						 <?php  $num=0;foreach($db_sub->getSubjectListByYG($rs['year_id'],$rs['group_id'] ) As $key=>$rs_list){
+																							if($rs_list['total_hour']>1){
+																								$h_label='hrs';
+																							}else{
+																								$h_label='hr';
+																							}
+																							if(!empty($rs_list['subject_id'])){
+																								$totalTime = $db_sub->getSubjectForCalculateTime($rs['year_id'], $rs['group_id'], $rs_list['subject_id']);
+																								$num++;
+																							?>
+																								<li style="width: 20%;float: left;list-style-type: none;"><?php echo $num;?>.&nbsp;<?php echo $rs_list['subject_name']?>:&nbsp;<?php echo $totalTime;?></li>
+																						 <?php }}?>
+																					 </ul>
+																				</td>
+																			 </tr>
+																		 </table>	
+																	<?php  }?>
+																	</td>
+																</tr>
+															</table>
+														</div>		
+													</div>
+												</div>
+											</div>
+										</div>
+										<div role="tabpanel" class="tab-pane fade" id="studentAchievement" aria-labelledby="student-tab">
+											<div class="card-box report-frame" id="divPrintService">
+												<div class="col-md-12 col-sm-12 col-xs-12">
+													<table class="padd" width="100%" border="1" align="center" style="border:1px solid #000;border-collapse:collapse;white-space:nowrap;font-family: 'Khmer OS Battambang';">
+														<thead>
+															<tr> 
+																<td colspan="5" align="center" class="bd-solid">
+																	<span style="color:#000; font-size: 14px;font-family: 'Times New Roman','Khmer OS Muol light';"><?php echo $tr->translate("STUDENT_ACHIEVEMENT");?></span><br />
+																</td>
+															</tr> 
+															<tr> 
+																<td colspan="5" align="center" class="bd-solid">
+																	&nbsp; 
+																</td>
+															</tr> 
+															<tr style="text-align:center;background-color: #ccd9ff;line-height: 30px;font-weight: bold;font-size:13px; height: 30px; align="center" >
+																<td><?php echo $tr->translate('N_O');?></td>
+																<td><?php echo $tr->translate('TITLE');?></td>
+																<td><?php echo $tr->translate('achievementType');?></td>
+																<td><?php echo $tr->translate('GROUP');?></td>
+																<td></td>
+															</tr>
+														</thead>
+													  <?php $i=0;
+														$urlAchievementLetter = $this->baseUrl()."/allreport/score/achievement-letter/id/";
+														if(!empty($this->studentAchievement)){
+															  foreach($this->studentAchievement as $rowAchie){ $i++;?>
+															  <tr class="hover" style="font-size:12px; color:#000; height: 25px;" align="center">
+																<td><?php echo $i;?></td>
+																<td align="left"><?php echo $rowAchie['achievementTitle']; ?></td>
+																<td align="center"><?php echo $rowAchie['achievementTypeTitle']; ?></td>
+																<td align="center">
+																	<strong><?php echo $rowAchie['groupCode']; ?></strong><br/>
+																	<?php echo $rowAchie['academicYear']; ?>
+																</td>
+																<td align="center">
+																	<a class="btn btn-xs  bg-primary" href="javascript:void(0);" title="<?php echo $tr->translate("PREVIEW");?>" onclick="addTab('<?php echo $tr->translate("achievementLetter");?>','<?php echo $urlAchievementLetter.$rowAchie['id'].'?inFrame=true'?>');" ><i class="fa fa-search-plus text-white" ></i></a>
+																	<a class="btn btn-xs  bg-success" href="javascript:void(0);" title="<?php echo $tr->translate("DOWNLOAD");?>" onclick="downloadImage('<?php echo $rowAchie["id"];?>');" ><i class="fa fa-download text-white" ></i></a>
+																</td>
+															</tr>
+														  <?php } 
+														 }?>
+														</table>
+												</div>
+											</div>
+										</div>
+										<div role="tabpanel" class="tab-pane fade" id="attendance" aria-labelledby="home-tab">
+											<div class="text-right">
+												<a class="qButton print" href="#" title="<?php echo $tr->translate("PRINT");?>" onclick="doPrintProfle('divPrintAttendance');" ><i class="fa fa-print" aria-hidden="true"></i></a>
+											</div>
+											<div class="card-box report-frame" id="divPrintAttendance">
+												<style>
+													table.content-data{
+														page-break-inside:always; page-break-after:always;  
+														font-size:12px; 
+														line-height:16px; 
+														font-family:'Times New Roman','Khmer OS Battambang'; 
+														margin:0 auto;
+														width:100%;
+														border:1px solid #000; 
+														border-collapse: collapse;white-space: nowrap;
+												
+													}
+													.hide{visibility: hidden;}
+													@media print{
+														@page{
+															margin:0.3cm 0.7cm 0cm 0.7cm;
+															page-break-before: avoid;
+															-webkit-transform: scale(0.5);  /* Chrome, Safari 3.1+  */
+															-moz-transform: scale(0.5);  /* Firefox 3.5-15 */
+															-ms-transform: scale(0.5);   /* IE 9 */
+															-o-transform: scale(0.5);    /* Opera 10.50-12.00 */
+															transform: scale(0.5);
+															page: A4;
+														}
+														.hide{visibility: visible; height: 20px;}
+														table.content-data{
+															page-break-inside:always; page-break-after:always;  
+														}
+													}
+												</style>
+												<div class="col-md-12 col-sm-12 col-xs-12">
+													<?php echo $this->rsheader;?>
+													<?php if (!empty($this->student_attendance)){?>
+													
+														<?php 
+															$month = array("01"=>"មករា","02"=>"កុម្ភៈ","03"=>"មីនា","04"=>"មេសា","05"=>"ឧសភា","06"=>"មិថុនា","07"=>"កក្កដា","08"=>"សីហា","09"=>"កញ្ញា","10"=>"តុលា","11"=>"វិច្ឆិកា","12"=>"ធ្នូ",);
+															$i=0; 
+															$old_groupid=0; 
+															$old_student_id=0; 
+														 foreach ($this->student_attendance as $key => $rs){
+															if ($rs['sex']==1){$sex = $tr->translate("MALE");}else{$sex = $tr->translate("FEMALE");}
+														?>
+														<?php if ($old_groupid!=$rs['group_id']){ ?>
+														<?php if ($key>0){ 
+														?>
+														<tr>
+															<td align="right" style=" border-bottom: 1px solid #fff;  border-left: 1px solid #fff; border-right: 1px solid #fff;">
+																&nbsp;
+															</td>
+														</tr>
+													</table>
+													<?php }$i=0; ?>
+													<table class="content-data" cellpadding="5" border="1" >
+														<thead>
+															<tr>
+															<?php if($key>0){ ?> 
+																<tr class="hide"  style="border:1px solid #000;">
+																	<td style="border:1px solid #fff;"></td>
+																</tr>
+																<?php } ?>
+																<td align="center" class="bd-solid">
+																		
+																	<div style="margin-bottom:5px; color:#000; font-size: 16px; line-height:24px; font-family: 'Times New Roman','Khmer OS Muol light';"><?php echo $tr->translate("STUDENT_ATTENDENCE");?></div>
+																	<div style="color:#000; line-height:18px; font-family:'Times New Roman','Khmer OS Muol light';">
+																		<?php echo $tr->translate("MONTHLY");?> : <span style="font-family: 'Times New Roman','Khmer OS Battambang';"><?php echo $month[date("m")]." ".date("Y");?></span>
+																		<?php echo $tr->translate("ACADEMIC_YEAR");?> : <span style="font-family: 'Times New Roman','Khmer OS Battambang';"><?php echo $rs['academic_year'];?></span> ,
+																		<br />
+																		<?php echo $tr->translate("GROUP");?> : <span style="font-family: 'Times New Roman','Khmer OS Battambang';"><?php echo $rs['group_code'];?></span> , 
+																		<?php echo $tr->translate("ROOM_NAME");?> : <span style="font-family: 'Times New Roman','Khmer OS Battambang';"><?php echo $rs['room_name'];?></span> 
+																		, <?php echo $tr->translate("SESSION");?> : <span style="font-family: 'Times New Roman','Khmer OS Battambang';"><?php echo $rs['session'];?></span>
+																	</div>
+																</td>
+															</tr>
+														</thead>
+														<?php } $i++;?>
+														<tr style="border: solid 1px #fff;">
+															<td style="font-weight: 600;">
+																<?php echo $tr->translate("STUDENT_ID");?> : <?php echo $rs['stu_code'];?>
+																<?php echo $tr->translate("STUDENT");?> : <?php echo $rs['stu_khname'];?>
+																<?php echo $tr->translate("SEX");?> : <?php echo $sex;?>
+															</td>
+														</tr>
+														<?php 
+														$A=0; 
+														$P=0; 
+														$L=0; 
+														$EL=0; 
+														$db = new Home_Model_DbTable_DbStudent();
+														$attentence_status = $db->getStatusAttendence($rs['stu_id'], $rs['group_id']);
+														?>
+														
+														<?php if (!empty($attentence_status)){?>
+														<tr style="border: solid 1px #fff;">
+															<td>
+																<table cellpadding="5" border="1" style="font-size:12px; line-height:16px; border:1px solid #000; border-collapse: collapse; margin:0 auto; width:100%; white-space: nowrap;" >
+																	<tr style="font-weight:bold; background: #ccd9ff;">
+																		<td rowspan="2" align="center">
+																			<?php echo $tr->translate("DATE");?>	
+																		</td>
+																		<td colspan="4" align="center">
+																			<?php echo $tr->translate("ATTENDANCE");?>
+																		</td>
+																		<td rowspan="2" align="center">
+																			<?php echo $tr->translate("DESCRIPTION");?>
+																		</td>
+																	</tr>
+																	<tr style="font-size:12px; font-weight:bold; background: #ccd9ff;">
+																		<td align="center"><?php echo $tr->translate("ABSENT");?></td>
+																		<td align="center"><?php echo $tr->translate("PERMISSION");?></td>
+																		<td align="center"><?php echo $tr->translate("LATE");?></td>
+																		<td align="center"><?php echo $tr->translate("EARLY_LEAVE");?></td>
+																	</tr>
+																	<?php foreach ($attentence_status as $rs){
+																		$absent="";
+																		$permission="";
+																		$late="";
+																		$early_leave="";
+																		
+																		if ($rs['attendence_status']==2){
+																			$absent = 1;
+																			$A=$A+1;
+																			//Absent
+																		}
+																		else if ($rs['attendence_status']==3){
+																			$permission=1;
+																			 $P = $P+1;
+																			//Permission
+																		}
+																		else if ($rs['attendence_status']==4){
+																			$late=1;
+																			$L = $L+1;
+																			//Late
+																		}
+																		else if ($rs['attendence_status']==5){
+																			$early_leave=1;
+																			$EL = $EL+1;
+																			//Early Leave
+																		}else{
+																			echo " ";
+																		}
+																	?>
+																	<tr >
+																		<td width="20%" align="center"><?php echo date("d-m-Y",strtotime($rs['date_attendence']));?></td>
+																		<td width="10%" align="center"><?php echo $absent;?></td>
+																		<td width="10%" align="center"><?php echo $permission;?></td>
+																		<td width="10%" align="center"><?php echo $late;?></td>
+																		<td width="10%" align="center"><?php echo $early_leave;?></td>
+																		<td width="40%" align="left" style="font-size: 10px;white-space: normal;line-height: 14px;"><?php echo $rs['description'];?></td>
+																	</tr>
+																	<?php }?>
+																	<tr align="center" >
+																		<td style="background: #ccd9ff;">
+																			<?php echo $tr->translate("TOTAL");?>
+																		</td>
+																		<td>
+																			<?php echo $A;?>
+																		</td>
+																		<td>
+																			<?php echo $P;?>
+																		</td>
+																		<td>
+																			<?php echo $L;?>
+																		</td>
+																		<td>
+																			<?php echo $EL;?>
+																		</td>
+																	</tr>
+																</table>
+															</td>
+														</tr>
+														<?php }?>
+														<?php $old_groupid = $rs['group_id'];
+														}?>
+														<tr>
+															<td align="right" style=" border-bottom: 1px solid #fff;  border-left: 1px solid #fff; border-right: 1px solid #fff;">
+																<?php echo $this->rsfooter;?>
+															</td>
+														</tr>
+													</table>
+												<?php }?>
+											</div>
+										</div>
+									</div>
+									<div role="tabpanel" class="tab-pane fade" id="mistake" aria-labelledby="mistake-tab">
+										<div class="text-right">
+											<a class="qButton print" href="#" title="<?php echo $tr->translate("PRINT");?>" onclick="doPrintProfle('divPrintMistake');" ><i class="fa fa-print" aria-hidden="true"></i></a>
+										</div>
+										<div class="card-box report-frame" id="divPrintMistake">
+											<style>
+												table.content-data{
+													page-break-inside:always; page-break-after:always;  
+													font-size:12px; 
+													line-height:16px; 
+													font-family:'Times New Roman','Khmer OS Battambang'; 
+													margin:0 auto;
+													width:100%;
+													border:1px solid #000; 
+													border-collapse: collapse;white-space: nowrap;
+											
+												}
+												.hide{visibility: hidden;}
+												@media print{
+													@page{
+														margin:0.3cm 0.7cm 0cm 0.7cm;
+														page-break-before: avoid;
+														-webkit-transform: scale(0.5);  /* Chrome, Safari 3.1+  */
+														-moz-transform: scale(0.5);  /* Firefox 3.5-15 */
+														-ms-transform: scale(0.5);   /* IE 9 */
+														-o-transform: scale(0.5);    /* Opera 10.50-12.00 */
+														transform: scale(0.5);
+														page: A4;
+													}
+													.hide{visibility: visible; height: 20px;}
+													table.content-data{
+														page-break-inside:always; page-break-after:always;  
+													}
+												}
+											</style>
+											<div class="col-md-12 col-sm-12 col-xs-12">
+												<?php echo $this->rsheader;?>
+												<?php if (!empty($this->student_mistake)) {
+														$month = array("01"=>"មករា","02"=>"កុម្ភៈ","03"=>"មីនា","04"=>"មេសា","05"=>"ឧសភា","06"=>"មិថុនា","07"=>"កក្កដា","08"=>"សីហា","09"=>"កញ្ញា","10"=>"តុលា","11"=>"វិច្ឆិកា","12"=>"ធ្នូ",);
+														$i=0; 
+														$old_groupid=0; 
+														$old_student_id=0; 
+													 foreach ($this->student_mistake as $key => $rs){
+														if ($rs['sex']==1){$sex = $tr->translate("MALE");}else{$sex = $tr->translate("FEMALE");}
+													?>
+													<?php if ($old_groupid!=$rs['group_id']){ ?>
+													
+													
+													<?php if ($key>0){ 
+													?>
+														<tr>
+															<td align="right" style=" border-bottom: 1px solid #fff;  border-left: 1px solid #fff; border-right: 1px solid #fff;">
+																&nbsp;
+															</td>
+														</tr>
+													</table>
+													<?php }$i=0; ?>
+													<table class="content-data"  cellpadding="5" border="1" >
+														<thead>
+															<?php if($key>0){ ?> 
+															<tr class="hide"  style="border:1px solid #000;">
+																<td style="border:1px solid #fff;"></td>
+															</tr>
+															<?php } ?>
+															<tr>
+																<td align="center" class="bd-solid">
+																	<div style="margin-bottom:5px; color:#000; font-size: 16px; line-height:24px; font-family: 'Times New Roman','Khmer OS Muol light';"><?php echo $tr->translate("STUDENT_MISTAKE");?></div>
+																	
+																	<div style="color:#000; line-height:18px; font-family:'Times New Roman','Khmer OS Muol light';">
+																		<?php echo $tr->translate("MONTHLY");?> : <span style="font-family: 'Times New Roman','Khmer OS Battambang';"><?php echo $month[date("m")]." ".date("Y");?></span>
+																		<?php echo $tr->translate("ACADEMIC_YEAR");?> : <span style="font-family: 'Times New Roman','Khmer OS Battambang';"><?php echo $rs['academic_year'];?></span> ,
+																		<br />
+																		<?php echo $tr->translate("GROUP");?> : <span style="font-family: 'Times New Roman','Khmer OS Battambang';"><?php echo $rs['group_code'];?></span> , 
+																		<?php echo $tr->translate("ROOM_NAME");?> : <span style="font-family: 'Times New Roman','Khmer OS Battambang';"><?php echo $rs['room_name'];?></span> 
+																		, <?php echo $tr->translate("SESSION");?> : <span style="font-family: 'Times New Roman','Khmer OS Battambang';"><?php echo $rs['session'];?></span>
+																	</div>
+																</td>
+															</tr>
+														</thead>
+													<?php } $i++;?>
+													<tr style="border: solid 1px #fff;">
+														<td style="font-weight: 600;">
+															<?php echo $tr->translate("STUDENT_ID");?> : <?php echo $rs['stu_code'];?>
+															<?php echo $tr->translate("STUDENT");?> : <?php echo $rs['stu_khname'];?>
+															<?php echo $tr->translate("SEX");?> : <?php echo $sex;?>
+														</td>
+													</tr>
+													<?php 
+													
+													$db = new Home_Model_DbTable_DbStudent();
+													$mistake_status = $db->getStatusMistakeByStudent($rs['stu_id'],$rs['group_id']);?>
+													<?php if (!empty($mistake_status)){?>
+													<tr style="border: solid 1px #fff;">
+														<td>
+															<table cellpadding="5" border="1" style="font-size:12px; line-height:16px; border:1px solid #000; border-collapse: collapse; margin:0 auto; width:100%; white-space: nowrap;" >
+																<tr style="font-weight:bold; background: #ccd9ff;">
+																	<td rowspan="2" align="center">
+																		<?php echo $tr->translate("DATE");?>	
+																	</td>
+																	<td colspan="4" align="center">
+																		<?php echo $tr->translate("MISTAKE");?>
+																	</td>
+																	<td rowspan="2" align="center">
+																		<?php echo $tr->translate("DESCRIPTION");?>
+																	</td>
+																</tr>
+																<tr style="font-size:12px; font-weight:bold; background: #ccd9ff;">
+																	<td align="center"><?php echo $tr->translate("SMALL_MISTACK");?></td>
+																	<td align="center"><?php echo $tr->translate("MEDIUM_MISTACK");?></td>
+																	<td align="center"><?php echo $tr->translate("BIG_MISTACK");?></td>
+																	<td align="center"><?php echo $tr->translate("OTHER");?></td>
+																</tr>
+																<?php
+																$s=0; 
+																$m=0; 
+																$b=0;
+																$totalOther = 0;
+																foreach ($mistake_status as $rs){
+																	$small="";
+																	$medium="";
+																	$big="";
+																	$other = "";
+																	$description="";
+																	if ($rs['type']==2){
+																		$description = $rs['description'];
+																		if ($rs['mistake_type']==1){
+																			$small = 1;
+																			$s=$s+1;
+																			//small
+																		}
+																		else if ($rs['mistake_type']==2){
+																			$medium=1;
+																			 $m = $m+1;
+																			//medium
+																		}
+																		else if ($rs['mistake_type']==3){
+																			$big=1;
+																			$b = $b+1;
+																			//big
+																		}else{
+																			$other = 1;
+																			$totalOther+= 1;
+																		}
+																	}else{
+																		if ($rs['mistake_type']==4){
+																			$small = 1;
+																			if ($rs['for_session']==1){
+																				$descri_added = "(មកយឺត ពេលព្រឹក)";
+																			}else if ($rs['for_session']==2){
+																				$descri_added = "(មកយឺត ពេលល្ងាច)";
+																			}
+																			$description = $rs['description']." ".$descri_added;
+																			 $s=$s+1;
+																		}elseif ($rs['mistake_type']==5){
+																			$small = 1;
+																			if ($rs['for_session']==1){
+																				$descri_added = "(ចេញមុន ពេលព្រឹក)";
+																			}else if ($rs['for_session']==2){
+																				$descri_added = "(ចេញមុន ពេលល្ងាច)";
+																			}
+																			$description = $rs['description']." ".$descri_added;
+																			$s=$s+1;
+																		}
+																	}
+																?>
+																<tr>
+																	<td width="20%" align="center"><?php echo date("d-m-Y",strtotime($rs['mistake_date']));?></td>
+																	<td width="10%" align="center"><?php echo $small;?></td>
+																	<td width="10%" align="center"><?php echo $medium;?></td>
+																	<td width="10%" align="center"><?php echo $big;?></td>
+																	<td width="10%" align="center"><?php echo $other;?></td>
+																	<td width="50%" align="left" style="font-size: 10px;white-space: normal;line-height: 14px;"><?php echo $description;?></td>
+																</tr>
+																<?php }?>
+																<tr align="center">
+																	<td style="background: #ccd9ff;">
+																		<?php echo $tr->translate("TOTAL");?>
+																	</td>
+																	<td>
+																		<?php echo $s;?>
+																	</td>
+																	<td>
+																		<?php echo $m;?>
+																	</td>
+																	<td>
+																		<?php echo $b;?>
+																	</td>
+																	<td>
+																		<?php echo $totalOther;?>
+																	</td>
+																</tr>
+															</table>
+														</td>
+													</tr>
+													<?php }?>
+													<?php $old_groupid = $rs['group_id'];
+													}?>
+													<tr>
+														<td align="right" style=" border-bottom: 1px solid #fff;  border-left: 1px solid #fff; border-right: 1px solid #fff;">
+															<?php echo $this->rsfooter;?>
+														</td>
+													</tr>
+												</table>
+												<?php }?>
+											</div>
+										</div>
+									</div>
+								</div>
+								</div>
+							</div>
+				        </div>
+				        <!--/. Panel 6-->
+						
+			   		 </div>
+			   		   <!--/. Tab panels -->
+			   	</div>
+		</div>
+	</div>
+</div>
+<script src="<?php echo $this->baseUrl();?>/admin/js/extra-plug.js"></script>
+<script type="text/javascript">
+dojo.require("dijit.form.CheckBox"); 
+dojo.require("dijit.form.NumberTextBox");
+dojo.require("dijit.form.Textarea");
+dojo.require("dijit.form.DateTextBox");
+
+  $(document).ready(function() {
+    $('.copy-icon').on('click', function() {
+      var $container = $(this).closest('.duplicate');
+      var code = $container.data('studentid');
+
+      navigator.clipboard.writeText(code).then(function() {
+        var $successMsg = $container.find('.copy-success');
+        $successMsg.show();
+        setTimeout(function() {
+          $successMsg.hide();
+        }, 500);
+      });
+    });
+
+	$('.copy-icon-name').on('click', function() {
+      var $container = $(this).closest('.duplicate-name');
+      var code = $container.data('studentname');
+
+      navigator.clipboard.writeText(code).then(function() {
+        var $successMsg = $container.find('.copy-success-name');
+        $successMsg.show();
+        setTimeout(function() {
+          $successMsg.hide();
+        }, 500);
+      });
+    });
+  });
+
+<?php if($studentHasDocument==1){?>
+$( document ).ready(function() {
+   $('.gallery1').EZView();
+});
+<?php } ?>
+
+	function copyRecord(url){
+		 id = dijit.byId('recordcopy').get('value');
+		 if(id!=''){
+			window.location.href = url+'/id/'+id;
+		 }else{
+			alert('Please select record you want to copy');
+			return false;
+		 }
+	}
+
+	function setValue(index){
+		var recordcopy = $('input[name=copy]:checked').val();
+		dijit.byId('recordcopy').attr('value',recordcopy);
+	}
+
+	function setStuValue(type){ //type=1 set value vy studet code. type =2 by stu name
+	  if(type==1){
+		  stu_code=dijit.byId("stu_code").get("value");
+		  dijit.byId("stu_name").attr("value",stu_code);
+	  }else{
+		  stu_name=dijit.byId("stu_name").get("value");
+		  dijit.byId("stu_code").attr("value",stu_name);
+	  }
+	}
+	function doPrintProfle(keyid) {
+		window.frames["print_frame"].document.body.innerHTML=dojo.byId(keyid).innerHTML;
+	    window.frames["print_frame"].window.focus();
+	    window.frames["print_frame"].window.print();
+	    hideDialog();
+	}
+	
+	function downloadImage(index){
+		loadingBlock();
+		url = "<?php echo $this->baseUrl();?>/allreport/score/ajaxachievementletter";
+		var contentDataCondiction = { 
+					'value': index,
+			};
+		downloadAsImage(url,contentDataCondiction);
+		setTimeout(function() {
+			HideloadingBlock();
+		}, 700);
+	}
+</script> 

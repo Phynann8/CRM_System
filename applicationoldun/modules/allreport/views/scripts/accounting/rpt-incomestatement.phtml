@@ -1,0 +1,269 @@
+<?php 
+	$frm = $this->form_search;
+	$tr = Application_Form_FrmLanguages::getCurrentlanguage();
+	$base_url = Application_Form_FrmMessage::getUrl("/");
+	
+	$pageTitle = $tr->translate("RPT_INCOMESTATEMENT");
+	echo $this->headTitle($pageTitle); 
+	$dateFormat ="d/m/Y";
+?>
+<script>
+	dojo.require('dijit.form.Button');
+	dojo.require("dijit.form.DateTextBox");
+</script>
+<div class="layout-wrapper-report">
+	<div id="mainContent" class="main-content-report">
+		<div class="report-preview">
+			<?php echo $this->controlReport?>
+			<div id="main-viewer" class="main-viewer portrait">
+				<div id="viewer" class="viewer portrait">
+					<div id="divPrint" class="content">
+						<link rel="stylesheet" href="<?php echo $this->baseUrl();?>/admin/build/css/report-style.css">
+						<link rel="stylesheet" href="<?php echo $this->baseUrl();?>/admin/build/css/report-style-screen.css">
+						<style>
+							@media print {
+								<?php if(!empty($this->printFormat)){ echo $this->printFormat; } ?>
+							}
+							.border-doth{border: 1px dotted #000;line-height:20px;}
+						</style>
+						<table style="margin: 0 auto; width: 100%; padding:0.5cm;" >
+							<tr>
+								<td colspan="3"><?php echo $this->rsheader;?></td>
+							</tr>
+							<tr>
+								<td width="15%" align="center">
+								</td>
+								<td width="70%" align="center">
+									<div style="color:#000; font-size: 12px;font-family:Times New Roman,'Khmer MEF2';"><?php echo $tr->translate('RPT_INCOMESTATEMENT')?></div>
+									<span style="color:#000; font-size: 12px;font-family:'Times New Roman','Khmer OS Muol Light';"><?php if(!empty($this->search['start_date'])){?>&nbsp; <?php echo date("d-M-Y",strtotime($this->search["start_date"]))?> <?php echo $tr->translate('TO')?> <?php echo date("d-M-Y",strtotime($this->search["end_date"]));}?></span>
+								</td>
+								<td width="15%" align="center"></td>
+							</tr>
+							<tr>
+								<td colspan="3">
+									<table class="content-data text-color-black text-h16px text-size-12px" width="100%" align="left" border="0" style="white-space:nowrap;font-family: 'Times New Roman','Khmer OS Battambang';">
+										<thead>
+											<tr class="text-bold bg-ligt-blues hpx-25">
+												<td width="20%"></td>
+												<td width="20%" align="right"><?php echo $tr->translate('ALL_INCOME')?></td>
+												<td width="20%" ></td>
+												<td width="40%" ><?php echo $tr->translate('')?></td>
+											</tr>
+										</thead>
+										  <?php 
+											$i=0; 
+											$grand_total=0;
+											$total_income=0;
+											$total_penalty=0;
+											$credit_memo= 0;
+											$total_otherincome = 0;
+											$no=0;
+										 ?>
+										 <?php if(!empty($this->row)){ foreach($this->row as $key => $rs){ $i++;?>
+											<tr class="hover" align="right" >
+												<td ></td>
+												<td style="text-align:right;font-size:12px;"><?php echo $rs['category_name'];?></td>
+												<td style="vertical-align:middle;white-space: nowrap;" ><div class="border-doth"></div></td>
+												<td ><?php echo number_format($rs['total_paidamount'],2);?></td>
+											</tr>
+												<?php 
+													$grand_total = $grand_total + $rs['total_paidamount'];
+												?>
+										  <?php }}
+										  if(!empty($this->row_penalty)){
+											foreach ($this->row_penalty as $payment){
+												$credit_memo = $credit_memo + $payment['credit_memo'];
+												$total_penalty = $total_penalty + $payment['penalty'];
+											}
+										  }
+										  
+										  if($total_penalty>0){ ?>
+											<tr class="hover" align="right" >
+												<td ></td>
+												<td style="text-align:right;font-size:12px;"><?php echo $tr->translate('FINE');?></td>
+												<td><div class="border-doth"></div></td>
+												<td ><?php echo number_format($total_penalty,2);?></td>
+											</tr>
+											<?php }
+											if($credit_memo>0){?>
+											<tr class="hover"  align="right" >
+												<td ></td>
+												<td style="text-align:right;font-size:12px;"><?php echo $tr->translate('Credit Memo');?>(-)</td>
+												<td><div class="border-doth"></div></td>
+												<td ><?php echo number_format($credit_memo,2);?></td>
+											</tr>
+											<?php }?>
+											<tr class="hover" style="font-size:13px;" align="right" >
+												<td ></td>
+												<td style="text-align: right;font-weight:bold;"><?php echo $tr->translate('TOTAL');?></td>
+												<td style="white-space: nowrap;width:200px;"></td>
+												<td style="padding-left:20px;font-weight: bold;border-bottom: 6px double #000;"><?php 
+												$grand_total = $grand_total+$total_penalty-$credit_memo;
+												echo number_format($grand_total,2);?></td>
+											</tr>
+											<tr class="text-bold bg-ligt-blues hpx-25">
+												<td style="text-align: right;"></td>
+												<td style="text-align: right;"><?php echo $tr->translate('OTHER_INCOME')?></td>
+												<td ></td>
+												<td ></td>
+											</tr>
+											<?php
+												$parent="";
+												if(!empty($this->rsincome)){ foreach ($this->rsincome as $income_cate){
+													$total_otherincome = $total_otherincome +$income_cate['total_income'];
+											?>
+											<?php if($income_cate['parent']!=0 AND $parent != $income_cate['parent']){?>
+												<tr height="21px">
+													<td>&nbsp;</td>
+													<td style="text-align:right;font-size:12px;">&nbsp;<?php echo $income_cate['parent_name'];?>&nbsp;</td>
+													<td>&nbsp;</td>
+													<td>&nbsp;</td>
+													<?php $parent = $income_cate['parent'];?>
+												</tr>
+											<?php }?>
+											<?php if ( $income_cate['parent']==0){?>
+												<tr height="21px">
+													<td>&nbsp;</td>
+													<td style="text-align:right;font-size:12px;">&nbsp;<?php echo $income_cate['income_category'];?>&nbsp;</td>
+													<td><div class="border-doth"></div></td>
+													<td align="left">&nbsp;<?php echo number_format($income_cate['total_income'],2);?>&nbsp;</td>
+												</tr>
+											<?php }else{?>
+												<tr height="21px">
+													<td >&nbsp;</td>
+													<td style="text-align:right;font-size:12px;"><?php echo $income_cate['income_category'];?>&nbsp;</td>
+													<td><div class="border-doth"></div></td>
+													<td align="left">&nbsp;<?php echo number_format($income_cate['total_income'],2);?>&nbsp;</td>
+												</tr>
+											<?php }?>
+											<?php }?>	
+											 <tr class="hover" style="font-size:13px; height: 20px;" align="center" >
+												<td ></td>
+												<td style="text-align: right;font-weight:bold;"><?php echo $tr->translate('TOTAL');?></td>
+												<td style="white-space: nowrap;width:200px;"></td>
+												<td style="padding-left:20px;font-weight: bold;border-bottom: 6px double #000;"><?php echo number_format($total_otherincome,2);?></td>
+											</tr>
+											<?php }?>
+											<tr>
+												<td colspan="3" style="text-align: right;font-weight:bold;font-size:14px;"><?php echo $tr->translate('TOTLE_AMOUNT');?></td>
+												<td><strong style="border-bottom: 5px solid #000;font-size:14px;">$&nbsp;<?php echo number_format($grand_total+$total_otherincome,2);?></strong></td>
+											</tr>
+											<tr class="text-bold bg-ligt-blues hpx-25">
+												<td width="20%"></td>
+												<td width="20%" align="right"><?php echo $tr->translate('ALL_EXPENSE')?></td>
+												<td width="20%" ></td>
+												<td width="40%"><?php echo $tr->translate('')?></td>
+											</tr>
+												<?php
+													$parent="";
+													$total_expense = 0;
+													if(!empty($this->rsexpense)) foreach ($this->rsexpense as $expense_cate){
+														$total_expense = $total_expense +$expense_cate['total_expense'];
+												?>
+													<?php if ( $expense_cate['categoryId']!=0 AND $parent != $expense_cate['categoryId']){?>
+														<tr height="21px">
+															<td>&nbsp;</td>
+															<td style="text-align: right;font-size:12px;">&nbsp;<?php echo $expense_cate['expCategoryTitle'];?>&nbsp;</td>
+															<td>&nbsp;</td>
+															<td>&nbsp;</td>
+															<?php $parent = $expense_cate['categoryId'];?>
+														</tr>
+													<?php }?>
+													<?php if ( $expense_cate['parentId']==0){?>
+														<tr height="21px">
+															<td>&nbsp;</td>
+															<td style="text-align: right;font-size:12px;">&nbsp;<?php echo $expense_cate['categoryTitle'];?>&nbsp;</td>
+															<td><div class="border-doth"></div></td>
+															<td align="left">&nbsp;<?php echo number_format($expense_cate['total_expense'],2);?>&nbsp;</td>
+														</tr>
+													<?php }else{?>
+														<tr height="21px">
+															<td >&nbsp;</td>
+															<td style="text-align: right;font-size:12px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<?php echo $expense_cate['categoryTitle'];?>&nbsp;</td>
+															<td><div class="border-doth"></div></td>
+															<td align="left">&nbsp;<?php echo number_format($expense_cate['total_expense'],2);?>&nbsp;</td>
+														</tr>
+													<?php }?>
+													<?php }?>
+												<tr>
+													<td colspan="3" style="text-align: right;font-weight:bold;font-size:13px;"><?php echo $tr->translate('TOTLE_AMOUNT');?></td>
+													<td style="padding-left:20px;font-weight: bold;border-bottom: 6px double #000;font-size:13px;" >
+														<strong >$&nbsp;<?php echo number_format($total_expense,2);?></strong>
+													</td>
+												</tr>
+												<?php 
+														$grand_total = ($grand_total+$total_otherincome) - $total_expense;
+													?>
+												<tr>
+													<td></td>
+													<td style="white-space: nowrap;text-align: right;font-size:13px;"><strong><?php echo $tr->translate('NET_INCOME_OR_NET_LOST')?></strong></td>
+													<td></td>
+													<td align="left" >
+														<strong style="border-bottom:5px solid red;font-wight:bold;font-size:15px;<?php if($grand_total<0){echo 'color:red;';}?>">$&nbsp;<?php echo number_format($grand_total,2);?></strong>
+													</td>
+												</tr>
+									</table>
+								</td>	
+							</tr>	
+							<tr>
+								<td colspan="3">
+									<br />
+									<table width="100%" class="content-data text-color-black text-h16px text-size-12px" >
+										<tr style="text-align: center;">
+											<td width="30%">បានឃើញនិង ឯកភាព</td>
+											<td width="30%">បានពិនិត្យ</td>
+											<td width="30%">ភ្នំពេញ, ថ្ងៃទី……ខែ……ឆ្នាំ………	</td>
+										</tr>
+										<tr style="text-align: center;">
+											<td width="30%" style="font-size: 13px;font-family:'Times New Roman','Khmer OS Muol Light'">លោកអគ្គនាយក</td>
+											<td width="30%">ប្រធានគណនេយ្យ</td>
+											<td width="30%">បេឡាករ</td>
+										</tr>
+									</table>
+								</td>	
+							</tr>
+						</table>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="right-panel-report" id="rightPanel">
+		<div class="card-box">
+			<div class="card-search-head col-sm-12 border-botom">
+				<div class="col-sm-6 text-left pd-0">
+					<h4 class="m-b-0">
+					
+					<?php echo $tr->translate("SEARCH");?> 
+					</h4>
+				</div>
+				<div class="col-sm-6 text-right pd-0">
+				<i class="fa fa-search "></i> 
+				</div>
+			</div>
+			<form id="list" name="list" action="" dojoType="dijit.form.Form" method="post">
+				<div class="form-group">
+					<div class="col-md-12 col-sm-12 col-xs-12">
+						<?php echo $frm->getElement("branch_id");?>
+					</div>
+					<div class="col-md-12 col-sm-12 col-xs-12">
+						<?php echo $frm->getElement("start_date");?>
+					</div>
+					<div class="col-md-12 col-sm-12 col-xs-12">
+						<?php echo $frm->getElement("end_date");?>
+					</div>
+					<div class="col-md-12 col-sm-12 col-xs-12">
+						<button class="button-class button-primary fullside" iconClass="glyphicon glyphicon-search" dojoType="dijit.form.Button" showLabel="true" type="submit"><?php echo $tr->translate("SEARCH");?></button>
+					</div>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function(e) {
+  setTimeout(function() {
+		setPrintOrientation('portrait');
+	}, 500);
+});	
+</script>

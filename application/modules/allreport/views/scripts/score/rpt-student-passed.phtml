@@ -1,0 +1,222 @@
+<?php
+	$tr = Application_Form_FrmLanguages::getCurrentlanguage();
+	echo $this->headTitle($tr->translate('STUDNET_TRANDSFORMATION')); 
+	$base_url = Application_Form_FrmMessage::getUrl("/");
+	$ac = null;
+	$ad = null;
+	$i=null;
+	$j=null;
+	$session='';
+	$grade='';
+	
+	$to_ad = null;
+	$to_session='';
+	$to_grade='';
+	
+	$amt_stu_pass=0;
+	$amt_stu_fail=0;
+	
+	$from_group='';
+	$to_group='';
+	
+	$frm =  $this->form_search;
+?>	
+<div style="min-height:10cm; margin:0 auto; padding:0.5cm 0.5cm 0cm 0.5cm">	
+		<div class="card-box">
+       		<div class="col-sm-12 border-botom">
+		    	<div class="col-sm-8 pd-0">
+	    			<h4 class="m-b-0"><i class="fa fa-file " aria-hidden="true"></i>&nbsp;&nbsp;&nbsp;<?php echo $tr->translate('STUDNET_TRANDSFORMATION');?></h4>
+    			</div>
+    			<div class="col-sm-4 text-right">
+    			</div>
+    		</div>
+    	</div>
+		<form  id='foundation_class' action="" dojoType="dijit.form.Form" method="post" enctype="application/x-www-form-urlencoded">
+			<div class="form-group">
+            	<div class="col-md-2 col-sm-2 col-xs-12">
+            		<?php echo $frm->getElement("adv_search");?>
+                </div>
+                <div class="col-md-2 col-sm-2 col-xs-12">
+                	<?php echo $frm->getElement("branch_id");?>
+                </div>
+                <div class="col-md-2 col-sm-2 col-xs-12">
+		           	<?php echo $frm->getElement("academic_year");?>
+                </div>
+                <div class="col-md-2 col-sm-2 col-xs-12">
+                	<select  class="fullside" dojoType="dijit.form.FilteringSelect"  class="fullside" id="change_id" name="change_id" type="text">
+						<option value=""><?php echo $tr->translate("SELECT_GROUP");?></option>
+						<?php if(!empty($this->all_change_group)){foreach ($this->all_change_group as $rs){?>
+							<option value="<?php echo $rs['id']?>" <?php if($rs['id']==$this->search['change_id']){echo 'selected="selected"';}?>><?php echo $rs['from_group']." ".$tr->translate("TO_GROUP")." ".$rs['to_group']?></option>
+						<?php }}?>
+					</select>
+                </div>
+                <div class="col-md-2 col-sm-2 col-xs-12">
+                	<button class="button-class button-primary" iconClass="glyphicon glyphicon-search" dojoType="dijit.form.Button" showLabel="true" name="search"  type="submit"><?php echo $tr->translate("SEARCH");?></button>
+                </div>
+            </div>
+		</form>
+	<div id="divPrint">
+		<style> 
+		th{border-top:1px solid #000;border-collapse: collapse;}
+		tr.line td{ border-bottom: 2px solid #000;padding-top: 5px; }
+		table { page-break-before: avoid; }
+		tr{ 
+			page-break-inside:auto;
+			page-break-after:avoid;
+		}
+		</style>
+		<table style="width:100%;background:#fff; border-collapse: collapse;">
+			<tr>
+				<td colspan="3"><?php echo $this->rsheader;?></td>
+			</tr>
+			<tr>
+				<td>&nbsp;</td>
+			</tr>
+			<tr>
+				<td width="28%" >
+				</td>
+				<td width="44%" align="center">
+					<strong style="font-weight:normal;color:#000; font-size: 14px;font-family:Times New Roman,'Khmer MEF2';;"><?php echo $tr->translate("RPT_STUDENT_PASSED");?></strong><br />
+				</td>
+				<td width="28%" align="right">
+				</td>
+			</tr>
+			<tr>
+				<td>&nbsp;</td>
+			</tr>
+			<tr>
+				<td colspan="4" id="exportExcel">								
+					<table border="1" cellpadding="5"​ style="margin:0 auto;width:100%;border:1px solid #000; border-collapse: collapse;padding-buttom: 10px;font-family:Times New Roman,Khmer OS Battambang;"  border="1" >																			
+					<?php $total_stu=0; if(!empty($this->student_pass)){foreach ($this->student_pass as $key =>$stu){										
+					?>
+						<?php if(($from_group!=$stu["from_group"] OR $to_group!=$stu["to_group"]) AND  $key>0 ){?>											
+						
+						<?php 
+							$db= new Allreport_Model_DbTable_DbRptStudentScore();
+							$student_fail = $db->getAllStudentFailed($this->search,$from_group);
+						?>
+						
+						<?php $amt_stu_fail=0;if(!empty($student_fail)){foreach ($student_fail as $key =>$stu_fail){$i++;$amt_stu_fail++;?>
+							<tr class="hover" style="font-size:13px;height: 22px;color:red;"​ align="center">
+								<td><?php echo $i;?></td>
+								<td align="left">&nbsp;<?php echo $stu_fail['stu_code'];?></td>
+								<td align="left">&nbsp;<?php echo $stu_fail['stu_khname'];?></td>
+								<td align="left">&nbsp;<?php echo $stu_fail['last_name']." ".$stu_fail['stu_enname'];?></td>
+								<td><?php echo $stu_fail['sex'];?></td>
+								<td><?php echo $tr->translate("FAIL");?></td>
+							</tr>
+						<?php }}?>
+					</table>
+					<br/>
+					<table style="width:40%; font-family:Times New Roman,Khmer OS Battambang;font-size:15px;font-weight: bold;" align="right" border="0" >	
+						<tr class="hover" style="height: 26px;"​>
+							<td align="right" ><?php echo $tr->translate("TOTAL_STUDENT");?>&nbsp;&nbsp;</td>
+							<td align="center"><?php echo number_format($amt_stu_pass+$amt_stu_fail,0);?> <?php echo $tr->translate("STUDENT_UNIT");?></td>
+						</tr>
+						<tr class="hover" style="height: 22px;"​>
+							<td align="right" ><?php echo $tr->translate("STUDENT_PASSED");?>&nbsp;&nbsp;</td>
+							<td align="center"><?php echo number_format($amt_stu_pass,0);?> <?php echo $tr->translate("STUDENT_UNIT");?></td>
+						</tr>
+						<tr class="hover" style="height: 22px;"​>
+							<td align="right" ><?php echo $tr->translate("STUDENT_FAILED");?>&nbsp;&nbsp;</td>
+							<td align="center"><?php echo number_format($amt_stu_fail,0);?> <?php echo $tr->translate("STUDENT_UNIT");?></td>
+						</tr>
+					</table>
+					
+					<br/>
+					<table cellpadding="5"​ style="margin:0 auto;width:100%; padding-bottom: 10px;font-family:Times New Roman,Khmer OS Battambang;"  border="1" >
+							
+						<?php }$i++;$amt_stu_pass++;?>
+						<?php 
+							if($from_group!=$stu["from_group"] OR $to_group!=$stu["to_group"]){
+								$ac=0;$i=1;$amt_stu_pass=1;
+								
+						?>
+						<tr style="font-size:14px; height: 45px;" align="center" >
+							<td colspan="6" style="border: 1px solid white;border-bottom: 1px solid black;">
+								<span style="font-size: 15px;font-weight: bold;">
+									<span style="background-color: rgba(249,249,249,1);white-space: nowrap;color: red;padding: 10px 5px;border: 1px solid #efefef;border-radius: 5px;">&nbsp;<?php echo $stu["academic_year"]?> &nbsp; <?php echo $stu["from_group_code"];?> &nbsp; <?php echo $stu["session"];?>&nbsp;</span> &nbsp; To &nbsp; <span style="color: red;background-color: rgba(249,249,249,1);padding: 10px 5px;border: 1px solid #efefef;border-radius: 5px;">&nbsp;<?php echo $stu["to_academic_year"]?> &nbsp; <?php echo $stu["to_group_code"];?> &nbsp; <?php echo $stu["to_session"];?>&nbsp; </span> &nbsp; <?php echo $tr->translate("TYPE")?> : <span style="background-color: rgba(249,249,249,1);white-space: nowrap;color: red;padding: 10px 5px;border: 1px solid #efefef;border-radius: 5px;"><?php echo $stu["change_type"];?> </span>         
+								</span><br>
+							</td>
+						</tr>
+						<tr style="font-size:14px; height: 20px;background: #ccd9ff !important;line-height: 25px;font-weight: bold;" align="center" >
+							<td style="width: 10%;"><?php echo $tr->translate("N_O");?></td>
+							<td style="width: 15%;"><?php echo $tr->translate("STUDENT_ID");?></td>
+							<td style="width: 25%;"><?php echo $tr->translate("STUDENT_NAMEKHMER");?></td>
+							<td style="width: 25%;"><?php echo $tr->translate("NAME_ENGLISH");?></td>
+							<td style="width: 15%;"><?php echo $tr->translate("SEX");?></td>
+							<td style="width: 10%;"><?php echo $tr->translate("STATUS");?></td>
+						</tr>
+						<?php }?>
+						<?php 
+							$from_group=$stu["from_group"];
+							$to_group=$stu["to_group"];
+						?>
+						
+						<tr class="hover" style="font-size:13px;height: 22px;"​ align="center">
+							<td><?php echo $i;?></td>
+							<td align="left">&nbsp;<?php echo $stu['stu_code'];?></td>
+							<td align="left">&nbsp;<?php echo $stu['stu_khname'];?></td>
+							<td align="left">&nbsp;<?php echo $stu['last_name']." ".$stu['stu_enname'];?></td>
+							<td><?php echo $stu['sex'];?></td>
+							<td><?php echo $tr->translate("PASS");?></td>
+						</tr>
+					<?php }}?>
+					<?php if(!empty($this->student_pass)){?>
+						<?php 
+							$db= new Allreport_Model_DbTable_DbRptStudentScore();
+							$student_fail = $db->getAllStudentFailed($this->search,$from_group);
+						?>
+						<?php $amt_stu_fail=0;if(!empty($student_fail)){foreach ($student_fail as $key =>$stu_fail){$i++;$amt_stu_fail++;?>
+							<tr class="hover" style="font-size:13px;height: 22px; color:red"​ align="center">
+								<td><?php echo $i;?></td>
+								<td align="left">&nbsp;<?php echo $stu_fail['stu_code'];?></td>
+								<td align="left">&nbsp;<?php echo $stu_fail['stu_khname'];?></td>
+								<td align="left">&nbsp;<?php echo $stu_fail['last_name']." ".$stu_fail['stu_enname'];?></td>
+								<td><?php echo $stu_fail['sex'];?></td>
+								<td><?php echo $tr->translate("FAIL");?></td>
+							</tr>
+						<?php }}?>
+						
+					<?php }?>
+					</table>	
+					<?php if(!empty($this->student_pass)){?>
+					<table style="width:40%; font-family:Times New Roman,Khmer OS Battambang;font-size:15px;font-weight: bold;" align="right" border="0" >	
+						<tr class="hover" style="height: 26px;"​>
+							<td align="right" ><?php echo $tr->translate("TOTAL_STUDENT");?>&nbsp;&nbsp;</td>
+							<td align="center"><?php echo number_format($amt_stu_pass+$amt_stu_fail,0);?> <?php echo $tr->translate("STUDENT_UNIT");?></td>
+						</tr>
+						<tr class="hover" style="height: 22px;"​>
+							<td align="right" ><?php echo $tr->translate("STUDENT_PASSED");?>&nbsp;&nbsp;</td>
+							<td align="center"><?php echo number_format($amt_stu_pass,0);?> <?php echo $tr->translate("STUDENT_UNIT");?></td>
+						</tr>
+						<tr class="hover" style="height: 22px;"​>
+							<td align="right" ><?php echo $tr->translate("STUDENT_FAILED");?>&nbsp;&nbsp;</td>
+							<td align="center"><?php echo number_format($amt_stu_fail,0);?> <?php echo $tr->translate("STUDENT_UNIT");?></td>
+						</tr>
+					</table>	
+					<?php }?>
+				</td>
+			</tr>
+			<tr><td></td></tr>
+			<tr>
+				<td colspan="3">&nbsp;</td>
+			</tr>
+			<tr>
+				<td colspan="3" style="border:1px solid #fff;">
+					<?php echo $this->rsfooter; ?>
+				</td>
+			</tr>
+		</table>			
+	</div>
+</div>
+<script src="<?php echo $this->baseUrl();?>/js/help.js"></script>
+<script type="text/javascript">
+dojo.require("dojo.data.ItemFileWriteStore"); 
+dojo.ready(function(){
+	<?php if(!empty($this->search["academic_year"])){ ?>
+	dijit.byId('academic_year').set('value','<?php echo $this->search['academic_year']?>');  
+	<?php } ?>
+});
+
+</script>

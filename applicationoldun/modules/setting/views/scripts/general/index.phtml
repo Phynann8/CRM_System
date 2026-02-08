@@ -1,0 +1,814 @@
+<?php
+$tr = Application_Form_FrmLanguages::getCurrentlanguage();
+$this->headTitle($tr->translate('GENERAL_SETTING')); 
+echo $this->headTitle();
+$frm = $this->frm_general;
+
+$defaultLogo = $this->baseUrl()."/images/Logo/Logo.png";
+if(!empty($this->row['logo']['keyValue'])){
+	if (file_exists(PUBLIC_PATH."/images/logo/".$this->row['logo']['keyValue'])){
+		$defaultLogo = $this->baseUrl().'/images/logo/'.$this->row['logo']['keyValue'];
+	}
+}
+$featureScanCallOut=FEATURE_SCAN_CALLOUT;
+?>
+
+<script src="<?php echo $this->baseUrl();?>/ckeditor/ckeditor.js"></script>
+<style>
+div.cke_contents.cke_reset {
+    height: 200px !important;
+}
+img.image_view {
+	height: 100px;
+}
+img#image_viewbg {
+    height: 50px;
+}
+.button_browse{
+	margin-top:0 !important;
+}
+.button_browse span {
+    padding: 0 5px;
+}
+tr.header {
+    background: #008;
+    color: #fff;
+}
+tr.header td {
+    padding: 5px;
+}
+.disableFeature{
+	display:none;
+}
+.eableFeature{
+	display:block;
+}
+.form-group.audioBlog {
+    background: #02014a;
+    color: #fff;
+    border-radius: 10px;
+    padding: 5px 10px;
+}
+
+tr.rowAudiofile {
+    background: #cee1f7;
+    border-bottom: solid 2px #062b61;
+}
+tr.rowAudiofile td {
+    padding: 2px 0;
+}
+audio.audioControlRow {
+    height: 35px;
+    padding: 5px 0;
+}
+input[type=file] {
+    width: 100%;
+}
+
+</style>
+<form action="" dojoType="dijit.form.Form" method="post" enctype="multipart/form-data" >
+	<script type="dojo/method" event="onSubmit">				
+			if(this.validate()) {
+				loadingBlock();
+				return true;
+			}
+			return false;
+	</script>
+<div class="card">
+	<div class="card-content collapse show">
+		<div class="card-box">
+			<div class="col-sm-12 border-botom">
+				<div class="col-sm-8 pd-0">
+					<h4 class="m-b-0"><i class="fa fa-cogs" aria-hidden="true"></i>&nbsp;&nbsp;&nbsp;<?php echo $tr->translate('GENERAL_SETTING');?></h4>
+				</div>
+				<div class="col-sm-4 text-right">
+				</div>
+			</div>
+		</div>
+		<div class="card-box">
+			<div class="col-md-3 col-sm-3 col-xs-12">
+				<ul class="nav verticle-tab md-pills pills-primary nav-tab" role="tablist">
+					<li class="nav-item active">
+						<a class="nav-link " data-toggle="tab" href="#panelSetting1" role="tab"><i class="fa fa-university"></i> <?php echo $tr->translate("Company Info");?></a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link" data-toggle="tab" href="#panelSetting2" role="tab">
+						<i class="fa fa-book ml-2"></i> <?php echo $tr->translate("DOCUMENT_SETTING");?>
+						</a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link" data-toggle="tab" href="#panelSetting3" role="tab">
+						<i class="fa fa-cog ml-2"></i> <?php echo $tr->translate("SYSTEM_SETTING");?>
+						</a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link" data-toggle="tab" href="#panelSetting4" role="tab">
+						<i class="fa fa-graduation-cap ml-2"></i> <?php echo $tr->translate("STUDENT_SETTING");?>
+						</a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link" data-toggle="tab" href="#panelSetting5" role="tab">
+						<i class="fa fa-cubes ml-2"></i> <?php echo $tr->translate("STOCK_SETTING");?>
+						</a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link" data-toggle="tab" href="#panelSetting6" role="tab">
+						<i class="fa fa-paper-plane ml-2"></i> <?php echo $tr->translate("TELEGRAM_BOT");?>
+						</a>
+					</li>
+				</ul>
+			</div>
+			<div class="col-md-9 col-sm-9 col-xs-12">
+				 <!-- Tab panels -->
+				<div class="tab-content vertical">
+					<!--Panel 1-->
+					<div class="tab-pane fade in active" id="panelSetting1" role="tabpanel">
+						<div class="col-md-12 col-sm-12 col-xs-12">
+							<div class="card-blogform">
+								<div class="card-body"> 
+									<div class="row"> 
+										<div class="col-md-12 col-sm-12 col-xs-12"> 
+											<div class="d-flex"> 
+												<div class="settings-main-icon ">
+													<i class="fa fa-university" aria-hidden="true"></i>
+												</div> 
+												<div class="col-md-10 col-sm-10 col-xs-12"> 
+													<p class="tx-20 font-weight-semibold d-flex "><?php echo $tr->translate("Company Info");?></p>
+												</div> 
+											</div>
+											<div class="form-group">
+												<label class="control-label col-md-4 col-sm-4 col-xs-12"><?php echo $tr->translate('Logo')?></label>
+												<div class="col-md-4 col-sm-4 col-xs-12 alignCenter">
+													<img class="image_view" id="image_view" src="<?php echo $defaultLogo;?>" alt=""  />
+													<div class="button_browse">
+														<span><?php echo $tr->translate('Change Logo')?><span><i class="fa fa-camera" aria-hidden="true"></i></span></span>
+														<input class="btn_borwse_image"  type="file" id="photo" name="photo" onchange="loadImage()">
+													</div>
+												</div>
+											</div>
+											<div class="form-group">
+												<label class="control-label col-md-4 col-sm-4 col-xs-12"><?php echo $tr->translate('SCHOOL_NAMEKH')?></label>
+												<div class="col-md-8 col-sm-8 col-xs-12"><?php echo $frm->getElement('schooolNameKh')?></div>
+											</div>
+											<div class="form-group">
+												<label class="control-label col-md-4 col-sm-4 col-xs-12"><?php echo $tr->translate('SCHOOL_NAMEEN')?></label>
+												<div class="col-md-8 col-sm-8 col-xs-12"><?php echo $frm->getElement('schooolNameEng')?></div>
+											</div>
+											<div class="form-group">
+												<label class="control-label col-md-4 col-sm-4 col-xs-12"><?php echo $tr->translate('Company Tel')?></label>
+												<div class="col-md-8 col-sm-8 col-xs-12"><?php echo $frm->getElement('branch_tel')?></div>
+											</div>
+											<div class="form-group">
+												<label class="control-label col-md-4 col-sm-4 col-xs-12"><?php echo $tr->translate('Email')?></label>
+												<div class="col-md-8 col-sm-8 col-xs-12"><?php echo $frm->getElement('branch_email')?></div>
+											</div>
+											<div class="form-group">
+												<label class="control-label col-md-4 col-sm-4 col-xs-12"><?php echo $tr->translate('Address')?></label>
+												<div class="col-md-8 col-sm-8 col-xs-12"><?php echo $frm->getElement('branch_add')?></div>
+											</div>
+										</div>
+									</div>
+								</div>
+								<div class="card-blogform">
+									<div class="card-body"> 
+										<div class="row"> 
+											<div class="col-md-12 col-sm-12 col-xs-12"> 
+												<div class="d-flex"> 
+													<div class="settings-main-icon ">
+														<i class="glyphicon glyphicon-transfer" aria-hidden="true"></i>
+													</div> 
+													<div class="col-md-10 col-sm-10 col-xs-12"> 
+														<p class="tx-20 font-weight-semibold d-flex "><?php echo $tr->translate("Label Animation");?></p>
+													</div> 
+												</div> 
+												<br />
+												<div class="form-group">
+													<div class="col-sm-12"><?php echo $frm->getElement('label_animation')?></div>
+												</div>
+												
+											</div> 
+										</div> 
+									</div> 
+								</div>
+							</div>
+						</div>
+					</div>
+					<!--End Panel 1-->
+					<!--Panel 2-->
+					<div class="tab-pane fade in " id="panelSetting2" role="tabpanel">
+						<div class="card-box">
+							<div class="col-md-12 col-sm-12 col-xs-12">
+								
+								<div class="card-blogform">
+									<div class="card-body"> 
+										<div class="row"> 
+											<div class="col-md-12 col-sm-12 col-xs-12"> 
+												<div class="d-flex"> 
+													<div class="settings-main-icon ">
+														<i class="fa fa-file-text" aria-hidden="true"></i>
+													</div> 
+													<div class="col-md-10 col-sm-10 col-xs-12"> 
+														<p class="tx-20 font-weight-semibold d-flex "><?php echo $tr->translate("RECEIPT_SETTING");?></p>
+													</div> 
+												</div> 
+												<div class="form-group">
+													<label class="control-label col-md-4 col-sm-4 col-xs-12"><?php echo $tr->translate('RECEIPT_PRINT')?></label>
+													<div class="col-md-8 col-sm-8 col-xs-12"><?php echo $frm->getElement('receipt_print')?></div>
+												</div>
+												<div class="form-group">
+													<label class="control-label col-md-4 col-sm-4 col-xs-12"><?php echo $tr->translate('PADDINGTOP_RECEIPT')?></label>
+													<div class="col-md-8 col-sm-8 col-xs-12"><?php echo $frm->getElement('receipt_paddingtop')?></div>
+												</div>
+												<div class="form-group">
+													<label class="control-label col-md-4 col-sm-4 col-xs-12"><?php echo $tr->translate('SHOW_HEADER_RECEIPT')?></label>
+													<div class="col-md-8 col-sm-8 col-xs-12"><?php echo $frm->getElement('show_header_receipt')?></div>
+												</div>
+												<div class="form-group">
+													<label class="control-label col-md-4 col-sm-4 col-xs-12"><?php echo $tr->translate('SHOW_PIC_IN_RECEIPT')?></label>
+													<div class="col-md-8 col-sm-8 col-xs-12"><?php echo $frm->getElement('show_pic_receipt')?></div>
+												</div>
+												<div class="form-group">
+													<label class="control-label col-md-4 col-sm-4 col-xs-12"><?php echo $tr->translate('RECEIPT_START_SETTING')?></label>
+													<div class="col-md-8 col-sm-8 col-xs-12"><?php echo $frm->getElement('receipt_start_setting')?></div>
+												</div>
+												<div class="form-group">
+													<strong class="control-label text-primary col-md-12 col-sm-12 col-xs-12"><i class="fa fa-comments"></i> <?php echo $tr->translate('RECEIPT_FOOTER')?></strong>
+												</div>
+												
+												<div class="form-group">
+													<div class="col-md-6 col-sm-6 col-xs-12"><?php echo $frm->getElement('receiptDescTitle')?></div>
+													<div class="col-md-6 col-sm-6 col-xs-12"><?php echo $frm->getElement('receiptDescTitleEn')?></div>
+												</div>
+												<div class="form-group">
+													<div class="col-md-6 col-sm-6 col-xs-12"><?php echo $frm->getElement('receiptDesc')?></div>
+													<div class="col-md-6 col-sm-6 col-xs-12"><?php echo $frm->getElement('receiptDescEn')?></div>
+												</div>
+												
+												<?php
+													$branchIdetity="";
+													if(!empty($this->rsBranch)){?>
+													<?php foreach($this->rsBranch as $tFt){ 
+														if(empty($branchIdetity)){
+															$branchIdetity=$tFt['id'];
+														}else{
+															$branchIdetity=$branchIdetity.",".$tFt['id'];
+														}
+													
+													?>
+													<div class="form-group">
+														<label class="control-label col-md-8 col-sm-8 col-xs-12">
+															<i class="fa fa-university" ></i> <?php echo empty($tFt["shortcut"]) ? $tFt["branchName"] : $tFt["shortcut"];?>
+															<small><?php echo $tFt["brAddress"];?></small>
+														</label>
+														<div class="col-md-4 col-sm-4 col-xs-12">
+															<label class="custom-switch  "> 
+																<input type="checkbox" <?php if(!empty($tFt['showReceiptDesc'])) { echo "checked"; }else{ echo ""; }?>  id="brId<?php echo $tFt['id'];?>" name="brId<?php echo $tFt['id'];?>"  class="custom-switch-input" > 
+																<span class="custom-switch-indicator custom-radius"></span> 
+																<a href="javascript:void(0);" for="brId<?php echo $tFt['id'];?>" class="tx-14 mb-0 me-2"><?php echo $tr->translate('SHOW_RECEIPT_FOOTER')?></a> 
+															</label> 
+														</div>
+													</div>
+													<?php } ?>
+													<input type="hidden" value="<?php echo $branchIdetity;?>"  name="branchIdetity" id="branchIdetity" dojoType="dijit.form.TextBox" class="fullside"  />
+												<?php } ?>
+										
+
+												<div class="card-blogform">
+													<div class="card-body"> 
+														<div class="row"> 
+															<div class="col-md-12 col-sm-12 col-xs-12"> 
+																<div class="d-flex"> 
+																	<div class="settings-main-icon ">
+																		<i class="glyphicon glyphicon-tags" aria-hidden="true"></i>
+																	</div> 
+																	<div class="col-md-10 col-sm-10 col-xs-12"> 
+																		<p class="tx-20 font-weight-semibold d-flex "><?php echo $tr->translate("DISCOUNT_CALCULATE_SETTING");?></p>
+																	</div> 
+																</div> 
+																<div class="form-group mb-4">
+																	<label class="control-label col-md-4 col-sm-4 col-xs-12"><?php echo $tr->translate('DISCOUNT')?>%</label>
+																	<div class="col-md-8 col-sm-8 col-xs-12 "><?php echo $frm->getElement('discount_percent');?></div>
+																</div>
+																<div class="form-group">
+																	<label class="control-label col-md-4 col-sm-4 col-xs-12 r"><?php echo $tr->translate('DISCOUNT_AMOUNT')?></label>
+																	<div class="col-md-8 col-sm-8 col-xs-12"><?php echo $frm->getElement('discount_amount');?></div>
+																</div>
+																<div class="form-group">
+																	<label class="control-label col-md-4 col-sm-4 col-xs-12 "><?php echo $tr->translate('OTHER_FEE')?></label>
+																	<div class="col-md-8 col-sm-8 col-xs-12"><?php echo $frm->getElement('other_fee');?></div>
+																</div>
+															</div> 
+														</div> 
+													</div> 
+												</div>
+												
+												<div class="card-blogform">
+													<div class="card-body"> 
+														<div class="row"> 
+															<div class="col-md-12 col-sm-12 col-xs-12"> 
+																<div class="d-flex"> 
+																	<div class="settings-main-icon ">
+																		<i class="fa fa-money" aria-hidden="true"></i>
+																	</div> 
+																	<div class="col-md-10 col-sm-10 col-xs-12"> 
+																		<p class="tx-20 font-weight-semibold d-flex "><?php echo $tr->translate("PAYMENT_SETTING");?></p>
+																	</div> 
+																</div> 
+																<div class="form-group">
+																	<label class="control-label col-md-4 col-sm-4 col-xs-12"><?php echo $tr->translate('PAYMENT_DATE_SETTING')?></label>
+																	<div class="col-md-8 col-sm-8 col-xs-12"><?php echo $frm->getElement('payment_date');?></div>
+																</div>
+																<div class="form-group">
+																	<label class="control-label col-md-4 col-sm-4 col-xs-12"><?php echo $tr->translate('Payment Amount Day Alert')?></label>
+																	<div class="col-md-8 col-sm-8 col-xs-12"><?php echo $frm->getElement('payment_day_alert');?></div>
+																</div>
+															</div> 
+														</div> 
+													</div> 
+												</div>
+												
+												
+											</div> 
+										</div> 
+									</div> 
+								</div> 
+								
+							</div> 
+						</div> 
+					</div>
+					<!--End Panel 2-->	
+					<!--Panel 3-->
+					<div class="tab-pane fade in " id="panelSetting3" role="tabpanel">
+						<div class="card-box">
+							<div class="col-md-12 col-sm-12 col-xs-12">
+							<div class="card-blogform">
+									<div class="card-body"> 
+										<div class="row"> 
+											<div class="col-md-6 col-sm-6 col-xs-12"> 
+												<div class="d-flex"> 
+													<div class="settings-main-icon ">
+														<i class="fa fa-cog"></i>
+													</div> 
+													<div class="col-md-10 col-sm-10 col-xs-12"> 
+														<p class="tx-20 font-weight-semibold d-flex "><?php echo $tr->translate("SYSTEM_SETTING");?></p>
+													</div> 
+												</div> 
+												<div class="form-group">
+													<label class="control-label col-md-6 col-sm-6 col-xs-12"><i class="glyphicon glyphicon-calendar" ></i> <?php echo $tr->translate('STUDY_DAY_SETTING')?></label>
+													<div class="col-md-6 col-sm-6 col-xs-12"><?php echo $frm->getElement('studyday_schedule');?></div>
+												</div>
+												<div class="form-group">
+													<label class="control-label col-md-6 col-sm-6 col-xs-12"><i class="fa fa-university" ></i><?php echo $tr->translate('DISPLAY_BRANCH_SETTING')?></label>
+													<div class="col-md-6 col-sm-6 col-xs-12"><?php echo $frm->getElement('branch_display_setting');?></div>
+												</div>
+												<br />
+												<div class="d-flex"> 
+													<div class="settings-main-icon ">
+														<i class="glyphicon glyphicon-copy" aria-hidden="true"></i>
+													</div> 
+													<div class="col-md-10 col-sm-10 col-xs-12"> 
+														<p class="tx-20 font-weight-semibold d-flex "><?php echo $tr->translate("FOOTER_SCORE_REPORT");?></p>
+													</div> 
+												</div> 
+												<div class="form-group">
+													<label class="custom-switch  "> 
+														<input type="checkbox" <?php if(!empty($this->row['footerScoreDocument']['keyValue'])) { echo "checked"; }else{ echo ""; }?>  id="footerScoreDocument" name="footerScoreDocument"  class="custom-switch-input" > 
+														<span class="custom-switch-indicator custom-radius"></span> 
+														<a href="javascript:void(0);" class="tx-14 mb-0 me-2"><?php echo $tr->translate('AUTO_STAMP_AND_DATE')?></a> 
+													</label>
+												</div>
+											</div> 
+											<div class="col-md-6 col-sm-6 col-xs-12"> 
+												<div class="d-flex"> 
+													<div class="settings-main-icon ">
+														<i class="glyphicon glyphicon-subscript" aria-hidden="true"></i>
+													</div> 
+													<div class="col-md-10 col-sm-10 col-xs-12"> 
+														<p class="tx-20 font-weight-semibold d-flex "><?php echo $tr->translate("SCORING");?></p>
+													</div> 
+												</div>
+												<div class="form-group">
+													<div class="col-md-4 col-sm-4 col-xs-12"> 
+														<strong class="control-label text-primary col-md-12 col-sm-12 col-xs-12"><i class="fa fa-keyboard-o"></i> <?php echo $tr->translate("DISABLE_CH_AVG");?></strong>
+													</div>
+													<div class="col-md-6 col-sm-6 col-xs-12"> 
+														<label class="custom-switch  "> 
+															<input type="checkbox" <?php if(!empty($this->row['disableChAvg']['keyValue'])) { echo "checked"; }else{ echo ""; }?>  id="disableChAvg" name="disableChAvg"  class="custom-switch-input" > 
+															<span class="custom-switch-indicator custom-radius"></span> 
+															<a href="javascript:void(0);" class="tx-14 mb-0 me-2"></a> 
+														</label>
+													</div>
+												</div>
+												<div class="form-group">
+													<div class="col-md-4 col-sm-4 col-xs-12"> 
+														<strong class="control-label text-primary col-md-12 col-sm-12 col-xs-12"><i class="fa fa-keyboard-o"></i> <?php echo $tr->translate("GRADING_SYSTEM");?></strong>
+													</div>
+													<div class="col-md-6 col-sm-6 col-xs-12"> 
+														<label class="custom-switch  "> 
+															<input type="checkbox" <?php if(!empty($this->row['scoreSystemStatus']['keyValue'])) { echo "checked"; }else{ echo ""; }?>  id="scoreSystemStatus" name="scoreSystemStatus"  class="custom-switch-input" > 
+															<span class="custom-switch-indicator custom-radius"></span> 
+															<a href="javascript:void(0);" class="tx-14 mb-0 me-2"></a> 
+														</label>
+													</div>
+												</div>
+												<div class="form-group">
+													<div class="col-md-4 col-sm-4 col-xs-12"> 
+														<strong class="control-label text-primary col-md-12 col-sm-12 col-xs-12"><i class="fa fa-keyboard-o"></i> <?php echo $tr->translate("CRITERIA_SETTING");?></strong>
+													</div>
+													<div class="col-md-6 col-sm-6 col-xs-12"> 
+														<label class="custom-switch  "> 
+															<input type="checkbox" <?php if(!empty($this->row['criteriaLimitation']['keyValue'])) { echo "checked"; }else{ echo ""; }?>  id="criteriaLimitation" name="criteriaLimitation"  class="custom-switch-input" > 
+															<span class="custom-switch-indicator custom-radius"></span> 
+															<a href="javascript:void(0);" class="tx-14 mb-0 me-2"><?php echo $tr->translate('CRITERIA_LIMIT_SETTING')?></a> 
+														</label>
+													</div>
+												</div>
+												
+											</div> 
+										</div> 
+									</div> 
+								</div>
+
+							</div> 
+						</div> 
+					</div>
+					<!--End Panel 3-->		
+					<div class="tab-pane fade in " id="panelSetting4" role="tabpanel">
+						<div class="card-box">
+							<div class="col-md-12 col-sm-12 col-xs-12">
+								<div class="card-blogform">
+									<div class="card-body"> 
+										<div class="row"> 
+											<div class="col-md-12 col-sm-12 col-xs-12"> 
+												<div class="d-flex"> 
+													<div class="settings-main-icon ">
+														<i class="fa fa-graduation-cap" aria-hidden="true"></i>
+													</div> 
+													<div class="col-md-10 col-sm-10 col-xs-12"> 
+														<p class="tx-20 font-weight-semibold d-flex "><?php echo $tr->translate("STUDENT_ID_SETTING");?></p>
+													</div> 
+												</div> 
+												<div class="form-group">
+													 <label class="control-label col-md-4 col-sm-4 col-xs-12">
+														<?php echo $tr->translate('STU_ID_COUNTING')?>
+														<small><?php echo $tr->translate('COUNTING_STUDENT_CODE')?></small>
+													</label>
+													<div class="col-md-8 col-sm-8 col-xs-12"><?php echo $frm->getElement('settingStuID')?></div>
+												</div>
+												<div class="form-group">
+													<label class="control-label col-md-4 col-sm-4 col-xs-12">
+														<?php echo $tr->translate('COUNT_STUDENT_ID_OPTION')?>
+														<small><?php echo $tr->translate('COUNTING_STUDENT_ID_OPTION_SETTING')?></small>
+													</label>
+													<div class="col-md-8 col-sm-8 col-xs-12">
+														<div class="col-md-4 col-sm-4 col-xs-12">
+															<?php  echo $frm->getElement('studentPrefixOpt');?>
+														</div>
+														<div class="col-md-4 col-sm-4 col-xs-12">
+															<?php  echo $frm->getElement('studentIPrefix');?>
+														</div>
+														<div class="col-md-4 col-sm-4 col-xs-12">
+															<?php  echo $frm->getElement('studentIdLength');?>
+														</div>
+													</div>
+												</div>
+												<div class="form-group">
+													<label class="control-label col-md-4 col-sm-4 col-xs-12">
+														<?php echo $tr->translate('NEW_STU_ID_FROM_TEST')?>
+														<small><?php echo $tr->translate('SHOW_STUID_REGISTER_TO_ENTER')?></small>
+													</label>
+													<div class="col-md-8 col-sm-8 col-xs-12"><?php  echo $frm->getElement('new_stuid_test');?></div>
+												</div>
+												<div class="form-group">
+													<label class="control-label col-md-4 col-sm-4 col-xs-12">
+														<?php echo $tr->translate('SHOW_GROUP_IN_PAYMENT')?>
+														<small><?php echo $tr->translate('SHOW_GROUP_IN_PAYMENT_SUBTITLE')?></small>
+													</label>
+													<div class="col-md-8 col-sm-8 col-xs-12"><?php  echo $frm->getElement('show_groupin_payment');?></div>
+												</div>
+												<div class="form-group">
+													<label class="control-label col-md-4 col-sm-4 col-xs-12">
+														<?php echo $tr->translate('ENTRY_STUDENT_ID_SETING')?>
+														<small><?php echo $tr->translate('CAN_ENTRY_STUID_OR_DISABLE')?></small>
+													</label>
+													<div class="col-md-8 col-sm-8 col-xs-12"><?php  echo $frm->getElement('entry_stuid');?></div>
+												</div>
+											</div> 
+										</div> 
+									</div> 
+								</div>
+								<div class="card-blogform">
+									<div class="card-body"> 
+										<div class="row"> 
+											<div class="col-md-12 col-sm-12 col-xs-12"> 
+												<div class="d-flex"> 
+													<div class="settings-main-icon ">
+														<i class="fa fa-hourglass-start" aria-hidden="true"></i>
+													</div> 
+													<div class="col-md-10 col-sm-10 col-xs-12"> 
+														<p class="tx-20 font-weight-semibold d-flex "><?php echo $tr->translate("TEST_SETTING");?></p>
+													</div> 
+												</div> 
+												<div class="form-group">
+													<label class="control-label col-md-4 col-sm-4 col-xs-12">
+														<?php echo $tr->translate('Amount Month Can Test Again')?>
+														<small><?php echo $tr->translate('PERIOD_FOR_TEST_STUDENT_AGAIN')?></small>
+													</label>
+													<div class="col-md-8 col-sm-8 col-xs-12"><?php echo $frm->getElement('test_period');?></div>
+												</div>
+												<div class="form-group">
+													<label class="control-label col-md-4 col-sm-4 col-xs-12">
+														<?php echo $tr->translate('TEST_ONLINE_SETTING')?>
+														<small><?php echo $tr->translate('DISPLAY_TEST_ONLINE_SETTING')?></small>
+													</label>
+													<div class="col-md-8 col-sm-8 col-xs-12"><?php echo $frm->getElement('test_online');?></div>
+												</div>
+											</div> 
+										</div> 
+									</div> 
+								</div>
+								<div class="card-blogform">
+									<div class="card-body"> 
+										<div class="row"> 
+											<div class="col-md-12 col-sm-12 col-xs-12"> 
+												<div class="d-flex"> 
+													<div class="settings-main-icon ">
+														<i class="fa fa-file-text" aria-hidden="true"></i>
+													</div> 
+													<div class="col-md-10 col-sm-10 col-xs-12"> 
+														<p class="tx-20 font-weight-semibold d-flex "><?php echo $tr->translate("DOCUMENT_DISPLAY_SETTING");?></p>
+													</div> 
+												</div> 
+												<div class="form-group">
+													<label class="control-label col-md-4 col-sm-4 col-xs-12">
+														<?php echo $tr->translate('DISPLAY_STUDENT_DOCUMENT_SETTING')?>
+														<small><?php echo $tr->translate('DISPLAY_STUDENT_DOCUMENT')?></small>
+													</label>
+													<div class="col-md-8 col-sm-8 col-xs-12"><?php echo $frm->getElement('doc_display');?></div>
+												</div>
+												<div class="form-group">
+													<label class="control-label col-md-4 col-sm-4 col-xs-12">
+														<?php echo $tr->translate('DISPLAY_TEACHER_DOCUMENT_SETTING')?>
+														<small><?php echo $tr->translate('DISPLAY_TEACHER_DOCUMENT')?></small>
+													</label>
+													<div class="col-md-8 col-sm-8 col-xs-12"><?php echo $frm->getElement('teacher_doc');?></div>
+												</div>
+											</div> 
+										</div> 
+									</div> 
+								</div>
+								<div class="card-blogform">
+									<div class="card-body"> 
+										<div class="row"> 
+											<div class="col-md-12 col-sm-12 col-xs-12"> 
+												<div class="d-flex"> 
+													<div class="settings-main-icon ">
+														<i class="fa fa-money-bill" ></i>
+													</div> 
+													<div class="col-md-10 col-sm-10 col-xs-12"> 
+														<p class="tx-20 font-weight-semibold d-flex "><?php echo $tr->translate("STUDENT_PAYMENT_SETTING");?></p>
+													</div> 
+												</div> 
+												<div class="form-group">
+													<label class="control-label col-md-4 col-sm-4 col-xs-12">
+														<?php echo $tr->translate('STUDENT_PAYMENT')?>
+														<small><?php echo $tr->translate('STUDENT_PAYMENT_AS_GROUP')?></small>
+													</label>
+													<div class="col-md-8 col-sm-8 col-xs-12"><?php echo $frm->getElement('pay_as_group');?></div>
+												</div>
+											</div> 
+										</div> 
+									</div> 
+								</div>
+
+								<div class="card-blogform">
+									<div class="card-body"> 
+										<div class="row"> 
+											<div class="col-md-12 col-sm-12 col-xs-12"> 
+												<div class="d-flex"> 
+													<div class="settings-main-icon ">
+														<i class="fa fa-graduation-cap" aria-hidden="true"></i>
+													</div> 
+													<div class="col-md-10 col-sm-10 col-xs-12"> 
+														<p class="tx-20 font-weight-semibold d-flex "><?php echo $tr->translate("STUDY_INFO_SETTING");?></p>
+													</div> 
+												</div> 
+												<div class="form-group">
+													<label class="control-label col-md-4 col-sm-4 col-xs-12">
+														<?php echo $tr->translate('STUDY_INFO_SETTING')?>
+														<small><?php echo $tr->translate('STUDY_INFO_SETTING_NOTE')?></small>
+													</label>
+													<div class="col-md-8 col-sm-8 col-xs-12"><?php echo $frm->getElement('study_info_setting');?></div>
+												</div>
+											</div> 
+										</div> 
+									</div> 
+								</div>
+
+								<div class="card-blogform">
+									<div class="card-body"> 
+										<div class="row"> 
+											<div class="col-md-12 col-sm-12 col-xs-12"> 
+												<div class="d-flex"> 
+													<div class="settings-main-icon ">
+														<i class="glyphicon glyphicon-info-sign" aria-hidden="true"></i>
+													</div> 
+													<div class="col-md-10 col-sm-10 col-xs-12"> 
+														<p class="tx-20 font-weight-semibold d-flex "><?php echo $tr->translate("Other Info");?></p>
+													</div> 
+												</div> 
+												<div class="form-group">
+													 <label class="control-label col-md-4 col-sm-4 col-xs-12">
+														<?php echo $tr->translate('NAME_REQUIRED_SETTING')?>
+														<small><?php echo $tr->translate('REQUIRED_SURENAME_AND_NAME_OR_NOT')?></small>
+													</label>
+													<div class="col-md-8 col-sm-8 col-xs-12"><?php echo $frm->getElement('name_required')?></div>
+												</div>
+												<div class="form-group">
+													 <label class="control-label col-md-4 col-sm-4 col-xs-12">
+														<?php echo $tr->translate('HORNOR_TABLE_TYPE')?>
+														<small><?php echo $tr->translate('HORNOR_TABLE_TYPE_DESCRIPTION')?></small>
+													</label>
+													<div class="col-md-8 col-sm-8 col-xs-12"><?php echo $frm->getElement('hornorTableSetting')?></div>
+												</div>
+												
+											</div> 
+										</div> 
+									</div> 
+								</div> 
+
+							</div> 
+						</div> 
+					</div>
+					<!--End Panel 4-->	
+					<!--Panel 5-->	
+					<div class="tab-pane fade in " id="panelSetting5" role="tabpanel">
+						<div class="card-box">
+							<div class="col-md-12 col-sm-12 col-xs-12">
+								<div class="card-blogform">
+									<div class="card-body"> 
+										<div class="row"> 
+											<div class="col-md-12 col-sm-12 col-xs-12"> 
+												<div class="d-flex"> 
+													<div class="settings-main-icon ">
+														<i class="fa fa-cubes" aria-hidden="true"></i>
+													</div> 
+													<div class="col-md-10 col-sm-10 col-xs-12"> 
+														<p class="tx-20 font-weight-semibold d-flex "><?php echo $tr->translate("Stock Option");?></p>
+													</div> 
+												</div> 
+												<div class="form-group">
+													<label class="control-label col-md-4 col-sm-4 col-xs-12"><?php echo $tr->translate('RECEIVED_STOCK_SETTING')?></label>
+													<div class="col-md-8 col-sm-8 col-xs-12"><?php echo $frm->getElement('receive_note_print');?></div>
+												</div>
+												<div class="form-group">
+													<label class="control-label col-md-4 col-sm-4 col-xs-12"><?php echo $tr->translate('Sale Stock Setting')?></label>
+													<div class="col-md-8 col-sm-8 col-xs-12"><?php echo $frm->getElement('sale_stock');?></div>
+												</div>
+												<div class="form-group">
+													<label class="control-label col-md-4 col-sm-4 col-xs-12"><?php echo $tr->translate('Transfer Stock')?></label>
+													<div class="col-md-8 col-sm-8 col-xs-12"><?php echo $frm->getElement('trasfer_st_cut');?></div>
+												</div>
+												<div class="form-group">
+													 <label class="control-label col-md-12 col-sm-12 col-xs-12">
+														<?php echo $tr->translate('SCHOOL_OPTION')?>
+														<small><?php echo $tr->translate('STUDY_SERVICE_PROVIDE_TO_CLIENT')?></small>
+													</label>
+												</div>
+												<?php if (!empty($this->allSchoolOption)) foreach ($this->allSchoolOption as $rs){?>
+												<div class="form-group">
+													<label class="custom-switch  "> 
+														<input type="checkbox" <?php if ($rs['status']==1){?> checked="checked" <?php }?> id="school_<?php echo $rs['id']?>" name="school_<?php echo $rs['id']?>"  class="custom-switch-input" > 
+														<span class="custom-switch-indicator custom-radius"></span> 
+														<a href="javascript:void(0);" class="tx-14 mb-0 me-2"><?php echo $rs['title'];?></a> 
+													</label>
+												</div>
+												<?php }?>
+												
+											</div> 
+										</div> 
+									</div> 
+								</div>
+							</div> 
+						</div> 
+					</div>
+					<!--End Panel 5 -->		
+					<!--Panel 6-->
+					<div class="tab-pane fade in " id="panelSetting6" role="tabpanel">
+						<div class="card-box">
+							<div class="col-md-12 col-sm-12 col-xs-12">
+								<div class="card-blogform">
+									<div class="card-body"> 
+										<div class="d-flex"> 
+											<div class="settings-main-icon ">
+												<i class="fa fa-paper-plane" ></i>
+											</div> 
+											<div class="col-md-10 col-sm-10 col-xs-12"> 
+												<p class="tx-20 font-weight-semibold d-flex "><?php echo $tr->translate("TELEGRAM_BOT_INFO");?></p>
+											</div> 
+										</div> 
+										<div class="form-group">
+											<label class="control-label col-md-4 col-sm-4 col-xs-12"><?php echo $tr->translate('botName')?></label>
+											<div class="col-md-8 col-sm-8 col-xs-12"><?php echo $frm->getElement('telegramBotName');?></div>
+										</div>
+										<div class="form-group">
+											<label class="control-label col-md-4 col-sm-4 col-xs-12"><?php echo $tr->translate('botToken')?></label>
+											<div class="col-md-8 col-sm-8 col-xs-12"><?php echo $frm->getElement('telegramBotToken');?></div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+					<!--End Panel 6 -->							
+				</div>
+			</div>
+		</div>
+		<div class="card-box">
+			<div class="col-md-12 col-sm-12 col-xs-12 border-top mt-20 ptb-10 text-center">
+				<input class="button-class button-primary" iconClass="glyphicon glyphicon-floppy-disk" type="submit" value="save_close" name="save_close" label="<?php echo $tr->translate('GO_EDIT');?>" id="save_close" dojoType="dijit.form.Button"  /> 	
+			</div>
+		</div>
+	 </div>
+</div>
+</form>
+<script src="<?php echo $this->baseUrl();?>/js/help.js"  type="text/javascript"></script>
+<script>
+dojo.require("dojo.data.ItemFileWriteStore");  
+dojo.require("dijit.form.DateTextBox");
+dojo.require("dijit.form.NumberTextBox");
+dojo.require("dijit.form.CheckBox");
+dojo.require("dijit.form.Textarea");
+
+dojo.require("dojo.NodeList-manipulate");
+dojo.require("dojo.data.ObjectStore");
+
+var degree_store = getDataStorefromJSON('id','name', <?php print_r(Zend_Json::encode(array()));?> );
+dojo.ready(function(){
+
+	
+		
+}); 
+
+
+		
+
+function loadImage(){
+	 var output = document.getElementById('image_view');
+  output.src = URL.createObjectURL(event.target.files[0]);
+}
+
+function CheckPenalty(){
+	penalty_type = dijit.byId("penalty_type").get('value');
+	if(penalty_type==1){
+		penalty_value = dijit.byId("penalty_value").get('value');
+		if(penalty_value>100){
+			alert("<?php echo $tr->translate('ប្រាក់ពិន័យជាភាគរយមិនអាចលើសពី ១០០%ឡើយ');?>");
+			dijit.byId('penalty_value').attr('value',100);
+			return false;
+		}
+	}
+}
+
+
+
+function CompareA(){
+	discount = dijit.byId("discount_percent").get('value');
+ 	dis_amt = dijit.byId("discount_amount").get('value');
+ 	other_fee = dijit.byId("other_fee").get('value');
+
+	if(discount == dis_amt  || discount == other_fee){
+		alert("<?php echo $tr->translate('ALL_THREE_VALUE_CAN_NOT_BE_THE_SAME');?>");
+		dis_amt = dijit.byId("discount_percent").attr('value','');
+	}
+
+}
+
+function CompareDis(){
+	discount = dijit.byId("discount_percent").get('value');
+ 	dis_amt = dijit.byId("discount_amount").get('value');
+ 	other_fee = dijit.byId("other_fee").get('value');
+
+	if(dis_amt == discount  || dis_amt == other_fee){
+		alert("<?php echo $tr->translate('ALL_THREE_VALUE_CAN_NOT_BE_THE_SAME');?>");
+		dis_amt = dijit.byId("discount_amount").attr('value','');
+	}
+
+	
+}
+
+function CompareOtherFee(){
+	discount = dijit.byId("discount_percent").get('value');
+ 	dis_amt = dijit.byId("discount_amount").get('value');
+ 	other_fee = dijit.byId("other_fee").get('value');
+
+	if(other_fee == discount  || other_fee == dis_amt){
+		alert("<?php echo $tr->translate('ALL_THREE_VALUE_CAN_NOT_BE_THE_SAME');?>");
+		dis_amt = dijit.byId("other_fee").attr('value','');
+	}
+
+	
+}
+
+
+</script>

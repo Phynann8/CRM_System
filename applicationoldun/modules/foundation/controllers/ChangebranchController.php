@@ -1,0 +1,174 @@
+<?php
+class Foundation_ChangebranchController extends Zend_Controller_Action {
+	
+    public function init()
+    {    	
+    	$this->tr = Application_Form_FrmLanguages::getCurrentlanguage();
+    	header('content-type: text/html; charset=utf8');
+    	defined('BASE_URL')	|| define('BASE_URL', Zend_Controller_Front::getInstance()->getBaseUrl());
+	}
+	public function indexAction(){
+		if($this->getRequest()->isPost()){
+			$search = $this->getRequest()->getPost();
+		}else{
+			$search=array(
+				'branch_id'	=>'',
+				'adv_search'	=>'',
+				'academic_year'=> '',
+				'grade'=> '',
+				'session'=> '',
+				'start_date'=> date('Y-m-d'),
+				'end_date'=>date('Y-m-d'),
+			);
+		}
+		
+		$db_student= new Foundation_Model_DbTable_DbChangeBranch();
+		$rs_rows = $db_student->selectAllStudentChangeGroup($search);
+		
+		$list = new Application_Form_Frmtable();
+		if(!empty($rs_rows)){
+		}else{
+			$result = Application_Model_DbTable_DbGlobal::getResultWarning();
+		}
+		$collumns = array("BRANCH","STUDENT_ID","STUDENT","SEX","GROUP","TO_BRANCH","MOVING_DATE","GRADE","STATUS","ROLLBACK");
+		$link=array(
+				'module'=>'foundation','controller'=>'changebranch','action'=>'edit',
+		);
+		$this->view->list=$list->getCheckList(10, $collumns, $rs_rows,array());
+		$this->view->adv_search=$search;	
+		
+		$form=new Application_Form_FrmSearchGlobal();
+		$forms=$form->FrmSearch();
+		Application_Model_Decorator::removeAllDecorator($forms);
+		$this->view->form_search=$form;
+	}
+	function addAction(){
+		if($this->getRequest()->isPost()){
+			try{
+				$_data = $this->getRequest()->getPost();
+				$_add = new Foundation_Model_DbTable_DbChangeBranch();
+ 				$_add->addStudentChangeBranch($_data);
+ 				if(!empty($_data['save_close'])){
+ 					Application_Form_FrmMessage::Sucessfull("INSERT_SUCCESS","/foundation/changebranch");
+ 				}
+				Application_Form_FrmMessage::Sucessfull("INSERT_SUCCESS","/foundation/changebranch/add");
+			}catch(Exception $e){
+				Application_Form_FrmMessage::message("INSERT_FAIL");
+				Application_Model_DbTable_DbUserLog::writeMessageError($e->getMessage());
+			}
+		}
+		
+		$frm = new Foundation_Form_FrmChangeBranch();
+		$frm->FrmAddChangeBranch();
+		Application_Model_Decorator::removeAllDecorator($frm);
+		$this->view->frm = $frm;
+		
+	}
+	function revertAction(){
+		
+		$dbgb = new Application_Model_DbTable_DbGlobal();
+		$checkses = $dbgb->checkSessionExpire();
+		if (empty($checkses)){
+			$dbgb->reloadPageExpireSession();
+			exit();
+		}
+		$id=$this->getRequest()->getParam("id");
+		$id = empty($id)?0:$id;
+		
+		$dbUser = new Application_Model_DbTable_DbUsers();
+		$permission = $dbUser->getAccessUrl("foundation","changebranch","revert");
+		if (empty($permission)){
+			Application_Form_FrmMessage::Sucessfull("NO_PERMISSION_TO_ROLLBACK","/foundation/changebranch/index");
+			exit();
+		}else{
+			$db = new Foundation_Model_DbTable_DbChangeBranch();
+			$row = $db->getStudentChangeBranchById($id);
+			if (empty($row)){
+				Application_Form_FrmMessage::Sucessfull("NO_RECORD","/foundation/changebranch");
+				exit();
+			}
+			if($row["pmtId"]>0){
+				Application_Form_FrmMessage::Sucessfull("UNABLE_TO_ROLLBACK_SOME_STUDENT_HAS_SOME_PAYMENT","/foundation/changebranch/index");
+				exit();
+			}
+			
+			$tr = Application_Form_FrmLanguages::getCurrentlanguage();
+			$delete_sms=$tr->translate('CONFIRM_REVERT');
+			echo "<script language='javascript'>
+			var txt;
+			var r = confirm('$delete_sms');
+			if (r == true) {";
+			echo "window.location ='".Zend_Controller_Front::getInstance()->getBaseUrl()."/foundation/changebranch/revertrecord/id/".$id."'";
+			echo"}";
+			echo"else {";
+			echo "window.location ='".Zend_Controller_Front::getInstance()->getBaseUrl()."/foundation/changebranch'";
+			echo"}
+			</script>";
+		}
+		
+	
+	}
+	function revertrecordAction(){
+		$dbgb = new Application_Model_DbTable_DbGlobal();
+		$checkses = $dbgb->checkSessionExpire();
+		if (empty($checkses)){
+			$dbgb->reloadPageExpireSession();
+			exit();
+		}
+		
+		$request=Zend_Controller_Front::getInstance()->getRequest();
+		$action=$request->getActionName();
+		$controller=$request->getControllerName();
+		$module=$request->getModuleName();
+		
+		$id = $this->getRequest()->getParam("id");
+		$id = empty($id)?0:$id;
+		$db = new Foundation_Model_DbTable_DbChangeBranch();
+		try {
+			$dbacc = new Application_Model_DbTable_DbUsers();
+// 			$rs = $dbacc->getAccessUrl($module,$controller,'revert');
+// 			if(!empty($rs)){
+				$db->revertChangeBranch($id);
+				Application_Form_FrmMessage::Sucessfull("INSERT_SUCCESS","/foundation/changebranch");
+				exit();
+// 			}
+			Application_Form_FrmMessage::Sucessfull("You no permission","/foundation/changebranch");
+			exit();
+		}catch (Exception $e) {
+			Application_Model_DbTable_DbUserLog::writeMessageError($e->getMessage());
+			Application_Form_FrmMessage::message("INSERT_FAIL");
+			exit();
+		}
+	}
+	function getToGroupAction(){
+		if($this->getRequest()->isPost()){
+			$data=$this->getRequest()->getPost();
+			$db = new Application_Model_DbTable_DbGlobal();
+			$grade = $db->getStudentGroupInfoById($data['to_group']);
+			print_r(Zend_Json::encode($grade));
+			exit();
+		}
+	}
+	
+	function getStudentAction(){
+		if($this->getRequest()->isPost()){
+			$data=$this->getRequest()->getPost();
+			$db = new Foundation_Model_DbTable_DbChangeBranch();
+			$grade = $db->getStudentInfoById($data['studentid']);
+			print_r(Zend_Json::encode($grade));
+			exit();
+		}
+	}
+	
+	function getalltobranchAction(){
+		if($this->getRequest()->isPost()){
+			$data=$this->getRequest()->getPost();
+			$branch_id = empty($data['branch_id'])?0:$data['branch_id'];
+			$db = new Foundation_Model_DbTable_DbChangeBranch();
+			$arr = $db->getAllToBranch($branch_id);
+			print_r(Zend_Json::encode($arr));
+			exit();
+		}
+	}
+	
+}

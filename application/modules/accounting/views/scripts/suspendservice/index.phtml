@@ -1,0 +1,95 @@
+<?php
+	$tr = Application_Form_FrmLanguages::getCurrentlanguage();
+	echo $this->headTitle($tr->translate("STUDENT_SUSPEND_SERVICE"));
+	$frm = $this->form_search;
+	$base_url = Application_Form_FrmMessage::getUrl("/");
+?>
+<div class="card pb-10 pt-10 pl-10 pr-10">
+	<div class="card-content collapse show">
+		<div class="card-box">
+             <div class="col-sm-12 border-botom">
+		    		<div class="col-sm-8 pd-0">
+		    			<h4 class="m-b-0"><i class="fa fa-money" aria-hidden="true"></i>&nbsp;&nbsp;&nbsp;<?php echo $tr->translate('STUDENT_SUSPEND_SERVICE');?></h4>
+    			</div>
+    			<div class="col-sm-4 text-right">
+    			</div>
+    		</div>
+    	</div>
+		<div class="card-box">
+			<form id="list" name="list" action="<?php echo $this->url(array('module'=>'accounting','controller'=>'suspendservice','action'=>'index')); ?>" dojoType="dijit.form.Form" method="post">
+				<div class="form-group">
+					<div class="col-md-2 col-sm-2 col-xs-12">
+						<?php echo $frm->getElement("adv_search");?>
+					</div>
+					<div class="col-md-2 col-sm-2 col-xs-12">
+						<?php echo $frm->getElement("branch_id");?>
+					</div>
+					<div class="col-md-2 col-sm-2 col-xs-12">
+						<input id="studentId" />
+					</div>
+					<div class="col-md-2 col-sm-2 col-xs-12">
+						<?php echo $frm->getElement("start_date");?>
+					</div>
+					<div class="col-md-2 col-sm-2 col-xs-12">
+						<?php echo $frm->getElement("end_date");?>
+					</div>
+					<div class="col-md-2 col-sm-2 col-xs-12">
+						<button  class="button-class button-primary" iconClass="glyphicon glyphicon-search" dojoType="dijit.form.Button" showLabel="true" name="search"  type="submit"><?php echo $tr->translate("SEARCH");?></button>
+					</div>
+				</div>
+			</form>
+		</div>
+		<div class="card-box">
+		<?php  echo $this->list;?>
+		</div>
+	</div>
+</div>
+
+<script src="<?php echo $base_url;?>/js/help.js"></script>
+<script src="<?php echo $this->baseUrl();?>/admin/js/global.js"  type="text/javascript"></script>
+<script type="text/javascript">
+	dojo.require("dojo.data.ItemFileWriteStore");
+	dojo.require("dojo.NodeList-manipulate");
+    dojo.require("dijit.form.Textarea");
+	dojo.require("dijit.form.DateTextBox");
+	
+	student_store = getDataStorefromJSON('id','name');
+	dojo.ready(function(){ 
+		new dijit.form.FilteringSelect({
+		    queryExpr: "*${0}*",
+			autoComplete: false,                     
+			required: false,
+		    id: "studentId",
+		    name: "studentId",           
+		    class: 'fullside',  
+		    placeHolder:"<?php echo $tr->translate("SELECT_STUDENT_ID")?>",          
+		  
+		}, "studentId");
+		
+		var branch_id = dijit.byId('branch_id');
+		branch_id.on('change', function(evt) {
+			getStudentByBranch();
+		});
+		getStudentByBranch("<?php echo $this->rs['studentId']?>");
+	});	
+	
+	var url_data = '<?php echo $this->url(array('module'=>'registrar','controller'=>'register','action'=>'getliststudenturl')); ?>';
+	function getStudentByBranch(stu_id=''){//
+
+		dijit.byId("studentId").attr('value','');
+		branchId = dijit.byId('branch_id').get('value');
+		if(branchId==''){
+			 dijit.byId('branch_id').focus();
+			 return false;
+		}
+		let urlGet = '<?php echo $this->url(array('module'=>'registrar','controller'=>'register','action'=>'getliststudenturl')); ?>';
+		
+		contentData = {
+				'branchId':branchId,
+				'customerType':1,
+				'joinGroup':1
+			}
+		getAllStudentByBranch(urlGet,contentData,stu_id);
+	}
+
+</script>

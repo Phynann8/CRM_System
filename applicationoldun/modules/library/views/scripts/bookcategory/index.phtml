@@ -1,0 +1,79 @@
+<?php
+	$tr = Application_Form_FrmLanguages::getCurrentlanguage();
+	echo $this->headTitle($tr->translate("BOOK_CATEGORY"));
+	$url_edit = $this->url(array('module'=>'library','controller'=>'bookcategory','action'=>'edit',));
+	$imgnone='<img src="'.$this->baseUrl().'/images/icon/cross.png"/>';
+	$imgtick='<img src="'.$this->baseUrl().'/images/icon/apply2.png"/>';
+	$baseurl = $this->baseUrl();
+?>
+<?php $frm =  $this->frm_search;?>
+<script src="<?php echo $baseurl;?>/js/help.js"></script>
+<style>
+	#items  {
+	    border: 1px solid #CCCCCC;
+	    color: #000;
+	    font-family: 'Khmer OS Battambang';  
+	    font-size: 100%;
+	    line-height: 30px;
+	    padding: 0px 5px 0px 5px;
+	    text-align: left;
+	    width: 35px;
+	}
+</style>
+<div class="card pb-10 pt-10 pl-10 pr-10">
+	<div class="card-content collapse show">
+		<div class="card-box">
+       		<div class="col-sm-12 border-botom">
+		    	<div class="col-sm-8 pd-0">
+	    			<h4 class="m-b-0"><i class="fa fa-book " aria-hidden="true"></i>&nbsp;&nbsp;&nbsp;<?php echo $tr->translate('BOOK_CATEGORY');?></h4>
+    			</div>
+    			<div class="col-sm-4 text-right">
+    			</div>
+    		</div>
+    	</div>
+		<div class="card-box">
+			<form id="list" name="list" action="" dojoType="dijit.form.Form" method="post">
+				<div class="form-group">
+                    <div class="col-md-2 col-sm-2 col-xs-12">
+                    	<?php echo $frm->getElement("title");?>
+                    </div>
+                    <div class="col-md-2 col-sm-2 col-xs-12">
+                    	<?php echo $frm->getElement('parent');?>
+                    </div>
+                    <div class="col-md-2 col-sm-2 col-xs-12">
+                    	<?php echo $frm->getElement('status_search');?>
+                    </div>
+                    <div class="col-md-2 col-sm-2 col-xs-12">
+                    	<button class="button-class button-primary" iconClass="glyphicon glyphicon-search"  dojoType="dijit.form.Button" showLabel="true" type="submit"><?php echo $tr->translate("SEARCH");?></button>
+                    </div>
+                </div>
+			</form>
+		</div>
+		<div class="card-box">
+			<table border="1" id="datatable-responsive" style="  border-collapse: collapse;   border-color: #ddd;"  class="display nowrap dataTable dtr-inline collapsed" cellspacing="0" width="100%" >
+			      <thead>
+						<tr>
+							<th class="tdheader header" width="4%" align="center"><?php echo $tr->translate("NUM");?></th>
+							<th class="tdheader header"><?php echo $tr->translate("CATEGORY_NAME");?></th>
+							<th class="tdheader header"><?php echo $tr->translate("REMARK");?>
+							<th class="tdheader header"><?php echo $tr->translate("USER");?>
+							<th class="tdheader header"><?php echo $tr->translate("STATUS");?>
+						</tr>
+					</thead>
+			     <?php $i=1;
+						if(!empty($this->cate)) foreach($this->cate as $key=>$row){?>
+						
+						<tr class="normal" style="font-size: 100%;font-family: 'Khmer OS Battambang';">
+						    <td  style="text-align: center;"><?php echo $i++;?></td>
+							<td ><a href="<?php echo $url_edit.'?id='.$row['id'];?>"><?php echo $row['name'];?></a></td>
+							<td ><?php echo $row['remark'];?></td>
+							<td ><?php echo $row['user_name'];?></td>
+							<td  align="left"><?php echo $row['status'];?></td>
+						</tr>
+					<?php } ?>
+			</table>
+		</div>
+	</div>
+</div>
+
+

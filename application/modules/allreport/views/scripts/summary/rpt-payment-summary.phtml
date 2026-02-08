@@ -1,0 +1,341 @@
+<?php
+	$tr = Application_Form_FrmLanguages::getCurrentlanguage();
+	echo $this->headTitle("Student Payment Summary"); 
+	$frm =  $this->form_search;
+	
+
+	
+?>	
+<style>
+.hover:hover{ background:#95b8e7;}
+table.content-data tr.style-head,
+table.tb-footer tr.style-head {
+   font-weight: bold !important;
+}
+svg {
+    position: relative !important;
+}
+.under-line{border-bottom: 3px double #000;}
+</style>
+<div class="layout-wrapper-report">
+	<div id="mainContent" class="main-content-report">
+		<div class="report-preview">
+			<?php echo $this->controlReport?>
+			<div id="main-viewer" class="main-viewer portrait">
+				<div id="viewer" class="viewer portrait">
+					<div id="divPrint" class="content">
+						<link rel="stylesheet" href="<?php echo $this->baseUrl();?>/admin/build/css/report-style.css">
+						<link rel="stylesheet" href="<?php echo $this->baseUrl();?>/admin/build/css/report-style-screen.css">
+						<style>
+							@media print {
+								<?php if(!empty($this->printFormat)){ echo $this->printFormat; } ?>
+							}
+							.divBreak{
+								page-break-inside:always;
+								page-break-after:always;
+							}
+							.content-data{
+								table-layout: fixed;
+								width: 100%;
+								border-collapse:collapse;
+							}
+						</style>
+						<div class="divBreak" style="width:100%;">
+							<table border="0" style="background:#fff; margin: 0 auto; width: 100%; ">
+								<tr>
+									<td colspan="3"><?php echo $this->rsheader;?></td>
+								</tr>
+								<tr>
+									<td width="15%" align="center">
+									</td>
+									<td width="70%"  align="center">
+										<span style=" color:#4839bd; font-size:14px;font-family:'Times New Roman','Khmer OS Muol Light';">Student Payment Summary</span><br />
+										<span style=" color:#4839bd; font-size:12px;font-family:'Times New Roman','Khmer OS Muol Light';"><?php if (!empty($this->search['academic_year'])){ echo "For Academic Year";}?> <span id="academicDisplay"></span></span>
+									</td>
+									<td width="15%" align="center">
+									</td>
+								</tr>
+								<tr>
+									<td colspan="3" valign="top">
+										<div id="exportExcel">
+											<table class="content-data" cellpadding="1"  >
+												<colgroup>
+													<col class="wpx-70">
+													<col class="wpx-40">
+													<col class="wpx-40">
+													<col class="wpx-70">
+													<col class="wpx-40">
+													<col class="wpx-70">
+													<col class="wpx-35">
+													<col class="wpx-70">
+													<col class="wpx-35">
+													<col class="wpx-70">
+													<col class="wpx-35">
+													<col class="wpx-70">
+													<col class="wpx-35">
+													<col class="wpx-70">
+													<col class="wpx-35">
+													<col class="wpx-70">
+													<col class="wpx-35">
+													<col class="wpx-70">
+													<col class="wpx-75">
+												</colgroup>
+												<thead>
+													<tr class="border-right-double border-right-width-3px border-left-double border-left-width-3px border-top-double border-top-width-3px border-bottom-solid text-center">
+														<td rowspan="2">Location</td>
+														<td class="text-left" rowspan="2">Active</td>
+														<td rowspan="2">Drop</td>
+														<td class="text-right" rowspan="2">TT Student</td>
+														<td colspan="2" class="border-left-solid border-left-width-2px">Year</td>
+														<td colspan="2" class="border-left-solid border-left-width-2px">Semester1</td>
+														<td colspan="2" class="border-left-solid border-left-width-2px">Semester2</td>
+														<td colspan="2" class="border-left-solid border-left-width-2px">Term1</td>
+														<td colspan="2" class="border-left-solid border-left-width-2px">Term2</td>
+														<td colspan="2" class="border-left-solid border-left-width-2px">Term3</td>
+														<td colspan="2" class="border-left-solid border-left-width-2px border-right-solid">Term4</td>
+														<td rowspan="2"class="border-left-solid border-right-solid">Total</td>
+													</tr>
+													<tr class="border-right-double border-right-width-3px border-left-double border-left-width-3px border-bottom-double border-bottom-width-3px border-bottom-solid text-center">
+														<td class="border-left-solid border-left-width-2px">TT</td>
+														<td class="border-left-solid wpx-120">Paid</td>
+														<td class="border-left-solid border-left-width-2px">TT</td>
+														<td class="border-left-solid wpx-120">Paid</td>
+														<td class="border-left-solid border-left-width-2px">TT</td>
+														<td class="border-left-solid">Paid</td>
+														<td class="border-left-solid border-left-width-2px">TT</td>
+														<td class="border-left-solid">Paid</td>
+														<td class="border-left-solid border-left-width-2px">TT</td>
+														<td class="border-left-solid">Paid</td>
+														<td class="border-left-solid border-left-width-2px">TT</td>
+														<td class="border-left-solid">Paid</td>
+														<td class="border-left-solid border-left-width-2px">TT</td>
+														<td class="border-left-solid border-right-solid">Paid</td>
+													</tr>
+												</thead>
+												<?php 
+													$ttYear=0;
+													$ttSemester1=0;
+													$ttSemester2=0;
+													$ttTerm1=0;
+													$ttTerm2=0;
+													$ttTerm3=0;
+													$ttTerm4=0;
+
+													$pYear=0;
+													$pSemester1=0;
+													$pSemester2=0;
+													$pTerm1=0;
+													$pTerm2=0;
+													$pTerm3=0;
+													$pTerm4=0;
+													$allPaid=0;
+													$totalActiveStudent=0;
+													$totalInactiveStudent=0;
+												if(!empty($this->paymentSummary['paidResult'])) foreach($this->paymentSummary['paidResult'] as $key=> $rsPayment){ ?>
+													<tr class="hover border-left-double border-left-width-3px border-right-double border-right-width-3px ">
+														<?php 
+														$totalActiveStudent+=$rsPayment['activeStudent'];
+														$totalInactiveStudent+=$rsPayment['inactiveStudent'];
+														$ttYear+=$rsPayment['TTYear'];
+														$ttSemester1+=$rsPayment['TTSemester1'];
+														$ttSemester2+=$rsPayment['TTSemester2'];
+														$ttTerm1+=$rsPayment['TTTerm1'];
+														$ttTerm2+=$rsPayment['TTTerm2'];
+														$ttTerm3+=$rsPayment['TTTerm3'];
+														$ttTerm4+=$rsPayment['TTTerm4'];
+
+														$pYear+=$rsPayment['Year'];
+														$pSemester1+=$rsPayment['Semester1'];
+														$pSemester2+=$rsPayment['Semester2'];
+														$pTerm1+=$rsPayment['Term1'];
+														$pTerm2+=$rsPayment['Term2'];
+														$pTerm3+=$rsPayment['Term3'];
+														$pTerm4+=$rsPayment['Term4'];
+
+														$totalPaid = $rsPayment['Year']+$rsPayment['Semester1']+$rsPayment['Semester2']+$rsPayment['Term1']+$rsPayment['Term2']+$rsPayment['Term3']+$rsPayment['Term4'];
+														$allPaid+=$totalPaid;
+														?>
+
+														<td class="widthCol-px-30 bd-b-solid border-left-solid border-left-width-2px "><?php echo$rsPayment['branchName'];?></td>
+														<td class="bd-b-solid"><?php echo $rsPayment['activeStudent'];?></td>
+														<td class="bd-b-solid"><?php echo $rsPayment['inactiveStudent'];?></td>
+														<td class="bd-b-solid"><?php echo $rsPayment['activeStudent']+$rsPayment['inactiveStudent'];?></td>
+														<td class="bg-grey-blues border-left-solid border-left-width-2px"><?=$rsPayment['TTYear']?></td>
+														<td class="text-right"><?=number_format($rsPayment['Year'],2);?></td>
+														<td class="bg-grey-blues border-left-solid"><?=$rsPayment['TTSemester1'];?></td>
+														<td class="text-right"><?=number_format($rsPayment['Semester1'],2);?></td>
+														<td class="bg-grey-blues border-left-solid"><?=$rsPayment['TTSemester2']?></td>
+														<td class="text-right"><?=number_format($rsPayment['Semester2'],2)?></td>
+														<td class="bg-grey-blues border-left-solid"><?=$rsPayment['TTTerm1']?></td>
+														<td class="text-right"><?=number_format($rsPayment['Term1'],2)?></td>
+														<td class="bg-grey-blues border-left-solid"><?=$rsPayment['TTTerm2']?></td>
+														<td class="text-right"><?=number_format($rsPayment['Term2'],2)?></td>
+														<td class="bg-grey-blues border-left-solid"><?=$rsPayment['TTTerm3']?></td>
+														<td class="text-right"><?=number_format($rsPayment['Term3'],2)?></td>
+														<td class="bg-grey-blues border-left-solid"><?=$rsPayment['TTTerm4']?></td>
+														<td class="text-right"><?=number_format($rsPayment['Term4'],2)?></td>
+														<td class="border-left-double border-left-width-3px  text-right bg-col-blue bd-b-solid text-bold"><?php
+															echo number_format($totalPaid ,2);
+														?></td>
+													</tr>
+												<?php } ?>
+														
+												<tr class="footer-total height-px-35 border-top-solid  bd-b-solid border-left-solid border-left-width-2px border-bottom-solid border-bottom-width-3px  border-right-width-2px border-right-solid ">
+													<td class="text-bold">Grand Total</td>
+													<td><?php echo number_format($totalActiveStudent,0);?></td>
+													<td><?php echo number_format($totalInactiveStudent,0);?></td>
+													<td><?php echo number_format($totalActiveStudent+$totalInactiveStudent,0);?></td>
+													<td class="background-bluegreen"><?=$ttYear;?></td>
+													<td class="text-right"><strong class="under-line"><?=number_format($pYear,2);?></strong></td>
+													<td class="background-bluegreen"><?=$ttSemester1;?></td>
+													<td class="text-right"><strong class="under-line"><?=number_format($pSemester1,2);?></strong></td>
+													<td class="background-bluegreen"><?=$ttSemester2;?></td>
+													<td class="text-right"><strong class="under-line"><?=number_format($pSemester2,2);?></strong></td>
+													<td class="background-bluegreen"><?=$ttTerm1;?></td>
+													<td class="text-right"><strong class="under-line"><?=number_format($pTerm1,2);?></strong></td>
+													<td class="background-bluegreen"><?=$ttTerm2;?></td>
+													<td class="text-right"><strong class="under-line"><?=number_format($pTerm2,2);?></strong></td>
+													<td class="background-bluegreen"><?=$ttTerm3;?></td>
+													<td class="text-right"><strong class="under-line"><?=number_format($pTerm3,2);?></strong></td>
+													<td class="background-bluegreen"><?=$ttTerm4;?></td>
+													<td class="text-right"><strong class="under-line"><?=number_format($pTerm4,2);?></strong></td>
+													<td class="bg-col-blue text-right"><strong class="under-line"><?=number_format($allPaid,2);?></strong></td>
+												</tr>
+												<tr>
+													<td colspan="19" class="border-bottom-solid border-bottom-width-3px">Unpaid</td>
+												</tr>
+												
+													<?php
+													$totalUnpaid=0;
+													$totalAllUnpaid=0;
+
+													$unpaidTerm1=0;
+													$unpaidTerm2=0;	
+													$unpaidTerm3=0;
+													$unpaidTerm4=0;
+
+													$unpaidAllTerm1=0;
+													$unpaidAllTerm2=0;	
+													$unpaidAllTerm3=0;
+													$unpaidAllTerm4=0;
+
+													if(!empty($this->paymentSummary['unpaidResult'])) foreach($this->paymentSummary['unpaidResult'] as $key=> $rsPayment){ ?>
+													<tr class="hover border-left-double border-left-width-3px border-right-double border-right-width-3px ">
+														<?php 
+														$totalUnpaid=$rsPayment['unpaidTerm1']+$rsPayment['unpaidTerm2']+$rsPayment['unpaidTerm3']+$rsPayment['unpaidTerm4'];
+														$totalAllUnpaid+=$totalUnpaid;
+
+														$unpaidTerm1+=$rsPayment['countTerm1'];
+														$unpaidAllTerm1+=$rsPayment['unpaidTerm1'];
+
+														$unpaidTerm2+=$rsPayment['countTerm2'];	
+														$unpaidAllTerm2+=$rsPayment['unpaidTerm2'];
+
+														$unpaidTerm3+=$rsPayment['countTerm3'];
+														$unpaidAllTerm3+=$rsPayment['unpaidTerm3'];
+
+														$unpaidTerm4+=$rsPayment['countTerm4'];
+														$unpaidAllTerm4+=$rsPayment['unpaidTerm4'];
+
+														?>
+
+														<td colspan="10" class="widthCol-px-30 bd-b-solid border-left-solid border-left-width-2px "><?php echo$rsPayment['branchName'];?></td>
+														<td class="bg-grey-blues border-left-solid"><?=$rsPayment['countTerm1']?></td>
+														<td class="text-right"><?=number_format($rsPayment['unpaidTerm1'],2)?></td>
+														<td class="bg-grey-blues border-left-solid"><?=$rsPayment['countTerm2']?></td>
+														<td class="text-right"><?=number_format($rsPayment['unpaidTerm2'],2)?></td>
+														<td class="bg-grey-blues border-left-solid"><?=$rsPayment['countTerm3']?></td>
+														<td class="text-right"><?=number_format($rsPayment['unpaidTerm3'],2)?></td>
+														<td class="bg-grey-blues border-left-solid"><?=$rsPayment['countTerm4']?></td>
+														<td class="text-right"><?=number_format($rsPayment['unpaidTerm4'],2)?></td>
+														<td class="border-left-double border-left-width-3px  text-right bg-col-blue bd-b-solid text-bold"><?php
+															echo number_format($totalUnpaid ,2);
+														?></td>
+													</tr>
+												<?php } ?>
+												<tr class="footer-total height-px-35 border-top-solid  bd-b-solid border-left-solid border-left-width-2px border-bottom-solid border-bottom-width-3px  border-right-width-2px border-right-solid ">
+													<td colspan="10" class="text-bold">Grand Total</td>
+													<td class="background-bluegreen" ><?=$unpaidTerm1;?></td>
+													<td class="text-right"><strong class="under-line"><?=number_format($unpaidAllTerm1,2);?></strong></td>
+													<td class="background-bluegreen" ><?=$unpaidTerm2;?></td>
+													<td class="text-right"><strong class="under-line"><?=number_format($unpaidAllTerm2,2);?></strong></td>
+													<td class="background-bluegreen"><?=$unpaidTerm3;?></td>
+													<td class="text-right"><strong class="under-line"><?=number_format($unpaidAllTerm3,2);?></strong></td>
+													<td class="background-bluegreen" ><?=$unpaidTerm4;?></td>
+													<td class="text-right"><strong class="under-line"><?=number_format($unpaidAllTerm4,2);?></strong></td>
+													<td class="bg-col-blue text-right"><strong class="under-line"><?=number_format($totalAllUnpaid,2);?></strong></td>
+												</tr>
+											</table> 
+										</div>	
+									</td>
+								</tr>
+							</table>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="right-panel-report" id="rightPanel">
+		<div class="card-box">
+			<div class="card-search-head col-sm-12 border-botom">
+				<div class="col-sm-6 text-left pd-0">
+					<h4 class="m-b-0">
+						<?php echo $tr->translate("SEARCH");?> 
+						<i class="fa fa-search "></i> 
+					</h4>
+				</div>
+				<div class="col-sm-6 text-right pd-0">
+					<button onclick="closeRightPanel()" title="<?php echo $tr->translate("CLOSED");?> " class="btn-close">
+						<i class="fa-solid fa-xmark"></i>
+					</button>
+				</div>
+			</div>
+			<form id='foundation_class' action="" dojoType="dijit.form.Form" method="post" enctype="application/x-www-form-urlencoded">
+				<div class="form-group">
+					<div class="col-md-12 col-sm-12 col-xs-12">
+						<?php echo $frm->getElement('branch_id');?>
+					</div>
+					<div class="col-md-12 col-sm-12 col-xs-12">
+						<?php echo $frm->getElement('academic_year'); ?>
+					</div>
+					<div class="col-md-12 col-sm-12 col-xs-12">
+					</div>
+					<div class="col-md-12 col-sm-12 col-xs-12">
+						<button class="button-class button-primary fullside" iconClass="glyphicon glyphicon-search" dojoType="dijit.form.Button" showLabel="true" name="search"  type="submit"><?php echo $tr->translate("SEARCH");?></button>
+					</div>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
+<link rel="stylesheet" href="<?php echo $this->baseUrl()."/"?>dashboard/plugins/morris/morris.css">
+<script src="<?php echo $this->baseUrl()."/"?>dashboard/plugins/morris/morris.min.js"></script>
+<script src="<?php echo $this->baseUrl()."/"?>dashboard/plugins/raphael/raphael-min.js"></script>
+<script src="<?php echo $this->baseUrl();?>/js/help.js"></script>
+<script type="text/javascript">
+
+dojo.require("dojo.NodeList");
+	dojo.require("dojo.NodeList-manipulate");
+	dojo.require("dojo.data.ItemFileWriteStore"); 
+	
+	dojo.ready(function(){
+		var branch_id = dijit.byId('branch_id');
+		branch_id.on('change', function(evt) {
+		});
+		dijit.byId('academic_year').set('value','<?php echo empty($this->search["academic_year"]) ? 0 : $this->search["academic_year"];?>'); 
+		
+		$("#academicDisplay").html(dijit.byId('academic_year').attr("displayedValue"));
+		$(".academicDisplay").html(dijit.byId('academic_year').attr("displayedValue"));
+		
+		 setTimeout(function() {
+			setPrintOrientation('landscape');
+		}, 500);
+	});
+	function doPrintProfle(keyid) {
+		window.frames["print_frame"].document.body.innerHTML = dojo.byId(keyid).innerHTML;
+		window.frames["print_frame"].window.focus();
+		window.frames["print_frame"].window.print();
+		hideDialog();
+	}	
+</script>

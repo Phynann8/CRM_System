@@ -1,0 +1,153 @@
+<?php
+	/*--------------------URLs link display--------------------------*/
+		  $tr=Application_Form_FrmLanguages::getCurrentlanguage();
+		  $session_user=new Zend_Session_Namespace(SYSTEM_SES);
+		  $arr_module = $session_user->arr_acl;
+		  
+		  $menu = array();
+		  $module = '';
+		  $controller=array();
+		  $newarray=array();
+		  if(!empty($arr_module)){
+		  	foreach ($arr_module as $key => $rs){
+		  		$lblcontroller = $rs['label'];
+		  		if($module!=$rs['module']){
+		  			$newarray= array($rs['controller']=>$tr->translate(($lblcontroller)));
+		  			$menu[$rs['module']]= $newarray;
+		  			$old_module=$rs['module'];
+		  		}else{
+		  			$newarray= array_merge($newarray,array($rs['controller']=>$tr->translate(($lblcontroller))));
+		  			$menu[$rs['module']] = $newarray;
+		  		}
+		  		$module=$rs['module'];
+		  	}
+		  }
+		  
+		  $arr_param_menu = $menu;
+		  $request=Zend_Controller_Front::getInstance()->getRequest();
+		  $module = $request->getModuleName();
+		  $controller = $request->getControllerName();
+	?>
+	<?php 
+	$array_icon = array(
+      		'home'=>'<i class="glyphicon glyphicon-home"></i>',
+			'test'=>'<i class="glyphicon glyphicon-list-alt"></i>',
+      		'registrar'=>'<i class="fa fa-graduation-cap"></i>',
+      		'global'=>'<i class="glyphicon glyphicon-exclamation-sign"></i>',
+      		'foundation'=>'<i class="glyphicon glyphicon-blackboard"></i>',
+			'issue'=>'<i class="glyphicon glyphicon-pencil"></i>',
+			'issuesetting'=>'<i class="fa fa-cogs"></i>',
+      		'accounting'=>'<i class="fa fa-hand-holding-usd"></i>',
+      		'stock'=>'<i class="fa fa-cubes"></i>',
+			'library'=>'<i class="fa  fa-book"></i>',
+			'mobileapp'=>'<i class="fa fa-apple"></i>',
+      		'allreport'=>'<i class="fa  fa-file-text"></i>',
+      		'rsvacl'=>'<i class="fa  fa-cog"></i>',
+      		'setting'=>'<i class="fa  fa-database"></i>',
+			'placement'=>'<i class="fa  fa-edit"></i>',
+			'scan'=>'<i class="fa fa-qrcode"></i>',
+      		
+      );
+		$arr_module = $session_user->arr_module;
+	?>
+	<!-- sidebar menu -->
+            <div id="sidebar-menu" class="main_menu_side hidden-print main_menu">
+              <div class="menu_section">
+              &nbsp;
+               <?php 
+					if(!empty($session_user->accessRegistarBtn)){
+				?>
+						<div class="button-make-loan mb-10">
+							<a href="<?php echo $this->baseUrl()."/registrar/register/add"?>"  class="closebtn-makesale"  ><i class="fa fa-graduation-cap" ></i> <?php echo $tr->translate("REGISTER");?> </a>
+						</div>
+			<?php }?>
+                <ul class="nav side-menu">
+                	<?php if(!empty($arr_module)){ foreach ($arr_module as $rs){
+                		$url =$this->url(array('module'=>$rs,'controller'=>'index','action'=>'index'), null, true);
+                		if ($rs=="test"){
+                			$title=$tr->translate("STUDENTTEST");
+                		}else if ($rs=="issue"){
+                			$title=$tr->translate("STUDENT_AFFAIR");
+                		}
+                		else if ($rs=="registrar"){
+                			$title=$tr->translate("INCOME_EXPENSE");
+                		}
+                		else{
+                			$title=$tr->translate(strtoupper($rs));
+                		}
+                	?>
+                	<li <?php if ($rs==$module ){ echo 'class="active"';}?> >
+                		<?php if ($rs=="allreport"){?>
+							<?php if (count($arr_param_menu[$rs])>=2){?>
+		                		<a><?php echo $array_icon[$rs];?> <?php echo $title;?> 
+		                		<?php if (!empty($arr_param_menu[$rs])){?><span class="fa fa-chevron-down"></span><?php }?>
+		                		</a>
+		                		<?php if (!empty($arr_param_menu[$rs])){?>
+			                    <ul class="nav child_menu" <?php if ($rs==$module ){ echo 'style="display: block;"';}?>>
+			                       <?php  foreach ($arr_param_menu[$rs] as $key => $sub){
+			                       	
+			                       	$urlsub = $this->url(array('module'=>$rs,'controller'=>$key,'action'=>'index'), null, true);
+			                       	$Stringmenu =$key;
+			                       	?>
+			                      <li <?php if ($rs==$module AND $key==$controller){ echo 'class="current-page"';}?>><a href="<?php echo $urlsub;?>"><?php echo $tr->translate(strtoupper($Stringmenu));?></a></li>
+			                       <?php }?>
+			                    </ul>
+			                    <?php }?>
+		                    <?php }else{?>
+									<?php if (!empty($arr_param_menu[$rs])){?>
+										<?php  foreach ($arr_param_menu[$rs] as $key => $sub){
+											$urlsub = $this->url(array('module'=>$rs,'controller'=>$key,'action'=>'index'), null, true);
+										?>
+										<a href="<?php echo $urlsub;?>">
+										<?php echo $array_icon[$rs];?> <?php echo $title;?> 
+										</a>
+										<?php }?>
+									<?php }else{?>
+									<a href="<?php echo $this->url(array('module'=>$rs,'controller'=>'index','action'=>'index'), null, true);;?>">
+										<?php echo $array_icon[$rs];?> <?php echo $title;?> 
+									</a>
+							<?php }
+							}?>
+                		<?php }else{?>
+                		
+                			<?php if (count($arr_param_menu[$rs])>1){?>
+	                		<a><?php echo $array_icon[$rs];?> <?php echo $title;?> 
+	                		<?php if (!empty($arr_param_menu[$rs])){?><span class="fa fa-chevron-down"></span><?php }?>
+	                		</a>
+	                		<?php if (!empty($arr_param_menu[$rs])){?>
+		                    <ul class="nav child_menu" <?php if ($rs==$module ){ echo 'style="display: block;"';}?>>
+		                       <?php  foreach ($arr_param_menu[$rs] as $key => $sub){
+		                       	$urlsub = $this->url(array('module'=>$rs,'controller'=>$key,'action'=>'index'), null, true);
+		                       	?>
+		                      <li <?php if ($rs==$module AND $key==$controller){ echo 'class="current-page"';}?> ><a href="<?php echo $urlsub;?>"><?php echo $sub;?></a></li>
+		                       <?php }?>
+		                    </ul>
+		                    <?php }?>
+	                    <?php }else{?>
+	                    	<?php  foreach ($arr_param_menu[$rs] as $key => $sub){
+		                       	$urlsub = $this->url(array('module'=>$rs,'controller'=>$key,'action'=>'index'), null, true);
+		                       	$title=$tr->translate(strtoupper($key));
+		                       	if($rs=='foundation' AND $key=='register'){
+		                       		$title=$tr->translate('STUDENT_INFO');
+		                       	}
+		                       	if($rs=='global' AND $key=='term'){
+		                       		$title=$tr->translate('START_DATE_END_DATE');
+		                       	}
+		                       	if ($rs=="home" and $key=="index" ){
+		                       		$title=$tr->translate(strtoupper($rs));
+		                       	}else if ($rs=="test" AND $key=="index"){
+                					$title=$tr->translate("STUDENT_TEST");
+		                       	}
+		                       	?>
+		                    <a href="<?php echo $urlsub;?>">
+                			<?php echo $array_icon[$rs];?> <?php echo $title;?> 
+	                		</a>
+	                		<?php }?>
+	                    <?php }?>
+                    <?php }?>
+                 	 </li>
+                	<?php }
+                	}?>
+                </ul>
+              </div>
+            </div>

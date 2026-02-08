@@ -1,0 +1,14 @@
+; Local overrides for CRM_System (Zend Framework 1.12)
+; Copy this file to application.local.ini and adjust values for your machine.
+; This file is merged on top of application.ini by public/index.php.
+
+[production]
+resources.db.params.host = "localhost"
+resources.db.params.username = "root"
+resources.db.params.password = ""
+resources.db.params.dbname = "db_demopsischv"
+
+[development : production]
+phpSettings.display_startup_errors = 1
+phpSettings.display_errors = 1
+resources.frontController.params.displayExceptions = 1

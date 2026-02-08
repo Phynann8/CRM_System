@@ -1,0 +1,542 @@
+<?php
+	$tr = Application_Form_FrmLanguages::getCurrentlanguage();
+	$pageTitle = $tr->translate("RPT_DAILY_COLLECTION_SUMARRY");
+	echo $this->headTitle($pageTitle);
+	
+	$frm =  $this->form_search;
+	$classHideHeight=classHideHeight;
+	$dateFormat ="d/m/y";
+	
+	$parentCol = $this->parentCol;
+	$allBank = $this->bank;
+	$allBankBr = $allBank;
+
+	$countCol = count($parentCol);
+	$dbAcc = new Allreport_Model_DbTable_DbAccountReport();
+	
+	$arrBrachInfo = [];
+?>
+<div class="layout-wrapper-report">
+	<div id="mainContent" class="main-content-report">
+		<div class="report-preview">
+			<?php echo $this->controlReport?>
+			<div id="main-viewer" class="main-viewer portrait">
+				<div id="viewer" class="viewer portrait">
+					<div id="divPrint" class="content">
+						<link rel="stylesheet" href="<?php echo $this->baseUrl();?>/admin/build/css/report-style.css">
+						<link rel="stylesheet" href="<?php echo $this->baseUrl();?>/admin/build/css/report-style-screen.css">
+						<style>
+							@media print {
+								.hide {
+									visibility: visible;
+									height: <?php echo $classHideHeight;?>;
+								}
+								<?php if(!empty($this->printFormat)){ echo $this->printFormat; } ?>
+							}
+						</style>
+						<table style="width:100%;">
+							<tr>
+								<td colspan="3"><?php echo $this->rsheader;?></td>
+							</tr>
+							<tr>
+								<td width="15%" align="center"></td>
+								<td align="center" width="70%">
+									<div style="width:100%;margin-top: -25px;">
+										<div style="font-size:12px;color: #000;font-family: 'Times New Roman','Khmer OS Muol Light';">
+											<?php echo $pageTitle; ?>
+										</div>
+										<div  class="setfontsize branchName"></div>
+											<?php if(!empty($this->search["end_date"])){?>
+										<div class="setfontsize" style="margin-bottom:5px; color: #000;  font-family: 'Times New Roman', 'Khmer OS Muol Light'; line-height:15px;">For <?php echo date("m/Y",strtotime($this->search["end_date"]))?></div><?php }?>
+									</div>
+								</td>
+								<td width="15%">
+								</td>
+							</tr>
+							<tr>
+								<td colspan="3" id="exportExcel" valign="top">
+									<?php 
+									$i=1;
+									$summaryInfoArray = array();
+									$oldLabelMethod="";
+									$colspanTotal=$countCol;
+									if($countCol>1){
+										$colspanTotal=$countCol-1;
+									}
+											
+									$paymentMethod="";
+									$bankId="";
+									
+									
+									$gTutionTotal=0;
+									$gTotalPaid=0;
+									$gTotalPaidCash=0;
+									
+									$dateValue="";
+											if(!empty($this->rowStDailyPmt)){
+									 ?>
+									<table class="content-data text-size-10px text-h14px text-color-black" width="100%" align="center">
+										<thead>
+											<tr class="bd-black text-bold hpx-40 bd-l-solid bd-r-solid bd-t-solid bd-w2px bd-b-double bd-b-w4px" align="center">
+												<td scope="col" class="wpx-30">Day</td>
+												<td scope="col" class="wpx-30">Branch</td>
+												
+												<td scope="col"><?php echo $tr->translate("Tuition");?></td>
+												<td scope="col"><?php echo $tr->translate("Discount");?></td>
+												<?php if(!empty($parentCol)) foreach($parentCol AS $k =>$mainParent){?>
+												<td scope="col" width="70px"><?php echo $mainParent["title"];?></td>
+												<?php } ?>
+												<td scope="col"><?php echo $tr->translate("Paid");?></td>
+												<?php 
+													if(!empty($allBank)) foreach($allBank AS $key => $bank){ 
+													$allBank[$key]["total"] = 0;
+													$allBank[$key]["gTotal"] = 0;
+													
+													
+													$allBankBr[$key]["total"] = 0;
+													$allBankBr[$key]["gTotal"] = 0;
+												?>
+												<td scope="col"><?php echo $bank["name"];?></td>
+												<?php } ?>
+												<td scope="col">Cash</td>
+											</tr>
+										</thead>
+										<tbody>
+											<?php 
+											foreach($this->rowStDailyPmt as $kerIndex => $rs){ 
+												$i++; 
+												$classOdd="";
+												if(($kerIndex%2)==0){
+													$classOdd="bg-col-blue";
+												}
+												$payTerm="";
+												$tutionTotalFeeLabel="-";
+												$tutionFeeDisPer="";
+												$tutionFeeDisAmt="-";	
+												$pmtDetailJson = json_decode($rs['pmtDetailJson'], TRUE);
+																				
+											?>
+											
+												<?php 
+													$strTotalByMethod="";
+													$columnTypeStr="";
+													if(!empty($parentCol)) foreach($parentCol AS $k =>$mainParent){ 
+													
+														$columnClass="";
+														$expl = explode(',', $mainParent["listSubId"]);
+														$totalPaymentLabel="-";
+														$totalPayment=0;
+														$gTotalPayment = 0;
+														if(!empty($pmtDetailJson)) foreach($pmtDetailJson as $detail){
+															$category = empty($detail["category"]) ? 0 : $detail["category"];
+															$keyIndex = in_array($category, $expl);
+															if(in_array($category, $expl)) {
+																$thisTotal= empty($detail["totalPayment"]) ? 0 : $detail["totalPayment"];
+																$totalPayment = $totalPayment + $thisTotal;
+																if($detail["itemType"]==1){
+																	$tutionTotalFeeLabel=$detail["fee"];
+																	$payTerm= empty($detail["payTermTitle"]) ?  $tr->translate("OTHER") :  $detail["payTermTitle"];
+																	$tutionFeeDisPer=($detail["disPer"]>0) ?  str_replace(".00","",$detail["disPer"])."%" : "";
+																	
+																	if($detail["disPer"]>0){
+																		$tutionFeeDisAmt=($detail["disAmt"]>0) ? "+".$detail["disAmt"] : "";
+																	}else{
+																		$tutionFeeDisAmt=($detail["disAmt"]>0) ? $detail["disAmt"] : "";
+																	}
+																}
+															}
+															
+														}
+														$gTotalPayment = $gTotalPayment + $totalPayment;
+														$totalPaymentLabel= empty($totalPayment) ? "-" : number_format($totalPayment,2);
+														if($totalPayment<0){
+															$columnClass="redColor";
+															$totalPaymentLabel = "(".number_format($totalPayment,2).")";
+														}
+														
+														
+														$parentCol[$k]["gTotal"] = empty($parentCol[$k]["gTotal"]) ? 0 : $parentCol[$k]["gTotal"];
+														$parentCol[$k]["gTotal"] = $parentCol[$k]["gTotal"] + $gTotalPayment;
+														
+														
+														$columnTypeStr.= '<td class="text-bold '.$columnClass.'" align="center" data-label="'.$mainParent["title"].'">'.$totalPaymentLabel.'</td>';
+													}
+													
+													if(empty($arrBrachInfo)){
+														$newBraArr = [
+															"branchId"=>$rs["branchId"],
+															"branchName"=>$rs["branchName"],
+															"totalPaid"=>empty($rs['ttMPaidAmt']) ? 0 : $rs['ttMPaidAmt'],
+															"totalCashPaid"=>empty($rs['tPaidAmountCash']) ? 0 : $rs['tPaidAmountCash'],
+															"bankInfo"=>$allBankBr,
+														];
+														array_push($arrBrachInfo,$newBraArr);
+													}else{
+														$strFilter =  (string) $rs["branchId"];
+														$rsFindBr = array_filter($arrBrachInfo, function ($item) use ($strFilter) {
+															if ($item['branchId'] == $strFilter) {
+																return $item;
+															}
+															return;
+														});
+														if(!empty($rsFindBr)){
+															$thisBrKey = array_keys($rsFindBr)[0];
+															if(!empty($arrBrachInfo[$thisBrKey])){
+																$brPaid = empty($rs['ttMPaidAmt']) ? 0 : $rs['ttMPaidAmt'];
+																$brPaidCash = empty($rs['tPaidAmountCash']) ? 0 : $rs['tPaidAmountCash'];
+																$arrBrachInfo[$thisBrKey]["totalPaid"] = $arrBrachInfo[$thisBrKey]["totalPaid"] +  $brPaid;
+																$arrBrachInfo[$thisBrKey]["totalCashPaid"] = $arrBrachInfo[$thisBrKey]["totalCashPaid"] +  $brPaidCash;
+															}
+														}else{
+															$newBraArr = [
+																"branchId"=>$rs["branchId"],
+																"branchName"=>$rs["branchName"],
+																"totalPaid"=>empty($rs['ttMPaidAmt']) ? 0 : $rs['ttMPaidAmt'],
+																"totalCashPaid"=>empty($rs['tPaidAmountCash']) ? 0 : $rs['tPaidAmountCash'],
+																"bankInfo"=>$allBankBr,
+															];
+															array_push($arrBrachInfo,$newBraArr);
+														}
+													}
+													
+													//សម្រាប់សរុបទឹកប្រាក់តាមធនាគារ
+													$bankInfoBr = [];
+													if(!empty($pmtDetailJson)) foreach($pmtDetailJson as $detail){										
+														if($detail["bankId"]>0){
+															$strFilter =  (string) $detail["bankId"];
+															$arrRow = $allBank;
+															$rsFindBank = array_filter($arrRow, function ($item) use ($strFilter) {
+																if ($item['id'] == $strFilter) {
+																	return $item;
+																}
+																return;
+															});
+															if(!empty($rsFindBank)){
+																$thisKey = array_keys($rsFindBank)[0];
+																if(!empty($allBank[$thisKey])){
+																	$allBank[$thisKey]["total"] = (double)$allBank[$thisKey]["total"]+  (double)$detail["paid"];
+																	$allBank[$thisKey]["gTotal"] =  (double) $allBank[$thisKey]["gTotal"]+  (double)$detail["paid"];
+																}
+															}
+															
+															$strFilter =  (string) $rs["branchId"];
+															$rsFindBr = array_filter($arrBrachInfo, function ($item) use ($strFilter) {
+																if ($item['branchId'] == $strFilter) {
+																	return $item;
+																}
+																return;
+															});
+															
+															if(!empty($rsFindBr)){
+																$thisBrKey = array_keys($rsFindBr)[0];
+																
+																if(!empty($arrBrachInfo[$thisBrKey])){
+																
+																	$bankBrInfo = empty($arrBrachInfo[$thisBrKey]['bankInfo']) ? [] : $arrBrachInfo[$thisBrKey]['bankInfo'];
+																	
+																	if(!empty($bankBrInfo)){
+																		$strFilter =  (string) $detail["bankId"];
+																		$rsFindBank = array_filter($bankBrInfo, function ($item) use ($strFilter) {
+																			if ($item['id'] == $strFilter) {
+																				return $item;
+																			}
+																			return;
+																		});
+																		
+																		if(!empty($rsFindBank)){
+																			$thisKey = array_keys($rsFindBank)[0];
+																			if(!empty($bankBrInfo[$thisKey])){
+																				$bankBrInfo[$thisKey]["gTotal"] =  (double) $bankBrInfo[$thisKey]["gTotal"]+  (double)$detail["paid"];
+																				$arrBrachInfo[$thisBrKey]['bankInfo']= $bankBrInfo;//set New Arr Value
+																			}
+																		}
+																	}
+																}
+															}
+														}
+													}
+													
+													
+													
+													$totalCashPaid="-";
+													if($rs['tPaidAmountCash']>0){
+														$totalCashPaid=number_format($rs['tPaidAmountCash'],2);
+														$gTotalPaidCash = $gTotalPaidCash + $rs['tPaidAmountCash'];
+													}
+													
+													$classBdRowDate=" bd-t-solid bd-b-w1px bd-light-grey";
+													$strDate="";
+													if( $dateValue!=date($dateFormat, strtotime($rs['createDateFmt'])) ){
+														
+														$strFilter =  (string) $rs['createDateFmt'];
+														$rowSt = $this->rowStDailyPmt;
+														$rsFindBank = array_filter($rowSt, function ($item) use ($strFilter) {
+															if ($item['createDateFmt'] == $strFilter) {
+																return $item;
+															}
+															return;
+														});
+														$amtBr = count($rsFindBank);
+														$amtBr = empty($amtBr) ? 0 : $amtBr;
+															
+														$strDate='<td class="rowspan-class bd-solid bd-w1px" rowspan="'.$amtBr.'" align="center">'.date("d", strtotime($rs['createDateFmt'])).'</td>';
+														$strDate.='<td style="display:none;" class="not-show" align="center">'.date("d", strtotime($rs['createDateFmt'])).'</td>';
+														
+														if($kerIndex>0){
+															$classBdRowDate="bd-t-solid bd-t-w1px bd-t-black bd-b-light-grey";
+														}
+													}else{
+														$strDate='<td style="display:none;" class="not-show" align="center">'.date("d", strtotime($rs['createDateFmt'])).'</td>';
+														
+													}
+													
+													$dateValue=date($dateFormat, strtotime($rs['createDateFmt']));
+													
+													
+												?>
+												
+												 <tr class="row-data style hover  <?php echo $classBdRowDate;?>" >
+													<?php echo $strDate;?>
+													<td data-label="<?php echo $tr->translate("BRANCH");?>" align="left" ><?php echo $rs["branchName"];?></td>
+													<td data-label="<?php echo $tr->translate("Tuition");?>" align="center" class="text-bold"><?php echo $tutionTotalFeeLabel;?></td>
+													<td data-label="<?php echo $tr->translate("Discount");?>" align="center" class="text-bold"><?php echo $tutionFeeDisPer.$tutionFeeDisAmt;?></td>
+													
+													<?php echo $columnTypeStr; ?>
+													<?php 
+														
+														$paidAmount = $rs['ttMPaidAmt'];
+														$paidAmountLabel = number_format($paidAmount,2);
+														$paidClass="";
+														if($paidAmount<0){
+															$paidClass="redColor";
+															$paidAmountLabel = "(".$paidAmountLabel.")";
+														}		
+													?>
+													
+													<td  align="center" class="bd-r-double bd-r-w2px bd-r-black text-bold <?php echo $classOdd." ".$paidClass;?>"><?php echo $paidAmountLabel; ?></td>
+													<?php 
+														if(!empty($allBank)) foreach($allBank AS $key => $bank){ 
+														$valueBankLabel="-";
+														if($bank["total"]>0){
+															$valueBankLabel=number_format($bank["total"],2);
+														}
+													?>
+													<td scope="col" align="center" class="text-bold <?php echo $classOdd;?>" ><?php echo $valueBankLabel;?></td>
+													<?php $allBank[$key]["total"] = 0; } ?>
+													<td align="center" class="text-bold bd-r-solid bd-r-w1px bd-black <?php echo $classOdd;?>"><?php echo $totalCashPaid; ?></td>
+													
+													
+												</tr>
+												
+												<?php 
+													$gTotalPaid = $gTotalPaid + $paidAmount;
+													
+												?>
+											<?php }
+												$strGTotal="";
+												if(!empty($parentCol)) foreach($parentCol AS $k =>$mainParent){ 
+												$currTotalMethod = empty($mainParent["totalByMethod"]) ? "" : number_format($mainParent["totalByMethod"],2);
+												$gTotal = empty($mainParent["gTotal"]) ? "" : number_format($mainParent["gTotal"],2);
+												$strGTotal.= '<td align="center"><strong>'.$gTotal.'</strong></td>';
+												}
+											?>
+												
+												<tr class="row-data height-px-50 bd-black bd-t-double bd-t-w3px bd-b-solid bd-r-solid bd-l-solid bd-b-w3px">
+													<td colspan="4" align="left"><strong>Grand Total</strong></td>
+													<?php echo $strGTotal;?>
+													<td align="center" class="bg-col-blue"><strong><?php echo number_format($gTotalPaid,2);?></strong></td>
+													<?php 
+														if(!empty($allBank)) foreach($allBank AS $key => $bank){ 
+														$valueBankLabel="";
+														if($bank["gTotal"]>0){
+															$valueBankLabel=number_format($bank["gTotal"],2);
+														}
+													?>
+													<td scope="col" align="center" class="bg-col-blue"><strong><?php echo $valueBankLabel;?></strong></td>
+													<?php } ?>
+													<td align="center" class="bg-col-blue"><strong><?php echo number_format($gTotalPaidCash,2); ?></strong></td>
+												</tr>
+										
+										</tbody>
+									</table>
+									<?php } ?>
+									<?php if(!empty($arrBrachInfo)){?>
+									<div style="display: flex; text-align: right;align-content: end;flex-wrap: wrap;flex-direction: column;margin-top: 10px;">
+										<table class="content-data text-color-black text-size-10px text-h14px" style=" width:42%; text-align: center; margin: 0 auto; font-weight: bold; border: 0;">
+											<tbody>
+											
+											<?php 
+											foreach($arrBrachInfo AS $key => $rsBr){ 
+												
+												$classOdd="";
+												if(($kerIndex%2)==0){
+													$classOdd="bg-col-blue";
+												}
+												
+												$countBank = count($rsBr["bankInfo"]);
+												$colspan = $countBank+3;
+												$stringHead="
+													<tr class=\"bd-r-solid bd-l-solid bd-r-black bd-l-black bd-t-double bd-t-w2px  bd-t-black bd-b-solid bd-b-w1px  bd-b-light-grey\">
+														<td  colspan=\"$colspan\" align=\"center\" ><strong>Summary Infomation</strong></td>
+													</tr>
+													<tr class=\"bd-r-solid bd-l-solid bd-b-double bd-b-w2px  bd-black\">
+														<td></td>
+												";
+												$stringCol="";
+												if(!empty($rsBr["bankInfo"])){
+													foreach($rsBr["bankInfo"] AS $bank){
+														$stringHead.="<td>".$bank["name"]."</td>";
+														$stringCol.="<td align=\"center\">".number_format($bank["gTotal"],2)."</td>";
+													}
+												}
+												
+												$stringHead.="<td>Cash</td>";
+												$stringHead.="<td>Total</td>";
+												$stringHead.="</tr>";
+												
+												
+											?>
+											<?php if($key==0){
+												echo $stringHead;
+											}?>
+											<?php if(empty($this->search["branch_id"])){?>
+											<tr class="row-data bd-b-solid bd-b-w1px  bd-b-light-grey bd-r-solid bd-l-solid bd-r-black bd-l-black">
+												<td align="right"><?php echo $rsBr["branchName"];?></td>
+												<?php echo $stringCol;?>
+												
+												<td align="center"><?php echo number_format($rsBr["totalCashPaid"],2)?></td>
+												<td align="center"><?php echo number_format($rsBr["totalPaid"],2);?></td>
+											</tr>
+											<?php } ?>
+											<?php } ?>
+												<tr class="row-data bg-col-blue height-px-35 bd-black bd-t-double bd-t-w3px bd-b-solid bd-r-solid bd-l-solid bd-b-w3px">
+													<td align="right"><strong>Grand Total</strong></td>
+													<?php 
+														if(!empty($allBank)) foreach($allBank AS $key => $bank){ 
+														$valueBankLabel="0.00";
+														if($bank["gTotal"]>0){
+															$valueBankLabel=number_format($bank["gTotal"],2);
+														}
+													?>
+													<td align="center"><strong><?php echo $valueBankLabel;?></strong></td>
+													<?php } ?>
+													<td align="center"><strong><?php echo number_format($gTotalPaidCash,2)?></strong></td>
+													<td align="center"><strong><?php echo number_format($gTotalPaid,2);?></strong></td>
+												</tr>
+												
+											</tbody>
+										</table>
+									</div>
+									<?php } ?>
+								</td>
+							</tr>
+						</table>
+					</div>					
+				</div>					
+			</div>					
+		</div>					
+	</div>	
+	<div class="right-panel-report" id="rightPanel">
+		<div class="card-box">
+			<div class="card-search-head col-sm-12 border-botom">
+				<div class="col-sm-6 text-left pd-0">
+					<h4 class="m-b-0">
+						<?php echo $tr->translate("SEARCH");?> 
+						<i class="fa fa-search "></i> 
+					</h4>
+				</div>
+				<div class="col-sm-6 text-right pd-0">
+					<button onclick="closeRightPanel()" title="<?php echo $tr->translate("CLOSED");?> " class="btn-close">
+						<i class="fa-solid fa-xmark"></i>
+					</button>
+				</div>
+			</div>
+			<form id='foundation_class' action="" dojoType="dijit.form.Form" method="post" enctype="application/x-www-form-urlencoded">
+				<script type="dojo/method" event="onSubmit" enctype="multipart/form-data">			
+						if(this.validate()) {	
+							end_date = dijit.byId('end_date').get('value');
+							if(branch_id==''){
+								alert("<?php echo $tr->translate("PLEASE_SELECT_DATE");?>");
+								dijit.byId('end_date').focus();
+								return false;
+							}
+							loadingBlock();
+							return true;
+						} else {
+							return false;
+						}
+					</script>
+				<div class="form-group">
+					<div class="col-md-12 col-sm-12 col-xs-12">
+						<?php echo $frm->getElement("branch_id");?>
+					</div>
+					<div class="col-md-12 col-sm-12 col-xs-12">
+						<?php echo $frm->getElement("end_date");?>
+					</div>
+					<div class="col-md-12 col-sm-12 col-xs-12">
+						<button class="button-class button-primary fullside"
+							iconClass="glyphicon glyphicon-search" dojoType="dijit.form.Button"
+							showLabel="true" type="submit"><?php echo $tr->translate("SEARCH");?></button>
+					</div>
+					<div class="col-md-2 col-sm-2 col-xs-12"></div>
+				</div>
+				<div class="form-group">
+					<div class="col-md-12 col-sm-12 col-xs-12"></div>
+				</div>
+			</form>			
+		</div>	
+	</div>					
+</div>	
+<script src="<?php echo $this->baseUrl();?>/js/help.js" type="text/javascript"></script>
+<script src="<?php echo $this->baseUrl();?>/admin/js/global.js" type="text/javascript"></script>
+<script type="text/javascript">
+	dojo.require("dojo.data.ItemFileWriteStore"); 
+	dojo.require("dijit.form.CheckBox"); 
+	dojo.ready(function(){
+		 var branchId = dijit.byId('branch_id');
+		 branchId.on('change', function(evt) {
+			//doFilterBranch();
+		});
+		 setTimeout(function() {
+			setPrintOrientation('landscape');
+		}, 500);
+	});
+	
+	function doFilterBranch(){
+		var searchValue = dijit.byId("branch_id").attr('displayedValue')+'';
+		  searchValue = searchValue.toLowerCase();
+		  
+		 var branchIdValue = dijit.byId("branch_id").get('value');
+		 branchIdValue = (branchIdValue=="") ? 0 : branchIdValue;
+		  $('table.content-data tr.row-data').each(function () {
+			   $(".rowspan-class").show();
+				var rowText = $(this).text().toLowerCase();
+				var hasRowspan = $(this).find('td[rowspan]').length > 0;
+				 
+				if (hasRowspan) {
+					previousRowspanRow = $(this);
+				}
+				
+				if (rowText.indexOf(searchValue) > -1) {
+					$(this).show();
+					$(".rowspan-class").show();
+					$(".not-show").hide();
+					if(branchIdValue>0){
+						$(".rowspan-class").hide();
+						$(".not-show").show();
+					}
+				} else {
+					$(this).show();
+					$(".rowspan-class").show();
+					$(".not-show").hide();
+					if(branchIdValue>0){
+						$(".rowspan-class").hide();
+						$(".not-show").show();
+						$(this).hide();
+					}
+					
+				}
+			
+		});
+	}
+</script>

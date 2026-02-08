@@ -1,0 +1,71 @@
+<?php
+	$tr = Application_Form_FrmLanguages::getCurrentlanguage();
+	$this->headTitle($tr->translate('CHANGE_PWD_INFO')); 
+	echo $this->headTitle(''); 
+	$photo= $this->frm_techer;
+?>	
+<div class="card">
+	<div class="card-content collapse show">
+		<form id='add_client' action="" enctype="multipart/form-data" dojoType="dijit.form.Form" method="post">
+			<script type="dojo/method" event="onSubmit">			
+				if(this.validate()) {
+					loadingBlock();
+					return true;
+				}else{
+					return false;
+				}
+			</script>
+			<div class="card-box">
+               	<div class="col-sm-12 border-botom">
+		    		<div class="col-sm-8 pd-0">
+		    			<h4 class="m-b-0"><i class="fa fa-newspaper-o" aria-hidden="true"></i>&nbsp;&nbsp;&nbsp;<?php echo $tr->translate('CHANGE_PWD_INFO');?></h4>
+	    			</div>
+	    			<div class="col-sm-4 text-right">
+	    			</div>
+	    		</div>
+	    	</div>
+	    	<div class="card-box">
+	    		<div class="col-md-8 col-sm-12 col-xs-12">
+	    			<div class="form-group">
+	                   <label class="control-label col-md-5 col-sm-5 col-xs-12" >
+							<?php echo $tr->translate("ACCOUNT_NAME");?>
+	                   </label>
+	                   <div class="col-md-7 col-sm-7 col-xs-12">
+	                   	<input type="hidden" dojoType="dijit.form.TextBox" name="id"  id="id" value="<?php echo $this->rs['stu_id'];?>" class="fullside" />
+							<input class="fullside" readonly style="color: red;" tabindex="15" dojoType="dijit.form.TextBox"  id="student_id" name="student_id" value="<?php echo $this->rs['stu_code']; ?>" type="text" >
+	                   </div>
+	                </div>
+	                
+	                <div class="form-group">
+	                   <label class="control-label col-md-5 col-sm-5 col-xs-12" >
+							<?php echo $tr->translate("NEW_PASSWORD");?>
+	                   </label>
+	                   <div class="col-md-7 col-sm-7 col-xs-12">
+	                   		<input class="fullside" type="password" required="true" name="new_password" id="new_password" placeholder="ពាក្យ​​សំងាត់ ថ្មី" 
+											regExp="\w{6,}" invalidMessage="ពាក្យ​សំងាត់យ៉ាង​តិច មាន 6​ តួអក្សរ"
+											dojoType="dijit.form.ValidationTextBox" missingMessage="អ្នក​ភ្លេច​បំពេញ​ ពាក្យ​​សំងាត់ ថ្មី!" style="width: 100%;"/>
+	                   </div>
+	                </div>
+	                <div class="form-group">
+	                   <label class="control-label col-md-5 col-sm-5 col-xs-12" >
+							<?php echo $tr->translate("CONFIRM_PASSWORD");?>
+	                   </label>
+	                   <div class="col-md-7 col-sm-7 col-xs-12">
+	                   		<input class="fullside" type="password" required="true" name="new_con_password" id="new_con_password" placeholder="បញ្ជាក់ពាក្យ​​សំងាត់  ថ្មី"
+											regExp="\w{6,}" invalidMessage="ពាក្យ​សំងាត់យ៉ាង​តិច មាន 6​ តួអក្សរ" 
+											dojoType="dijit.form.ValidationTextBox"  missingMessage="អ្នក​ភ្លេច​បំពេញ​ បញ្ជាក់ ពាក្យ​​សំងាត់ ថ្មី!" style="width: 100%;"/>
+										
+	                   </div>
+	                </div>
+	                
+	    		</div>
+	    	</div>
+	    	<div class="clearfix"></div>
+			<div class="card-box">
+				<div class="col-sm-12 border-top mt-20 ptb-10 text-center">
+					<input class="button-class button-primary" iconClass="glyphicon glyphicon-floppy-disk" type="submit" value="SAVE_NEW" tabindex="1" label="<?php echo $tr->translate('SAVE');?>" id="save_new" dojoType="dijit.form.Button" name="save_new" /> 
+	    		</div>
+	    	</div>
+	    </form>
+	  </div>
+</div>

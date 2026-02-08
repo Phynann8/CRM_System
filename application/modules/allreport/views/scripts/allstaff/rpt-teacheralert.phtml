@@ -1,0 +1,185 @@
+<?php
+	$tr = Application_Form_FrmLanguages::getCurrentlanguage();
+	$this->headTitle($tr->translate('REPORT_TEACHER_DOCUMENT_ALERT')); 
+	echo $this->headTitle(''); 
+	$frm =  $this->frm_search;
+	$classHideHeight=classHideHeight;
+	$dateFormat ="d/m/Y";
+	?>	
+<style>
+.hover:hover{ background:#ccc;}
+table.content-data tr.style-head,
+table.tb-footer tr.style-head {
+   font-weight: bold !important;
+}
+</style>
+<div class="layout-wrapper-report">
+	<div id="mainContent" class="main-content-report">
+		<div class="report-preview">
+			<?php echo $this->controlReport?>
+			<div id="main-viewer" class="main-viewer portrait">
+				<div id="viewer" class="viewer portrait">
+					<div id="divPrint" class="content">
+						<link rel="stylesheet" href="<?php echo $this->baseUrl();?>/admin/build/css/report-style.css">
+						<link rel="stylesheet" href="<?php echo $this->baseUrl();?>/admin/build/css/report-style-screen.css">
+						<style>
+							.hide{visibility: hidden;}
+							@media print {
+								<?php if(!empty($this->printFormat)){ echo $this->printFormat; } ?>
+								.hide{visibility: visible; height: <?php echo $classHideHeight;?>;}
+							}
+						</style>
+						<table  style=" margin: 0 auto; width: 100%; ">
+							<tr>
+								<td colspan="3"><?php echo $this->rsheader;?></td>
+							</tr>
+							<tr>
+								<td></td>
+							</tr>
+							<tr>
+								<td width="10%" align="right">
+								</td>
+								<td width="60%" align="center">
+									<span class="text-color-black text-h16px text-size-12px" style="font-family:'Times New Roman','Khmer OS Muol Light';"><?php echo $tr->translate("REPORT_TEACHER_DOCUMENT_ALERT");?></span><br/>
+									<span class="text-color-black text-h16px text-size-12px" style="font-family:'Times New Roman','Khmer OS Battambang';"><?php if(!empty($this->search['end_date'])){?><?php echo $tr->translate("BY_DAY")." ".date($dateFormat,strtotime($this->search['end_date']));}?>  </span>
+								</td>
+								<td width="5%" align="right">
+								</td>
+							</tr>
+							<tr>
+								<td></td>
+							</tr>
+							<tr>
+								<td colspan="3" id="exportExcel">
+										<table class="content-data bd-dark-grey text-color-black text-h16px text-size-12px" cellpadding="5" border="1" >
+											<thead>
+												<tr class="styleheader bg-head text-bold hpx-25 " align="center">
+													<th  scope="col" rowspan="2"><?php echo $tr->translate("NUM");?></th>
+													<th  scope="col" rowspan="2"><?php echo $tr->translate("BRANCH");?></th>
+													<th  scope="col" colspan="8"><?php echo $tr->translate("INFORMATION_TEACHER");?></th>
+													<th  scope="col" colspan="4"><?php echo $tr->translate("INFORMATION_PRODUCT");?></th>
+												</tr>
+												<tr class="styleheader bg-head text-bold hpx-25 " align="center">
+													<th  scope="col"><?php echo $tr->translate("ID_CARD");?></th>
+													<th  scope="col"><?php echo $tr->translate("TEACHER_NAME");?></th>
+													<th  scope="col"><?php echo $tr->translate("SEX");?></th>
+													<th  scope="col"><?php echo $tr->translate("TEACHER_TYPE");?></th>
+													<th  scope="col"><?php echo $tr->translate("NATIONALITY");?></th>
+													<th  scope="col" ><?php echo $tr->translate("DEGREE");?></th>
+													<th  scope="col"><?php echo $tr->translate("PHONE");?></th>
+													<th  scope="col"><?php echo $tr->translate("EMAIL");?></th>
+													<th  scope="col"><?php echo $tr->translate("DOCUMENT/MATERIAL");?></th>
+													<th  scope="col"><?php echo $tr->translate("DATE_GIVE_BACK");?></th>
+													<th  scope="col"><?php echo $tr->translate("LATE");?></th>
+													<th  scope="col"><?php echo $tr->translate("NOTE");?></th>
+												</tr>
+											</thead>
+											<?php $i=0;$degree=0; if(!empty($this->rs)){ foreach ($this->rs AS $row) { $i++;
+											
+											$end_dat=$row['date_end'];
+											$total_day=strtotime($end_dat)-strtotime($this->search['end_date']);
+											$total_late_day=(int)($total_day/(60*60*24));
+											//echo $total_late_day;
+											?>
+											<tr class="style hover" align="center">
+												<td data-label="<?php echo $tr->translate("NUM");?>" ><?php echo $i;?></td>
+												<td data-label="<?php echo $tr->translate("BRANCH");?>"><?php echo $row['branch_name'];?></td>
+												<td data-label="<?php echo $tr->translate("ID_CARD");?>"><?php echo $row['teacher_code'];?></td>
+												<td data-label="<?php echo $tr->translate("TEACHER_NAME");?>" align="center"><?php echo $row['teacher_name_kh'];?></td>
+												<td data-label="<?php echo $tr->translate("SEX");?>" align="center"><?php echo $row['sex'];?></td>
+												<td data-label="<?php echo $tr->translate("TEACHER_TYPE");?>"><?php echo $row['teacher_type'];?></td>
+												<td data-label="<?php echo $tr->translate("NATIONALITY");?>"><?php echo $row['nationality'];?></td>	
+												<td data-label="<?php echo $tr->translate("DEGREE");?>"><?php echo $row['degree'];?></td>	
+												<td data-label="<?php echo $tr->translate("PHONE");?>"><?php echo $row['tel'];?></td>	
+												<td data-label="<?php echo $tr->translate("EMAIL");?>"><?php echo $row['email'];?></td>	
+												<td data-label="<?php echo $tr->translate("DOCUMENT/MATERIAL");?>"><?php echo $row['document_type'];?></td>
+												<td data-label="<?php echo $tr->translate("DATE_GIVE_BACK");?>"><?php echo date("d-m-Y",strtotime($row['date_end']));?></td>	
+												<td data-label="<?php echo $tr->translate("LATE");?>" style="color: red;">
+													<?php if ($total_late_day<0){?> 
+														<small><?php echo abs($total_late_day)." ".$tr->translate("DAY"); ?></small><br />
+													<?php }?>
+												</td>
+												<td data-label="<?php echo $tr->translate("NOTE");?>"><?php echo $row['note'];?></td>	
+											</tr>
+										<?php }}?>	
+										</table>	
+								</td>
+							</tr>
+							<tr >
+								<td colspan="3" width="100%">
+									<?php echo $this->rsfooteracc;?>
+								</td>
+							</tr>
+						</table>
+					</div>	
+				</div>	
+			</div>	
+		</div>	
+	</div>
+	<div class="right-panel-report" id="rightPanel">
+		<div class="card-box">
+			<div class="card-search-head col-sm-12 border-botom">
+				<div class="col-sm-6 text-left pd-0">
+					<h4 class="m-b-0">
+						<?php echo $tr->translate("SEARCH");?> 
+						<i class="fa fa-search "></i> 
+					</h4>
+				</div>
+				<div class="col-sm-6 text-right pd-0">
+					<button onclick="closeRightPanel()" title="<?php echo $tr->translate("CLOSED");?> " class="btn-close">
+						<i class="fa-solid fa-xmark"></i>
+					</button>
+				</div>
+			</div>
+			<form  id='foundation_class' action="" dojoType="dijit.form.Form" method="post" enctype="application/x-www-form-urlencoded">
+				<div class="form-group">
+					<div class="col-md-12 col-sm-12 col-xs-12">
+						<?php echo $frm->getElement("title");?>
+					</div>
+					<div class="col-md-12 col-sm-12 col-xs-12">
+						<?php echo $frm->getElement("branch_id");?>
+					</div>
+					<div class="col-md-12 col-sm-12 col-xs-12">
+						<?php echo $frm->getElement("degree");?>
+					</div>
+					<div class="col-md-12 col-sm-12 col-xs-12">
+						<?php echo $frm->getElement("teacher_type");?>
+					</div>
+					<div class="col-md-12 col-sm-12 col-xs-12">
+						<?php echo $frm->getElement("nationality");?>
+					</div>
+					<div class="col-md-12 col-sm-12 col-xs-12">
+						<?php echo $frm->getElement("end_date");?>
+					</div>
+				</div>	
+				<div class="form-group">
+					<div class="col-md-12 col-sm-12 col-xs-12">
+						<?php echo $frm->getElement("staff_type");?>
+					</div>
+					<div class="col-md-12 col-sm-12 col-xs-12">
+						<?php echo $frm->getElement("department");?>
+					</div>
+					<div class="col-md-12 col-sm-12 col-xs-12">
+						<button class="button-class button-primary fullside" iconClass="glyphicon glyphicon-search" dojoType="dijit.form.Button" showLabel="true" name="search"  type="submit"><?php echo $tr->translate("SEARCH");?></button>
+					</div>
+				</div>
+			</form>
+		</div>	
+	</div>	
+</div>	
+<script type="text/javascript">
+	document.addEventListener("DOMContentLoaded", function(e) {
+		setTimeout(function() {
+			setPrintOrientation('landscape');
+		}, 500);
+	});	
+	function setID(type){
+		if(type==1){
+			id = dijit.byId('stu_id').get('value');
+			dijit.byId('stu_name').attr('value',id);
+		}else{
+			id = dijit.byId('stu_name').get('value');
+			dijit.byId('stu_id').attr('value',id);
+		}
+	}
+</script>

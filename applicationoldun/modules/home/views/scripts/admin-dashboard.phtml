@@ -1,0 +1,360 @@
+ <?php
+ $tr=Application_Form_FrmLanguages::getCurrentlanguage();
+$db = new Allreport_Model_DbTable_DbRptAllStudent();
+      $rsamountstudent =$db->getAmountStudent();
+      $rsnewstudent = $db->getAmountNewStudent();
+      $rsdropstudent = 0;//$db->getAmountDropStudent();
+      $rsteststudent = 0;//$db->getAmountStudentTest();
+      $rsteststuregistered = 0;//$db->getAmountStudentTestRegistered();
+      $rsupdateresult = 0;//$db->getAmountStudentUpdateresult();
+      
+      $_db = new Allreport_Model_DbTable_DbRptIncomeExpense();
+      $totalExpense = 0;//$_db->getAmountExpest();
+      $totalIncome = 0;//$_db->getTotalIncome();
+      
+      $_db = new Home_Model_DbTable_DbDashboard();
+      $studropnew = $_db->getStudentDropNew();
+      $alltypedrop = $_db->countStudentDrop();
+      $stu_suppend = $_db->countStudentDrop(2);
+      $stu_stopped = $_db->countStudentDrop(1);
+      
+      //$dissetting = $_db->getSettingDiscountNearlyExpire();
+      
+      $ddgb = new Application_Model_DbTable_DbGlobal();
+     // $view->news = $ddgb->getAllNew(10);
+      //$notread = $ddgb->getNewNotreadByUser();
+     // $view->notread = empty($notread)?0:$notread;
+	 
+	 $news = array();
+		$notread = 0;
+      
+      $db_yeartran = new Allreport_Model_DbTable_DbRptAllStudent();
+      $yearly =$ddgb->getAllAcademicYear(null,1);
+?>
+<link rel="stylesheet" href="<?php echo $this->baseUrl()."/"?>dashboard/plugins/morris/morris.css">
+<!-- Icons CSS -->
+<link href="<?php echo $this->baseUrl()."/"?>dashboard/css/icons.css" rel="stylesheet">
+<!-- Custom styles for this template -->
+<link href="<?php echo $this->baseUrl()."/"?>dashboard/css/style.css" rel="stylesheet">
+<style>
+span.title-suppend {
+    display: block;
+    margin: 10px 0;
+    border-bottom: solid 2px #0f2a5b;
+    font-weight: bold;
+    color: #0f2a5b;
+}
+.profile_details .profile_view img.img-circle.img-responsive {
+    height: 125px;
+    width: 125px;
+}
+.blog-stu-droplist {
+    height: 290px;
+    overflow-y: auto;
+    width: 100%;
+    padding: 10px;
+}
+.x_title {
+    border-bottom: 2px solid #7abedf;
+}
+.well.profile_view {
+    margin-bottom: 10px;
+}
+.col-lg-6.capital-box {
+    min-height: 97px;
+}
+.accounting-management .capital-box span{
+	font-size: 24px;
+}
+.bg-style-drop {
+    height: 80%;
+    width: 35%;
+    position: absolute;
+    left: 30%;
+    opacity: 0.1;
+    top: 30px;
+}
+.discount-exp ul.top_profiles {
+    overflow-y: auto;
+    height: 200px;
+}
+h4.brief {
+    font-size: 14px;
+}
+.profile_details .profile_view h2 {
+    font-size: 15px;
+}
+.profile_details .profile_view .left {
+    margin-top: 5px;
+}
+.media .profile_thumb {
+    padding: 9px 15px;
+}
+
+small.dashbd.badge.bg-green {
+    font-size: 10px;
+    line-height: 13px;
+    padding: 2px 6px;
+    position: absolute;
+    left: 12px;
+    top: 3px;
+    font-weight: 600;
+    z-index: 1;
+}
+article.media.event.unread {
+    background: #f2f1ff;
+    
+}
+article.announce {
+    margin-top: 3px;
+	padding: 10px;
+}
+a.pull-left.newsimage {
+    width: 100px;
+    height: 64px;
+}
+small.pull-right.showall-ann {
+    display: block;
+    padding: 5px 0;
+    margin: 0;
+    line-height: 24px;
+}
+.x_content.news-content {
+    height: 345px;
+    display: block;
+    overflow-y: auto;
+}
+ </style>
+<div id="page-wrapper">
+	<!-- Page content start -->
+	<div class="page-contentbar">
+		<!-- START PAGE CONTENT -->
+		<div id="page-right-content">
+			<div class="container">
+				 <div class="row" style="margin-top: 15px;">
+					<div class="col-lg-6">
+						<div class="card-box" style="  margin: 0;">
+							<div class="col-lg-12">
+								<div class="accounting-management text-center">
+									<div class="col-lg-6 capital-box" style="background:#17418e;; color: #fff">
+										<a title="<?php echo $tr->translate("FINDING_ALL_STUDENT_INFORMATION")?>" href="<?php echo $this->url(array('module'=>'home','controller'=>'searchstudentinfo','action'=>'index'), null, true);?>">
+											<span data-bind="text: txnRecorded"><h3><?php echo $tr->translate("FINDING_ALL_STUDENT_INFORMATION")?></h3></span>
+											<p class="month" style="text-align: center; margin: 0 auto;" data-bind="text: lang.lang.transactions_recorded">&nbsp;<?php echo $tr->translate("STUDENT_TOTAL")." : ".$rsamountstudent." ".$tr->translate("STUDENT_UNIT");?> &nbsp;<?php echo $tr->translate("NEW_STUDENT")." : ".$rsnewstudent." ".$tr->translate("STUDENT_UNIT");?></p>
+										</a>
+									</div>
+									<?php 
+										//$net_income = abs($totalIncome) - $totalExpense;
+									?>
+									<div class="col-lg-6 capital-box" style="background: #203864; color: #fff">
+										<span data-bind="text: txnRecorded"><?php //if ($net_income<0){ echo "$ ".number_format($net_income,2);}else{ echo "$ ".number_format($net_income,2);}?></span>
+										<p class="month" style="text-align: center; margin: 0 auto;" data-bind="text: lang.lang.transactions_recorded"><?php echo $tr->translate("Net Income")?></p>
+									</div>
+									<div class="col-lg-12" style="padding: 0;">
+										<div class="col-lg-6 capital-box" style="background: #0077c5;">
+											<span data-bind="text: currentRatio"><?php echo "$ ".number_format($totalIncome,2);?></span> 
+											<p class="month" data-bind="text: lang.lang.current_ratio"><?php echo $tr->translate("Total Revenue")?></p>
+										</div>
+										<div class="col-lg-6 capital-box" style="background: #21abf6; color: #fff;">
+											<span data-bind="text: quickRatio"><?php echo "$ ".number_format($totalExpense,2);?></span> 
+											<p class="month" style="color: #fff;" data-bind="text: lang.lang.quick_ratio"><?php echo $tr->translate("Total Expense")?></p>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="card-box">
+							<div class="col-lg-6">
+								<h4 class="m-t-0"><?php echo $tr->translate("Yearly Student")?></h4>
+								<div class="text-center">
+									<ul class="list-inline chart-detail-list">
+										<li>
+											<h5 class="font-normal"><i class="fa fa-circle m-r-10 text-primary"></i><?php echo $tr->translate("Number Of Student")?></h5>
+										</li>
+									</ul>
+								</div>
+								<div id="dashboard-bar-stacked" style="height: 200px;"></div>
+							</div>
+							<div class="col-lg-6">
+								<h4 class="m-t-0"><?php echo $tr->translate("Monthly Net Income")?></h4>
+								<div class="text-center">
+									<ul class="list-inline chart-detail-list">
+										<li>
+											<h5 class="font-normal"><i class="fa fa-circle m-r-10 text-muted"></i><?php echo $tr->translate("Net Income")?></h5>
+										</li>
+									</ul>
+								</div>
+								<div id="dashboard-bar-income" style="height: 200px;"></div>
+							</div>
+						</div>
+						
+						
+					</div> <!-- end col -->	  
+					 <div class="col-lg-6">
+					 	<div class="x_panel">
+							<div class="card-box" style="padding: 0;  margin: 0;">
+								<span data-bind="text: lang.lang.performance"><?php echo $tr->translate("STUDENT_DROP");?></span>
+								<div class="accounting-management text-center">
+									<div class="col-lg-12 capital-box" style="background:#0077c5;; color: #fff">
+										<a target="_blank" title="<?php echo $tr->translate("RPT_STUDENT_DROPS");?>" href="<?php echo $this->url(array('module'=>'allreport','controller'=>'allstudent','action'=>'rpt-student-drop'), null, true);?>">
+											<span data-bind="text: txnRecorded"><h3><?php echo $tr->translate("TOTAL")." : ".$alltypedrop." ".$tr->translate("STUDENT_UNIT");?></h3></span>
+											<p class="month" style="text-align: center; margin: 0 auto;" data-bind="text: lang.lang.transactions_recorded">&nbsp;<?php echo $tr->translate("SUSPEND")." : ".$stu_suppend." ".$tr->translate("STUDENT_UNIT");?> &nbsp;<?php echo $tr->translate("DROPPED")." : ".$stu_stopped." ".$tr->translate("STUDENT_UNIT");?></p>
+										</a>
+										<br />
+									</div>
+									<div class="clearfix"></div>
+								</div>
+								<?php if (!empty($studropnew)){?>
+								<span class="title-suppend" data-bind="text: lang.lang.performance"><i class="fa fa-user-times" aria-hidden="true"></i> <?php echo $tr->translate("STUDENT_DROP_NEW");?>&nbsp;<?php echo count($studropnew)." ".$tr->translate("STUDENT_UNIT");?></span>
+								<div class="blog-stu-droplist">
+									<?php if (!empty($studropnew)) foreach ($studropnew as $drop){?>
+									<div class="profile_details" title="<?php echo $drop['stu_khname'];?> <?php echo $drop['stu_enname']." ".$drop['last_name'];?>">
+										<div class="well profile_view">
+										  <div class="col-sm-12">
+										  <?php 
+										  $style='';
+										  if (!empty($drop['branch_photo'])){
+											if (file_exists(PUBLIC_PATH.'/images/'.$drop['branch_photo'])) {
+												$style="background: url(/elt/trunk/public/images/".$drop['branch_photo'].");  background-repeat: no-repeat; background-size: 100%;";
+											}
+										  }
+										  ?>
+											<div class="bg-style-drop" style="<?php echo $style;?>"></div>
+											<h4 class="brief"><i><?php echo $drop['type_drop'];?><br /><small><?php echo $drop['branch_name'];?></small></i></h4>
+											<div class="left col-xs-7">
+											  <h2><?php echo $drop['stu_khname'];?></h2>
+											  <h2><?php echo $drop['stu_enname']." ".$drop['last_name'];?></h2>
+											  <p><strong><?php echo $tr->translate("STUDENT_CODE")?>: </strong> <?php echo $drop['stu_code'];?> </p>
+											  <ul class="list-unstyled">
+												<li><i class="fa fa-graduation-cap"></i> <?php echo $tr->translate("ACADEMIC_YEAR")?>: <?php echo $drop['academic'];?></li>
+												<li><i class="fa fa-magic"></i> <?php echo $tr->translate("DEGREE")?>: <?php echo $drop['degree'];?></li>
+												<li><i class="fa fa-building"></i> <?php echo $tr->translate("GRADE")?>: <?php echo $drop['group_name'];?></li>
+												<li><i class="fa fa-phone"></i> <?php echo $tr->translate("PHONE")?>: <?php echo $drop['tel'];?></li>
+											  </ul>
+											</div>
+											<div class="right col-xs-5 text-center">
+												<?php 
+													$photo = $this->baseUrl()."/images/no-profile.png";
+													if ($drop['sex']==2){
+														$photo = $this->baseUrl()."/images/no-profile-female.png";
+													}
+													if (!empty($drop['photo'])){
+														if (file_exists(PUBLIC_PATH."/images/photo/".$drop['photo'])){
+															$photo = $this->baseUrl().'/images/photo/'.$drop['photo'];
+														}
+													}
+												?>
+											  <img src="<?php echo $photo;?>" alt="" class="img-circle img-responsive">
+											</div>
+										  </div>
+										  <div class="col-xs-12 bottom text-center">
+											<div class="col-xs-12 col-sm-6 emphasis">
+											  <?php echo $tr->translate("STOP_DATE");?> <?php echo date("d/M/Y",strtotime($drop['date_stop']));?>
+											</div>
+											<div class="col-xs-12 col-sm-6 emphasis">
+												<?php 
+												$sex="btn-primary";
+												$sexTitle=$tr->translate("MALE");
+												if ($drop['sex']==2){
+													$sex="btn-danger";
+													$sexTitle=$tr->translate("FEMALE");
+												}?>
+											  <button type="button" title="<?php echo $sexTitle;?>" class="btn <?php echo $sex;?> btn-xs"> <i class="fa fa-user">
+												</i>
+											  </button>
+											  <a class="btn btn-info btn-xs" href="<?php echo $this->baseUrl()."/home/searchstudentinfo/student-detail/id/".$drop['stu_id']."?droplink=true&drid=".$drop['id'];?>"><i class="fa fa-user"> </i> <?php echo $tr->translate("View Profile")?></a>
+											</div>
+										  </div>
+										</div>
+								  </div>
+								  <?php }?>
+								</div>
+								<?php }?>
+							</div>
+						</div>
+						<div class="clearfix"></div>
+						
+						</div> <!-- end col -->	  
+					</div> <!-- end row -->
+                 <div class="row-fluid">
+					<div style="margin-top: 10px; margin-left: 0;" align="center">
+						<p>© 2018<span data-bind="text: lang.lang.all_rights_reserved"><a href="http://www.cam-app.com" target="_blank" > Cam App Teachnology</a>. All rights reserved.</span></p>
+					</div>	
+				</div>       
+			</div>
+		</div>
+		<!-- END PAGE CONTENT -->
+	</div>
+</div>
+<script src="<?php echo $this->baseUrl()."/"?>dashboard/plugins/morris/morris.min.js"></script>
+<script src="<?php echo $this->baseUrl()."/"?>dashboard/plugins/raphael/raphael-min.js"></script>
+<script>
+//creating Stacked chart
+var $stckedData  = [
+                    <?php if (!empty($yearly)) foreach ($yearly as $yearly){
+                    		$stu = $db->getAmountStudent($yearly['id'],0);
+                    	?>
+                   	 { y: '<?php echo $yearly['name'];?>', a: <?php echo $stu;?>},
+                    <?php }?>
+                   
+                ];
+var $stckedDataIncmoe  = [
+         { y: '2017', a: 0},
+         { y: '2018', a: 0},
+         { y: '2019', a: 0},
+         { y: '2020', a: 0},
+    ];
+!function($) {
+    "use strict";
+    var Dashboard = function() {};
+    //creates Stacked chart
+    Dashboard.prototype.createStackedChart  = function(element, data, xkey, ykeys, labels, lineColors) {
+        Morris.Bar({
+            element: element,
+            data: data,
+            xkey: xkey,
+            ykeys: ykeys,
+            stacked: true,
+            labels: labels,
+            hideHover: 'auto',
+            resize: true, //defaulted to true
+            gridLineColor: '#ccc',
+            barColors: lineColors
+        });
+    },
+    Dashboard.prototype.init = function() {
+        this.createStackedChart('dashboard-bar-stacked', $stckedData, 'y', ['a'], ['<?php echo $tr->translate('TOTAL_STUDENT');?>'], ['#458bc4']);
+    },
+    $.Dashboard = new Dashboard, $.Dashboard.Constructor = Dashboard
+
+
+    var DashboardII = function() {};
+    //creates Stacked chart
+    DashboardII.prototype.createStackedChart  = function(element, data, xkey, ykeys, labels, lineColors) {
+        Morris.Bar({
+            element: element,
+            data: data,
+            xkey: xkey,
+            ykeys: ykeys,
+            stacked: true,
+            labels: labels,
+            hideHover: 'auto',
+            resize: true, //defaulted to true
+            gridLineColor: '#ccc',
+            barColors: lineColors
+        });
+    },
+    DashboardII.prototype.init = function() {
+        this.createStackedChart('dashboard-bar-income', $stckedDataIncmoe, 'y', ['a'], ['ចំណូលដុល'], ['#144673']);
+    },
+    //init
+    $.DashboardII = new DashboardII, $.DashboardII.Constructor = DashboardII
+    
+}(window.jQuery),
+
+function($) {
+    "use strict";
+    $.Dashboard.init();
+    $.DashboardII.init();
+}(window.jQuery);
+
+</script>

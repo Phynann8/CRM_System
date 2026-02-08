@@ -1,0 +1,504 @@
+<?php
+	$_dbgb = new Application_Model_DbTable_DbGlobal();
+	$tr = Application_Form_FrmLanguages::getCurrentlanguage();
+	$this->headTitle($tr->translate('RPT_STUDNET_CERTIFICATE')); 
+	echo $this->headTitle(''); 
+	$frm =  $this->form_search;
+	
+	$dateFormat ="d/m/Y";
+	$dateFormatExpt ="d/M/Y";
+?>	
+<style>
+.hover:hover{ background:#ccc;}
+.hidden{visibility: visible !important;
+display: table-cell !important;
+}
+</style>
+<div class="layout-wrapper-report">
+	<div id="mainContent" class="main-content-report">
+		<div class="report-preview">
+			<?php echo $this->controlReport?>
+			<div id="main-viewer" class="main-viewer portrait">
+				<div id="viewer" class="viewer portrait">
+					<div id="divPrint" class="content">
+						<link rel="stylesheet" href="<?php echo $this->baseUrl();?>/admin/build/css/report-style.css">
+						<link rel="stylesheet" href="<?php echo $this->baseUrl();?>/admin/build/css/report-style-screen.css">
+						<style>
+							@media print {
+								<?php if(!empty($this->printFormat)){ echo $this->printFormat; } ?>
+							}
+						</style>
+						<table border="0" style="background:#fff; margin: 0 auto; width: 100%; ">
+							<tr>
+								<td colspan="3"><?php echo $this->rsheader;?></td>
+							</tr>
+							<tr>
+								<td>&nbsp;</td>
+							</tr>
+							<tr>
+								<td colspan="3" align="center">
+									<strong class="text-h16px text-size-14px" style=" font-weight:200; font-family:'Times New Roman','Khmer OS Muol Light';"><?php echo $tr->translate("RPT_STUDNET_CERTIFICATE");?></strong><br />
+									<strong  class="text-h16px text-size-12px" style=" font-weight:200;  font-family:'Times New Roman','Khmer OS Battambang';"><?php if(!empty($this->search['start_date'])){?><?php echo date($dateFormat,strtotime($this->search['start_date']));?> <?php echo $tr->translate("TO");?> <?php echo date($dateFormat,strtotime($this->search['end_date']));}?> </strong>
+								</td>
+							</tr>
+							<tr>
+								<td>&nbsp;</td>
+							</tr>
+							<tr>
+								<td colspan="3">
+								<div id="exportExcel">
+									 <table class="content-data bd-dark-grey text-color-black text-h14px text-size-10px" border="1" width="100%" cellspacing="4">
+										<thead>
+											<tr class="styleheader bg-head text-bold hpx-25" align="center">
+												<td scope="col"><?php echo $tr->translate("NUM");?></td>
+												<td scope="col"><?php echo $tr->translate("BRANCH");?></td>
+												<td scope="col"><?php echo $tr->translate("STUDENT_CODE");?></td>
+												<td scope="col"><?php echo $tr->translate("STUDENT_NAME");?></td>
+												<td scope="col"><?php echo $tr->translate("SEX");?></td>
+												<td scope="col"><?php echo $tr->translate("GROUP");?></td>
+												<td scope="col"><?php echo $tr->translate("DEGREE");?></td>
+												<td scope="col"><?php echo $tr->translate("ISSUE_DATE");?></td>
+												<td scope="col"><?php echo $tr->translate("TYPE");?></td>
+												<td scope="col"><?php echo $tr->translate("USER");?></td>
+											</tr>
+										</thead>
+										
+										<tbody>
+											<?php if (!empty($this->row)) $i=0; foreach ($this->row as $rs){ $i++?>
+											 <tr oncontextmenu="setrowdata(<?php echo $rs['id'];?>);return false;" style="font-size:12px; line-height: 25px;" align="center" class='hover padding context-menu-one'>
+												<td align="center"><?php echo $i;?></td>
+												<td ><?php echo $rs['branch_name'];?></td>
+												<td><?php echo $rs['stu_code'];?></td>
+												<td align="left"><?php echo $rs['stu_khname'];?></td>
+												<td align="center"><?php echo $rs['sex'];?></td>
+												<td align="left"><?php echo $rs['group_code'];?></td>
+												<td align="left"><?php echo $rs['dept_kh'];?></td>
+												<td align="center" class="hideExport"><?php echo date($dateFormat,strtotime($rs['issue_date']));?></td>
+												<td align="center" class="showExport" style="display:none;"><?php echo date($dateFormatExpt,strtotime($rs['issue_date']));?></td>
+												<td align="center"><?php echo $rs['languageType'];?></td>
+												<td><?php echo $rs['user'];?></td>
+											 </tr>
+											 <?php }?>
+										</tbody>
+									</table>	
+								</div>	
+								</td>
+							</tr>
+							<tr>
+								<td colspan="3">&nbsp;</td>
+							</tr>
+							<tr>
+								<td colspan="3" style="border:1px solid #fff;">
+									<?php echo $this->rsfooter; ?>
+								</td>
+							</tr>
+						</table>
+					</div>	
+				</div>	
+			</div>	
+		</div>	
+	</div>
+	<div class="right-panel-report" id="rightPanel">
+		<div class="card-box">
+			<div class="card-search-head col-sm-12 border-botom">
+				<div class="col-sm-6 text-left pd-0">
+					<h4 class="m-b-0">
+						<?php echo $tr->translate("SEARCH");?> 
+						<i class="fa fa-search "></i> 
+					</h4>
+				</div>
+				<div class="col-sm-6 text-right pd-0">
+					<button onclick="closeRightPanel()" title="<?php echo $tr->translate("CLOSED");?> " class="btn-close">
+						<i class="fa-solid fa-xmark"></i>
+					</button>
+				</div>
+			</div>
+			<form  id='foundation_class' action="" dojoType="dijit.form.Form" method="post" enctype="application/x-www-form-urlencoded">
+				<div class="form-group">
+					<div class="col-md-12 col-sm-12 col-xs-12">
+						<?php echo $frm->getElement("adv_search");?>
+					</div>
+					<div class="col-md-12 col-sm-12 col-xs-12">
+						<?php echo $frm->getElement("branch_id");?>
+					</div>
+					<div class="col-md-12 col-sm-12 col-xs-12">
+						<?php echo $frm->getElement("academic_year");?>
+					</div>
+					<div class="col-md-12 col-sm-12 col-xs-12">
+						<input id="group" />
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="col-md-6 col-sm-6 col-xs-12">
+						<?php echo $frm->getElement("degree");?>
+					</div>
+					<div class="col-md-6 col-sm-6 col-xs-12">
+						<input id="grade" />
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="col-md-6 col-sm-6 col-xs-12">
+						<input id="student" />
+					</div>
+					<div class="col-md-6 col-sm-6 col-xs-12">
+					   <?php echo $frm->getElement("language_type");?>
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="col-md-6 col-sm-6 col-xs-12">
+						<?php echo $frm->getElement("start_date");?>
+					</div>
+					<div class="col-md-6 col-sm-6 col-xs-12">
+						<?php echo $frm->getElement("end_date");?>
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="col-md-12 col-sm-12 col-xs-12">
+						<button class="button-class button-primary fullside" iconClass="glyphicon glyphicon-search" dojoType="dijit.form.Button" showLabel="true" name="search"  type="submit"><?php echo $tr->translate("SEARCH");?></button>
+					</div>
+				</div>
+			</form>
+		</div>	
+	</div>	
+</div>	
+<?php 
+$urlCertificate = $this->baseUrl()."/allreport/score/certificate/id/";
+?>
+
+<script src="<?php echo $this->baseUrl();?>/js/help.js"></script>
+<script type="text/javascript">
+
+var row=0;
+var url="";
+$(function(){
+	$.contextMenu({
+		selector: '.context-menu-one', 
+		callback: function(key, options) {
+			var m = "clicked: " + key;
+			if(key=="certificate"){
+				url='<?php echo $urlCertificate;?>';
+			}
+			gotoAction();
+		},
+		items: {
+			"certificate": {name: "<?php echo $tr->translate("PRINT_CERTIFICATE");?>", icon: "fa-print",},
+		}
+	});
+});
+function setrowdata(index){
+	row = index;
+}
+var recordid ='';
+function gotoAction(){
+	window.open(url+row);
+}
+
+dojo.require("dojo.data.ItemFileWriteStore");
+dojo.require("dojo.html");
+
+var group_store  = getDataStorefromJSON('id','name',<?php print_r(Zend_Json::encode(array()));?> );
+var student_store  = getDataStorefromJSON('id','name',<?php print_r(Zend_Json::encode(array()));?> );
+dojo.ready(function(){
+	new dijit.form.FilteringSelect({
+		store: student_store,
+	    queryExpr: "*${0}*",
+		autoComplete: false,  
+		required: false,                        
+		id: "student",
+		name: "student",  
+		class: 'fullside',  
+		placeHolder:"<?php echo $tr->translate("STUDENT");?>",          
+		onChange: function() {  
+
+		}
+	}, "student");
+	
+	new dijit.form.FilteringSelect({
+		store: group_store,
+	    queryExpr: "*${0}*",
+		autoComplete: false,                     
+	    id: "group",
+	    name: "group",  
+	    class: 'fullside', 
+	    readonly:false,
+	    required:false,
+	    placeHolder:"<?php echo $tr->translate("SELECT_GROUP");?>",          
+	    onChange: function() {  
+	    	 getAllStudentBranch();
+	    }
+	}, "group");
+	
+	new dijit.form.FilteringSelect({
+		queryExpr: "*${0}*",
+		autoComplete: false,                     
+		required: false,                        
+		id: "grade",
+		name: "grade",  
+		class: 'fullside',  
+		placeHolder:"<?php echo $tr->translate("SELECT_GRADE");?>",          
+		onChange: function() {  
+			 getAllStudentBranch();
+		}
+	}, "grade");
+	
+	 var branch_id = dijit.byId('branch_id');
+	 branch_id.on('change', function(evt) {
+		 getAllGroupByBranch();
+		 getAllStudentBranch();
+    });
+	 var academic_year = dijit.byId('academic_year');
+	 academic_year.on('change', function(evt) {
+		 getAllGroupByBranch();
+		 getAllStudentBranch();
+    });
+	 getallGrade();
+	 getAllGroupByBranch();
+	 getAllStudentBranch();
+	 
+	setTimeout(function() {
+		setPrintOrientation('portrait');
+	}, 500);
+
+});
+
+var url_getstudent = '<?php echo $this->url(array('module'=>'foundation','controller'=>'register','action'=>'getallstudentdata'));?>';
+function getAllStudentBranch(){
+	dijit.byId('student').reset();
+	branch_id = dijit.byId('branch_id').get('value');
+	var student_store  = getDataStorefromJSON('id','name',<?php print_r(Zend_Json::encode(array()));?> );
+	dijit.byId('student').set('store',student_store);  
+	if(branch_id=='' || branch_id==-1){
+		return false;
+	}
+	academic_year = dijit.byId('academic_year').get('value');
+	if(academic_year=='' || academic_year==-1){
+		academic_year = "";
+	}
+	group = dijit.byId('group').get('value');
+	if(group=='' || group==-1){
+		group = "";
+	}
+	degree = dijit.byId('degree').get('value');
+	if(degree=='' || degree==-1){
+		degree = "";
+	}
+	grade = dijit.byId('grade').get('value');
+	if(grade=='' || grade==-1){
+		grade = "";
+	}
+	dojo.xhrPost({
+		url: url_getstudent,
+		content:{
+			'branch_id':branch_id,'academic_year':academic_year,'group':group,'degree':degree,'grade':grade,'typeQuery':1,'completedStudent':1
+			},
+		handleAs:"json",
+		load: function(data) {
+			
+			student_store  = getDataStorefromJSON('id','name', data);
+		    dijit.byId('student').set('store',student_store);  
+		    <?php if (!empty($this->search['student'])){?>
+		    dijit.byId('student').set('value','<?php echo $this->search['student']?>');  
+		    <?php }?>
+		},
+		error: function(err) {
+			
+		}
+	});
+}
+
+var oldBranch = "<?php echo $this->search['branch_id']?>";
+url_getgroup = '<?php echo $this->url(array('module'=>'foundation','controller'=>'group','action'=>'getallgroup'));?>';
+function getAllGroupByBranch(){
+	dijit.byId('group').reset();
+	branch_id = dijit.byId('branch_id').get('value');
+	if(branch_id=='' || branch_id==-1){
+		var group_store  = getDataStorefromJSON('id','name',<?php print_r(Zend_Json::encode(array()));?> );
+		dijit.byId('group').set('store',group_store);  
+		dijit.byId('branch_id').focus();
+		return false;
+	}
+	degree = dijit.byId('degree').get('value');
+	if(degree=='' || degree==-1){degree ="";}
+	grade = dijit.byId('grade').get('value');
+	if(grade=='' || grade==-1){grade ="";}
+	academic_year = dijit.byId('academic_year').get('value');
+	if(academic_year=='' || academic_year==-1){academic_year ="";}
+	
+	dojo.xhrPost({
+		url: url_getgroup,
+		content:{
+			'branch_id':branch_id,
+			'degree':degree,
+			'grade':grade,
+			'academic_year':academic_year,
+			'noaddnew':1,'forfilter':1
+			},
+		handleAs:"json",
+		load: function(data) {
+		    group_store  = getDataStorefromJSON('id','name', data);
+		    dijit.byId('group').set('store',group_store);   
+		    if(oldBranch==branch_id){
+		    	dijit.byId('group').set('value','<?php echo $this->search['group']?>');  
+		    }
+		},
+		error: function(err) {
+		}
+	});
+}
+var url_dept = '<?php echo $this->url(array('module'=>'global','controller'=>'grade','action'=>'get-grade')); ?>';
+function getallGrade(){
+	getAllGroupByBranch();  
+	 getAllStudentBranch();
+	dept_id = dijit.byId('degree').get('value');
+	if(dept_id=='' || dept_id==-1){return false;}
+		dojo.xhrPost({
+			url:url_dept,
+			content:{
+				'dept_id':dept_id,
+				'noaddnew':1
+				},
+			handleAs:"json",
+			load: function(data) {
+				dijit.byId('grade').attr('value','');
+				grade_store  = getDataStorefromJSON('id','name', data);
+			    dijit.byId('grade').set('store',grade_store); 
+			    dijit.byId('grade').attr('value','<?php echo $this->search['grade']?>');  
+			},
+			error: function(err) {
+			}
+		});
+}
+
+	function getKHMonthByNumber(m){
+		var monthName=[
+		      			"មករា",
+		      			"កុម្ភៈ",
+		      			"មីនា",
+		      			"មេសា",
+		      			"ឧសភា",
+		      			"មិថុនា",
+		      			"កក្កដា",
+		      			"សីហា",
+		      			"កញ្ញា",
+		      			"តុលា",
+		      			"វិច្ឆិកា",
+		      			"ធ្នូ",
+		   			];
+			return (monthName[m-1]);
+	}	
+	function printIDCard(){
+		loadingBlock();
+	  	 var contents = document.getElementById("print_student_card").innerHTML;
+	 	  var frame1 = document.createElement('iframe');
+	    frame1.name = "frame1";
+	    frame1.style.position = "absolute";
+	    frame1.style.top = "-1000000px";
+	    document.body.appendChild(frame1);
+	    var frameDoc = (frame1.contentWindow) ? frame1.contentWindow : (frame1.contentDocument.document) ? frame1.contentDocument.document : frame1.contentDocument; frameDoc.document.open();
+	    frameDoc.document.write('<html><head><title>Employee ID</title>');
+	    frameDoc.document.write('</head><body>');
+	    frameDoc.document.write(contents);
+	    frameDoc.document.write('</body></html>');
+	    frameDoc.document.close();
+	    setTimeout(function () {
+	        window.frames["frame1"].focus();
+	        window.frames["frame1"].print();
+	        document.body.removeChild(frame1);
+	        HideloadingBlock();
+	    }, 10000);
+	   return false;
+	}
+	function printSelected(){
+		<?php 
+			defined('BASE_URL')	|| define('BASE_URL', Zend_Controller_Front::getInstance()->getBaseUrl());
+    		$tr = Application_Form_FrmLanguages::getCurrentlanguage();
+    		$url_copy =$this->url(array('module'=>'allreport','controller'=>'allstudent','action'=>'idselected'));
+    	?>
+
+    	 id_selected = dijit.byId('id_selected').get('value');
+		 if(id_selected!=''){
+			window.location.href = '<?php echo $url_copy;?>'+'/id/'+id_selected;
+		 }else{
+			alert('Please select record you want to print');
+			return false;
+		 }
+	}
+	function print(){
+		window.frames["print_frame"].document.body.innerHTML=dojo.byId('print_student_card').innerHTML;
+	    window.frames["print_frame"].window.focus();
+	    window.frames["print_frame"].window.print();
+	}
+
+	function printPickupCardSelected(){
+		<?php 
+			defined('BASE_URL')	|| define('BASE_URL', Zend_Controller_Front::getInstance()->getBaseUrl());
+    		$tr = Application_Form_FrmLanguages::getCurrentlanguage();
+    		$url_copy =$this->url(array('module'=>'allreport','controller'=>'allstudent','action'=>'pickupselected'));
+    	?>
+
+    	 id_selected = dijit.byId('id_selected').get('value');
+		 if(id_selected!=''){
+			window.location.href = '<?php echo $url_copy;?>'+'/id/'+id_selected;
+		 }else{
+			alert('Please select record you want to print');
+			return false;
+		 }
+	}
+	
+	function printPickup(){
+	    loadingBlock();
+	  	 var contents = document.getElementById("PickupCard").innerHTML;
+	 	  var frame1 = document.createElement('iframe');
+	    frame1.name = "frame1";
+	    frame1.style.position = "absolute";
+	    frame1.style.top = "-1000000px";
+	    document.body.appendChild(frame1);
+	    var frameDoc = (frame1.contentWindow) ? frame1.contentWindow : (frame1.contentDocument.document) ? frame1.contentDocument.document : frame1.contentDocument; frameDoc.document.open();
+	    frameDoc.document.write('<html><head><title>Employee ID</title>');
+	    frameDoc.document.write('</head><body>');
+	    frameDoc.document.write(contents);
+	    frameDoc.document.write('</body></html>');
+	    frameDoc.document.close();
+	    setTimeout(function () {
+	        window.frames["frame1"].focus();
+	        window.frames["frame1"].print();
+	        document.body.removeChild(frame1);
+	        HideloadingBlock();
+	    }, 10000);
+	   return false;
+	}
+	function checkAllStudent(array_length){
+		dijit.byId('id_selected').attr('value','');
+		if(dojo.byId('checkall').checked){
+			for(var j=1;j<=array_length;j++){
+				$("#check_box"+j).attr('checked', 'checked');
+				checked_id(j);
+			}
+		}else{
+			for(var j=1;j<=array_length;j++){
+				$("#check_box"+j).removeAttr("checked");
+				checked_id(j);
+			}
+		}
+	}
+	function checked_id(index){
+		stu_id = dijit.byId('stu_id'+index).get('value');
+		if(dojo.byId('check_box'+index).checked){
+			
+			if($("#id_selected").val()!="") {
+				var identity = $("#id_selected").val();
+				$("#id_selected").val(identity+','+stu_id);
+			}else{
+				$("#id_selected").val(stu_id);
+			}
+		}else{
+			var identity = $('#id_selected').val();
+			var arrays = identity.split(',');
+			for(var i=0;i<arrays.length;i++) {
+			if(arrays[i] == stu_id) arrays.splice(i,1);
+			}
+			var strings = arrays.join(',');
+			$('#id_selected').val(strings);
+		}
+	}
+</script>

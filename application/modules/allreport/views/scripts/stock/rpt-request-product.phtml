@@ -1,0 +1,281 @@
+<?php
+	$tr = Application_Form_FrmLanguages::getCurrentlanguage();
+	echo $this->headTitle($tr->translate('RPT_REQUEST_PRODUCT_DETAIL'));
+	$base_url = Application_Form_FrmMessage::getUrl("/");
+	$frm =  $this->form_search;
+	$classHideHeight=classHideHeight;
+
+	$rows=$this->rows;
+	$dateFormat ="d/m/Y";
+?>
+<style>
+.hover:hover{ background:#ccc;}
+table.content-data tr.style-head,
+table.tb-footer tr.style-head {
+   font-weight: bold !important;
+}
+</style>
+<div class="layout-wrapper-report">
+	<div id="mainContent" class="main-content-report">
+		<div class="report-preview">
+			<?php echo $this->controlReport?>
+			<div id="main-viewer" class="main-viewer portrait">
+				<div id="viewer" class="viewer portrait">
+					<div id="divPrint" class="content">
+						<link rel="stylesheet" href="<?php echo $this->baseUrl();?>/admin/build/css/report-style.css">
+						<link rel="stylesheet" href="<?php echo $this->baseUrl();?>/admin/build/css/report-style-screen.css">
+						<style>
+							@media print {
+								<?php if(!empty($this->printFormat)){ echo $this->printFormat; } ?>
+							}
+							thead td span {
+								text-align: left;
+								text-decoration: underline;
+								font-weight: 800;
+							}
+							td.underLine{text-decoration: underline;}
+							.double-underLine{border-bottom: 4px double #000;text-align: center;
+							}
+							.p-right10{padding-right: 10px;}
+						</style>
+						<table width="100%">
+							<tr>
+								<td colspan="3"><?php echo $this->rsheader;?></td>
+							</tr>
+							<tr>
+								<td>&nbsp;</td>
+							</tr>
+							<tr>
+								<td width="15%" align="center">
+								</td>
+								<td align="center" width="70%">
+									<span <?php echo TITLE_REPORT;?>><?php echo $tr->translate('RPT_REQUEST_PRODUCT_DETAIL');?></span> <br/>
+									<span style="color:#000; font-size: 12px;"><?php if(!empty($this->search['start_date'])){?><?php echo date($dateFormat,strtotime($this->search["start_date"]))?> &nbsp;<?php echo $tr->translate('TO');?> &nbsp;<?php echo date($dateFormat,strtotime($this->search["end_date"]));}?></span>
+								</td>
+								<td width="15%" align="center">
+								</td>
+							</tr>
+							<tr>
+								<td colspan="3">
+									<table class="content-data bd-dark-grey text-color-black text-h16px text-size-12px">
+										<thead>
+											<tr class="style">
+												<td scope="col"><span><?php echo $tr->translate("NUM");?></span></td>
+												<td scope="col"><span><?php echo $tr->translate('BRANCH');?></span></td>
+												<td scope="col"><span><?php echo $tr->translate('REQUEST_NO');?></span></td>
+												<td scope="col"><span><?php echo $tr->translate('NAME');?></span></td>
+												<td scope="col"><span><?php echo $tr->translate('DEPARTMENT');?></span></td>
+												<td scope="col"><span><?php echo $tr->translate('REQUEST_DATE');?></span></td>
+												<td scope="col"><span><?php echo $tr->translate('RETURN_DATE');?></span></td>
+												<td scope="col"><span><?php echo $tr->translate('PRODUCT_CODE');?></span></td>
+												<td scope="col"><span><?php echo $tr->translate('PRODUCT_NAME');?></span></td>
+												<td scope="col"><span><?php echo $tr->translate('REQUEST_QTY');?></span></td>
+												<td scope="col"><span><?php echo $tr->translate('RECEIVE_QTY');?></span></td>
+												<td scope="col"><span><?php echo $tr->translate('RETURN_QTY');?></span></td>
+											</tr>
+										</thead>
+
+										<?php 
+										$i = 0;
+										$total_amount = 0;
+										$oldRequestId = null;
+										$totalRequest = 0;
+										$totalRecieved = 0;
+										$totalReturn = 0;
+
+										$gtotalRequest = 0;
+										$gtotalRecieved = 0;
+										$gtotalReturn = 0;
+
+										if (!empty($rows)) {
+											foreach ($rows as $key => $rs_row) {  
+												if ($oldRequestId !== $rs_row['id']) {
+													// If new request ID, show a header row for it
+													if ($oldRequestId !== null) {
+														?>
+														<tr class="bg-light-blues text-bold" >
+															<td colspan='8'></td><td  align='center'></td>
+															<td><?php echo number_format($totalRequest, 2)  ?></td>
+															<td><?php echo number_format($totalRecieved, 2)  ?></td>
+															<td><?php echo number_format($totalReturn, 2)  ?></td>
+														</tr>
+													<?php 	}
+													
+													$i++;
+													$totalRequest = 0; // Reset for new group
+													$totalRecieved = 0; // Reset for new group
+													$totalReturn = 0; // Reset for new group
+													$link = "addTab('" . $tr->translate('REQUEST_NO')." ".$rs_row['request_no']. "', '" . $this->baseUrl() . "/allreport/stock/rpt-request-productdetail/id/" . $rs_row['id'] . "?inFrame=true')";
+													
+													?>
+													
+											<?php } ?>
+												<tr class="style hover">
+													<td><?php echo $oldRequestId!=$rs_row["id"]?$i:""; ?></td>
+													<td><a class="text-color-black" href="javascript:void(0);" onClick="<?php echo $link; ?>"><?php echo $oldRequestId!=$rs_row["id"]?$rs_row['branch_name']:""; ?></a></td>
+													<td><a class="text-color-black" href="javascript:void(0);" onClick="<?php echo $link; ?>"><strong><?php echo $oldRequestId!=$rs_row["id"]?$rs_row['request_no']:""; ?></strong></a></td>
+													<td><a class="text-color-black" href="javascript:void(0);" onClick="<?php echo $link; ?>"><?php echo $oldRequestId!=$rs_row["id"]?$rs_row['request_for']:""; ?></a></td>
+													<td><a class="text-color-black" href="javascript:void(0);" onClick="<?php echo $link; ?>"><?php echo $oldRequestId!=$rs_row["id"]?$rs_row['for_section']:""; ?></a></td>
+													<td><a class="text-color-black" href="javascript:void(0);" onClick="<?php echo $link; ?>"><?php echo $oldRequestId!=$rs_row["id"]?date($dateFormat, strtotime($rs_row['request_date'])):""; ?></a></td>
+													<td>
+														<a class="text-color-black" href="javascript:void(0);" onClick="<?php echo $link; ?>"><?php 
+															echo ($oldRequestId != $rs_row["id"]) 
+																? (!empty($rs_row['returnDate']) ? date($dateFormat, strtotime($rs_row['returnDate'])) : "") 
+																: ""; 
+															?>
+														</a>
+													</td>
+													<td><?php echo $rs_row['pro_code']; ?></td>
+													<td><?php echo $rs_row['pro_name']; ?></td>
+													<td><?php echo $rs_row['qty_request']; ?></td>
+													<td><?php echo $rs_row['qty_receive']; ?></td>
+													<td><?php echo !empty($rs_row['qty_return'])? $rs_row['qty_return']: '0.00'; ?></td>
+												</tr>
+											
+
+												<?php
+											
+												$totalRecieved += $rs_row['qty_receive'];
+												$totalRequest += $rs_row['qty_request'];
+												$totalReturn += $rs_row['qty_return'];
+
+												$gtotalRequest += $rs_row['qty_request'];
+												$gtotalRecieved += $rs_row['qty_receive'];
+												$gtotalReturn += $rs_row['qty_return'];
+
+												$oldRequestId = $rs_row['id'];
+											}
+											?>
+											<tr class="bg-light-blues text-bold" >
+												<td colspan='8'></td><td  align='center'></td>
+												<td><?php echo number_format($totalRequest, 2)  ?></td>
+												<td><?php echo number_format($totalRecieved, 2)  ?></td>
+												<td><?php echo number_format($totalReturn, 2)  ?></td>
+											</tr>
+											<tr class="bg-head text-bold" >
+												<td colspan='7'></td><td colspan='2' align='center'>Grand Total</td>
+												<td><?php echo number_format($gtotalRequest, 2)  ?></td>
+												<td><?php echo number_format($gtotalRecieved, 2)  ?></td>
+												<td><?php echo number_format($gtotalReturn, 2)  ?></td>
+											</tr>
+									<?php } ?>
+									</table>
+								</td>
+							</tr>
+							<tr>
+								<td colspan="3">
+									<?php echo $this->rsfooteracc;?>
+								</td>
+							</tr>
+						</table>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>	
+	<div class="right-panel-report" id="rightPanel">
+		<div class="card-box">
+			<div class="card-search-head col-sm-12 border-botom">
+				<div class="col-sm-6 text-left pd-0">
+					<h4 class="m-b-0">
+						<?php echo $tr->translate("SEARCH");?> 
+						<i class="fa fa-search "></i> 
+					</h4>
+				</div>
+				<div class="col-sm-6 text-right pd-0">
+					<button onclick="closeRightPanel()" title="<?php echo $tr->translate("CLOSED");?> " class="btn-close">
+						<i class="fa-solid fa-xmark"></i>
+					</button>
+				</div>
+			</div>
+			<form action="" dojoType="dijit.form.Form" method="post">
+				<div class="form-group">
+					<div class="col-md-12 col-sm-12 col-xs-12">
+						<?php echo $frm->getElement('adv_search');?>
+					</div>
+					<div class="col-md-12 col-sm-12 col-xs-12">
+						<?php echo $frm->getElement('branch_id');?>
+					</div>
+					<div class="col-md-12 col-sm-12 col-xs-12">
+						<?php echo $frm->getElement('request_for');?>
+					</div>
+					<div class="col-md-12 col-sm-12 col-xs-12">
+						<?php echo $frm->getElement('for_section');?>
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="col-md-6 col-sm-6 col-xs-12">
+						<?php echo $frm->getElement("category_id");?>
+					</div>
+					<div class="col-md-6 col-sm-6 col-xs-12">
+						<input id="product" />
+					</div>
+				</div>	
+				<div class="form-group">
+					<div class="col-md-6 col-sm-6 col-xs-12">
+						<?php echo $frm->getElement('product_type');?>
+					</div>
+					<div class="col-md-6 col-sm-6 col-xs-12">
+						<?php echo $frm->getElement('request_status');?>
+					</div>
+				</div>
+				<div class="form-group">
+				   <div class="col-md-6 col-sm-6 col-xs-12">
+						<?php echo $frm->getElement('start_date');?>
+					</div>
+					<div class="col-md-6 col-sm-6 col-xs-12">
+						<?php echo $frm->getElement('end_date');?>
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="col-md-12 col-sm-12 col-xs-12">
+						<button class="button-class button-primary fullside" iconClass="glyphicon glyphicon-search" dojoType="dijit.form.Button" showLabel="true" type="submit"><?php echo $tr->translate("SEARCH");?></button> 
+					</div>
+				</div>
+			</form>			
+		</div>		
+	</div>					
+</div>	
+<script src="<?php echo $this->baseUrl();?>/js/help.js"  type="text/javascript"></script>
+<script>
+	dojo.require("dojo.data.ItemFileWriteStore");  
+	///dojo.require("dojo.NodeList-manipulate");
+	
+	require(["dojo/ready"], function(ready){
+		ready(function(){
+			getProductByCate();
+			setTimeout(function() {
+				setPrintOrientation('landscape');
+			}, 500);
+		});
+		new dijit.form.FilteringSelect({
+			store: item_store,
+			autoComplete: false,
+			queryExpr: "*${0}*",                     
+			id: "product",
+			name: "product",   
+			required:false,        
+			class: 'fullside', 
+		}, "product");
+	});
+	
+	var item_store  = getDataStorefromJSON('id','name', <?php print_r(array())?> );
+	var url_dept = '<?php echo $this->url(array('module'=>'allreport','controller'=>'stock','action'=>'get-productbycate')); ?>';
+	function getProductByCate(){
+		cate_id = dijit.byId("category_id").get("value");
+		dojo.xhrPost({
+			url:url_dept,
+			content:{
+				'cate_id':cate_id,
+				},
+			handleAs:"json",
+			load: function(data) {
+				item_store  = getDataStorefromJSON('id','name', data);
+				dijit.byId('product').set('store',item_store);  	
+				dijit.byId('product').attr('value',"<?php echo $this->search['product']?>");
+			},
+			error: function(err) {
+			}
+		});
+	}
+</script>

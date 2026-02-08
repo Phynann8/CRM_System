@@ -1,0 +1,181 @@
+<?php
+	$tr = Application_Form_FrmLanguages::getCurrentlanguage();
+	echo $this->headTitle($tr->translate('RPT_STUDENT_WALLET_BALANCE'));
+	$base_url = Application_Form_FrmMessage::getUrl("/");
+	$frm = $this->frm_search;
+	//print_r($this->all_memo);
+?>
+<style>
+.hover:hover{ background:#ccc;}
+table.content-data tr.style-head,
+table.tb-footer tr.style-head {
+   font-weight: bold !important;
+}
+</style>
+<div style="min-height: 10cm; margin: 0 auto; padding: 0.2cm 0.2cm 0cm 0.2cm">
+	<div class="card-box">
+		<div class="col-sm-12 border-botom">
+			<div class="col-sm-8 pd-0">
+				<h4 class="m-b-0">
+					<i class="fa fa-file-text"></i>&nbsp;&nbsp;&nbsp;<?php echo $tr->translate("RPT_STUDENT_WALLET_BALANCE");?></h4>
+			</div>
+			<div class="col-sm-4 text-right"></div>
+		</div>
+	</div>
+	<form id="list" name="list" action="" dojoType="dijit.form.Form" method="post">
+	  	<div class="form-group">
+       		<div class="col-md-2 col-sm-2 col-xs-12">
+       			<?php echo $frm->getElement("adv_search");?>
+       		</div>
+       		<div class="col-md-2 col-sm-2 col-xs-12">
+       			<?php echo $frm->getElement('branch_id');?>
+       		</div>
+       		<div class="col-md-2 col-sm-2 col-xs-12">
+       			<?php echo $frm->getElement('status');?>
+       		</div>
+       		<div class="col-md-2 col-sm-2 col-xs-12">
+       			<?php echo $frm->getElement('paid_transfer');?>
+       		</div>
+       		<div class="col-md-2 col-sm-2 col-xs-12">
+       			<select name="paid_type" id="paid_type" dojoType="dijit.form.FilteringSelect" class="fullside"  >
+	        		<option value="0" <?php if($this->search['paid_type']==0){echo "selected='selected'";}?>><?php echo $tr->translate('SELECT_FORM_REPORT');?></option>
+					<option value="1" <?php if($this->search['paid_type']==1){echo "selected='selected'";}?>>Credit Memo</option>
+					<option value="2" <?php if($this->search['paid_type']==2){echo "selected='selected'";}?>>Credit Memo Transfer</option>	
+		        </select>
+       		</div>
+       		<div class="col-md-2 col-sm-2 col-xs-12">
+       			<?php echo $frm->getElement('by_date');?>
+       		</div>
+       	</div>
+       	<div class="form-group">
+       		<div class="col-md-2 col-sm-2 col-xs-12">
+       			<?php echo $frm->getElement('start_date');?>
+       		</div>
+       		<div class="col-md-2 col-sm-2 col-xs-12">
+       			<?php echo $frm->getElement('end_date');?>
+       		</div>
+       		<div class="col-md-2 col-sm-2 col-xs-12">	
+       			<button class="button-class button-primary" iconClass="glyphicon glyphicon-search" dojoType="dijit.form.Button" showLabel="true" type="submit"><?php echo $tr->translate("SEARCH");?></button>
+       		</div>
+       		<div class="col-md-2 col-sm-2 col-xs-12">
+       		</div>
+       		<div class="col-md-2 col-sm-2 col-xs-12">
+       		</div>
+       		<div class="col-md-2 col-sm-2 col-xs-12">
+       		</div>
+       	</div>
+	</form>
+	<div id="divPrint">
+		<style>
+			#footer{display: none;}
+				table.content-data {page-break-inside:auto; font-family:'Times New Roman','Khmer OS Battambang'; }
+				tr.content-data{ page-break-inside:avoid; page-break-after:auto; }
+				#header {
+				  display: table-header-group;
+				  page-break-inside:avoid; page-break-after:auto;
+				}	
+				td{ padding: 1px !important;}
+				tr.line td{ border-bottom: 2px solid #000;padding-top: 5px; }
+				table.content-data{
+					border-collapse:collapse;
+					width:100%;
+					
+					font-family:'Times New Roman','Khmer OS Battambang';
+					font-size:13px;
+					white-space: nowrap;
+					margin:0 auto;
+					color:#000;
+					margin:0 auto;
+				}
+				table.content-data tr.style-head {
+					line-height: 25px; 
+					padding: 1px 0px; 
+					white-space: nowrap;
+					height: 22px; 
+					text-align: center;
+					border-bottom: double 3px #000; /* Add this line */
+				}
+
+				table.content-data tr td{
+					padding: 2px;
+				}
+				table.content-data tr.style-rowdata {
+					font-size:12px; 
+					height: 23px;
+				}
+				table.content-data tr:nth-child(even) {
+					background-color: #f2f2f2;
+				}
+
+				table.content-data tr:hover {
+					background-color: #d0e0ff;
+					cursor: pointer;
+				}
+				tr.total-row {
+					font-size: 12px;
+					font-weight: bold;
+					margin-top: 30px;
+					background: #ffffff !important
+				}
+				td.double-border {
+					border-bottom: double 3px #000;
+				}
+
+			</style>	
+		<table  style="background:#fff; margin: 0 auto; ;white-space: nowrap;width: 100%">
+			<tr>
+				<td colspan="3"><?php echo $this->rsheader;?></td>
+			</tr>
+			<tr>
+				<td width="15%" align="center">
+				</td>
+				<td width="70%" align="center">
+				    <span style="color:#000; font-size: 14px;font-family:'Times New Roman','Khmer OS Muol Light';"><?php echo $tr->translate('RPT_STUDENT_WALLET_BALANCE')?></span><br />
+					<span style="color:#000; font-size: 14px;font-family:'Times New Roman','Khmer OS Muol Light';"><?php if(!empty($this->search['start_date'])){?><?php echo date("d-M-Y",strtotime($this->search["start_date"]))?> <?php echo $tr->translate('TO')?> <?php echo date("d-M-Y",strtotime($this->search["end_date"]));}?></span>
+				</td>
+				<td width="15%" align="center"></td>
+			</tr>
+			<tr>
+				<td colspan="3" id="exportExcel">
+					<?php if(!empty($this->all_memo)){?>
+					
+						<table class="content-data" >
+							<thead>
+								<tr class="style-head" >
+									<td><?php echo $tr->translate("N_O");?></td>
+									<td align="left"><?php echo $tr->translate("BRANCH");?></td>
+									<td align="left"><?php echo $tr->translate("STUDENT_CODE");?></td>
+									<td align="left"><?php echo $tr->translate("STUDENT_NAME");?></td>
+									<td align="right"><?php echo $tr->translate("TOTAL_AMOUNT");?></td>
+								</tr>
+							</thead>
+							<?php $num=1; $d_balance = 0;
+							if(!empty($this->all_memo)){ foreach($this->all_memo as $key=>$rs){ $key=$key+1; ?>
+							<tr class="style-rowdata hover" align="center">
+								<td><?php echo $key; ?></td>
+								<td align="left"><?php echo $rs['branch_name']; ?></td>
+								<td align="left"><?php echo $rs['stu_code']; ?></td>
+								<td align="left"><?php echo $rs['studentName']; ?></td>
+								<td align="right"><?php echo "$ ".number_format($rs["total_amount"],2);?></td>
+							</tr>
+							<?php
+								$d_balance = $d_balance+$rs["total_amount"];
+							}}
+							?>
+							<tr class="total-row">
+								<td colspan="4" align="right"><?php echo $tr->translate("TOTAL");?> :</td>
+								<td align="right" class="double-border"><?php echo "$ " . number_format($d_balance, 2); ?></td>
+							</tr>
+						</table>
+						
+					<?php }?>
+				</td>
+			</tr>
+			<tr>
+				<td colspan="3" width="100%">
+					<?php echo $this->rsfooteracc;?>
+				</td>
+			</tr>
+		</table>
+	</div>	
+</div>

@@ -1,0 +1,148 @@
+<?php
+	$tr = Application_Form_FrmLanguages::getCurrentlanguage();
+	echo $this->headTitle($tr->translate("FEE"));
+	$frm =  $this->form_search;
+	$frm_fee = $this->frm_fee;
+	
+	$url_copy =$this->url(array('module'=>'accounting','controller'=>'fee','action'=>'copy'));
+	$formList = new Application_Form_Frmtable();
+	$urlCopy = $this->baseUrl()."/accounting/fee/copy/id/";
+	$urlEdit = $this->baseUrl()."/accounting/fee/edit/id/";
+	$baseurl =  Zend_Controller_Front::getInstance()->getBaseUrl();
+?>	
+<div class="card pb-10 pt-10 pl-10 pr-10">
+	<div class="card-content collapse show">
+		<div class="card-box">
+             <div class="col-sm-12 border-botom">
+		    		<div class="col-sm-8 pd-0">
+		    			<h4 class="m-b-0"><i class="fa fa-money-bill" aria-hidden="true"></i>&nbsp;&nbsp;&nbsp;<?php echo $tr->translate('FEE');?></h4>
+    			</div>
+    			<div class="col-sm-4 text-right">
+    			</div>
+    		</div>
+    	</div>
+		<div class="card-box">
+			<form id="list" name="list" action="<?php echo $this->url(array('module'=>'accounting','controller'=>'fee','action'=>'index')); ?>" dojoType="dijit.form.Form" method="post">
+				<div class="form-group">
+					 <div class="col-md-3 col-sm-3 col-xs-12">
+					 	<?php echo $frm_fee->getElement("title");?>
+					 </div>
+					 <div class="col-md-3 col-sm-3 col-xs-12">
+						 <?php echo $frm_fee->getElement("branch_id");?>
+					 </div>
+					 <div class="col-md-3 col-sm-3 col-xs-12">
+						<input id="academic_year" />
+					 </div>
+					 <div class="col-md-3 col-sm-3 col-xs-12">
+					  	<?php echo $frm_fee->getElement("type_study");?>
+					 </div>
+			    </div>
+				<div class="form-group">
+					<div class="col-md-3 col-sm-3 col-xs-12">
+					  	<?php echo $frm_fee->getElement("school_option");?>
+					 </div>
+					 <div class="col-md-3 col-sm-3 col-xs-12">
+					  	<?php echo $frm_fee->getElement("is_finished_search");?>
+					 </div>
+					 <div class="col-md-3 col-sm-3 col-xs-12">
+					  	<?php echo $frm_fee->getElement("status");?>
+					 </div>
+					 <div class="col-md-3 col-sm-3 col-xs-12">
+					 	<button class="button-class button-primary" iconClass="glyphicon glyphicon-search" dojoType="dijit.form.Button" showLabel="true" name="search"  type="submit"><?php echo $tr->translate("SEARCH");?></button>
+					 </div>
+				</div>
+			</form>
+		</div>
+		<div class="card-box">
+			<?php echo $this->list; ?>
+		</div>
+	</div>
+</div>
+<script src="<?php echo $baseurl;?>/js/help.js"></script>
+<script src="<?php echo $this->baseUrl();?>/admin/js/global.js"  type="text/javascript"></script>
+<script type="text/javascript">
+	dojo.require("dojo.data.ItemFileWriteStore"); 
+	dojo.require("dijit.form.NumberTextBox");
+	dojo.require("dijit.form.Textarea");
+	dojo.require("dijit.form.DateTextBox");
+
+dojo.ready(function(){ 
+	new dijit.form.FilteringSelect({
+		queryExpr: "*${0}*",
+		autoComplete: false,                     
+		required: false,                     
+		id: "academic_year",
+		name: "academic_year",
+		class: "fullside", 		
+		placeHolder:"<?php echo $tr->translate("SELECT_ACADEMIC_YEAR");?>",          
+		onChange: function() {  
+			academic_year = dijit.byId('academic_year').get('value');
+		}
+	}, "academic_year");
+	var branch_id = dijit.byId('branch_id');
+	branch_id.on('change', function(evt) {
+			getAllAcademicByBranch();
+		
+	});
+	getAllAcademicByBranch();
+});
+
+url_getacademic = '<?php echo $this->url(array('module'=>'foundation','controller'=>'group','action'=>'get-academicyear'));?>';
+function getAllAcademicByBranch(){
+	dijit.byId('academic_year').reset();
+	branch_id = dijit.byId('branch_id').get('value');
+	if(branch_id=='' || branch_id==-1){
+		var academic_store  = getDataStorefromJSON('id','name',<?php print_r(Zend_Json::encode(array()));?> );
+		dijit.byId('academic_year').set('store',academic_store);  
+		//dijit.byId('branch_id').focus();
+		//return false;
+		branch_id = 0;
+	}
+	
+	contentData = {
+		'branch_id':branch_id
+	}
+	selectedId = '<?php echo $this->adv_search['academic_year']?>';
+	getAllYear(url_getacademic,contentData,selectedId);
+}
+function copyRecord(url){
+	 id = dijit.byId('recordcopy').get('value');
+	 if(id!=''){
+		window.location.href = url+'/id/'+id;
+	 }else{
+		alert('Please select record you want to copy');
+		return false;
+	 }
+}
+function setValue(index){
+	var recordcopy = $('input[name=copy]:checked').val();
+	dijit.byId('recordcopy').attr('value',recordcopy);
+}
+var row=0;
+var url="";
+$(function(){
+	$.contextMenu({
+		selector: '.context-menu-one', 
+		callback: function(key, options) {
+			var m = "clicked: " + key;
+			if(key=="edit"){
+				url='<?php echo $urlEdit;?>';
+			}else if(key=="copy"){
+				url='<?php echo $urlCopy;?>';
+			}
+			gotoAction();
+		},
+		items: {
+			"edit": {name: "<?php echo $tr->translate("EDIT");?>", icon: "edit", accesskey: "e"},
+			"copy": {name: "<?php echo $tr->translate("COPY");?>", icon: "copy"},
+		}
+	});
+});
+function setrowdata(index){
+	row = index;
+}
+var recordid ='';
+function gotoAction(){
+	window.location.href =url+row;
+}
+</script>

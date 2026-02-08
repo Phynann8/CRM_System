@@ -1,0 +1,533 @@
+<?php
+
+$tr = Application_Form_FrmLanguages::getCurrentlanguage();
+$title = $tr->translate("NEWSLETTER");
+$frm =  $this->form_search;
+$dbgb = new Application_Model_DbTable_DbGlobal();
+
+$month = array(
+	"01" => "មករា",
+	"02" => "កុម្ភៈ",
+	"03" => "មីនា",
+	"04" => "មេសា",
+	"05" => "ឧសភា",
+	"06" => "មិថុនា",
+	"07" => "កក្កដា",
+	"08" => "សីហា",
+	"09" => "កញ្ញា",
+	"10" => "តុលា",
+	"11" => "វិច្ឆិកា",
+	"12" => "ធ្នូ"
+);
+$monthview = array("01" => "មករា", "02" => "កុម្ភៈ", "03" => "មីនា", "04" => "មេសា", "05" => "ឧសភា", "06" => "មិថុនា", "07" => "កក្កដា", "08" => "សីហា", "09" => "កញ្ញា", "10" => "តុលា", "11" => "វិច្ឆិកា", "12" => "ធ្នូ",);
+?>
+<div style="min-height:10cm; margin:0 auto; padding:0.5cm 0.5cm 0.5cm 0.5cm;">
+	<div class="card-box">
+		<div class="col-sm-12 border-botom">
+			<div class="col-sm-8 pd-0">
+				<h4 class="m-b-0"><i class="fa fa-file " aria-hidden="true"></i>&nbsp;&nbsp;&nbsp;<?php echo $tr->translate('NEWSLETTER'); ?></h4>
+			</div>
+			<div class="col-sm-4 text-right">
+			</div>
+		</div>
+	</div>
+
+	<div id="divPrint">
+		<style type="text/css">
+			table {
+				height: 100%;
+				background-color: transparent;
+			}
+			table.header,
+			table.studentInfo {
+				page-break-inside: auto;
+				font-family: 'Times New Roman','Khmer OS Battambang', Times, serif !important;
+				font-size: 14px !important;
+			}
+
+			.header tr {
+				page-break-inside: avoid;
+				page-break-after: auto
+			}
+
+			#header {
+				display: table-header-group;
+				page-break-inside: avoid;
+				page-break-after: auto;
+			}
+
+			.cheader {
+				line-height: 30px;
+				white-space: nowrap;
+				color: #000;
+				font-weight: bold;
+				background-color: #dddddd;
+				font-size: 12px;
+				font-family: 'Times New Roman','Khmer OS Battambang', Times, serif !important;
+			}
+
+			.hover:hover {
+				background: #ccc;
+			}
+
+			.blue {
+				color: #4839bd;
+			}
+
+			.border-right-none {
+				border-right: #fff solid 1px;
+			}
+
+			.borderBottom {
+				border-bottom: 1px dashed #000 !important;
+				border-right: 1px solid #fff;
+				border-left: 1px solid #fff;
+			}
+
+			.borderSolidBottom {
+				border-bottom: 2px solid #000 !important;
+			}
+
+			.teacherComment {
+				min-height: 50px;
+				font-size: 14px;
+			}
+
+			.border-none {
+				border: 1px solid #fff;
+			}
+
+			.fontBold {
+				font-weight: bold;
+			}
+
+			.colorRed {
+				color: #000 !important;
+			}
+
+			.khmerBoldFont {
+				font-family: 'Times New Roman', 'Khmer OS Muol Light';
+			}
+
+			.doubleBorder {
+				border: 2px solid #000;
+			}
+
+			.circleHeader {
+				border: 2px solid #000;
+				padding: 8px 25px;
+				border-radius: 5px;
+				background-color: #34d1fcff;
+				width: 100%;
+			}
+
+			table tr {
+				line-height: 14px;
+			}
+
+			.pages-break {
+				page-break-inside: always;
+				page-break-before: always;
+			}
+
+			.student-container {
+				width: 100%;
+				border-collapse: collapse;
+				font-size: 14px;
+			}
+
+			.student-photo {
+				width: 25%;
+				text-align: center;
+				
+			}
+
+			.student-photo img {
+				width: 170px;
+    			height: 245px;
+				border: 1px solid #000;
+			}
+
+			.info-grade-table {
+				width: 100%;
+				border-collapse: collapse;
+				font-size: 12px;
+				font-family: 'Times New Roman','Khmer OS Battambang', Times, serif !important;
+			}
+
+			.info-header {
+				height: 30px;
+				background-color: #ddd;
+				text-align: center;
+				font-weight: bold;
+				font-size: 14px;
+				font-family: 'Times New Roman','Khmer OS Battambang', Times, serif !important;
+			}
+
+			.student-info-inner td {
+				padding: 1px 5px;
+				font-size: 14px;
+				font-family: 'Times New Roman','Khmer OS Battambang', Times, serif !important;
+			}
+
+			.grading-scale-table {
+				width: 100%;
+				border-collapse: collapse;
+				font-size: 14px;
+				font-family: 'Times New Roman','Khmer OS Battambang', Times, serif !important;
+			}
+
+			.grading-scale-table th,
+			.grading-scale-table td {
+				text-align: center;
+			}
+
+		    .emoji {
+				width: 25px;
+				height: 25px;
+			}
+
+			@media print {
+				@page {
+					page: A4;
+					size: portrait;
+					;
+					margin: 0.8cm 0.8cm 0.2cm 0.8cm;
+				}
+			}
+		</style>
+		<?php
+		//$titleNum=1;
+		$titleNum = count($this->studentScoreResult);
+		if (!empty($this->studentScoreResult)) {
+			foreach ($this->studentScoreResult as $key => $rs) {
+
+				$scoreId = $rs['id'];
+				$stu_id = $rs['stu_id'];
+
+				$data = array(
+					'scoreId' => $scoreId, //use
+					'studentId' => $stu_id, //use and all above not use
+				);
+
+				$dbscore = new Allreport_Model_DbTable_DbScoreTranscript();
+				$resultData = $dbscore->getTranscriptExamTerm($data);
+
+				$db = new Allreport_Model_DbTable_DbRptStudentScore();
+				$group = $db->getAllGroupOfStudent($data['studentId']);
+				//$this->view->group = $group;
+
+				$studentInfo = $resultData['studentInfo'];
+				$evalueationList = $resultData['EvalueationList'];
+				$scoreInfo = $resultData['scoreInfo'];
+				$groupId = $scoreInfo['group_id'];
+				$forMonthId = $scoreInfo['for_month'];
+				$academicId = $scoreInfo['academicYearId'];
+				$forSemester = $scoreInfo['for_semester'];
+				$degreeId = $scoreInfo['degreeId'];
+
+				$monthlyScale = (empty($scoreInfo['max_average'])) ? 10 : $scoreInfo['max_average'];
+				$semesterScale = (empty($scoreInfo['semesterTotalAverage'])) ? 10 : $scoreInfo['semesterTotalAverage'];
+
+				$break_page = "pages-break";
+
+				
+				if ($titleNum == 1) {
+					$title = "របាយការណ៍ការវិវឌ្ឍ : " . $scoreInfo['groupCode'] . '_' . $studentInfo['stu_code'] . '_' . $studentInfo['last_name'] . ' ' . $studentInfo['stu_enname'];
+				} else {
+					$title = "របាយការណ៍ការវិវឌ្ឍ : " . $scoreInfo['groupCode'];
+				}
+				$this->headTitle($title);
+				echo $this->headTitle();
+
+			//	print_r($scoreSubjectList); exit();
+		?>
+
+				<?php if (1 == 1) { //$scoreInfo['exam_type']
+				?>
+					<?php
+					$sexkh = "ប្រុស";
+					$sexen = "Male";
+					if ($studentInfo['sex'] == 2) {
+						$sexkh = "ស្រី";
+						$sexen = "Female";
+					}
+					?>
+					<table class="<?php echo $break_page; ?>" style="width:100%;background:#fff; margin: 0 auto;font-size:14px;break-after: page;">
+						<tr style="height: 125px;">
+							<td align="center" colspan="3"></td>
+						</tr>
+						<tr>
+							<td colspan="3" align="center">
+								<div class="khmerBoldFont" style="color:#000;line-height:20px; margin: 0;font-size:16px;margin-bottom:10px;">
+									<span class="circleHeader"><strong>NEWSLETTER</strong></span>
+								</div>
+							</td>
+						</tr>
+						<tr>
+							<td colspan="3" align="center">
+								<table cellpadding="0" class="student-container">
+									<tr>
+										<!-- Student Photo -->
+										 <?php
+										 	$blankProfile = $this->baseUrl().'/images/no-profile.png';
+
+											$Profile=$blankProfile;
+											if (!empty($studentInfo['photo'])) {
+												if (file_exists(PUBLIC_PATH."/images/photo/".$studentInfo['photo'])){
+													$Profile = $this->baseUrl() . '/images/photo/' . $studentInfo['photo'];
+												}
+											}
+										 ?>
+										<td class="student-photo" style=" width: 15%; height:100%;">
+											<img src="<?php echo $Profile; ?>" />
+										</td>
+										<td style="width: 25%; height:100%;">
+											<?php
+												$arrRomanNum = array(1 => "I", 2 => "II",3 => "III");
+												$romanNumber = empty($arrRomanNum[$scoreInfo['for_term']]) ? "" : $arrRomanNum[$scoreInfo['for_term']];
+											 $scoreTitle = $romanNumber; 
+											 ?>
+											<table border="1" class="info-grade-table">
+												<tr class="info-header">
+													<td >STUDENT'S INFORMATION</td>
+												</tr>
+												<tr>
+													<td rowspan="5" align="center">
+														<table class="student-info-inner">
+															<tr>
+																<td align="right"><strong>Name:</strong></td>
+																<td><?php echo ucfirst(strtolower($studentInfo['last_name'])) . ' ' . ucfirst(strtolower($studentInfo['stu_enname'])); ?></td>
+															</tr>
+															<tr>
+																<td align="right"><strong>ID:</strong></td>
+																<td><?php echo $studentInfo['stu_code']; ?></td>
+															</tr>
+															<tr>
+																<td align="right"><strong>Sex:</strong></td>
+																<td><?php echo $sexen; ?></td>
+															</tr>
+															<tr>
+																<td align="right"><strong>Class:</strong></td>
+																<td><?php echo $scoreInfo['groupCode']; ?></td>
+															</tr>
+															<tr>
+																<td align="right"><strong>Term:</strong></td>
+																<td><?php echo $scoreTitle; ?></td>
+															</tr>
+															<tr>
+																<td align="right"><strong>AY:</strong></td>
+																<td><?php echo $scoreInfo['academicYearLabel']; ?></td>
+															</tr>
+															<tr>
+																<td align="right"><strong>Teacher:</strong></td>
+																<td><?php echo $scoreInfo['teacherName']; ?></td>	
+															</tr>
+														</table>
+													</td>
+												</tr>
+												
+											</table>
+										</td>
+
+										<td style="width: 1%;"></td>
+
+										<!-- Info + Grade Table -->
+										<td style="width: 25%; height:100%;">
+											<table border="1" class="info-grade-table">
+												<tr class="info-header">
+													<td colspan="2">PERFORMANCE INDICATORS</td>
+												</tr>
+												<tr style="height: 30px;">
+													<td class="fontBold" align="center" width="70%">Achievement and Effort</td>
+													<td class="fontBold" align="center" width="30%">Indicator</td>
+												</tr>
+												<?php $gradrs = $dbgb->getRatingSystem($degreeId); ?>
+												<?php if (!empty($gradrs)) foreach ($gradrs as $key => $row) { ?>
+													<tr>
+														<td align="center"><?php echo $row['rating']; ?></td>
+														<td align="center">
+															<?php 
+																$emoji = '';
+																if (!empty($row['emoji'])) {
+																	if (file_exists(PUBLIC_PATH."/images/emoji/".$row['emoji'])){
+																		$emoji = $this->baseUrl() . '/images/emoji/' . $row['emoji'];
+																	}
+																}	
+															?>
+															<img class="emoji" src="<?php echo $emoji; ?>" />
+														</td>
+													</tr>
+												<?php } ?>
+
+											</table>
+										</td>
+									</tr>
+								</table>
+							</td>
+						</tr>
+						<tr>
+							<td colspan="3" align="center">&nbsp;</td>
+						</tr>
+						<tr>
+							<td colspan="3" id="exportExcel" valign="top">
+
+							<?php
+								if (!empty($evalueationList)) {
+										// Group comments by subject
+										$grouped = [];
+										foreach ($evalueationList as $row) {
+											$grouped[$row['commentTypeEng']][] = $row;
+										}
+
+										// Define subject pairs for display
+										$subjectPairs = [
+											["English", "Phonics"],
+											["Mathematics", "Life Skills"]
+										];
+									?>
+
+									<table class="header" cellpadding="2" border="1" style="margin:0 auto;width:100%;border-collapse:collapse;">
+										<tr class="cheader" align="center">
+											<td colspan="4" >LEARNING GOALS</td>
+										</tr>
+
+										<?php foreach ($subjectPairs as $pair) {
+											$sub1 = $pair[0];
+											$sub2 = $pair[1];
+											$rows1 = isset($grouped[$sub1]) ? $grouped[$sub1] : [];
+											$rows2 = isset($grouped[$sub2]) ? $grouped[$sub2] : [];
+											$maxRows = max(count($rows1), count($rows2));
+										?>
+											<!-- Header row for each subject pair -->
+											<tr align="center">
+												<td width="35%"><strong><?php echo $sub1; ?></strong></td>
+												<td width="5%" ><strong>Indicator</strong></td>
+												<td width="35%"><strong><?php echo $sub2; ?></strong></td>
+												<td width="5%"><strong>Indicator</strong></td>
+											</tr>
+
+											<?php for ($i = 0; $i < $maxRows; $i++) {
+												$item1 = isset($rows1[$i]) ? $rows1[$i] : null;
+												$item2 = isset($rows2[$i]) ? $rows2[$i] : null;
+											?>
+												<tr class="hover blackColor">
+													<!-- Subject 1 -->
+													<td><?php echo isset($item1['commentLabel']) ? $item1['commentLabel'] : ''; ?></td>
+													<td align="center">
+														<?php
+															if (!empty($item1['emoji'])) {
+																if (file_exists(PUBLIC_PATH."/images/emoji/".$item1['emoji'])){
+																	$emoji1 = $this->baseUrl() . '/images/emoji/' . $item1['emoji'];
+																}
+															}	
+														?>
+														<img class="emoji" src="<?php echo $emoji1; ?>" />
+													</td>
+
+													<!-- Subject 2 -->
+													<td><?php echo isset($item2['commentLabel']) ? $item2['commentLabel'] : ''; ?></td>
+													<td align="center">
+														<?php
+															if (!empty($item2['emoji'])) {
+																if (file_exists(PUBLIC_PATH."/images/emoji/".$item2['emoji'])){
+																	$emoji2 = $this->baseUrl() . '/images/emoji/' . $item2['emoji'];
+																}
+															}	
+														?>
+														<img class="emoji" src="<?php echo $emoji2; ?>" />
+													</td>
+												</tr>
+											<?php } ?>
+										<?php } ?>
+									</table>
+								<?php } ?>
+							</td>
+						</tr>
+						
+						<tr>
+							<td colspan="3" align="center">&nbsp;</td>
+						</tr>
+						<?php
+						$teacherComment = '';
+							if (!empty($evalueationList)) foreach ($evalueationList as $keycom => $rsComment) {
+								if ($teacherComment == '') {
+									$teacherComment = $rsComment['teacherComment'];
+								}
+							} 
+						 ?>
+						<tr>
+							<td colspan="3" >
+								<table class="header" cellpadding="2" border="1" style="margin:0 auto;width:100%;border-collapse:collapse;">
+									<tr class="cheader" align="center">
+										<td>TEACHER'S COMMENT</td>
+									</tr>
+									<tr class="hover blackColor" style="height: 70px;">
+										<td align="left" style="vertical-align: baseline; font-size: 14px; padding:5px;">
+											<?php echo $teacherComment ; ?>
+										</td>
+									</tr>
+								</table>
+							</td>
+						</tr>
+						<tr style="height: 30px;">
+							<td colspan="3" align="center">&nbsp;</td>
+						</tr>
+						<tr>
+							<td colspan="3" >
+								<table class="header" width="100%" style="width:100%; border-collapse:collapse; text-align :center;">
+									<tr>
+										<td class="borderSolidBottom" width="30%">&nbsp;</td>
+										<td></td>
+										<td class="borderSolidBottom" width="30%">&nbsp;</td>
+										<td></td>
+										<td class="borderSolidBottom" width="30%">&nbsp;</td>
+									</tr>
+									<?php 
+										$dbSetting = new Setting_Model_DbTable_Dbduty();
+										$principalInfo = $dbSetting->getDutyByDegree($degreeId, 1);
+									?>
+									<tr>
+										<td>Name: <?php echo $principalInfo['duty_nameen']; ?></td>
+										<td></td>
+										<td>Name: <?php  echo $scoreInfo['teacherName']; ?></td>
+										<td></td>
+										<td>Name : ................</td>
+									</tr>
+									<tr>
+										<td><strong><?php echo $principalInfo['positionen']; ?></strong></td>
+										<td></td>
+										<td><strong>Homeroom Teacher</strong></td>
+										<td></td>
+										<td><strong>Parent/Guardian</strong></td>
+									</tr>
+								</table>
+							</td>
+						</tr>
+						<tr style="height: 60px;">
+							<td colspan="3" align="center">&nbsp;</td>
+						</tr>
+					</table>
+					
+				<?php } ?>
+
+		<?php	}
+		} ?>
+	</div>
+</div>
+<script>
+	dojo.ready(function() {
+		displaymonth();
+	});
+
+	function displaymonth() {
+		exam_type = dijit.byId('exam_type').get('value');
+		if (exam_type == 1) {
+			$("#semester").css("display", "none");
+			$("#month").css("display", "block");
+		} else {
+			$("#semester").css("display", "block");
+			$("#month").css("display", "none");
+		}
+	}
+</script>

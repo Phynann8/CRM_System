@@ -1,0 +1,134 @@
+<?php 
+	$frm = $this->form_search;
+	$tr = Application_Form_FrmLanguages::getCurrentlanguage();
+	$base_url = Application_Form_FrmMessage::getUrl("/");
+?>
+<title><?php echo $tr->translate('RPT_TOTALDISCOUNT');?></title>
+<script>
+	dojo.require('dijit.form.Button');
+	dojo.require("dijit.form.DateTextBox");
+</script>
+<div style="min-height:15cm; margin:0 auto; padding:0.5cm 0.5cm 0cm 0.5cm">			
+<form id="list" name="list" action="" dojoType="dijit.form.Form" method="post">
+	<table style="width:100%;font-family:'khmer os battambang';">
+		  <tr> 
+			   <td><?php echo $frm->getElement("branch_id");?></td>
+			   <td><?php echo $frm->getElement("start_date");?></td>
+	           <td><?php echo $frm->getElement("end_date");?></td>
+	           <td><button class="button-class button-primary" iconClass="glyphicon glyphicon-search" dojoType="dijit.form.Button" showLabel="true" type="submit"><?php echo $tr->translate("SEARCH");?></button></td>
+	   	  </tr>
+	</table>
+</form>
+<style>
+	.hideprintdate{display:none !important;}
+</style>
+<div id="divPrint">
+		<table style="background:#fff; margin: 0 auto; width: 100%; padding:0.5cm;" >
+			<tr>
+				<td colspan="3"><?php echo $this->rsheader;?></td>
+			</tr>
+			<tr>
+				<td width="20%" align="center">
+				</td>
+				<td width="60%" align="center">
+					<span style="padding-left: 0px;  color:#000; font-size: 12px;font-family:'Times New Roman','Khmer OS Muol Light';"><?php echo $tr->translate('RPT_TOTALDISCOUNT')?> (Tuition Fee)</span><br />
+					<span style="color:#000; font-size: 12px;font-family:'Times New Roman','Khmer OS Muol Light';"><?php if(!empty($this->search['start_date'])){?>&nbsp; <?php echo date("d-M-Y",strtotime($this->search["start_date"]))?> <?php echo $tr->translate('TO')?> <?php echo date("d-M-Y",strtotime($this->search["end_date"]));}?></span>     
+				</td>
+				<td width="20%" align="center">
+					<label class='hideprintdate'>Print Date <?php echo date("d-m-Y h:i");?></label>
+				</td>
+			</tr>
+			<tr>
+				<td colspan="3">
+					<style type="text/css">
+						table{ border-collapse:collapse; margin:0 auto;
+						border-color:#000; }
+						.padd tr td{  text-align:left}
+						.padd tr th{  background-color: #ccc; }
+						th,td{ padding:0 1px;}
+						tr.line td{ border-bottom: 2px solid #000;padding-top: 5px; }
+						.hideprintdate{display:block;font-size:10px;white-space:nowrap;}
+						@media print{
+							<?php if(!empty($this->printFormat)){ echo $this->printFormat; } ?>
+						}
+					</style>
+					<table class="padd" width="100%" align="left" style="white-space:nowrap;font-family: Khmer OS Battambang;">
+						<thead>
+							<tr style="font-size:12px; height: 20px;background-color: #ccd9ff;line-height: 30px;font-weight: bold;" align="center" >
+								<td style="text-align: center;" colspan="2"><?php echo $tr->translate('INCOME_CATEGORY')?></td>
+								<td style="text-align: center;" ><?php echo $tr->translate('PAID_AMOUNT')?></td>
+								<td style="text-align: center;" ><?php echo $tr->translate("EXTRA_FEE").'/'.$tr->translate("DEDUCT");?></td>
+								<td style="text-align: center;"><?php echo $tr->translate('DISCOUNT')?></td>
+								<td style="text-align: center;"><?php echo $tr->translate('TOTAL_AMOUNT')?></td>
+							</tr>
+						</thead>
+						<style>td{padding:0 3px; }</style>
+						  <?php 
+							$i=0; 
+							$total_penalty=0;
+							$credit_memo= 0;
+							$no=0;
+							$total_discount=0;
+							$sub_total =0;
+							$extra_total=0;
+							$discount = 0;
+							$total_paid = 0;
+						 ?>
+						 <?php if(!empty($this->row)){ foreach($this->row as $key => $rs){ $i++;?>
+							<tr class="hover" style="font-size:12px; height: 20px;<?php if($key%2==0){echo "background:#eee;";}?>" align="center" >
+								<td style="text-align: left;"><?php echo $rs['item_name'];?></td>
+								<td style="white-space: nowrap;width:200px;">....................................................................</td>
+								<td style="text-align: center;"><?php echo number_format($rs['subtotal'],2);?></td>
+								<td style="text-align: center;"><?php echo number_format($rs['extra_fee'],2);?></td>
+								<td style="text-align: center;"><?php 
+										$discount = (($rs['subtotal']+$rs['extra_fee'])-$rs['paidamount']);
+										echo number_format($discount,2);
+								?></td>
+								<td style="text-align: center;"><?php echo number_format($rs['paidamount'],2);?></td>
+							</tr>
+								<?php 
+									$sub_total = $sub_total+$rs['subtotal'];
+									$extra_total = $extra_total+$rs['extra_fee'];
+									$total_discount = $total_discount+$discount;
+									$total_paid= $total_paid+$rs['paidamount'];
+						 	 	?>
+						  <?php }}if($total_penalty>0){ ?>
+					  		<tr class="hover" style="font-size:12px; height: 20px;" align="center" >
+								<td ></td>
+								<td style="text-align: right;"><?php echo $tr->translate('FINE');?></td>
+								<td style="white-space: nowrap;width:200px;">............................................</td>
+								<td style=""><?php echo number_format($total_penalty,2);?></td>
+							</tr>
+						  <?php }
+						  ?>
+						  <tr style="border: 1px solid #fff;border-top: 1px solid #000;font-size:12px;">
+							<td colspan="2" style="text-align: right !important;"></td>
+							<td style="text-align: center;">$&nbsp;<strong style="border-bottom: 5px double #000;"><?php echo number_format($sub_total,2);?></strong></td>
+							<td style="text-align: center;">$&nbsp;<strong style="border-bottom: 5px double #000;text-align:center;"><?php echo number_format($extra_total,2);?></strong></td>
+							<td style="text-align: center;">$&nbsp;<strong style="border-bottom: 5px double #000;text-align:center;"><?php echo number_format($total_discount,2);?></strong></td>
+							<td style="text-align: center;">$&nbsp;<strong style="border-bottom: 5px double #000;text-align:center;"><?php echo number_format($total_paid,2);?></strong></td>
+						  </tr>
+					</table>
+				</td>	
+			</tr>	
+			<tr>
+				<td colspan="3">
+					<br />
+					<br />
+					<table width="100%" style="font-size:12px;color:#000; font-size: 12px;font-family:'khmer os battambang';">
+						<tr style="text-align: center;">
+							<td width="30%">បានឃើញនិង ឯកភាព</td>
+							<td width="30%">បានពិនិត្យ</td>
+							<td width="30%">ភ្នំពេញ, ថ្ងៃទី……ខែ……ឆ្នាំ………	</td>
+						</tr>
+						<tr style="text-align: center;">
+							<td width="30%" style="font-size: 12px;font-family:'Khmer OS Muol Light'">លោកអគ្គនាយក</td>
+							<td width="30%">ប្រធានគណនេយ្យ</td>
+							<td width="30%">បេឡាករ</td>
+						</tr>
+					</table>
+				</td>	
+			</tr>
+		</table>
+	</div>	
+</div>

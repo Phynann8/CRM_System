@@ -1,0 +1,72 @@
+<?php 
+$tr = Application_Form_FrmLanguages::getCurrentlanguage();
+$pageTitle = $tr->translate('achievementLetter');
+echo $this->headTitle($pageTitle);
+$_dbgb = new Application_Model_DbTable_DbGlobal();
+$arrFilter = array(
+	'type' => 3,
+	'branch_id' => 1,
+	'degree' => 0,
+);
+$bgRs = $_dbgb->getBackgroundSetting($arrFilter);
+
+$defaultBg = $this->baseUrl().'/images/background/default-achievement.png';
+$defaultLabelNameBg = $this->baseUrl().'/images/background/default-achievement-label.png';
+$settingBg = empty($bgRs["background"]) ? "" : $bgRs["background"];
+$settingBgName = empty($bgRs["outstanding_bg"]) ? "" : $bgRs["outstanding_bg"];
+
+$backgroundImage = $defaultBg;
+$labelNameBg = $defaultLabelNameBg;
+if(!empty($settingBg)){
+	if (file_exists(PUBLIC_PATH."/images/background/".$settingBg)){
+		$backgroundImage = $this->baseUrl().'/images/background/'.$settingBg;
+	}
+}
+if(!empty($settingBgName)){
+	if (file_exists(PUBLIC_PATH."/images/background/".$settingBgName)){
+		$labelNameBg = $this->baseUrl().'/images/background/'.$settingBgName;
+	}
+}
+?>
+<div style="margin:0 auto; padding:0.5cm 0.5cm 0cm 0.5cm">
+	<div class="card-box">
+       	<div class="col-sm-12 border-botom">
+		   	<div class="col-sm-8 pd-0">
+	    		<h4 class="m-b-0"><i class="fa fa-file-text-o " aria-hidden="true"></i>&nbsp;&nbsp;&nbsp;<?php echo $pageTitle;?></h4>
+    		</div>
+    		<div class="col-sm-4 text-right">
+				<div class="text-right">
+					<a class="qButton print" href="#" title="<?php echo $tr->translate('DOWNLOAD');?>" onclick="downloadImage();"><i class="fa fa-download" aria-hidden="true"></i></a>
+				</div>
+    		</div>
+    	</div>
+    </div>
+	<div class="card-box">
+		<div id="divPrint">
+			<style>
+				#divPrint{
+					width: 210mm;
+					min-height: 296mm;
+					margin: 0 auto;
+				}
+			</style>
+			<?php echo $this->rsData["template"];?>
+		</div>
+	</div>
+</div>
+<script src="<?php echo $this->baseUrl();?>/admin/js/extra-plug.js"></script>
+<script>
+function downloadImage(){
+	loadingBlock();
+	let pages = document.querySelectorAll('.html-content-holder');
+	var index=0;
+	for (let node of pages) { 
+		captureAndDownloadImage(node,index);
+		index++;
+	}
+	setTimeout(function() {
+		HideloadingBlock();
+	}, 1000);
+}
+</script>
+

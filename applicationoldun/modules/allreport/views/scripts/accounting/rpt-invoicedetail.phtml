@@ -1,0 +1,248 @@
+<?php
+	$tr = Application_Form_FrmLanguages::getCurrentlanguage();
+	echo $this->headTitle($tr->translate("INVOICE"));
+	$base_url = Application_Form_FrmMessage::getUrl("/");
+	$frm = $this->form_search;
+	$gender=array(1=>"Male",2=>"Female");
+	$payment_term = $this->payment_term;
+?>
+<style>
+	#footer{
+		display: none;
+	}
+	p.t_shadow {
+		line-height: 26px !important;
+	}
+	.height{height:10px;}
+</style>	
+<div style="border: 1px dotted #000;background: #fff; margin: 0 auto;min-height: 13cm; font-family:'Khmer OS Battambang';">
+	<br />
+	<div id="divPrint" style="padding:20px;">
+			<style>
+				ul li{line-height: 25px; list-style: none;white-space: nowrap;}
+				ul{padding: 0;margin: 0;}
+				.value{    
+				/* border: 1px solid #000 !important; */
+			    padding: 1px;
+			    /* height: 28px !important; */
+			    /* line-height: 24px; */
+			    font-weight: 600;
+					}
+				
+			</style>
+		<table width="100%" style="font-family:Times New Roman,'Khmer OS Battambang">
+				<tr height="90px;">
+					<td colspan="3" align="center" valign="top">
+						<?php echo $this->header?>
+					</td>
+				</tr>
+				<tr>
+					<td width="30%"></td>
+					<td width="40%" align="center" valign="top" >
+						<ul style="font-size:16px;font-family:Khmer OS Muol Light">
+							<li><?php echo $tr->translate("វិក្កយបត្រ");?></li>
+							<li style="padding-top:2px;">Invoice</li>
+						</ul>
+					</td>
+					<td width="30%" valign="bottom">
+						<ul style="font-size:12px;font-weight:bold;">
+							<li>លេខវិក័យបត្រ / Invoice No. : <?php echo $this->invoice['invoice_num']; ?></li>
+							<li style="padding-top:2px;">ថ្ងៃចេញវិក័យបត្រ / Invoice Date : <?php echo date("d/m/Y",strtotime($this->invoice['invoice_date'])); ?></li>
+							<li style="padding-top:2px;">សុពលភាព / Valid Date : <?php echo date("d/m/Y",strtotime($this->invoice['expired_date'])); ?></li>
+						</ul>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="3" align="center" class="height">
+					</td>
+				</tr>
+				<tr>
+					<td colspan="3" align="center" style="border-top:1px solid #000;">
+					</td>
+				</tr>
+				<tr>
+					<td colspan="3" align="center" class="height">
+					</td>
+				</tr>
+				<tr>
+					<td align="center" valign="top" colspan="3">
+						<table style="line-height:18px;margin: 0 auto; width:100%;font-size: 12px;" cellspacing="0">
+							<tr>
+								<td width="13%" style="white-space: nowrap;">
+									<?php echo $tr->translate("STUDENT_ID");?>/ Student ID
+								</td>
+								<td width="25%" ><div  class="value"> : &nbsp;<strong><?php echo $this->invoice['stu_code']; ?></strong></div></td>
+								<td width="27%">&nbsp;</td>
+								<td width="10%" style="white-space: nowrap;">
+									<?php echo $tr->translate("ACADEMIC_YEAR");?>/Year
+								</td>
+								<td width="25%" ><div  class="value"> : &nbsp;<?php echo $this->invoice['academicYear']; ?></div></td>
+							</tr>
+							<tr>
+								<td  style="white-space: nowrap;">
+									<?php echo $tr->translate("STUDENT_NAME");?>
+								</td>
+								<td style="white-space: nowrap;" >
+									<div  class="value">
+										 : &nbsp;<strong><?php echo $this->invoice['stu_khname']; ?></strong>
+									</div>
+								</td>
+								<td></td>
+								<td style="white-space: nowrap;">
+									<?php echo $tr->translate("DEGREE");?>/Program
+								</td>
+								<td ><div  class="value"> : &nbsp;<?php echo $this->invoice['degree']; ?></div></td>
+							</tr>
+							<tr>
+								<td  style="white-space: nowrap;">
+									<?php echo $tr->translate("Student Name");?>
+								</td>
+								<td style="white-space: nowrap;" >
+									<div  class="value">
+										 : &nbsp;<strong><?php echo $this->invoice['last_name']." ".$this->invoice['stu_enname']; ?></strong>
+									</div>
+								</td>
+								<td></td>
+								<td style="white-space: nowrap;">
+									<?php echo $tr->translate("GRADE");?>/Level
+								</td>
+								<td ><div  class="value"> : &nbsp;<?php echo $this->invoice['grade']; ?></div></td>
+							</tr>
+							<tr>
+								<td  style="white-space: nowrap;">
+									<?php echo $tr->translate("SEX");?>/Gender
+								</td>
+								<td ><div  class="value"> : &nbsp;<?php echo @$gender[$this->invoice['sex']]; ?></div></td>
+								<td></td>
+								<td style="white-space: nowrap;">
+								</td>
+								<td ></td>
+							</tr>
+							<tr>
+								<td  style="white-space: nowrap;">
+									<?php echo $tr->translate("PHONE");?>/Tel
+								</td>
+								<td ><div  class="value"> : &nbsp;<?php echo $this->invoice['tel']; ?></div></td>
+								<td></td>
+								<td style="white-space: nowrap;">
+								</td>
+								<td ><div  class="value"><div></td>
+							</tr>
+							<tr>
+							    <td colspan="5">
+								  <p>
+								  	<div style="font-weight: 900;">Dear Parents, </div>
+	 								We would like to inform you that <?php echo $this->invoice['last_name']." ".$this->invoice['stu_enname']; ?>’s fee to be paid for a term  is as below:
+								  </p>
+								 </td>
+							</tr>
+							<tr>
+							    <td colspan="5">
+								    <table width="100%" style="font-size: 12px;border-collapse: collapse; white-space: nowrap;border:1px solid #000;font-family:Times New Roman,'Khmer OS Battambang">
+									   <?php if ($this->invoice['invoiceType'] == 1) {//outstanding ?>
+										<tr class="head-tr" style="background:#ccd9ff;height: 25px;text-align: center;font-weight: bolder;">
+										    <td style="border:1px solid #000;white-space: nowrap;"><?php echo $tr->translate("N_O"); ?><br />No.</td>
+											<td style="border:1px solid #000;white-space: nowrap;"><?php echo $tr->translate("បរិយាយ"); ?><br />Description</td>
+											<td style="border:1px solid #000;white-space: nowrap;"><?php echo $tr->translate("បង់ជា"); ?><br />Pay As</td>
+											<td style="border:1px solid #000;white-space: nowrap;"><?php echo $tr->translate("ចំនួន"); ?><br />Qty</td>
+											<td style="border:1px solid #000;white-space: nowrap;"><?php echo $tr->translate("តម្លៃ"); ?><br />Price</td>
+											<td style="border:1px solid #000;white-space: nowrap;"><?php echo $tr->translate("ការបញ្ចុះតម្លៃ"); ?><br />Discount</td>
+											<td style="border:1px solid #000;white-space: nowrap;"><?php echo $tr->translate("ប្រាក់ត្រូវបង់"); ?><br />Sub Total</td>
+										</tr>
+										<?php
+										$totalPayment = 0;
+										foreach ($this->invoice_service as $key => $row) {
+											$key = $key + 1;
+											$totalPayment += $row['totalPayment'];
+										?>
+										<tr align="center" style="font-size: 12px;">
+										    <td style="border:1px solid #000;"><?php echo $key; ?></td>
+										    <td style="border:1px solid #000;"><?php echo $row['title']; ?></td>
+										    <td style="border:1px solid #000;"><?php echo $row['payAs']; ?></td>
+										    <td style="border:1px solid #000;"><?php echo $row['qty']; ?></td>
+										    <td style="border:1px solid #000;"><?php echo $row['price']; ?></td>
+										    <td style="border:1px solid #000;"><?php echo $row['discountValue']; ?></td>
+											<td style="border:1px solid #000;"><?php echo $row['totalPayment']; ?></td>
+										</tr>
+										<?php }?>
+											<tr style="font-weight:bold;">
+												<td colspan="5"></td>
+												<td align="center" style="background:#ccd9ff; border:1px solid #000;"><?php echo $tr->translate("TOTLE_AMOUNT");?></td>
+												<td align="center" style="background:#ccd9ff; border:1px solid #000;"><?php echo number_format($totalPayment,2); ?></td>
+											</tr>
+										<?php }else { ?>
+											<tr class="head-tr" style="background:#ccd9ff;height: 25px;text-align: center;font-weight: bolder;">
+										    <td style="border:1px solid #000;white-space: nowrap;"><?php echo $tr->translate("N_O"); ?><br />No.</td>
+											<td style="border:1px solid #000;white-space: nowrap;"><?php echo $tr->translate("SERVICES"); ?><br />Description</td>
+											<?php $s = 0; ?>
+											<?php foreach ($payment_term as $value) { ?>
+											<?php echo '<td style="border:1px solid #000;white-space: nowrap;min-width:50px;">' . $value . '</td>'; ?>			
+											<?php } ?>
+											
+											<td style="border:1px solid #000;white-space: nowrap;">ផ្សេងៗ<br />Other</td>
+										</tr>
+										<?php
+											$month=0;
+											$term=0;
+											$semester=0;
+											$year=0;
+										?>
+										<?php 
+										if(!empty($this->invoice_service)){
+											foreach ($this->invoice_service as $key => $row) {
+												$key = $key + 1;
+										?>	
+										<tr align="center" style="font-size: 12px;">
+										    <td style="border:1px solid #000;"><?php echo $key; ?></td>
+											<td align="left" style="border:1px solid #000;">&nbsp;&nbsp;<?php echo " " . $row['title']; ?></td>
+										    <td style="border:1px solid #000;"><?php if ($row['month'] != 0)
+												echo '&nbsp;' . number_format($row['month'], 2); ?></td>
+										    <td style="border:1px solid #000;"><?php if ($row['term'] != 0)
+												echo '&nbsp;' . number_format($row['term'], 2); ?></td>
+										    <td style="border:1px solid #000;"><?php if ($row['semester'] != 0)
+												echo '&nbsp;' . number_format($row['semester'], 2); ?></td>
+										    <td style="border:1px solid #000;"><?php if ($row['year'] != 0)
+												echo '&nbsp;' . number_format($row['year'], 2); ?></td>
+											<td align="left" style="border:1px solid #000;">&nbsp;&nbsp;<?php echo $row['remark']; ?></td>
+										</tr>
+										<?php }
+										}
+											$month=$month+$row['month'];
+											$term=$term+$row['term'];
+											$semester=$semester+$row['semester'];
+											$year=$year+$row['year'];
+										 ?>	
+										<tr style="font-weight:bold;">
+											<td colspan="2" align="center" style="background:#ccd9ff; border:1px solid #000;"><?php echo $tr->translate("TOTLE_AMOUNT");?></td>
+											<td align="center" style="background:#ccd9ff; border:1px solid #000;"><?php if($month!=0) echo '$&nbsp;'.number_format($month,2); ?></td>
+											<td align="center" style="background:#ccd9ff; border:1px solid #000;"><?php if($term!=0) echo '$&nbsp;'.number_format($term,2); ?></td>
+											<td align="center" style="background:#ccd9ff; border:1px solid #000;"><?php if($semester!=0) echo '$&nbsp;'.number_format($semester,2); ?></td>
+											<td align="center" style="background:#ccd9ff; border:1px solid #000;"><?php if($year!=0) echo '$&nbsp;'.number_format($year,2); ?></td>
+										</tr>
+										<?php } ?>
+									</table>
+								</td>
+							</tr>		
+							<tr>
+							   <td colspan="5">
+							     <br/>
+								<p><div style="font-weight: 900;"> Note:</div>
+								 -&nbsp;&nbsp;<?php echo $tr->translate("SCHOOL_NAME");?> will not refund, discount, or defer credit for days unattended by the student due to sickness,<br>
+								 &nbsp;&nbsp;&nbsp;personal holidays and vacation availed within the school year.</p> 
+							    
+							   </td> 
+							</tr>		
+							<tr>
+							   <td colspan="5">
+							   	<p>
+							   	Phnom Penh, <?php echo date("l jS \of F Y h:i:s A"); ?><br>
+								Administration Office
+							   	</p>
+							   </td>
+							</tr>	
+						</table>
+					</td>							
+				</tr>
+		</table>	
+	</div>	
+</div>

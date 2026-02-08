@@ -1,0 +1,336 @@
+<?php
+	$tr = Application_Form_FrmLanguages::getCurrentlanguage();
+	$_dbgb = new Application_Model_DbTable_DbGlobal();
+	echo $this->headTitle($tr->translate('SINGLE_IDPRINT'));
+	$type=$this->rs[0]['card_type'];//CARD_TYPE;  // tyep=1 for ELT , type=2 for good will , type=3 for New World
+
+	$dbc = new Setting_Model_DbTable_DbCardmg();
+	$cardId= $this->cardSetting;
+	$bg = $dbc->getCardmgById($cardId); // from background card setting Id
+	
+	$displayBy = 1;
+	$validDate="";
+	$issueDateLabel="";
+	if (!empty($bg)){
+		$displayBy = $bg['display_by'];
+		$prefix = $bg['card_prefix'];
+		$validDate = $bg['valid'];
+		$issueDate = $bg['issue'];
+		$issueDateLabel = date("j M Y",strtotime($issueDate));
+	}
+				
+	$defaultProfile = $this->baseUrl().'/images/no-profile.png';
+?>	
+<style>
+
+div#tt .tabs-panels .panel-body.panel-body-noheader.panel-body-noborder {
+    overflow: auto;
+    background: #fff;
+}
+
+.ptss__toggle-btn {
+    display: none;
+}
+section.inputmask {
+    box-shadow: none !important;
+    border: 0 !important;
+}
+button.button-class.btn-primary {
+    padding: 10px;
+    border-radius: 7px;
+    margin-top: 10px;
+    font-size: 14px;
+}
+</style>
+<div style="width: 28.5cm !important; height: 11cm ; padding: 0px; margin: 0px;">
+	<div align="center" data-dojo-props="title:'<?php echo $tr->translate("PAYMENT_RECEIPT");?>'" id="print_income" >
+		<style>
+			.name-card-block ul.list-data {
+				top: 145.5px !important;
+			}	
+		</style>
+		<button id="printBtn" class="button-class btn-primary"><?php echo $tr->translate("PRINT");?> <i class="fa fa-print"></i></button>
+		<div id="divPrint1">
+			<style>
+				@media print {
+					@page {
+						margin: 0;
+						padding: 0;
+					}										
+														
+				}
+				.card-content-student-print{
+					background-image: url('<?php echo $this->baseUrl()."/images/card/student_card_bg.jpg";?>');
+					background-size: cover;
+					background-repeat: no-repeat;
+					page-break-after:always;
+
+					display:inline-block; 
+					line-height: 16.285px;  
+					width: 5.3cm;
+					height: 8.5cm;
+					color: #2c335c; 
+					font-family: 'Times New Roman', 'sans-serif','Khmer OS Battambang';
+					position: relative;					
+				}
+			<?php 
+			$isShowQr=0;
+			$linkQr="";
+			
+			$maginTopQR = 242;
+			$maginLeftQR = 60;
+			if(!empty($this->groupByBranchAndSchool)) foreach($this->groupByBranchAndSchool as $bck){
+				$image = $this->baseUrl().'/images/card/default_card_bg.jpg';
+				$imageBack = $this->baseUrl().'/images/card/default_card_bg.jpg';
+				$color = "000000";
+				$dep = empty($bck['degree_id'])?0:$bck['degree_id'];
+			//	$bg = $_dbgb->getCardBackground($bck['branch_id'],1,$bck['schoolOption'],$dep);
+				
+				$maginTopName = 180;
+				$maginTopClass = 198;
+				$maginTopId = 217;
+				
+				$maginTopPhoto = 87;
+				$maginLeftPhoto = 0;
+				
+				if(!empty($bg['background'])){
+					if (file_exists(PUBLIC_PATH."/images/card/".$bg['background'])){
+						$image = $this->baseUrl().'/images/card/'.$bg['background'];
+					}
+					if(!empty($bg['front_background'])){
+						if (file_exists(PUBLIC_PATH."/images/card/".$bg['front_background'])){
+							$imageBack = $this->baseUrl().'/images/card/'.$bg['front_background'];
+						}
+					}
+					
+					if (!empty($bg['colorcode'])){
+						$color = str_replace("#", "", $bg['colorcode']);
+					}
+					
+					// $maginTopName = empty($bg['stunametop']) ? 0 : $bg['stunametop'];
+					// $maginTopClass = empty($bg['grouptop']) ? 0 : $bg['grouptop'];
+					// $maginTopId = empty($bg['studentcodetop']) ? 0 : $bg['studentcodetop'];
+					
+					//$maginTopPhoto = empty($bg['photo_top']) ? 0 : $bg['photo_top'];
+					// $maginLeftPhoto = empty($bg['photo_left']) ? 0 : $bg['photo_left'];
+					
+					// $maginTopQR = empty($bg['qrcodetop']) ? 0 : $bg['qrcodetop'];
+					// $maginLeftQR = empty($bg['qrcodeleft']) ? 0 : $bg['qrcodeleft'];
+					
+					$isShowQr = empty($bg['isShowQr']) ? 0 : $bg['isShowQr'];
+					$linkQr = empty($bg['qrLink']) ? "" : $bg['qrLink'];
+					
+				}
+			?>
+				
+				
+				.back-card-content-student-print<?php echo $dep;?>{
+					background-image: url('<?php echo $imageBack;?>');
+					 background-size: 100%;background-repeat: no-repeat;
+					 page-break-after:always;					
+				}
+				
+				.card-content-student-print<?php echo $dep;?>{
+					background-image: url('<?php echo $image;?>');
+					 background-size: 100%;background-repeat: no-repeat;
+					 page-break-after:always;					
+				}
+				
+				.name-card-block ul.list-data li.sdudent-id.color{
+					color:#<?php echo $color;?>;
+				}
+			<?php }?>
+					
+				.profile-card-block {
+					position: relative;
+				}
+				.profile-card-block .photo {
+					text-align: center;
+					width: 100%;
+					position: absolute;
+					top: <?php echo $maginTopPhoto;?>px;
+					left: <?php echo $maginLeftPhoto;?>px;
+				}
+				.photo img {
+					width: 70px;
+					height:88px;
+					/* border-radius: 50%; */
+				}
+				.name-card-block {
+					position: relative;
+				}
+		
+				span.stuNameValue,
+				span.groupCodeValue,
+				span.studentIdValue	
+				{
+					position: absolute;
+					display: block;
+					width: 100%;
+					font-weight: 600;
+					font-size: 12px;
+					text-align: center;
+				}
+				span.stuNameValue {
+					top: <?php echo $maginTopName;?>px;
+					
+					
+				}
+				span.groupCodeValue {
+					top: <?php echo $maginTopClass;?>px;
+					
+				}
+				span.studentIdValue {
+					top: <?php echo $maginTopId;?>px;
+				}
+				span.issueDate {
+					position: absolute;
+					top: 266px;
+					left: 14px;
+					font-size: 7px;
+					line-height: 16px;
+					font-weight: bold;
+				}
+				.footer-card {
+					bottom: 0px;
+					position: absolute;
+					width: 91%;
+					left: 9px;
+				}
+				.footer-card span {
+					display: block;
+					width: 100%;
+					text-align: center;
+					font-size: 7px;
+					line-height: 14px;
+					color: #000000;
+				}
+				
+				.qr-block {
+					position: absolute;
+					top: <?php echo $maginTopQR;?>px;
+					left: <?php echo $maginLeftQR;?>px;
+					<?php if($isShowQr==0){?>
+						display:none !important;
+					<?php } ?>
+				}
+				svg,
+				.qrimages img {
+					width: 50px;
+					height: 50px;
+				}
+			</style>
+			 <div id="cards" aria-live="polite"></div>
+		
+		</div>
+	</div>
+</div>
+<script type="text/javascript">
+	$(document).ready(function() {
+		setTimeout(function () {
+			generateCards();
+		}, 1000);
+	});
+	$("#printBtn").on("click", function () {
+	  var frame = $('<iframe />');
+		frame.css({ position: "absolute", top: "-9999px" });
+		$("body").append(frame);
+
+		var doc = frame[0].contentWindow.document;
+		doc.open();
+		doc.write("<html><head><title>Print</title></head><body>");
+		doc.write($("#divPrint1").html());
+		doc.write("</body></html>");
+		doc.close();
+
+		setTimeout(function () {
+			frame[0].contentWindow.focus();
+			frame[0].contentWindow.print();
+			frame.remove();
+		}, 150);
+	});
+	
+	var displayBy = <?php echo $displayBy;?>;
+	var list = <?php echo Zend_Json::encode($this->rs);?>;
+	 function generateCards() {
+		 loadingBlock();
+		$("#cards").empty();
+		$.each(list, function (i, item) {
+			var svg = generateSvgQR(item.qrUrl);
+			var thisPhoto = '<?php echo $defaultProfile;?>';
+			var stuName = item.en_name;
+			if(displayBy==2){
+				stuName = item.stu_khname;
+			}
+			var card = $(
+			  '<div class="card-content-student-print card-content-student-print'+item.degree_id+'">'+
+					'<div class="profile-card-block">'+
+						'<div class="photo">'+
+							'<img id="photo'+i+'" src="'+thisPhoto+'">'+
+						'</div>'+
+					'</div>'+
+					'<div class="name-card-block">'+
+						'<span class="stuNameValue">' + escapeHtml(stuName) + '</span>'+
+						'<span class="groupCodeValue">CLASS: ' + escapeHtml(item.group_name) + '</span>'+
+						'<span class="studentIdValue">ID: ' + escapeHtml(item.stu_code) + '</span>'+
+					'</div>'+
+					'<span class="issueDate">' + escapeHtml('<?php echo $issueDateLabel; ?>') + '</span>'+
+					'<div class="footer-card">'+
+						'<span class="br-address">' + escapeHtml(item.branchAddress) + '</span>'+
+						'<span class="br-tel">' + escapeHtml(item.branchTel) + '</span>'+
+					'</div>'+
+					
+					
+						'<div class="qr-block">'+
+							'<div class="qrimages">'+
+								svg+
+							'</div>'+
+						'</div>'+
+				'</div>'
+			  
+			);
+
+			$("#cards").append(card);
+			loadImage(item.photoUrl,$("#photo"+i));
+		  });
+		setTimeout(function () {
+			
+			HideloadingBlock();
+	    }, 1000);
+    }
+function loadImage(url, elem) {
+    checkImage(url, function(ok) {
+        if (!ok) {
+            elem.attr("src", '<?php echo $defaultProfile;?>');
+        } else {
+            elem.attr("src", url);
+        }
+    });
+}
+function checkImage(url, callback) {
+    var img = new Image();
+    img.onload = function () { callback(true); };
+    img.onerror = function () { callback(false); };
+    img.src = url;
+}  
+  
+/* Generate SVG QR using qrcode-generator lib */
+function generateSvgQR(text) {
+  var qr = qrcode(0, "M");
+  qr.addData(text);
+  qr.make();
+  return qr.createSvgTag(4, 10); // scale = 4
+}
+/* escape HTML to avoid injection */
+function escapeHtml(s) {
+  return (s + "").replace(/[&<>"]/g, function (m) {
+    return ({
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      "\"": "&quot;"
+    })[m];
+  });
+}
+
+</script>

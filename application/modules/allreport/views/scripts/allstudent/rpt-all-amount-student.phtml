@@ -1,0 +1,670 @@
+<?php
+	$tr = Application_Form_FrmLanguages::getCurrentlanguage();
+	
+	$frm =  $this->form_search;
+	$dateFormat ="d/m/Y";
+	$dateFormatExport ="d/M/Y";
+	
+	$stuReportType =empty($this->search["stuReportType"]) ? 1 : $this->search["stuReportType"];
+	$paperLayout = "portrait";
+	
+	$reportTitle = $tr->translate('ALL_STUDENT_REPORT');
+	if($stuReportType==1){
+		$reportTitle = "Enrollment Student Report";
+	}
+	echo $this->headTitle($reportTitle); 
+	
+	$arrTableHeader = [];
+?>	
+<style>
+.hover:hover{ background:#ccc;}
+.line-height{line-height:20px !important;}
+.table-width{width:40% !important}
+.hover:hover{ background:#ccc;}
+table.content-data tr.style-head,
+table.content-data-main tr.style-head,
+table.tb-footer tr.style-head {
+   font-weight: bold !important;
+}
+</style>
+<div class="layout-wrapper-report">
+	<div id="mainContent" class="main-content-report">
+		<div class="report-preview">
+			<?php echo $this->controlReport?>
+			<div id="main-viewer" class="main-viewer portrait">
+				<div id="viewer" class="viewer portrait">
+					<div id="divPrint" class="content">
+						<link rel="stylesheet" href="<?php echo $this->baseUrl();?>/admin/build/css/report-style.css">
+						<link rel="stylesheet" href="<?php echo $this->baseUrl();?>/admin/build/css/report-style-screen.css">
+						<style>
+							@media print {
+								<?php if(!empty($this->printFormat)){ echo $this->printFormat; } ?>
+							}
+							ul.title-report {
+								list-style: none;
+								margin: 0;
+								padding: 0;
+							}
+							table{ border-collapse:collapse; margin:0 auto; border-color:#4839bd; }
+							.padding{ padding: 0 1px !important;}
+							.divBreak{
+								page-break-inside:always;
+								page-break-after:always;
+							}
+							.content-data-main{ page-break-inside:auto; font-family:'Times New Roman','Khmer OS Battambang'; }
+							.content-data-main tr{ page-break-inside:avoid; page-break-after:auto }
+							
+							
+							table.tableFooterTotal tr td {
+								border: none !important;
+							}
+							#BrowserPrintDefaults{display:none}
+						</style>
+						
+						<table border="0" style="margin: 0 auto; width: 100%; ">
+							<tr>
+								<td colspan="3"><?php echo $this->rsheader;?></td>
+							</tr>
+							<tr>
+								<td id="exportExcel" colspan="3" valign="top">
+									<?php if($stuReportType!=1){?>
+										<?php 
+										$i=0;$degree="";$count=0; $grade="";
+										$all_total = 0;$all_drop = 0; $all_female=0; $all_femaledrop=0;
+										$female=0;$male=0;
+										if(!empty($this->rs)){ foreach ($this->rs AS $key=>$row) { 
+												if($row['is_subspend']!=0){
+													$all_drop = $all_drop+1;
+													if ($row['sex_key']==2){
+														$all_femaledrop++;
+													}
+												}else{
+													$all_total = $all_total+1;
+													if ($row['sex_key']==2){ $all_female++;}
+												}
+									?>
+										<?php if($grade!=$row['grade']){?>
+											<?php if ($key>0){?>
+													<tr class="style-head bg-head hpx-30">
+														<td colspan="14" >
+															<table class="tableFooterTotal text-color-black text-h14px text-size-12px" cellpadding="0" cellspacing="0" width="50%" >
+																<tr>
+																	<td valign="top" style="width:33%;">
+																		<span>
+																			<?php echo $tr->translate("STUDENT_TOTAL");?> : <?php echo str_pad($count, 2, '0', STR_PAD_LEFT); $male=$count-$female; $count=0;$i=0;?> <?php echo $tr->translate("STUDENT_UNIT");?>
+																		</span> 
+																	</td>
+																	<td  valign="top" style="width:33%; text-align: center;">
+																		<span>
+																			<?php echo $tr->translate("FEMALE");?> : <?php echo str_pad($female, 2, '0', STR_PAD_LEFT)." ".$tr->translate("STUDENT_UNIT"); $female=0;?>
+																		</span> 
+																	</td>
+																	<td  style="width:33%;white-space: nowrap;" valign="top">
+																		<span style=" text-align: center;">
+																			<?php echo $tr->translate("MALE");?> : <?php echo str_pad($male, 2, '0', STR_PAD_LEFT);?> <?php echo $tr->translate("STUDENT_UNIT");?>
+																		</span> 
+																	</td>
+																</tr>
+															</table>
+														</td>
+													</tr>
+													<tr><td colspan="14" class="bd-t-black bd-t-w1px" style="border:1px solid #fff;"></td></tr>
+												</table>
+												</div>
+											<?php } ?>
+											<div class="divBreak" style="width:100%;">
+											<table width="100%" class="content-data-main text-color-black text-h16px text-size-11px bd-dark-grey" cellpadding="2" border="1" >
+												<tr class="bd-b-black bd-b-w1px" style="border:0px solid #fff;">
+													<td colspan="14" valign="top" class="text-center">
+														<span style="font-weight:200;font-size: 12px;font-family:'Times New Roman','Khmer OS Muol Light';line-height: 16px; margin-top: 25px; display: block;"><?php echo $tr->translate("ALL_STUDENT_REPORT");?></span>
+														<div class="text-color-black text-h20px text-size-12px ">
+															<?php echo $tr->translate("ACADEMIC_YEAR")." "; echo empty($row['academic_year']) ? "N/A" : $row['academic_year'];?> 
+															<?php echo $tr->translate("DEGREE")." "; echo empty($row['degree']) ? "N/A" : $row['degree'];?> 
+														</div>
+														<div class="text-color-black text-h20px text-size-12px " style="margin-bottom: 10px; display: block;">
+															<?php echo $tr->translate("GRADE")." "; echo empty($row['grade']) ? "N/A" : $row['grade'];?> 
+															<?php echo $tr->translate("SESSION")." "; echo empty($row['session']) ? "N/A" : $row['session'];?> 
+														</div>
+													</td>
+												</tr>
+												<tr class="style-head bd-black bd-w1px style-head bg-head hpx-30" align="center" >
+													<td scope="col"><?php echo $tr->translate("NUM");?></td>
+													<td scope="col"><?php echo $tr->translate("STUDENT_CODE");?></td>
+													<td scope="col"><?php echo $tr->translate("STUDENT_NAMEKHMER");?></td>
+													<td scope="col"><?php echo $tr->translate("NAME_ENGLISH");?></td>
+													<td scope="col"><?php echo $tr->translate("SEX");?></td>
+													<td scope="col"><?php echo $tr->translate("DOB");?></td>
+													<td scope="col"><?php echo $tr->translate("STATUS");?></td>
+												</tr>
+										<?php } ?>
+										
+										<?php $i++;$count++; if ($row['sex_key']==2){ $female++;}?>
+											<?php 
+												$statuTitle=$row['status'];
+												$styleStatus='';
+												if($row['is_subspend']!=0){
+													$styleStatus='style="color: red;"';
+												}else{
+													if($row['is_pass']==1){
+														$statuTitle=$tr->translate("IS_PASS");
+													}
+												}
+												$stuDob="";
+												if(!empty($row['dob'])){
+													$stuDob = date($dateFormat,strtotime($row['stuDob']));
+												}
+												
+											?>
+											<tr class="style-rowdata hover" align="center" >
+												<td  data-label="<?php echo $tr->translate("NUM");?>" ><?php echo $i;?></td>
+												<td  data-label="<?php echo $tr->translate("STUDENT_CODE");?>" ><?php echo $row['stu_code'];?></td>
+												<td  data-label="<?php echo $tr->translate("STUDENT_NAMEKHMER");?>" align="left"><?php echo $row['stu_khname'];?></td>
+												<td  data-label="<?php echo $tr->translate("NAME_ENGLISH");?>" align="left"><?php echo $row['name'];?></td>
+												<td  data-label="<?php echo $tr->translate("SEX");?>" ><?php echo $row['sex'];?></td>	
+												<td  data-label="<?php echo $tr->translate("DOB");?>" ><?php echo $stuDob;?></td>
+												<td  data-label="<?php echo $tr->translate("STATUS");?>" <?php echo $styleStatus; ?> ><?php echo $statuTitle;?></td>	
+											</tr>
+											<?php $grade=$row['grade'];?>
+										<?php }?>
+											<tr class="style-head bg-head hpx-30">
+												<td colspan="14" >
+													<table class="tableFooterTotal text-color-black text-h14px text-size-12px" cellpadding="0" cellspacing="0" width="50%" >
+														<tr>
+															<td valign="top" style="width:33%;">
+																<span>
+																	<?php echo $tr->translate("STUDENT_TOTAL");?> : <?php echo str_pad($count, 2, '0', STR_PAD_LEFT); $male=$count-$female; $count=0;$i=0;?> <?php echo $tr->translate("STUDENT_UNIT");?>
+																</span> 
+															</td>
+															<td  valign="top" style="width:33%; text-align: center;">
+																<span>
+																	<?php echo $tr->translate("FEMALE");?> : <?php echo str_pad($female, 2, '0', STR_PAD_LEFT)." ".$tr->translate("STUDENT_UNIT"); $female=0;?>
+																</span> 
+															</td>
+															<td  style="width:33%;white-space: nowrap;" valign="top">
+																<span style=" text-align: center;">
+																	<?php echo $tr->translate("MALE");?> : <?php echo str_pad($male, 2, '0', STR_PAD_LEFT);?> <?php echo $tr->translate("STUDENT_UNIT");?>
+																</span> 
+															</td>
+														</tr>
+													</table>
+												</td>
+											</tr>
+										</table>
+										<table class="text-color-black text-h14px text-size-12px" border="0" align="right" width="60%" style="font-family:'Times New Roman','Khmer OS Battambang'; margin:0 auto; white-space:nowrap; margin-top:10px;">
+											<tr>
+												<td width="15%" >
+													<?php echo $tr->translate("TOTAL_STUDYING_STUDENT");?>
+												</td>
+												<td width="15%" >
+													: <?php echo $all_total;?> <?php echo $tr->translate("STUDENT_UNIT");?>
+												</td>
+												<td width="15%" align="right">
+													<?php echo $tr->translate("FEMALE");?>
+												</td>
+												<td width="15%" >
+													: <?php echo $all_female;?> <?php echo $tr->translate("STUDENT_UNIT"); ?>
+												</td>
+												<td width="15%" align="right">
+													<?php echo $tr->translate("MALE");?>
+												</td>
+												<td width="15%" >
+													: <?php echo $all_total-$all_female;?> <?php echo $tr->translate("STUDENT_UNIT");?>
+												</td>
+											</tr>
+											<tr>
+												<td>
+													<?php echo $tr->translate("TOTAL_STOP_STUDENT");?>
+												</td>
+												<td>
+													: <?php echo $all_drop?> <?php echo $tr->translate("STUDENT_UNIT");?>
+												</td>
+												<td align="right">
+													<?php echo $tr->translate("FEMALE");?>
+												</td>
+												<td>
+													: <?php echo $all_femaledrop;?> <?php echo $tr->translate("STUDENT_UNIT"); ?>
+												</td>
+												<td align="right">
+													<?php echo $tr->translate("MALE");?>
+												</td>
+												<td>
+													: <?php echo $all_drop-$all_femaledrop;?> <?php echo $tr->translate("STUDENT_UNIT");?>
+												</td>
+											</tr>
+										</table>	
+										<?php  echo $this->rsfooter; ?>										
+										</div>
+									<?php } ?>	
+									<?php }else{ $paperLayout ="landscape";
+									
+										$arrTableHeader = [
+											["index"=>"enrollDate",	"hClass"=>"w-px-50","label"=>"Enroll Date","isNumber"=>false,"isDate"=>true,"isShow"=>true],
+											["index"=>"stu_code",	"hClass"=>"w-px-65","label"=>"Student Id","isNumber"=>false,"isDate"=>false,"isShow"=>true],
+											["index"=>"stu_khname",	"hClass"=>"w-px-80","label"=>"Khmer Name","isNumber"=>false,"isDate"=>false,"isShow"=>true],
+											["index"=>"name",		"hClass"=>"w-px-90","label"=>"English Name","isNumber"=>false,"isDate"=>false,"isShow"=>true],
+											["index"=>"sex",		"hClass"=>"w-px-40","label"=>"Gender","isNumber"=>false,"isDate"=>false,"isShow"=>true],
+											["index"=>"stuDob",		"hClass"=>"w-px-50","label"=>"DoB","isNumber"=>false,"isDate"=>true,"isShow"=>true],
+											["index"=>"groupCode",	"hClass"=>"w-px-60","label"=>"Grade","isNumber"=>false,"isDate"=>false,"isShow"=>true],
+											["index"=>"status",		"hClass"=>"w-px-45","label"=>"Status","isNumber"=>false,"isDate"=>false,"isShow"=>true],
+											["index"=>"enrichment",	"hClass"=>"w-px-50","label"=>"Enrichment","isNumber"=>false,"isDate"=>false,"isShow"=>true],
+											["index"=>"paymentTerm","hClass"=>"w-px-40","label"=>"Payment","isNumber"=>false,"isDate"=>false,"isShow"=>true],
+											["index"=>"tel",		"hClass"=>"w-px-70","label"=>"Contact","isNumber"=>false,"isDate"=>false,"isShow"=>true],
+											["index"=>"fromSchool",	"hClass"=>"w-px-65","label"=>"Previous School","isNumber"=>false,"isDate"=>false,"isShow"=>true],
+											["index"=>"pob",		"hClass"=>"w-px-80","label"=>"Place Of Birth","isNumber"=>false,"isDate"=>false,"isShow"=>false],
+											["index"=>"fatherName",	"hClass"=>"w-px-70","label"=>"Father's Name","isNumber"=>false,"isDate"=>false,"isShow"=>false],
+											["index"=>"fatherJob",	"hClass"=>"w-px-50","label"=>"Occupation","isNumber"=>false,"isDate"=>false,"isShow"=>false],
+											["index"=>"motherName",	"hClass"=>"w-px-70","label"=>"Mother's Name","isNumber"=>false,"isDate"=>false,"isShow"=>false],
+											["index"=>"motherJob",	"hClass"=>"w-px-50","label"=>"Occupation","isNumber"=>false,"isDate"=>false,"isShow"=>false],
+											["index"=>"currentAdd",	"hClass"=>"w-px-80","label"=>"Current Address","isNumber"=>false,"isDate"=>false,"isShow"=>false],
+										];
+									?>
+										<style>
+										.content-data-main {
+											table-layout: fixed;
+										}
+										</style>
+										<?php 
+										$i=0;$count=0;
+										$all_total = 0;$all_drop = 0; $all_female=0; $all_femaledrop=0;
+										$female=0;$male=0;
+										if(!empty($this->rs)){ 
+										?>
+										<div style="width:100%;text-align: center;">
+											<span class="text-h12px text-size-12px text-bold" style="font-family: 'Times New Roman','Khmer OS Battambang'; "><?php echo $reportTitle; ?></span><br />
+											<span class="text-h12px text-size-12px" style="font-family: 'Times New Roman','Khmer OS Battambang'; "><?php if(!empty($this->search['start_date'])){?><?php echo date($dateFormat,strtotime($this->search['start_date']));?> <?php echo $tr->translate("TO");?> <?php echo date($dateFormat,strtotime($this->search['end_date']));}?> </span>
+										</div>
+										<table id="tableData" width="100%" class="content-data-main text-color-black text-h12px text-size-9px bd-dark-grey" cellpadding="2" border="1" >
+											<tr style="white-space:nowrap;" class="style-head bd-black bd-w1px style-head bg-head hpx-25" align="center" >
+												<td class="w-px-20"><?php echo $tr->translate("NUM");?></td>
+												<?php if(!empty($arrTableHeader)){?>
+													<?php foreach($arrTableHeader as $kh => $hRow){?>
+														<td class="<?php echo $hRow["hClass"];?>" data-col="<?php echo $kh+1;?>"><?php echo $hRow["label"];?></td>
+													<?php }?>
+												<?php }?>
+											</tr>
+										<?php foreach ($this->rs AS $key=>$row) { 
+												if($row['is_subspend']!=0){
+													$all_drop = $all_drop+1;
+													if ($row['sex_key']==2){
+														$all_femaledrop++;
+													}
+												}else{
+													$all_total = $all_total+1;
+													if ($row['sex_key']==2){ $all_female++;}
+												}
+												$stuDob="";
+												$stuDobExport="";
+												if(!empty($row['dob'])){
+													$stuDob = date($dateFormat,strtotime($row['stuDob']));
+													$stuDobExport = date($dateFormatExport,strtotime($row['stuDob']));
+												}
+												$enrollDate="";
+												$enrollDateExport="";
+												if(!empty($row['enrollDate'])){
+													$enrollDate = date($dateFormat,strtotime($row['enrollDate']));
+													$enrollDateExport = date($dateFormatExport,strtotime($row['enrollDate']));
+												}
+												
+												$i++;
+												$currentAdd="";
+												if (!empty($row['home_num'])){ 
+													$currentAdd = $row['home_num'];
+												}
+												if (!empty($row['street_num'])){
+													$currentAdd = empty($currentAdd) ? $row['street_num'] : $currentAdd.", ".$row['street_num'];
+												}
+												if (!empty($row['village_name'])){
+													$currentAdd = empty($currentAdd) ? str_replace("village","",$row['village_name']) : $currentAdd.", ".str_replace("village","",$row['village_name']);
+												}
+												if (!empty($row['commune_name'])){
+													$currentAdd = empty($currentAdd) ? str_replace("commune","",$row['commune_name']) : $currentAdd.", ".str_replace("commune","",$row['commune_name']);
+												}
+												if (!empty($row['district_name'])){
+													$currentAdd = empty($currentAdd) ? str_replace("district","",$row['district_name'])  : $currentAdd.", ".str_replace("district","",$row['district_name']);
+												}
+												if (!empty($row['province'])){
+													$currentAdd = empty($currentAdd) ? $row['province'] : $currentAdd.", ".$row['province'];
+												}
+												$payterm="";
+												if (!empty($row['paymentTerm'])){
+													if ($row['paymentTerm']==1){
+														$payterm = $tr->translate('MONTHLY');
+													}else if ($row['paymentTerm']==2){
+														$payterm = $tr->translate('TERM');
+													}else if ($row['paymentTerm']==3){
+														$payterm = $tr->translate('SEMESTER');
+													}else if ($row['paymentTerm']==4){
+														$payterm = $tr->translate('YEAR');
+													}else if ($row['paymentTerm']==5){
+														$payterm = $tr->translate('ONE_PAYMENT_ONLY');
+													}
+												}
+										?>
+											<tr class="style-rowdata hover" align="center" >
+												<td><?php echo $i;?></td>
+												<td data-col="1" class="hideExport">
+													<?php echo $enrollDate;?>
+												</td>
+												<td data-col="1" class="showExport" style="display:none;">
+													<?php echo $enrollDateExport;?>
+												</td>
+												<td data-col="2" ><div class="text-truncate"><?php echo $row['stu_code'];?></div></td>
+												<td data-col="3" align="left"><div class="text-truncate"><?php echo $row['stu_khname'];?></div></td>
+												<td data-col="4" align="left"><div class="text-truncate"><?php echo $row['name'];?></div></td>
+												<td data-col="5"><?php echo $row['sex'];?></td>	
+												<td data-col="6" class="hideExport">
+													<?php echo $stuDob;?>
+												</td>
+												<td data-col="6" class="showExport" style="display:none;">
+													<?php echo $stuDobExport;?>
+												</td>
+												<td data-col="7"><?php echo $row['groupCode'];?></td>	
+												<td data-col="8"><?php //echo $statuTitle;?></td>	
+												<td data-col="9"><?php //echo $statuTitle;?></td>	
+												<td data-col="10"><?php echo $payterm;?></td>	
+												<td data-col="11" align="left"><div class="text-truncate"><?php echo $row['tel'];?></div></td>	
+												<td data-col="12" align="left"><div class="text-truncate"><?php echo $row['fromSchool'];?></div></td>	
+												<td data-col="13" align="left"><div class="text-max-line3"><?php echo $row['pob'];?></div></td>	
+												<td data-col="14" align="left"><div class="text-truncate"><?php echo $row['fatherName'];?></div></td>	
+												<td data-col="15" align="left"><div class="text-truncate"><?php echo $row['fatherJob'];?></div></td>	
+												<td data-col="16" align="left"><div class="text-truncate"><?php echo $row['motherName'];?></div></td>	
+												<td data-col="17" align="left"><div class="text-truncate"><?php echo $row['motherJob'];?></div></td>	
+												<td data-col="18" align="left">
+													<div class="text-max-line3">
+													<?php echo $currentAdd;?>
+													</div>
+												</td>
+											</tr>
+										<?php } ?>
+										</table>
+										<?php } ?>
+									<?php } ?>
+									
+									</td>
+								</tr>
+						</table>
+		
+					</div>	
+				</div>	
+			</div>	
+		</div>	
+	</div>
+	<div class="right-panel-report" id="rightPanel">
+		<div class="card-box">
+			<div class="card-search-head col-sm-12 border-botom">
+				<div class="col-sm-6 text-left pd-0">
+					<h4 class="m-b-0">
+						<?php echo $tr->translate("SEARCH");?> 
+						<i class="fa fa-search "></i> 
+					</h4>
+				</div>
+				<div class="col-sm-6 text-right pd-0">
+					<button onclick="closeRightPanel()" title="<?php echo $tr->translate("CLOSED");?> " class="btn-close">
+						<i class="fa-solid fa-xmark"></i>
+					</button>
+				</div>
+			</div>
+			<form  id='foundation_class' action="" dojoType="dijit.form.Form" method="post" enctype="application/x-www-form-urlencoded">
+				<div class="form-group">
+					<div class="col-md-12 col-sm-12 col-xs-12">
+						<?php echo $frm->getElement("adv_search");?>
+					</div>
+					<div class="col-md-12 col-sm-12 col-xs-12">
+						<?php echo $frm->getElement("branch_id");?>
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="col-md-6 col-sm-6 col-xs-12">
+						<?php echo $frm->getElement("degree");?>
+					</div>
+					<div class="col-md-6 col-sm-6 col-xs-12">
+						<input id="grade" />
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="col-md-6 col-sm-6 col-xs-12">
+						<?php echo $frm->getElement("academic_year");?>
+					</div>
+					<div class="col-md-6 col-sm-6 col-xs-12">
+						<input id="group" />
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="col-md-6 col-sm-6 col-xs-12">
+						<input id="session" />
+					</div>
+					<div class="col-md-6 col-sm-6 col-xs-12">
+						<?php echo $frm->getElement("study_type");?>
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="col-md-6 col-sm-6 col-xs-12">
+						<?php echo $frm->getElement("start_date");?>
+					</div>
+					<div class="col-md-6 col-sm-6 col-xs-12">
+						<?php echo $frm->getElement("end_date");?>
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="col-md-6 col-sm-6 col-xs-12">
+						<?php echo $frm->getElement("isPassClass");?>
+					</div>
+					<div class="col-md-6 col-sm-6 col-xs-12">
+						<?php echo $frm->getElement("stuReportType");?>
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="col-md-12 col-sm-12 col-xs-12">
+						<button class="button-class button-primary fullside" iconClass="glyphicon glyphicon-search" dojoType="dijit.form.Button" showLabel="true" name="search"  type="submit"><?php echo $tr->translate("SEARCH");?></button>
+					</div>
+				</div>
+			</form>
+			
+			<?php if(!empty($arrTableHeader)){ ?>
+				<h6 class="text-primary text-bold"><i class="fa-solid fa-list-check"></i> Display Column</h6>
+				<?php foreach($arrTableHeader AS $keyH => $headRow){?>
+					<div class="custom-control custom-checkbox ">
+						<input type="checkbox" id="check<?php echo $keyH+1;?>" data-col="<?php echo $keyH+1;?>" class="col-toggle custom-control-input" <?php if($headRow["isShow"]){ echo 'checked="checked"'; } ?>     >
+						<label class="custom-control-label" for="check<?php echo $keyH+1;?>">
+							<?php echo $headRow["label"];?>
+						</label>
+					</div>
+				<?php } ?>
+			<?php } ?>
+		</div>	
+	</div>	
+</div>	
+<script src="<?php echo $this->baseUrl();?>/js/help.js"></script>
+<script type="text/javascript">
+dojo.require("dojo.data.ItemFileWriteStore"); 
+
+dojo.require("dojo.html");
+var academic_store= getDataStorefromJSON('id','name',<?php print_r(Zend_Json::encode(array()));?> );
+var group_store  = getDataStorefromJSON('id','name',<?php print_r(Zend_Json::encode(array()));?> );
+dojo.ready(function(){
+	
+	new dijit.form.FilteringSelect({
+		store: group_store,
+	    queryExpr: "*${0}*",
+		autoComplete: false,                     
+	    id: "group",
+	    name: "group",  
+	    class: 'fullside', 
+	    readonly:false,
+	    required:false,
+	    placeHolder:"<?php echo $tr->translate("SELECT_GROUP");?>",          
+	    onChange: function() {  
+		    
+	    }
+	}, "group");
+	
+	new dijit.form.FilteringSelect({
+		queryExpr: "*${0}*",
+		autoComplete: false,                     
+		required: false,                        
+		id: "grade",
+		name: "grade",  
+		class: 'fullside',  
+		placeHolder:"<?php echo $tr->translate("SELECT_GRADE");?>",          
+		onChange: function() {  
+
+		}
+	}, "grade");
+	
+	new dijit.form.FilteringSelect({
+		queryExpr: "*${0}*",
+		autoComplete: false,                     
+		required: false,                        
+		id: "session",
+		name: "session",  
+		class: 'fullside',  
+		placeHolder:"<?php echo $tr->translate("SELECT_SESSION");?>",          
+		onChange: function() {  
+
+		}
+	}, "session");
+	
+	var branch_id = dijit.byId('branch_id');
+	branch_id.on('change', function(evt) {
+		 getAllGroupByBranch();
+  	});
+	var academic_year = dijit.byId('academic_year');
+	academic_year.on('change', function(evt) {
+		getAllGroupByBranch();
+  	});
+	
+	var degree = dijit.byId('degree');
+	degree.on('change', function(evt) {
+		getAllSession();
+  	});
+	
+	 getAllGroupByBranch();
+	 getallGrade();
+	 getAllSession();
+	setTimeout(function() {
+		setPrintOrientation('<?php echo $paperLayout;?>');
+	}, 500);
+	
+	<?php if(!empty($arrTableHeader)){ ?>
+	$('.col-toggle').on('change', toggleColumns);
+	toggleColumns();
+	<?php } ?>
+});
+
+var url_getSession = '<?php echo $this->url(array('module'=>'global','controller'=>'parttimelist','action'=>'get-parttime')); ?>';
+function getAllSession(){
+	dijit.byId('session').set('value',''); 
+	degree = dijit.byId('degree').get('value');
+	if(degree==''){
+		sessionStore  = getDataStorefromJSON('id','name',<?php print_r(Zend_Json::encode(array()));?> );
+		dijit.byId('session').set('store',sessionStore);  
+		return false;
+	}
+	dojo.xhrPost({
+		url:url_getSession,
+		content:{
+			'degree':degree,
+		},
+		handleAs:"json",
+		load: function(data) {
+			sessionStore  = getDataStorefromJSON('id','name', data);
+			dijit.byId('session').set('store',sessionStore);  
+			<?php if(!empty($this->search['session'])){ ?>
+			dijit.byId('session').set('store','<?php echo $this->search['session']?>');  
+			<?php } ?>
+		},
+		error: function(err) {
+		}
+	});
+}
+
+var oldBranch = '<?php echo $this->search['branch_id']?>'
+url_getgroup = '<?php echo $this->url(array('module'=>'foundation','controller'=>'group','action'=>'getallgroup'));?>';
+function getAllGroupByBranch(){
+	dijit.byId('group').reset();
+	branch_id = dijit.byId('branch_id').get('value');
+	if(branch_id=='' || branch_id==-1){
+		var group_store  = getDataStorefromJSON('id','name',<?php print_r(Zend_Json::encode(array()));?> );
+		dijit.byId('group').set('store',group_store);  
+		dijit.byId('branch_id').focus();
+		return false;
+	}
+	degree = dijit.byId('degree').get('value');
+	if(degree=='' || degree==-1){degree ="";}
+	grade = dijit.byId('grade').get('value');
+	if(grade=='' || grade==-1){grade ="";}
+	academic_year = dijit.byId('academic_year').get('value');
+	if(academic_year=='' || academic_year==-1){academic_year ="";}
+	
+	dojo.xhrPost({
+		url: url_getgroup,
+		content:{
+			'branch_id':branch_id,
+			'degree':degree,
+			'grade':grade,
+			'academic_year':academic_year,
+			'noaddnew':1,
+			'forfilter':1
+			},
+		handleAs:"json",
+		load: function(data) {
+		    group_store  = getDataStorefromJSON('id','name', data);
+		    dijit.byId('group').set('store',group_store);   
+		    if(oldBranch==branch_id){
+		    	dijit.byId('group').set('value','<?php echo $this->search['group']?>');  
+		    }
+		},
+		error: function(err) {
+		}
+	});
+}
+
+var url_dept = '<?php echo $this->url(array('module'=>'global','controller'=>'grade','action'=>'get-grade')); ?>';
+function getallGrade(){
+	getAllGroupByBranch();  
+	dept_id = dijit.byId('degree').get('value');
+	if(dept_id=='' || dept_id==-1){return false;}
+		dojo.xhrPost({
+			url:url_dept,
+			content:{
+				'dept_id':dept_id,
+				'noaddnew':1
+				},
+			handleAs:"json",
+			load: function(data) {
+				dijit.byId('grade').attr('value','');
+				grade_store  = getDataStorefromJSON('id','name', data);
+			    dijit.byId('grade').set('store',grade_store); 
+			    dijit.byId('grade').attr('value','<?php echo $this->search['grade']?>');  
+			},
+			error: function(err) {
+			}
+		});
+}
+<?php if(!empty($arrTableHeader)){ ?>
+ function toggleColumns() {
+	
+	const visibleCols = {};
+	const colIndices = [];
+
+	$('.col-toggle').each(function () {
+		const col = parseInt($(this).data('col'), 10);
+		if (!isNaN(col)) {
+		  visibleCols[col] = $(this).is(':checked');
+		  colIndices.push(col);
+		}
+	});
+	colForExport = colIndices;
+	colIndices.forEach(col => {
+		const selector = `#tableData td[data-col="${col}"], #myTable th[data-col="${col}"]`;
+		if (visibleCols[col]) {
+		  $(selector).show();
+		  $(".showExport").css("display", "none");
+		} else {
+		  $(selector).hide();
+		}
+	});
+
+  }
+<?php } ?>
+</script>

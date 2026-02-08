@@ -1,0 +1,316 @@
+<?php
+	$tr = Application_Form_FrmLanguages::getCurrentlanguage();
+	echo $this->headTitle($tr->translate("EDIT_REQPERMISSION"));
+	$frm = $this->frm; 
+?>	
+<div class="card">
+	<div class="card-content collapse show">
+		<div class="card-box">
+               	<div class="col-sm-12 border-botom">
+		    		<div class="col-sm-8 pd-0">
+		    			<h4 class="m-b-0"><i class="fa fa-edit" ></i>&nbsp;&nbsp;&nbsp;<?php echo $tr->translate('EDIT_REQPERMISSION');?></h4>
+    			</div>
+    			<div class="col-sm-4 text-right">
+    			</div>
+    		</div>
+    	</div>
+    	 <form id='office_receipt' action="" dojoType="dijit.form.Form" method="post" enctype="application/x-www-form-urlencoded">
+			<script type="dojo/method" event="onSubmit">   
+  				 if(this.validate()) {
+					var thisBranch_id = dijit.byId('branch_id').get('value');
+   					if(thisBranch_id=="" || thisBranch_id==-1){
+						alert("<?php echo $tr->translate('PLEASE_SELECT_BRANCH');?>");
+         				dijit.byId("branch_id").focus();
+        				return false;
+    				}
+					var thisGroup = dijit.byId('group').get('value');
+   					if(thisGroup=="" || thisGroup==-1){
+						alert("<?php echo $tr->translate('PLEASE_SELECT_GROUP');?>");
+         				dijit.byId("group").focus();
+        				return false;
+    				}
+					var thisStudent = dijit.byId('stu_name').get('value');
+   					if(thisStudent=="" || thisStudent==-1){
+						alert("<?php echo $tr->translate('PLEASE_SELECT_STUDENT');?>");
+         				dijit.byId("group").focus();
+        				return false;
+    				}
+					loadingBlock();
+    				return true;
+   				}else {
+    				return false;
+   				}
+			</script>
+			<div class="card-box">
+	    		<div class="col-md-4 col-sm-4 col-xs-12">
+					<div class="card-blogform">
+						<div class="card-body"> 
+							<div class="row"> 
+								<div class="col-md-12 col-sm-12 col-xs-12"> 
+									<div class="d-flex"> 
+										<div class="settings-main-icon ">
+											<i class="material-icons-outlined">class</i>
+										</div> 
+										<div class="col-md-10 col-sm-10 col-xs-12"> 
+											<p class="tx-20 font-weight-semibold d-flex "><?php echo $tr->translate("STUDENT_INFO");?></p>
+										</div> 
+									</div>
+									<div class="form-group">
+										<label class="control-label  col-md-5 col-sm-5 col-xs-12"><?php echo $tr->translate("BRANCH");?> <span class="required">*</span></label>
+										<div class="col-md-7 col-sm-7 col-xs-12">
+											<?php echo $frm->getElement("branch_id");?>
+											<?php echo $frm->getElement("id");?>
+										</div>
+									</div>
+									<div class="form-group">
+										<label class="control-label  col-md-5 col-sm-5 col-xs-12"><?php echo $tr->translate("GROUP");?> <span class="required">*</span></label>
+										<div class="col-md-7 col-sm-7 col-xs-12">
+											<input id="group" />
+										</div>
+									</div>
+									<div class="form-group">
+										<label class="control-label  col-md-5 col-sm-5 col-xs-12"><?php echo $tr->translate("STUDENT_NAME");?> <span class="required">*</span></label>
+										<div class="col-md-7 col-sm-7 col-xs-12">
+											<input id="stu_name">
+										</div>
+									</div>
+									<div class="form-group">
+										<label class="control-label custom-switch float-end "> 
+											<a href="javascript:void(0);" class="switchButton status"><?php echo $tr->translate("STATUS");?></a> 
+											<input type="checkbox" id="status" name="status" class="custom-switch-input" <?php if(!empty($this->row['status'])){ echo "checked";} ?> > 
+											<span class="custom-switch-indicator custom-radius switch-status"></span> 
+										</label>
+									</div>
+									<div>&nbsp;</div>
+									<div id="gr-info"></div>
+								</div>
+							</div>
+						</div>
+					</div>
+		         </div>
+		         <div class="col-md-4 col-sm-4 col-xs-12">
+					 <div class="card-blogform">
+						<div class="card-body"> 
+							<div class="row"> 
+								<div class="col-md-12 col-sm-12 col-xs-12"> 
+									<div class="d-flex"> 
+										<div class="settings-main-icon ">
+											<i class="glyphicon glyphicon-sound-dolby"></i>
+										</div> 
+										<div class="col-md-10 col-sm-10 col-xs-12"> 
+											<p class="tx-20 font-weight-semibold d-flex "><?php echo $tr->translate("ATTENDENCE_INFO");?></p>
+										</div> 
+									</div>
+									<div class="form-group">
+										<label class="control-label  col-md-5 col-sm-5 col-xs-12"><?php echo $tr->translate("AMOUNT_DAY");?> <span class="required">*</span></label>
+										<div class="col-md-7 col-sm-7 col-xs-12">
+											<?php echo $frm->getElement("amountDay");?>
+										</div>
+									</div>
+									<div class="form-group">
+										<label class="control-label  col-md-5 col-sm-5 col-xs-12"><?php echo $tr->translate("FROM_DATE");?> <span class="required">*</span></label>
+										<div class="col-md-7 col-sm-7 col-xs-12">
+											<?php echo $frm->getElement("fromDate");?>
+										</div>
+									</div>
+									<div class="form-group">
+										<label class="control-label  col-md-5 col-sm-5 col-xs-12"><?php echo $tr->translate("TO_DATE");?> <span class="required">*</span></label>
+										<div class="col-md-7 col-sm-7 col-xs-12">
+											<?php echo $frm->getElement("toDate");?>
+										</div>
+									</div>
+									<div class="form-group">
+										<label class="control-label col-md-5 col-sm-5 col-xs-12"><?php echo $tr->translate("REASON");?> </label>
+										<div class="col-md-7 col-sm-7 col-xs-12">
+											<?php echo $frm->getElement("reason");?>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					 </div>
+		         </div>
+		         <div class="col-md-4 col-sm-4 col-xs-12">
+		    		
+		         </div>
+		     </div>
+		     
+	    	<div class="clearfix"></div>
+	       	<div class="card-box mt-20 ">
+	      	 	<div class="col-md-8 col-sm-8 col-xs-12 border-top mt-20 ptb-10 text-center">
+              		 <input type="hidden" name="identity" id="identity"  value="" >
+					<input type="submit" value="save_new" name="save_new" id="save_new" label="<?php echo $tr->translate('SAVE');?>" dojoType="dijit.form.Button" 
+						class="button-class button-primary" iconClass="glyphicon glyphicon-floppy-disk" />
+            	 </div>
+            </div>
+		</form>
+    </div>
+ </div>
+<script src="<?php echo $this->baseUrl();?>/js/help.js"  type="text/javascript"></script>
+<script type="text/javascript">
+	dojo.require("dojo.data.ObjectStore");
+	dojo.require("dojo.data.ItemFileWriteStore");  
+	dojo.require("dijit.form.DateTextBox");
+	dojo.require("dijit.form.Textarea");
+	dojo.require("dijit.form.NumberTextBox");
+	
+	var subject_store  = getDataStorefromJSON('id','name',  <?php print_r(array())?>  );
+	var group_store  = getDataStorefromJSON('id','name', <?php print_r(array())?> );
+	var stu_name_store  = getDataStorefromJSON('id','name',  <?php print_r(array())?>  );
+	
+	dojo.ready(function(){
+		new dijit.form.FilteringSelect({
+			store:stu_name_store,
+			queryExpr: "*${0}*",
+			autoComplete: false,                   
+			required: true,               
+			readOnly: true,               
+			id: "stu_name",
+			name: "stu_name",   
+			class: 'fullside', 
+			placeHolder:"<?php echo $tr->translate("SELECT_STUDENT_NAME");?>",
+			onChange: function() {  
+			}
+		}, "stu_name");
+		
+		new dijit.form.FilteringSelect({
+			store:group_store,
+			queryExpr: "*${0}*",
+			autoComplete: false,                   
+			required: false,               
+			readOnly: true,               
+			id: "group",
+			name: "group",   
+			class: 'fullside', 
+			placeHolder:"<?php echo $tr->translate("SELECT_GROUP");?>",
+			onChange: function() {  
+			 getInfoBygroup();   
+			 getStudentByGroup();
+			}
+		}, "group");
+		getallgroupby();
+	});
+	
+	url_getstudent = '<?php echo $this->url(array('module'=>'issue','controller'=>'studentevaluation','action'=>'get-studentbygroup'));?>';
+	function getStudentByGroup(){
+		dijit.byId('stu_name').reset();
+		group = dijit.byId('group').get('value');
+		if(group=='' || group==-1){
+			var stu_name_store  = getDataStorefromJSON('id','name',<?php print_r(Zend_Json::encode(array()));?> );
+			dijit.byId('stu_name').set('store',stu_name_store); 
+			dijit.byId('group').focus();
+			return false;
+		}
+		dojo.xhrPost({
+			url: url_getstudent,
+			content:{
+				'group':group
+				},
+			handleAs:"json",
+			load: function(data) {
+				stu_name_store  = getDataStorefromJSON('id','name', data);
+				dijit.byId('stu_name').set('store',stu_name_store);   
+				<?php if(!empty($this->row["studentId"])){?>
+				dijit.byId('stu_name').set('value','<?PHP echo $this->row["studentId"]; ?>');
+				<?php } ?>
+			},
+			error: function(err) {
+			}
+		});
+	}
+	
+	function getallgroupby(){// 
+		var url_data = '<?php echo $this->url(array('module'=>'foundation','controller'=>'group','action'=>'getallgroup')); ?>';
+		branch_id = dijit.byId("branch_id").attr("value");
+		if(branch_id==''){  
+			dijit.byId("branch_id").focus();
+			return false;}
+		loadingBlock();
+		dojo.xhrPost({
+			url:url_data,
+			content:{
+				'branch_id':branch_id,
+				'noaddnew':1,
+				'id': <?PHP echo empty($this->row["groupId"]) ? 0 : $this->row["groupId"]; ?>,
+			},
+			handleAs:"json",
+			load: function(data) {
+				group_store  = getDataStorefromJSON('id','name', data);
+			    dijit.byId('group').set('store',group_store);
+			    document.getElementsByClassName("overlay")[0].style.display="none";	
+				<?php if(!empty($this->row["groupId"])){?>
+				dijit.byId('group').set('value','<?PHP echo $this->row["groupId"]; ?>');
+				<?php } ?>
+			},
+			error: function(err) {
+			}
+		});
+	}
+
+	function gender(sex){
+		if(sex==1){
+			sex='Male';
+		}else sex='Female';
+		return sex;
+	}
+
+	function getInfoBygroup(){
+		url_group = '<?php echo $this->url(array('module'=>'issue','controller'=>'scoreeng','action'=>'getgroupinfo'));?>';
+		group = dijit.byId('group').get('value');
+		if(group==''){
+			alert("<?php echo $tr->translate("PLEASE_SELECT_GROUP");?>");
+			dojo.byId("gr-info").innerHTML = "";
+			return false;
+		}
+		dojo.xhrPost({
+			url:url_group,	
+			content:{ 
+				'group_id': group,'string':1
+			},
+			handleAs:"json",
+			load: function(data) {
+				string='';
+				string+='<div class="card-info bg-gradient-directional-warning">';
+					string+='<div class="card-content">';
+						string+='<div class="card-body">';
+							string+='<div class="media d-flex">';
+								string+='<div class="media-body text-white text-left align-self-bottom mt-3">';
+									string+='<span class="d-block mb-1 font-medium-1"></span>';
+									string+='<h3 class="text-white mb-10"><?php echo $tr->translate("GROUP_STUDENT_INFO");?></h3>';
+										string+=data;
+								string+='</div>';
+								string+='<div class="align-self-top">';
+									string+='<i class="glyphicon glyphicon-briefcase icon-opacity text-white font-large-4 float-end"></i>';
+								string+='</div>';
+							string+='</div>';
+						string+='</div>';
+					string+='</div>';
+				string+='</div>';
+				dojo.byId("gr-info").innerHTML = string;
+			},
+			error: function(err) {
+			}
+		});
+	}
+	
+	function calculateToDate(){
+		var amountDay = dijit.byId('amountDay').get('value');
+		var startDate = dijit.byId('fromDate').get('value');
+		var toDate = dijit.byId('toDate').get('value');
+		
+		if (!isNaN(startDate) && !isNaN(amountDay)) {
+			if(amountDay>0){
+				amountDay = amountDay -1;
+				const days = startDate.getDate(); 
+				const endDate = new Date(startDate);
+
+				endDate.setDate(days + amountDay);
+				dijit.byId('toDate').set('value',endDate);
+			}else{
+				const endDate = new Date(startDate);
+				dijit.byId('toDate').set('value',endDate);
+			}
+		  
+		}
+	}
+</script> 

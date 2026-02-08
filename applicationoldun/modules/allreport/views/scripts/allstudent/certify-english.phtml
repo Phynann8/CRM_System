@@ -1,0 +1,229 @@
+<?php 
+		$tr = Application_Form_FrmLanguages::getCurrentlanguage();
+		
+		$pageTitle = $tr->translate("STUDENT RECOMMENDATION");
+		echo $this->headTitle($pageTitle);
+
+		$image = $this->baseUrl().'/images/no-profile.png';
+		if(!empty($this->rs['photo'])){
+			if (file_exists(PUBLIC_PATH."/images/photo/".$this->rs['photo'])){
+				$image = $this->baseUrl().'/images/photo/'.$this->rs['photo'];
+			}
+		}
+		
+		$dateFormat ="d/m/y";
+?>
+<style>
+	button.btn-search {
+		display: none !important;
+	}
+</style>
+<div class="layout-wrapper-report">
+	<div id="mainContent" class="main-content-report">
+		<div class="report-preview">
+			<?php echo $this->controlReport?>
+			<div id="main-viewer" class="main-viewer portrait">
+				<div id="viewer" class="viewer portrait">
+					<div id="divPrint" class="content">
+						<link rel="stylesheet" href="<?php echo $this->baseUrl();?>/admin/build/css/report-style.css">
+						<link rel="stylesheet" href="<?php echo $this->baseUrl();?>/admin/build/css/report-style-screen.css">
+						<style>
+							@media print {
+								<?php if(!empty($this->printFormat)){ echo $this->printFormat; } ?>
+							}
+							.wrapper{
+								width: 100%;
+								margin: 0px;
+								padding: 0px;
+							}
+							.contain{
+								width: 1024px;
+								margin: 0 auto;
+							}
+							table {
+								border-collapse: collapse;
+								width: 100%;
+							}
+							th, td {
+								padding: 4px;
+							}
+							.image-box {
+								text-align: center;
+							}
+							.image-box img {
+								width: 120px;
+								height: 130px;
+							border:solid 1px #ddd;
+							}
+							.account-image {
+								width: 120px;
+								margin: 0 auto;
+							}
+							.transfrom{
+								text-transform: uppercase;
+							}
+							.center-no-next{text-align: center;}
+							.back-color,.back-footer{background-color: #eee;}
+							.back-color td{padding: 20px;}
+							.text-left td{text-align: right;}
+							.img-size img{height: 15px;}
+							tr.line td{ border-bottom: 2px solid #000; }
+							
+						</style>
+						<table cellpadding="0" cellspacing="0" width="100%">
+							<tr class="no-boder">
+								<td>
+									<?php echo $this->rsheader;?>
+								</td>
+							</tr>
+							<tr>
+								<td>
+									<table style="font-family: Khmer OS Battambang, Times New Roman;">
+										<tr>
+											<td>&nbsp;</td>
+										</tr>
+										<tr>
+											<td><div style="margin-left: 25px;">N<sup>o</sup> <span style="display:inline-block;min-width: 100px;border-bottom: dotted 1px #000;line-height: 11px;">&nbsp;</span></div></td>
+										</tr>
+										<tr>
+											<td valign="top">
+												<table width="100%" style="line-height: 15px;white-space: nowrap;">
+													<tr class="account-image">
+														<td width="20%" >&nbsp;</td>
+														<td width="60%" valign="top" align="center" style="font-family: Times New Roman , Khmer OS Muol;font-size:18px;font-weight: bold; padding-rgiht: 34px; line-height: 24px; text-align: center;">
+															STUDENT RECOMMENDATION
+														</td>
+														<td valign="top" width="20%" align="left" class="image-box" style="padding-left: 0px;">
+															<!-- <img style="margin-top: -30px;" id="profile_wiew" src="<?php //echo $image;?>" alt=""  /> -->
+														</td>
+													</tr>
+													<tr class="account-image">
+														<td colspan="2" valign="bottom">
+														</td>
+														<td valign="top" width="20%" align="left" class="image-box" style="padding-left: 0px;">
+															<img style="margin-top: -75px" id="profile_wiew" src="<?php echo $image;?>" alt=""  />
+														</td>
+													</tr>
+												</table>
+											</td>
+										</tr>
+									</table>
+									<div style="text-align: center; font-family: 'Times New Roman', Khmer OS Muol Light; font-size:16px; ">
+									This is to certify that
+									<br />
+									<span style=" font-size:18px;  font-weight: bold; text-transform: uppercase;"><?php echo $this->rs['name_englsih'];?></span>
+									</div>
+								</td>
+							</tr>
+							<tr>
+								<td>
+									<table border="0" style="margin:0 auto;line-height: 20px;font-family:  Times New Roman , Khmer OS Battambang;width: 70%;">
+										<tr>
+											<td >
+												&nbsp;
+											</td>
+										</tr>
+										<tr>
+											<td valign="top">
+												<strong class="transfrom">Date Of Birth</strong> 
+											</td>
+											<td valign="top">:&nbsp;<?php echo $this->rs['dob_en'];?></td>
+										</tr>
+										<tr>
+											<td valign="top" >
+												<strong class="transfrom">Gender</strong> 
+											</td>
+											<td valign="top">:&nbsp;<?php echo $this->rs['sex'];?></td>
+										</tr>
+										<tr>
+											<td valign="top">
+												<strong class="transfrom">Place Of Birth</strong>
+											</td>
+											<td valign="top">:&nbsp;<?php echo $this->rs['pob'];?></td>
+										</tr>
+										<tr>
+											<td valign="top">
+												<strong class="transfrom">Father Name:</strong> 
+											</td>
+											<td valign="top">:&nbsp;<?php echo $this->rs['father_enname'];?></td>
+										</tr>
+										<tr>
+											<td valign="top">
+												<strong class="transfrom">Mother Name</strong> 
+											</td>
+											<td valign="top">:&nbsp;<?php echo $this->rs['mother_enname'];?></td>
+										</tr>
+										<tr>
+											<td valign="top" style="line-height: 32px; white-space: nowrap;">
+												<strong class="transfrom">Permanent Address</strong> 
+											</td>
+											<td valign="top">:&nbsp;N<sup>o</sup> <span style="display: inline-block; white-space:nowrap; min-width: 20px;"><?php echo $this->rs['home_num'];?></span> &nbsp;Street &nbsp;<span style="display: inline-block; min-width: 40px;"><?php echo $this->rs['street_num'];?>,</span>
+												<?php echo $this->rs['commune_nameeg'];?>,&nbsp;<?php echo $this->rs['district_en'];?>&nbsp;,&nbsp;<?php echo $this->rs['province_enname'];?> 
+											</td>
+										</tr>
+									</table>
+								</td>
+							</tr>
+							<tr>
+								<td style="font-family:  'Times New Roman' , 'Khmer OS Battambang';">Is currently a Student  of &nbsp;<strong><?php echo $this->rs['grade_eng'];?></strong>&nbsp; in the academic school year <?php echo $this->rs['academic_year'];?>  at <?php echo $this->rs['school_nameen'];?> </td>
+							</tr>
+							<tr><td>&nbsp;</td></tr>
+							<tr>
+								<td style="line-height: 32px; font-family:  Times New Roman , Khmer OS Battambang;">
+								This letter is issued to the bearer for official purposes is may there to serve.
+								</td>
+							</tr>
+							<tr>
+								<td>
+									<table style="font-family: 'Times New Roman' , 'Khmer OS Battambang';">
+										<tr>
+											<td>
+												<table width="100%" style="line-height: 15px;white-space: nowrap;">
+													<tr>
+														<td width="28%">&nbsp;</td>
+														<td width="40%" align="center"> </td>
+														<td width="28%" align="center"></td>
+													</tr>
+													<tr>
+														<td>&nbsp;</td>
+														<td >&nbsp;</td>
+														<td align="center"><div>Date:&nbsp;<?php echo date('F d, Y');?></div></td>
+													</tr>
+													<tr>
+														<td>&nbsp;</td>
+														<td align="center"><div>&nbsp;</div></td>
+													</tr>
+													<tr>
+														<td>&nbsp;</td>
+														<td align="center"><div>&nbsp;</div></td>
+													</tr>
+													<tr>
+														<td>&nbsp;</td>
+														<td >&nbsp;</td>
+														<td width="40%" align="center">
+														<span style="line-height:32px; font-family: 'Times New Roman', Khmer OS Muol Light; display:block;font-size: 16px; margin-buttom: 78px;">
+														<strong>SCHOOL PRINCIPAL</strong>
+														</span>
+														</td>
+													</tr>
+												</table>
+											</td>
+										</tr>
+									</table>
+								</td>
+							</tr>
+						</table>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function(e) {
+  setTimeout(function() {
+		setPrintOrientation('portrait');
+	}, 500);
+});	
+</script>
+

@@ -1,0 +1,71 @@
+<?php 
+$frm = $this->frm_search;
+$tr = Application_Form_FrmLanguages::getCurrentlanguage();
+?>
+<title><?php echo $tr->translate('CATE_INCOME');?></title>
+<script>
+	dojo.require('dijit.form.Button');
+	dojo.require("dijit.form.DateTextBox");
+</script>
+<div class="card pb-10 pt-10 pl-10 pr-10">
+	<div class="card-content collapse show">
+		<div class="col-sm-12 border-botom ">
+	    	<div class="col-sm-8 pd-0">
+    			<h4 class="m-b-0">
+					<i class="fa fa-sitemap" aria-hidden="true"></i>&nbsp;&nbsp;&nbsp;
+					<?php echo $tr->translate('CATE_INCOME');?></h4>
+    			</div>
+    			<div class="col-sm-4 text-right">
+    		</div>
+    	</div>
+		<div class="card-box">
+			<form id="list" name="list" action="<?php echo $this->url(array('module'=>'registrar','controller'=>'cateincome','action'=>'index')); ?>" dojoType="dijit.form.Form" method="post">
+				<div class="form-group">
+			         <div class="col-md-2 col-sm-2 col-xs-12">
+			         	<?php echo $frm->getElement("adv_search");?>
+			         </div>
+			         <div class="col-md-2 col-sm-2 col-xs-12">
+			         	<?php echo $frm->getElement('status');?>
+			         </div>
+			          <div class="col-md-2 col-sm-2 col-xs-12">
+			          	<button class="button-class button-primary" iconClass="glyphicon glyphicon-search" dojoType="dijit.form.Button" showLabel="true" type="submit"><?php echo $tr->translate("SEARCH");?></button>
+			         </div>
+			     </div>
+		    </form>      
+		</div>
+		<div class="card-box">
+			 <?php //echo $this->list;?>
+			<div class="dataTables_scrollBody" style="position: relative;  width: 100%; background:#fff;   ">
+    			<table border="1" id="datatable-responsive" style="  border-collapse: collapse;   border-color: #ddd;"  class="responsiveTable display nowrap dataTable dtr-inline collapsed " cellspacing="0" width="100%" >
+    				<thead>
+    					<tr>
+    						<th class="tdheader text-center"><?php echo $tr->translate("NUM");?></th>
+    						<th class="tdheader text-center"><?php echo $tr->translate("TITLE");?></th>
+    						<th class="tdheader text-center"><?php echo $tr->translate("ACCOUNT_CODE");?></th>
+							<th class="tdheader text-center"><?php echo $tr->translate("CREATE_DATE");?></th>
+    						<th class="tdheader text-center"><?php echo $tr->translate("USER");?></th>
+    						<th class="tdheader text-center"><?php echo $tr->translate("STATUS");?></th>
+    					</tr>
+    				</thead>
+    				<tbody>
+    					<?php $r=0; if (!empty($this->row)) foreach ($this->row as $rs){ 
+    						if($r%2==0)$attb='normal';
+    						else $attb='alternate';
+    						$r++?>
+    					<tr >
+    						<td style="text-align:center;" ><?php echo $r;?></td>
+    						<td class="itesms" ><a class="edit" href="<?php echo $this->baseUrl()."/registrar/cateincome/edit/id/".$rs['id'];?> "><?php echo $rs['name']?></a></td>
+    						<td class="itesms" ><a class="edit" href="<?php echo $this->baseUrl()."/registrar/cateincome/edit/id/".$rs['id'];?> "><?php echo $rs['account_code']?></a></td>
+    						<td class="itesms text-center" ><?php echo date("d-m-Y",strtotime($rs['create_date']));?></td>
+							<td class="itesms text-center" ><?php echo $rs['user']?></td>
+    						<td class="itesms text-center" ><?php echo $rs['status']?></td>
+    					</tr>
+    					<?php }?>
+    				</tbody>
+    				
+    			</table>
+    		</div>	
+		</div>
+	</div>
+</div>
+

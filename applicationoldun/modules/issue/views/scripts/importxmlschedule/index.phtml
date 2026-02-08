@@ -1,0 +1,869 @@
+<?php
+	$tr = Application_Form_FrmLanguages::getCurrentlanguage();
+	$baseurl =  Zend_Controller_Front::getInstance()->getBaseUrl();
+	echo $this->headTitle($tr->translate('IMPORT_SCHEDULE')); 
+	$frm = $this->form; 
+	
+	$sessionXml = new Zend_Session_Namespace('xmlFile');
+	$importType = $sessionXml->xml_ImportType;
+	$importType = empty($importType) ? 1 : $importType;
+	$fileName = $sessionXml->xml_FileName;
+	$branchId = $sessionXml->xml_branch;
+	$academicYear = $sessionXml->xml_academicYear;
+	$setting = $sessionXml->xml_setting;
+	$step = $sessionXml->xml_Step;
+	$step = empty($step) ? 0 : $step;
+	
+	$buttonClass="button-primary";
+	$buttonIcon="glyphicon glyphicon glyphicon-circle-arrow-right";
+	$buttonTitle=$tr->translate('NEXT');
+	if($step==5){
+		$buttonClass="button-success";
+		$buttonIcon="glyphicon glyphicon glyphicon-floppy-disk";
+		$buttonTitle=$tr->translate('SAVE');
+	}
+?>
+<head>
+
+</head>
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.main {
+    width: 90%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    margin: 0 auto;
+}
+
+.main ul {
+    display: flex;
+}
+.main ul.import-step {
+    padding: 15px 0;
+    background: #fbfbfb;
+    border: solid 2px #eee;
+    border-radius: 20px;
+    margin: 15px 0;
+}
+.main ul li {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: 0 20px;
+}
+
+.main ul li .icons {
+    font-size: 25px;
+    color: #1c58a6;
+    margin: 0 60px;
+}
+
+.main ul li .label {
+    font-family: inherit;
+    letter-spacing: 1px;
+    font-size: 14px;
+    font-weight: normal;
+    color: #000000;
+    line-height: 16px;
+}
+
+.main ul li .step {
+    height: 30px;
+    width: 30px;
+    border-radius: 50%;
+    background-color: #d7d7c3;
+    margin: 16px 0 10px;
+    display: grid;
+    place-items: center;
+    color: ghostwhite;
+    position: relative;
+    cursor: pointer;
+}
+
+.main .step::after {
+    content: "";
+    position: absolute;
+    width: 168px;
+    height: 3px;
+    background-color: #d7d7c3;
+    right: 30px;
+}
+
+.main .first::after {
+    width: 0;
+    height: 0;
+}
+
+.main ul li .step .awesome {
+    display: none;
+}
+
+.main ul li .step p {
+    font-size: 18px;
+    margin: 0;
+}
+
+.main ul li .active {
+    background-color: #3b7acc;
+}
+
+.main li .active::after {
+    background-color: #3b7acc;
+
+}
+
+.main ul li .active p {
+    display: none;
+}
+
+.main ul li .active .awesome {
+    display: flex;
+}
+
+.instrunctionInfo label.control-label {
+    white-space: normal;
+}
+
+ul.detailInfo {
+    margin: 0;
+    padding: 0;
+    padding-left: 30px;
+}
+</style>
+<div class="card-box">
+    <div class="col-sm-12 border-botom">
+        <div class="col-sm-8 pd-0">
+            <h4 class="m-b-0"><i class="fa fa-database" aria-hidden="true"></i>&nbsp;&nbsp;&nbsp;<?php echo $tr->translate('IMPORT_SCHEDULE')?></h4>
+        </div>
+        <div class="col-sm-4 text-right">
+        </div>
+    </div>
+</div>
+<div class="card-box">
+	<div class="row g-3">
+		<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+			<ul class="nav nav-tabs bar_tabs" role="tablist">
+				<li role="presentation" class="<?php if($importType==1){ echo "active";}?>">
+					<a class="nav-link " data-toggle="tab" href="#panel21" role="tab"><i class="fa fa-file-excel-o  ml-2"></i> <?php echo $tr->translate("IMPORT_BY_EXCEL_FILE");?></a>
+				</li>
+				<li role="presentation" class="<?php if($importType==2){ echo "active";}?>">
+					<a class="nav-link" data-toggle="tab" href="#panel22" role="tab">
+					<i class="fa fa-file-code-o ml-2"></i> <?php echo $tr->translate("IMPORT_BY_XML_FILE");?>
+					</a>
+				</li>
+			</ul>
+		</div>
+	</div>
+	<div class="tab-content vertical">
+		<div class="tab-pane fade <?php if($importType==1){ echo "in active";}?>" id="panel21" role="tabpanel">
+			<div class="row g-3 border-botom">
+				<div class="col-md-4 col-sm-4 col-xs-12">
+					<form id='importExcel' action="<?php echo $this->baseUrl()."/issue/importxmlschedule/impexcel"; ?>" enctype="multipart/form-data" dojoType="dijit.form.Form" method="post">
+						<script type="dojo/method" event="onSubmit">	
+							if(this.validate()) {
+								loadingBlock();
+								return true;
+							}else {
+								return false;
+							}		
+						</script>
+						<div class="card-blogform">
+							<div class="card-body"> 
+								<div class="row"> 
+									<div class="col-md-12 col-sm-12 col-xs-12"> 
+										<div class="d-flex"> 
+											<div class="settings-main-icon ">
+												<i class="fa fa-file-archive-o" ></i>
+											</div> 
+											<div class="col-md-10 col-sm-10 col-xs-12"> 
+												<p class="tx-20 font-weight-semibold d-flex "><?php echo $tr->translate('UPLOAD_FILE')?></p>
+											</div> 
+										</div>
+										<br />
+										
+										<div class="form-group ">
+											<div class="col-md-12 col-sm-12 col-xs-12">
+												<?php echo $frm->getElement("branchId"); ?>
+											</div>
+										</div>
+										<div class="form-group ">
+											<div class="col-md-12 col-sm-12 col-xs-12">
+												<?php echo $frm->getElement("academicYear"); ?>
+											</div>
+										</div>
+										<div class="form-group ">
+											<div class="col-md-12 col-sm-12 col-xs-12">
+												<input id="scheduleSetting" />
+											</div>
+										</div>
+										<div class="form-group ">
+											<div class="col-md-12 col-sm-12 col-xs-12">
+												<?php echo $tr->translate('CHOOSE_FILE')?>(Excel File)
+											</div>
+										</div>
+										<div class="form-group ">
+											<div class="col-md-12 col-sm-12 col-xs-12">
+												<div id="file_excel" class="form-group" style=" margin-bottom: 5px !important;">
+													<div class="input-group input-file-excel" name="file_excel">
+														<input type="text" class="form-control" placeholder="<?php echo $tr->translate('CHOOSE_FILE');?>..." value="" />
+													</div>
+												</div>
+											</div>
+										</div>
+										<div class="form-group">
+											<div class="col-md-12 col-sm-12 col-xs-12 text-center">
+											<input type="submit"  value="SAVE_CLOSE" label="<?php echo $tr->translate('UPLOAD_FILE')?>" id="import_excel" dojoType="dijit.form.Button" name="import_excel"
+											class="button-class button-primary" iconClass="glyphicon glyphicon-download-alt" /> 
+											</div>
+										</div> 
+										
+									</div>
+								</div>
+							</div>
+						</div>
+					</form>
+					<?php if(!empty($fileName)  AND $importType==1){?>
+					<div class="form-group">
+						<div class="col-md-12 col-sm-12 col-xs-12 text-center">
+							<i class="fa fa-file-archive-o"></i> <?php echo "<strong>".$fileName."</strong>";?>
+						</div>
+					</div>
+					<div class="form-group">
+						<div class="col-md-12 col-sm-12 col-xs-12 text-center">
+							<input type="button" onclick="submitScheduleExcel();" value="SAVE_CLOSE" label="<?php echo $tr->translate('SAVE')?>" id="saveSchedule" name="saveSchedule" dojoType="dijit.form.Button"  class="button-class button-success" iconClass="glyphicon glyphicon glyphicon-floppy-disk" /> 
+							<a class="btn btn-primary" title="<?php echo $tr->translate('កាលវិភាគបណ្ដោះអាសន្ន');?>" href="javascript:void(0);" onClick="opentPreSchedule();"><?php echo $tr->translate('កាលវិភាគបណ្ដោះអាសន្ន');?> <i class="glyphicon glyphicon-eye-open" ></i> </a>
+						</div>
+					</div>
+					<?php } ?>
+				</div>
+				<div class="col-md-5 col-sm-5 col-xs-12">
+					<div class="row">
+						<div class="col-md-12 col-sm-12 col-xs-12">
+							<div class="card-body bg-label-primary instrunctionInfo"> 
+								<div class="row"> 
+									<div class="col-md-12 col-sm-12 col-xs-12"> 
+										<div class="d-flex"> 
+											<div class="settings-main-icon ">
+												<i class="glyphicon glyphicon-info-sign" ></i>
+											</div> 
+											<div class="col-md-10 col-sm-10 col-xs-12"> 
+												<p class="tx-20 font-weight-semibold d-flex "> <?php echo $tr->translate('INTRODUCTION')?></p>
+											</div> 
+										</div>
+										<div class="form-group">
+										   <small class="control-label bold col-md-12 col-sm-12 col-xs-12">
+												ការ<strong><?php echo $tr->translate('IMPORT_BY_EXCEL_FILE')?></strong> សូមអនុវត្តតាមរបៀបដូចខាងក្រោម៖
+										   </small>
+										</div>
+										<div class="form-group">
+										   <small class="control-label bold col-md-12 col-sm-12 col-xs-12">
+												1. <strong>ការរៀបចំ Excel File : </strong> សូមទាញយក <a download class="red" title="គំរូ Excel File" href="<?php echo $this->baseUrl()."/images/document/sample-schedule.xlsx";?>"><i class="fa fa-download"></i> គំរូ Excel File</a> ដើម្បីរៀបចំ។
+												<ul class="detailInfo">
+													<li>
+														ម៉ោងបង្រៀនត្រូវរៀបជាទម្រង់ 24 ម៉ោង <strong class="red">ឧ. 14:10-15:00</strong>។
+													ករណីដែលម៉ោងថ្មីមិនមាននៅក្នុងប្រព័ន្ធ សូមបង្កើតម៉ោងបន្ថែមជាមុនសិន	
+													ចុចទីនេះ <a class="text-warning" target="_blank" title="<?php echo $tr->translate('TIME_LIST');?>" href="<?php echo $this->baseUrl()."/issuesetting/timelist";?>"><?php echo $tr->translate('TIME_LIST');?></a> ដើម្បីបន្ថែមម៉ោងថ្មី	
+													</li>
+													<li>
+														បញ្ចូលឈ្មោះគ្រូបង្រៀនជាភាសាខ្មែរ និងភ្ជាប់ជាមួយឈ្មោះអក្សរឡាតាំងដោយសញ្ញាក្បៀស 
+														<br /><strong class="red">ឧ.  ចាន់ សំណាង,Chan Samnang</strong>។
+													</li>
+													<li>
+														បញ្ចូលមុខវិជ្ជាជាភាសាខ្មែរ និងភ្ជាប់ជាមួយឈ្មោះជាអង់គ្លេសដោយសញ្ញាក្បៀស 
+														<br /><strong class="red">ឧ. អង់គ្លេស,English</strong>។
+													</li>
+													<li>
+														លេខកូដថ្នាក់ត្រូវបញ្ចូលឱ្យដូច លេខកូដក្រុមដែលមានក្នុងប្រព័ន្ធ។
+													</li>
+													<li><i class="red">ចំណាំ៖ សូមផ្ទៀងផ្ទាត់ ឈ្មោះគ្រូបង្រៀន មុខវិជ្ជា និង លេខកូដថ្នាក់ ជៀសវាងការស្ទួន។
+														ករណី ឈ្មោះគ្រូបង្រៀន មុខវិជ្ជា និង លេខកូដថ្នាក់ មិនមានក្នុងប្រព័ន្ធនឹងត្រូវបង្កើតថ្មីស្វ័យប្រវត្តិផងដែរ។
+														</i>
+													</li>
+												</ul>
+										   </small>
+										</div>
+										<div class="form-group">
+										   <small class="control-label bold col-md-12 col-sm-12 col-xs-12">
+												2. Upload File Excel ដែលរៀបចំរួចចូលក្នុងប្រព័ន្ធ ជ្រើសរើស សាខា, ឆ្នាំសិក្សា, ទម្រង់គំរូដែលបានកំណត់ រួចចុច <strong><?php echo $tr->translate('UPLOAD_FILE')?></strong>។			   
+											</small>
+										</div>
+										<div class="form-group">
+										   <small class="control-label bold col-md-12 col-sm-12 col-xs-12">
+												3. Preview ដើម្បីផ្ទៀងផ្ទាត់ <strong>កាលវិភាគបណ្ដោះអាសន្ន</strong> និងព័ត៌មាន ដែល Alert <strong>(មុខវិជ្ជា / Subject,គ្រូ / Teacher,ក្រុម / Class...)</strong>  ដែលទទួលបានពីការបញ្ចូល File
+											</small>
+										</div>
+										<div class="form-group">
+										   <small class="control-label bold col-md-12 col-sm-12 col-xs-12">
+												4. ចុចប៊ូតុង <strong><?php echo $tr->translate('SAVE');?></strong> ដើម្បីបញ្ចប់ការ Import កាលវិភាគសិក្សា។			   
+											</small>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						
+					</div>
+				</div>
+				<div class="col-md-3 col-sm-3 col-xs-12">
+					<div class="row">
+						<div class="col-md-12 col-sm-12 col-xs-12 scheduleSettingExcel">
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="main">
+			<?php if(!empty($fileName) AND $importType==1){?>
+				<div class="row">
+					<div class="col-md-3 col-sm-3 col-xs-12 subjMessage">
+						<?php echo $this->subjMessageHtml; ?>
+					</div>
+					<div class="col-md-3 col-sm-3 col-xs-12 teacherMessage">
+						<?php echo $this->teacherMessageHtml; ?>
+					</div>
+					<div class="col-md-3 col-sm-3 col-xs-12 groupMessage">
+						<?php echo $this->groupMessageHtml; ?>
+					</div>
+					<div class="col-md-3 col-sm-3 col-xs-12 timeMessage">
+						
+					</div>
+				</div>
+				<?php } ?>
+			</div>
+		</div>
+		<div class="tab-pane <?php if($importType==2){ echo "in active";}?>" id="panel22" role="tabpanel">
+			<div class="col-sm-12 border-botom">
+				<div class="row">
+					<div class="col-md-4 col-sm-4 col-xs-12">
+						<form id='importxml' enctype="multipart/form-data" dojoType="dijit.form.Form" method="post">
+							<script type="dojo/method" event="onSubmit">	
+								if(this.validate()) {
+									/*branch_id=dijit.byId("branch_id").get("value");
+									if(branch_id==-1 || branch_id==""){
+										alert("<?php echo $tr->translate("PLEASE_SELECT_BRANCH");?>!!!");
+										dijit.byId("branch_id").focus();
+										return false;
+									}*/
+									loadingBlock();
+									return true;
+								}else {
+									return false;
+								}		
+							</script>
+							<div class="card-blogform">
+								<div class="card-body"> 
+									<div class="row"> 
+										<div class="col-md-12 col-sm-12 col-xs-12"> 
+											<div class="d-flex"> 
+												<div class="settings-main-icon ">
+													<i class="fa fa-file-archive-o" ></i>
+												</div> 
+												<div class="col-md-10 col-sm-10 col-xs-12"> 
+													<p class="tx-20 font-weight-semibold d-flex "><?php echo $tr->translate('UPLOAD_FILE')?></p>
+												</div> 
+											</div>
+											<br />
+											<div class="form-group ">
+												<div class="col-md-12 col-sm-12 col-xs-12">
+													<?php echo $tr->translate('CHOOSE_FILE')?>(XML File)
+												</div>
+											</div>
+											<div class="form-group ">
+												<div class="col-md-12 col-sm-12 col-xs-12">
+													<div id="xml_file" class="form-group" style=" margin-bottom: 5px !important;">
+														<div class="input-group input-file" name="xml_file">
+															<input type="text" class="form-control" placeholder="<?php echo $tr->translate('CHOOSE_FILE');?>..." value="" />
+														</div>
+													</div>
+												</div>
+											</div>
+											<div class="form-group">
+												<div class="col-md-12 col-sm-12 col-xs-12">
+												<input type="submit"  value="SAVE_CLOSE" label="<?php echo $tr->translate('UPLOAD_FILE')?>" id="import_file" dojoType="dijit.form.Button" name="import_file"
+												class="button-class button-primary" iconClass="glyphicon glyphicon-download-alt" /> 
+												</div>
+											</div> 
+										</div>
+									</div>
+								</div>
+							</div>
+						</form>
+					</div>
+					<div class="col-md-5 col-sm-5 col-xs-12">
+						<div class="row">
+							<div class="col-md-12 col-sm-12 col-xs-12">
+								<div class="card-body bg-label-primary instrunctionInfo"> 
+									<div class="row"> 
+										<div class="col-md-12 col-sm-12 col-xs-12"> 
+											<div class="d-flex"> 
+												<div class="settings-main-icon ">
+													<i class="glyphicon glyphicon-info-sign" ></i>
+												</div> 
+												<div class="col-md-10 col-sm-10 col-xs-12"> 
+													<p class="tx-20 font-weight-semibold d-flex "><?php echo $tr->translate('INTRODUCTION')?></p>
+												</div> 
+											</div>
+											<div class="form-group">
+											   <small class="control-label bold col-md-12 col-sm-12 col-xs-12">
+													1, Upload XML File <strong>aSc TimeTables.</strong>
+											   </small>
+											</div>
+											<div class="form-group">
+											   <small class="control-label bold col-md-12 col-sm-12 col-xs-12">
+													2, ចុចប៊ូតុង <strong>បន្ទាប់ / Next</strong> ដើម្បីផ្ទៀងផ្ទាត់ <strong>មុខវិជ្ជា,គ្រូ </strong> ទៅតាមជំហ៊ានបន្តបន្ទាប់។					   
+												</small>
+											</div>
+											<div class="form-group">
+											   <small class="control-label bold col-md-12 col-sm-12 col-xs-12">
+													3, ចុចប៊ូតុង <strong>បន្ទាប់ / Next</strong> ដើម្បីផ្ទៀងផ្ទាត់ <strong>ក្រុម / Class</strong> ករណីដែលក្រុមថ្មីមិនមាននៅក្នុងប្រព័ន្ធ សូមបង្កើតក្រុមបន្ថែមជាមុន
+													ចុចទីនេះ <a class="text-warning" target="_blank" title="<?php echo $tr->translate('CLASS');?>" href="<?php echo $this->baseUrl()."/foundation/group";?>"><?php echo $tr->translate('CLASS');?></a> ដើម្បីបន្ថែមក្រុម។
+												</small>
+											</div>
+											<div class="form-group">
+											   <small class="control-label bold col-md-12 col-sm-12 col-xs-12">
+													4, ចុចប៊ូតុង <strong>បន្ទាប់ / Next</strong> ដើម្បីផ្ទៀងផ្ទាត់ <strong>ម៉ោង / Time</strong> ករណីដែលម៉ោងថ្មីមិនមាននៅក្នុងប្រព័ន្ធ សូមបង្កើតបញ្ជីម៉ោងបន្ថែមជាមុន	
+													ចុចទីនេះ <a class="text-warning" target="_blank" title="<?php echo $tr->translate('TIME_LIST');?>" href="<?php echo $this->baseUrl()."/issuesetting/timelist";?>"><?php echo $tr->translate('TIME_LIST');?></a> ដើម្បីបន្ថែមម៉ោងថ្មី។
+												</small>
+											</div>
+											<div class="form-group">
+											   <small class="control-label bold col-md-12 col-sm-12 col-xs-12">
+													5, ចុចប៊ូតុង <strong>បន្ទាប់ / Next</strong> ដើម្បីរៀបចំកាលវិភាគ និង Preview ដើម្បីផ្ទៀងផ្ទាត់ មុននឹងរក្សាទុកជាទិន្នន័យពិតប្រាកដ។			   
+												</small>
+											</div>
+											<div class="form-group">
+											   <small class="control-label bold col-md-12 col-sm-12 col-xs-12">
+													6, ចុចប៊ូតុង <strong><?php echo $tr->translate('SAVE');?></strong> ដើម្បីបញ្ចប់ការ Import កាលវិភាគសិក្សា។			   
+												</small>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+							
+						</div>
+					</div>
+					<div class="col-md-3 col-sm-3 col-xs-12">
+						<div class="row">
+							<div class="col-md-12 col-sm-12 col-xs-12 scheduleSettingXml">
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="main">
+				<?php if(!empty($fileName) AND $importType==2){?>
+				<div class="row">
+					<div class="col-md-12 col-sm-12 col-xs-12">
+						<div class="form-group" style="background: #d8e0e2; padding: 10px 5px; margin: 0; border: solid 1px #697996; border-radius: 2px;">
+							<div class="col-md-2 col-sm-2 col-xs-12">
+								<i class="fa fa-file-archive-o"></i> <?php echo "<strong>".$fileName."</strong>";?>
+							</div>
+							<div class="col-md-2 col-sm-2 col-xs-12">
+								<?php echo $frm->getElement("branch_id"); ?>
+							</div>
+							<div class="col-md-2 col-sm-2 col-xs-12">
+								<?php echo $frm->getElement("academic_year"); ?>
+							</div>
+							<div class="col-md-2 col-sm-3 col-xs-12">
+								<input id="setting" />
+							</div>
+							<div class="col-md-3 col-sm-3 col-xs-12">
+								<input type="button" onclick="importschedule();" value="SAVE_CLOSE" label="<?php echo $buttonTitle;?>" id="next" name="next" dojoType="dijit.form.Button"  class="button-class <?php echo $buttonClass;?>" iconClass="<?php echo $buttonIcon;?>" /> 
+								<?php if($step==5){?>
+								<a class="btn btn-primary" title="<?php echo $tr->translate('កាលវិភាគបណ្ដោះអាសន្ន');?>" href="javascript:void(0);" onClick="opentPreSchedule();"><?php echo $tr->translate('កាលវិភាគបណ្ដោះអាសន្ន');?> <i class="glyphicon glyphicon-eye-open" ></i> </a>
+								<?php } ?>
+							</div>
+						</div>
+					</div>
+				</div>
+				<?php } ?>
+				<ul class="import-step">
+					<li>
+						<i class="icons awesome fa fa-book"></i>
+						<div class="step first stept1 <?php if($step>=1){echo "active";}?>">
+							<p>1</p>
+							<i class="awesome fa fa-check"></i>
+						</div>
+						<p class="label">មុខវិជ្ជា / Subject</p>
+					</li>
+					<li>
+						<i class="icons awesome fa fa-user"></i>
+						<div class="step second stept2 <?php if($step>=2){echo "active";}?>">
+							<p>2</p>
+							<i class="awesome fa fa-check"></i>
+						</div>
+						<p class="label">គ្រូ / Teacher</p>
+					</li>
+					<li>
+						<i class="icons awesome fa fa-desktop"></i>
+						<div class="step third stept3 <?php if($step>=3){echo "active";}?>">
+							<p>3</p>
+							<i class="awesome fa fa-check"></i>
+						</div>
+						<p class="label">ក្រុម / Class</p>
+					</li>
+					<li>
+						<i class="icons awesome fa fa-clock-o"></i>
+						<div class="step fourth stept4 <?php if($step>=4){echo "active";}?>">
+							<p>4</p>
+							<i class="awesome fa fa-check"></i>
+						</div>
+						<p class="label">ម៉ោង / Time</p>
+					</li>
+					<li>
+						<i class="icons awesome fa fa-calendar"></i>
+						<div class="step fifth stept5 <?php if($step>=5){echo "active";}?>">
+							<p>5</p>
+							<i class="awesome fa fa-check"></i>
+						</div>
+						<p class="label">រៀបចំកាលវិភាគ / Schedule</p>
+					</li>
+					<li>
+						<i class="icons awesome fa fa-thumbs-up"></i>
+						<div class="step sixth stept6 <?php if($step>=6){echo "active";}?>">
+							<p>6</p>
+							<i class="awesome fa fa-check"></i>
+						</div>
+						<p class="label">រួចរាល់ / Finished</p>
+					</li>
+				</ul>
+				<?php if(!empty($fileName) AND $importType==2){?>
+				<div class="row">
+					<div class="col-md-3 col-sm-3 col-xs-12 subjMessage">
+						<?php if($step>=1){ echo $this->subjMessageHtml; }?>
+					</div>
+					<div class="col-md-3 col-sm-3 col-xs-12 teacherMessage">
+						<?php if($step>=2){ echo $this->teacherMessageHtml; }?>
+					</div>
+					<div class="col-md-3 col-sm-3 col-xs-12 groupMessage">
+						<?php if($step>=3){ echo $this->groupMessageHtml; }?>
+					</div>
+					<div class="col-md-3 col-sm-3 col-xs-12 timeMessage">
+						<?php if($step>=4){?>
+						<div class="card-body bg-label-success"> 
+							<div class="row"> 
+								<div class="col-md-12 col-sm-12 col-xs-12"> 
+									<div class="d-flex"> 
+										<div class="settings-main-icon ">
+											<i class="fa fa-clock-o" ></i>
+										</div> 
+										<div class="col-md-10 col-sm-10 col-xs-12"> 
+											<p class="tx-20 font-weight-semibold d-flex ">ម៉ោង / Time</p>
+										</div> 
+									</div>
+									<small class="control-label bold col-md-12 col-sm-12 col-xs-12 text-center">
+										<i class="fa fa-check-circle-o"></i> <strong>ព័ត៌មានម៉ោងបានផ្ទៀងផ្ទាត់រួចរាល់</strong>
+								   </small>
+								</div>
+							</div>
+						</div>
+						<?php } ?>
+					</div>
+				</div>
+				<?php } ?>
+			</div>
+		</div>
+	</div>
+</div>
+<script src="<?php echo $this->baseUrl();?>/js/help.js"></script>
+<script>
+dojo.require("dojo.data.ObjectStore");
+dojo.require("dojo.data.ItemFileWriteStore");
+dojo.ready(function() {
+	new dijit.form.FilteringSelect({
+		queryExpr: "*${0}*",
+		autoComplete: false,
+		required: false,
+		id: "setting",
+		name: "setting",
+		class: 'fullside',
+		placeHolder: "<?php echo $tr->translate("SCHEDULE_SETTING"); ?>",
+		onChange: function() {
+			getScheduleSettingInfo(2);
+		}
+	}, "setting");
+	
+	new dijit.form.FilteringSelect({
+		queryExpr: "*${0}*",
+		autoComplete: false,
+		required: false,
+		id: "scheduleSetting",
+		name: "scheduleSetting",
+		class: 'fullside',
+		placeHolder: "<?php echo $tr->translate("SCHEDULE_SETTING"); ?>",
+		onChange: function() {
+			getScheduleSettingInfo(1);
+		}
+	}, "scheduleSetting");
+	
+	 bs_input_file();
+	 bsInputFileExcel();
+	 
+	
+	 
+	  
+	 
+	 <?php if(!empty($branchId)){?>
+			dijit.byId('branchId').set('value', "<?php echo $branchId; ?>");
+		<?php } ?>
+		<?php if(!empty($academicYear)){?>
+			dijit.byId('academicYear').set('value', "<?php echo $academicYear; ?>");
+		<?php } ?>
+		var branchId = dijit.byId('branchId');
+			branchId.on('change', function(evt) {
+			getScheduleSettingByBranch(1);
+		});
+		getScheduleSettingByBranch(1);
+		getScheduleSettingInfo(1);
+	 <?php if($importType==1){?>
+		<?php if(!empty($fileName)  AND $importType==1){?>
+			setTimeout(function() {
+				opentPreSchedule();
+			}, 1000);
+		<?php } ?>
+	 <?php }else if($importType==2){?>
+		  
+		<?php if(!empty($branchId)){?>
+			dijit.byId('branch_id').set('value', "<?php echo $branchId; ?>");
+		<?php } ?>
+		<?php if(!empty($academicYear)){?>
+			dijit.byId('academic_year').set('value', "<?php echo $academicYear; ?>");
+		<?php } ?>
+		 var branch_id = dijit.byId('branch_id');
+			branch_id.on('change', function(evt) {
+			getScheduleSettingByBranch(2);
+		});
+	
+		getScheduleSettingByBranch(2);
+		getScheduleSettingInfo(2);
+	 <?php } ?>
+});
+	
+var url_gettecher = '<?php echo $this->url(array("module"=>"issuesetting","controller"=>"schedulesetting","action"=>"getschedulesetting"));?>';										
+function getScheduleSettingByBranch(index=1){
+	if(index==2){
+		dijit.byId('setting').reset();
+		branch_id = dijit.byId('branch_id').get('value');
+		if(branch_id=='' || branch_id==-1){
+			var schedule_store  = getDataStorefromJSON('id','name',<?php print_r(Zend_Json::encode(array()));?> );
+			dijit.byId('setting').set('store',schedule_store);	
+			return false;
+		}
+	}else{
+		dijit.byId('scheduleSetting').reset();
+		branch_id = dijit.byId('branchId').get('value');
+		if(branch_id=='' || branch_id==-1){
+			var schedule_store  = getDataStorefromJSON('id','name',<?php print_r(Zend_Json::encode(array()));?> );
+			dijit.byId('scheduleSetting').set('store',schedule_store);	
+			return false;
+		}
+	}
+	 
+	
+	dojo.xhrPost({
+		url:url_gettecher,
+		content:{
+			'branch_id':branch_id
+		},
+		handleAs:"json",
+		load: function(data) {
+			var schedule_store  = getDataStorefromJSON('id','name', data);
+			if(index==2){
+				 dijit.byId('setting').set('store',schedule_store);
+				<?php if(!empty($setting)){?>
+					dijit.byId('setting').set('value', "<?php echo $setting; ?>");
+				<?php } ?>
+			}else{
+				dijit.byId('scheduleSetting').set('store',schedule_store);
+				<?php if(!empty($setting)){?>
+					dijit.byId('scheduleSetting').set('value', "<?php echo $setting; ?>");
+				<?php } ?>
+			}
+		},
+		error: function(err){
+
+		}
+	});
+}
+
+var url_importschedule = '<?php echo $this->url(array('module'=>'issue','controller'=>'importxmlschedule','action' =>'importxml')); ?>';
+var step=<?php echo ($step+1);?>;
+function importschedule() {
+     
+	 var branchId = dijit.byId('branch_id').get('value');
+	 if(branchId==-1 || branchId==""){
+		alert("<?php echo $tr->translate("PLEASE_SELECT_BRANCH");?>!!!");
+		dijit.byId("branch_id").focus();
+		return false;
+	}
+	 var academic_year = dijit.byId('academic_year').get('value');
+	 if(academic_year==-1 || academic_year==""){
+		alert("<?php echo $tr->translate("PLEASE_SELECT_YEAR");?>!!!");
+		dijit.byId("academic_year").focus();
+		return false;
+	}
+	 var setting = dijit.byId('setting').get('value');
+	 if(setting==-1 || setting==""){
+		alert("<?php echo $tr->translate("PLEASE_SELECT_SCHEDULE_SETTING");?>!!!");
+		dijit.byId("setting").focus();
+		return false;
+	}
+	loadingBlock();
+		dojo.xhrPost({
+			url: url_importschedule,
+            content: {
+					'step': step,
+					'branchId': branchId,
+					'academicYear': academic_year,
+					'setting': setting,
+				},
+			handleAs: "json",
+			load: function(data) {
+				if(step==1){
+					$(".subjMessage").html(data.content);
+				}else if(step==2){
+					$(".teacherMessage").html(data.content);
+				}else if(step==3){
+					$(".groupMessage").html(data.content);
+				}else if(step==4){
+					$(".timeMessage").html(data.content);
+				}
+				if(data.index > step){
+					completeStep(step);
+				}
+				if(data.index == 0 && data.msg =="completed"){
+					alert("<?php echo $tr->translate("IMPORTING_SCHEDULE_COMPLETED");?>");
+					window.location = '<?php echo $this->baseUrl()."/issue/schedule";?>';
+				}else{
+					step=data.index;
+					if(step==6){
+						opentPreSchedule();
+						$("#next").html('<i class="glyphicon glyphicon-floppy-disk" ></i> <?php echo $tr->translate('SAVE');?>');
+						$('.dijit.dijitReset.dijitInline.button-class').removeClass('button-primary');
+						$('.dijit.dijitReset.dijitInline.button-class').addClass('button-success');
+					}
+					HideloadingBlock();
+				}
+                
+			},
+			error: function(err) {
+				HideloadingBlock();
+            }
+		});
+		
+	}
+function completeStep(currentStep) {
+	$( ".stept"+currentStep ).addClass( "active" );
+}
+
+
+var urlGetSchInfo = '<?php echo $this->url(array('module'=>'issuesetting','controller'=>'schedulesetting','action' =>'getschedulesettinginfo')); ?>';
+var step=<?php echo ($step+1);?>;
+function getScheduleSettingInfo(index=1) {
+     var scheduleSetting = 0;
+	 if(index==2){
+		scheduleSetting = dijit.byId('setting').get('value');
+	 }else{
+		 scheduleSetting = dijit.byId('scheduleSetting').get('value');
+	 }
+	dojo.xhrPost({
+		url: urlGetSchInfo,
+		content: {
+				'scheduleSetting': scheduleSetting,
+				'getHtml': 1,
+			},
+		handleAs: "json",
+		load: function(data) {
+			 if(index==2){
+				$(".scheduleSettingXml").html(data.htmlContent);
+			 }else{
+				$(".scheduleSettingExcel").html(data.htmlContent);
+			 }
+		},
+		error: function(err) {
+			HideloadingBlock();
+		}
+	});
+	
+}
+function bs_input_file() {
+	$(".input-file").before(
+		function() {
+		if ( ! $(this).prev().hasClass('input-ghost') ) {
+			var element = $("<input  type='file' accept='.xml' class='input-ghost' style='visibility:hidden; height:0'>");
+			element.attr("name",$(this).attr("name"));
+			element.change(function(){
+				element.next(element).find('input').val((element.val()).split('\\').pop());
+			});
+			$(this).find("button.btn-choose").click(function(){
+				element.click();
+			});
+			
+			$(this).find('input').css("cursor","pointer");
+			$(this).find('input').mousedown(function() {
+				$(this).parents('.input-file').prev().click();
+				return false;
+			});
+			return element;
+		}
+	}
+	);
+}
+function bsInputFileExcel() {
+	$(".input-file-excel").before(
+		function() {
+		if ( ! $(this).prev().hasClass('input-ghost') ) {
+			var element = $("<input  type='file' accept='.xlsx,.xls' class='input-ghost' style='visibility:hidden; height:0'>");
+			element.attr("name",$(this).attr("name"));
+			element.change(function(){
+				element.next(element).find('input').val((element.val()).split('\\').pop());
+			});
+			$(this).find("button.btn-choose").click(function(){
+				element.click();
+			});
+			
+			$(this).find('input').css("cursor","pointer");
+			$(this).find('input').mousedown(function() {
+				$(this).parents('.input-file-excel').prev().click();
+				return false;
+			});
+			return element;
+		}
+	}
+	);
+}
+
+function opentPreSchedule(){
+	//addTab('កាលវិភាគបណ្ដោះអាសន្ន','<?php echo $this->baseUrl() . "/issue/importxmlschedule/preview?inFrame=true"; ?>');
+	window.open("<?php echo $this->baseUrl() . "/issue/importxmlschedule/preview"; ?>");
+}
+<?php if(!empty($fileName)  AND $importType==1){?>
+var urlGetSubmit = '<?php echo $this->url(array('module'=>'issue','controller'=>'importxmlschedule','action' =>'submitexcel')); ?>';
+function submitScheduleExcel(){
+    loadingBlock();
+	dojo.xhrPost({
+		url: urlGetSubmit,
+		content: {
+				'getHtml': 1,
+			},
+		handleAs: "json",
+		load: function(data) {
+			if(data.msg =="completed"){
+				alert("<?php echo $tr->translate("IMPORTING_SCHEDULE_COMPLETED");?>");
+				window.location = '<?php echo $this->baseUrl()."/issue/schedule";?>';
+			}
+		},
+		error: function(err) {
+			HideloadingBlock();
+		}
+	});
+}
+<?php } ?>
+</script>

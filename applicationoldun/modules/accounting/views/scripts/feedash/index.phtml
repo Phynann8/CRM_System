@@ -1,0 +1,424 @@
+<?php
+	$tr = Application_Form_FrmLanguages::getCurrentlanguage();
+	echo $this->headTitle($tr->translate("FEE_DASH"));
+	$lastestAcademic = $this->lastestAcademic;
+	
+	$mainServiceList = $this->mainServiceList;
+	$mainFeeList = $this->mainFeeList;
+	$amtTuitionFee = count($mainFeeList);
+	
+?>
+<div class="card">
+	<div class="card-content collapse show">
+		<div class="p-5">
+			<div class="row g-6 mb-6">
+				<div class="col-md-3 col-sm-3 col-xs-6">
+					<div class="card border rounded-3">
+						<div class="card-body">
+							<div class="d-flex align-items-start justify-content-between">
+								<div class="content-left">
+									<span class="text-heading"><?php echo $tr->translate('TUITION_FEE_TYPE');?></span>
+									<div class="d-flex align-items-center my-1">
+									  <h4 class="mb-0 me-2"><?php echo empty($amtTuitionFee) ? "00" : sprintf('%02d', $amtTuitionFee); ?></h4>
+									</div>
+								</div>
+								<div class="avatar">
+									<span class="badge p-4 rounded bg-label-primary">
+									  <i class="fa fa-briefcase fa-lg"></i>
+									</span>
+								</div>
+							</div>
+							<small class="d-flex justify-content-between mb-0">
+								<a class="btn btn-primary btn-xs waves-effect waves-light" href="<?php echo $this->baseUrl()."/accounting/fee/add";?>">
+									<?php echo $tr->translate('SET_UP_NEW');?> <i class="fa fa-plus-square-o"></i>
+								</a>
+								<a class="btn-xs btn-text-primary waves-effect waves-light" href="<?php echo $this->baseUrl()."/accounting/fee";?>">
+									<?php echo $tr->translate('SHOW_ALL');?> <i class="fa fa-angle-right fa-xs"></i>
+								</a>
+							</small>
+						</div>
+					</div>
+				</div>
+				<div class="col-md-3 col-sm-3 col-xs-6">
+					<div class="card border rounded-3">
+						<div class="card-body">
+							<div class="d-flex align-items-start justify-content-between">
+								<div class="content-left">
+									<span class="text-heading"><?php echo $tr->translate('SERVICE_FEE');?></span>
+									<div class="d-flex align-items-center my-1">
+										<h4 class="mb-0 me-2"><?php echo empty($this->countAllServiceFee) ? "00" : sprintf('%02d', $this->countAllServiceFee); ?></h4>
+									</div>
+								</div>
+								<div class="avatar">
+									<span class="badge p-4 rounded bg-label-danger">
+									  <i class="fa fa-compass fa-lg"></i>
+									</span>
+								</div>
+							</div>
+							<small class="d-flex justify-content-between mb-0">
+								<a class="btn btn-primary btn-xs waves-effect waves-light" href="<?php echo $this->baseUrl()."/accounting/servicecharge/add";?>">
+									<?php echo $tr->translate('SET_UP_NEW');?> <i class="fa fa-plus-square-o"></i>
+								</a>
+								<a class="btn-xs btn-text-primary waves-effect waves-light" href="<?php echo $this->baseUrl()."/accounting/servicecharge";?>">
+									<?php echo $tr->translate('SHOW_ALL');?> <i class="fa fa-angle-right fa-xs"></i>
+								</a>
+							</small>
+						</div>
+					</div>
+				</div>
+				<div class="col-md-3 col-sm-3 col-xs-6">
+					<div class="card border rounded-3">
+						<div class="card-body">
+							<div class="d-flex align-items-start justify-content-between">
+								<div class="content-left">
+									<span class="text-heading"><?php echo $tr->translate('SERVICE_TYPE');?></span>
+									<div class="d-flex align-items-center my-1">
+									  <h4 class="mb-0 me-2"><?php echo empty($this->countAllServiceType) ? "00" : sprintf('%02d', $this->countAllServiceType); ?></h4>
+									</div>
+								</div>
+								<div class="avatar">
+									<span class="badge p-4 rounded bg-label-success">
+									  <i class="fa fa-diamond fa-lg"></i>
+									</span>
+								</div>
+							</div>
+							<small class="d-flex justify-content-between mb-0">
+								<a class="btn btn-primary btn-xs waves-effect waves-light" href="<?php echo $this->baseUrl()."/accounting/servicecate/add";?>">
+									<?php echo $tr->translate('ADD_NEW');?> <i class="fa fa-plus-square-o"></i>
+								</a>
+								<a class="btn-xs btn-text-primary waves-effect waves-light" href="<?php echo $this->baseUrl()."/accounting/servicecate";?>">
+									<?php echo $tr->translate('SHOW_ALL');?> <i class="fa fa-angle-right fa-xs"></i>
+								</a>
+							</small>
+						</div>
+					</div>
+				</div>
+				<div class="col-md-3 col-sm-3 col-xs-6">
+					<div class="card border rounded-3">
+						<div class="card-body">
+							<div class="d-flex align-items-start justify-content-between">
+								<div class="content-left">
+									<span class="text-heading"><?php echo $tr->translate('SERVICE');?></span>
+									<div class="d-flex align-items-center my-1">
+									  <h4 class="mb-0 me-2"><?php echo empty($this->countAllService) ? "00" : sprintf('%02d', $this->countAllService); ?></h4>
+									</div>
+								</div>
+								<div class="avatar">
+									<span class="badge p-4 rounded bg-label-warning">
+										<i class="fa fa-sliders fa-lg"></i>
+									</span>
+								</div>
+							</div>
+							<small class="d-flex justify-content-between mb-0">
+								<a class="btn btn-primary btn-xs waves-effect waves-light" href="<?php echo $this->baseUrl()."/accounting/service/add";?>">
+									<?php echo $tr->translate('ADD_NEW');?> <i class="fa fa-plus-square-o"></i>
+								</a>
+								<a class="btn-xs btn-text-primary waves-effect waves-light" href="<?php echo $this->baseUrl()."/accounting/service";?>">
+									<?php echo $tr->translate('SHOW_ALL');?> <i class="fa fa-angle-right fa-xs"></i>
+								</a>
+							</small>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="row g-6 mb-6">
+			<div class="col-md-9 col-sm-9 col-xs-12">
+				<div class="card h-100">
+					<div class="card-header d-flex justify-content-between pb-0">
+						<div class="card-title mb-0">
+						  <h5 class="mb-1"><i class="fa fa-graduation-cap" ></i> <?php echo $tr->translate("FEE_FOR")?> <strong><?php echo empty($lastestAcademic["academicYear"]) ? "N/A" :$lastestAcademic["academicYear"]; ?></strong></h5>
+						  <p class="card-subtitle"><?php echo $tr->translate("FEE_FOR_DESC")?></p>
+						</div>
+					</div>
+					<div class="card-body p-0">
+						<div class="row g-3">
+							<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+								<ul class="nav nav-tabs bar_tabs" role="tablist">
+									<li role="presentation" class="active">
+										<a class="nav-link " data-toggle="tab" href="#tuition-fee" role="tab"><i class="fa fa-briefcase ml-2"></i> <?php echo $tr->translate("TUITION_FEE");?></a>
+									</li>
+									<li role="presentation">
+										<a class="nav-link" data-toggle="tab" href="#service-fee" role="tab">
+										<i class="fa fa-compass ml-2"></i> <?php echo $tr->translate("SERVICE_FEE");?>
+										</a>
+									</li>
+									<li role="presentation">
+										<a class="nav-link" data-toggle="tab" href="#payment-period" role="tab">
+										<i class="fa fa-calendar ml-2"></i> <?php echo $tr->translate("START_DATE_END_DATE");?>
+										</a>
+									</li>
+								</ul>
+							</div>
+						</div>
+						<div class="nav-align-top">
+							<div class="tab-content vertical p-5 m-0">
+								<div class="tab-pane fade in active" id="tuition-fee" role="tabpanel">
+									<?php if(!empty($mainFeeList)){ ?>
+										<div class="row g-6">
+											<?php foreach($mainFeeList AS $feeRow){ ?>
+												<div class="col-xl-4 col-lg-6 col-md-6">
+													<div class="card border rounded-3 mb-2">
+														<div class="card-body">
+															<div class="d-flex justify-content-between align-items-center mb-1">
+																<h6 class="fw-normal mb-0 text-body <?php echo "fee-branch-".$feeRow["id"];?>"><?php echo $feeRow["branch"];?></h6>
+																<span class="rounded bg-label-primary  p-1">
+																	<i class="fa fa-briefcase fa-lg me-1"></i>
+																	<span class="<?php echo "fee-type-".$feeRow["id"];?>"><?php echo $feeRow["study_type"];?></span>
+																</span>
+															</div>
+															<div class="d-flex justify-content-between align-items-end">
+																<div class="role-heading">
+																	<h5 class="mb-0 <?php echo "fee-title-".$feeRow["id"];?>"><?php echo $feeRow["academic"]." ".$feeRow["generation"];?></h5>
+																	<small class="mb-1 d-block text-body <?php echo "fee-sch-opt-".$feeRow["id"];?>"><?php echo $feeRow["school_option"];?></small>
+																	
+																</div>
+																<div class="role-action">
+																	<a title="<?php echo $tr->translate("EDIT")?>" href="<?php echo $this->baseUrl()."/accounting/fee/edit/id/".$feeRow["id"];?>" class="" >
+																		<span>
+																			<i class="fa fa-pencil-square-o fa-md text-heading"></i>
+																		</span>
+																	</a>
+																	<a title="<?php echo $tr->translate("VIEW")?>" href="javascript:void(0);" onClick="getFeeContent('1','<?php echo $feeRow["id"];?>');"><i class="fa fa-eye fa-md text-heading"></i></a>
+																</div>
+															</div>
+														</div>
+													</div>
+												</div>
+											<?php }?>
+										</div>
+									<?php }?>
+								</div>
+								<div class="tab-pane fade" id="service-fee" role="tabpanel">
+									<?php if(!empty($mainServiceList)){ ?>
+										<div class="row g-6">
+											<?php foreach($mainServiceList AS $svFeeRow){ ?>
+												<div class="col-xl-4 col-lg-6 col-md-6">
+													<div class="card border rounded-3 mb-2">
+														<div class="card-body">
+															<div class="d-flex justify-content-between align-items-center mb-1">
+																<h6 class="fw-normal mb-0 text-body <?php echo "fee-branch-".$svFeeRow["id"];?>"><?php echo $svFeeRow["branch"];?></h6>
+																<span class="rounded bg-label-primary  p-1">
+																	<i class="ti ti-cash-banknote ti-26px me-1"></i>
+																	<span class="<?php echo "fee-type-".$svFeeRow["id"];?>"><?php echo $svFeeRow["is_finished"];?></span>
+																</span>
+															</div>
+															<div class="d-flex justify-content-between align-items-end">
+																<div class="role-heading">
+																	<h5 class="mb-0 <?php echo "fee-title-".$svFeeRow["id"];?>"><?php echo $svFeeRow["academic"];?></h5>
+																</div>
+																<div class="role-action">
+																	<a title="<?php echo $tr->translate("EDIT")?>" href="<?php echo $this->baseUrl()."/accounting/servicecharge/edit/id/".$svFeeRow["id"];?>" class="" >
+																		<span>
+																			<i class="fa fa-pencil-square-o fa-md text-heading"></i>
+																		</span>
+																	</a>
+																	<a title="<?php echo $tr->translate("VIEW")?>" href="javascript:void(0);" onClick="getFeeContent('2','<?php echo $svFeeRow["id"];?>');"><i class="fa fa-eye fa-md text-heading"></i></a>
+																</div>
+															</div>
+														</div>
+													</div>
+												</div>
+											<?php }?>
+										</div>
+									<?php }?>
+								</div>
+								<div class="tab-pane fade " id="payment-period" role="tabpanel">
+									<div class="position-absolute w-100 text-end mb-0 px-12">
+										<a class="btn btn-primary btn-xs waves-effect waves-light me-1" href="<?php echo $this->baseUrl()."/accounting/term/add";?>">
+											<?php echo $tr->translate('ADD_NEW');?> <i class="fa fa-plus-square-o"></i>
+										</a>
+										<a class="btn btn-xs btn-text-primary waves-effect waves-light" href="<?php echo $this->baseUrl()."/accounting/term";?>">
+											<?php echo $tr->translate('SHOW_ALL');?> <i class="fa fa-angle-right fa-xs"></i>
+										</a>
+									</div>
+									<div class="h-px-30">
+									</div>
+									<?php if(!empty($this->paymentPeriod)) { ?>
+										<div class="card-datatable dataTables_scrollBody table-responsive h-px-300 overflow-auto p-0 px-5" style="position: relative;  width: 100%; ">
+											<table id="datatable-responsive" class=" nowrap dt-row-grouping table">
+												<thead>
+													<tr>
+														<th class="text-center" ><?PHP echo $tr->translate('NUM');?></th>
+														<th class="text-center" ><?PHP echo $tr->translate('TITLE');?></th>
+														<th class="text-center" ><?PHP echo $tr->translate('PERIOD');?></th>
+														<th class="text-center" ><?PHP echo $tr->translate('ACTION');?></th>
+													</tr>
+												</thead>
+												<tbody>
+												<?php  foreach($this->paymentPeriod AS $key => $row){ 
+													$bgClass="bg-label-dark";
+													if($row["periodId"]==2){
+														$bgClass="bg-label-warning";
+													}else if($row["periodId"]==3){
+														$bgClass="bg-label-success";
+													}else if($row["periodId"]==4){
+														$bgClass="bg-label-primary";
+													}else if($row["periodId"]==5){
+														$bgClass="bg-label-secondary";
+													}
+												?>
+													<tr>
+														<td class="items-no text-center"><?php echo ($key+1); ?></td>
+														<td class="">
+															<div>
+																<span class=" text-primary text-truncate fw-medium mb-2 text-wrap" ><?php echo $row["title"]; ?></span>
+																<div class="d-flex align-items-center mt-1">
+																	<small class="text-nowrap text-heading"><?php echo $row["degreeListTitle"]; ?></small>
+																</div>
+															</div>
+														</td>
+														<td class="text-center">
+															<div class="d-flex align-items-center justify-content-center">
+																<span class="rounded <?php echo $bgClass; ?>  p-1 px-2">
+																  <i class="ti ti-calendar-event ti-26px me-1"></i><?php echo $row["periodTitle"]; ?>
+																  <span class="d-block">
+																	<?php echo date("d/M/y",strtotime($row["startDate"]))." - ".date("d/M/y",strtotime($row["endDate"])); ?>
+																  </span>
+																</span>
+															</div>
+														</td>
+														<td class="text-center">
+															<a title="<?php echo $tr->translate('EDIT');?> " class="btn btn-success btn-xs waves-effect waves-light" href="<?php echo $this->baseUrl()."/accounting/term/edit/id/".$row["id"];?>">
+																<i class="fa fa-pencil-square-o"></i>
+															</a>
+														</td>
+													</tr>
+												<?php }?>
+												</tbody>
+											</table>
+										</div>
+									<?php }?>
+								</div>
+							</div>
+						</div>
+						
+					</div>
+				</div>
+			</div>
+			<div class="col-md-3 col-sm-3 col-xs-12">
+				<div class="card h-100">
+					<div class="card-header d-flex justify-content-between pb-0">
+						<div class="card-title mb-0">
+						  <h5 class="mb-1"><i class="fa fa-university fa-md"></i> <?php echo $tr->translate("BANK_LIST")?></h5>
+						</div>
+						<a class="btn btn-primary btn-xs waves-effect waves-light" href="<?php echo $this->baseUrl()."/accounting/bank/add";?>">
+							<?php echo $tr->translate('ADD_NEW');?> <i class="fa fa-plus-square-o"></i>
+						</a>
+					</div>
+					<div class="card-body p-0 pt-5">
+						<ul class="list-unstyled mb-0 h-px-300 overflow-auto">
+							<?php if(!empty($this->bankList)) foreach($this->bankList AS $k => $rsBank){
+									$bgRow = "bg-body";
+									if(($k%2)==0){
+										$bgRow = "";
+									}
+								?>
+							<li class="d-flex mb-2 p-2 align-items-center rounded <?php echo $bgRow;?>">
+								
+								<div class="row w-100 align-items-center">
+								  <div class="col-sm-2 d-flex justify-content-sm-center">
+									<div class="avatar flex-shrink-0 ms-1">
+									  <span class="badge p-4 rounded bg-label-primary"><?php echo $k+1;?></span>
+									</div>
+								  </div>
+								  <div class="col-sm-6 mb-1 mb-sm-0 mb-lg-1 mb-xxl-0">
+									<h6 class="mb-0"><?php echo $rsBank["bank_name"];?></h6>
+								  </div>
+								  <div class="col-sm-2 d-flex justify-content-sm-center">
+									<?php echo $rsBank["status"];?>
+								  </div>
+								  <div class="col-sm-2 d-flex justify-content-sm-end">
+									<a title="<?php echo $tr->translate('EDIT');?> " class="btn btn-success btn-xs waves-effect waves-light" href="<?php echo $this->baseUrl()."/accounting/bank/edit/id/".$rsBank["id"];?>">
+										<i class="fa fa-pencil-square-o"></i>
+									</a>
+								  </div>
+								</div>
+							</li>
+							<?php } ?>
+						</ul>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+	
+
+
+
+<!-- Modal -->
+<div class="modal fade" id="modal-info" tabindex="-1" aria-hidden="true">
+	<div class="modal-dialog modal-lg modal-simple modal-dialog-centered modal-add-new-role">
+		<div class="modal-content p-10">
+			<div class="modal-body p-0">
+				<button type="button" class="btn-close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+				<div class="d-flex justify-content-between align-items-center mb-1">
+					<h6 class="fw-normal mb-0 ">
+						<i class="fa fa-university ti-26px me-1"></i>
+						<span class="modal-top-left"></span>
+					</h6>
+					<div >
+						<span class="d-block rounded bg-label-primary  p-1 mb-2">
+							<i class="fa fa-briefcase fa-md me-1"></i>
+							<span class="modal-top-right"></span>
+						</span>
+						<a title="<?php echo $tr->translate("Export")?>" onClick="exportExcel('exportExcelList','Fee List');" class="btn btn-success btn-xs waves-effect waves-light" href="javascript:void(0);">
+							<i class="fa fa-file-excel-o"></i>
+						</a>
+					</div>
+				</div>
+				<div class="text-center mb-6">
+				  <h4 class="modal-title mb-2"></h4>
+				  <p class="modal-title-desc"></p>
+				</div>
+				<div class="col-12 contentInfo">
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<!--/ Modal -->
+<style>
+.global-action {
+    display: none;
+}
+</style>
+<script>
+function getFeeContent(type=1,feeId){
+	var getUrl = "<?PHP echo $this->baseUrl()."/accounting/feedash/get-fee-detail";?>";
+	loadingBlock();
+	$(".modal-title").html("");
+	$(".modal-title-desc").html("");
+	$(".modal-top-left").html("");
+	$(".modal-top-right").html("");
+	$(".contentInfo").html("");
+	$.ajax({
+		url: getUrl,
+		type: 'post',
+		dataType: 'json',
+		data: {
+			"type": type,
+			"feeId": feeId
+		},
+		success: function (data) {
+			var headTitle = "<?php echo $tr->translate("TUITION_FEE")?>";
+			if(type==2){
+				headTitle = "<?php echo $tr->translate("SERVICE_FEE")?>";
+			}
+			$(".modal-title").html(headTitle+' '+$(".fee-title-"+feeId).html());
+			$(".modal-title-desc").html($(".fee-sch-opt-"+feeId).html());
+			$(".modal-top-left").html($(".fee-branch-"+feeId).html());
+			$(".modal-top-right").html($(".fee-type-"+feeId).html());
+			$(".contentInfo").html(data.content);
+			$('#modal-info').modal('show');
+			HideloadingBlock();
+		},
+		error: function(request, status, error) {
+			HideloadingBlock();
+		}
+	});
+}
+</script>

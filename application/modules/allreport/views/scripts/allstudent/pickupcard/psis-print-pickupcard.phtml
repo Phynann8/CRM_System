@@ -1,0 +1,196 @@
+<?php
+	$tr = Application_Form_FrmLanguages::getCurrentlanguage();
+	$_dbgb = new Application_Model_DbTable_DbGlobal();
+	$type=PICKUP_TYPE;  // tyep=1 for ELT , type=2 for good will 
+?>	
+<title><?php echo $tr->translate("Pickup Card Selected")?></title>
+<div class="dijitHidden" style="width: 120mm !important; height: 40mm ; padding: 0px; margin: 0px;">
+	<div data-dojo-type="dijit.Dialog" style="width:22cm;margin: 0 auto;" align="center" data-dojo-props="title:'<?php echo $tr->translate("PAYMENT_RECEIPT");?>'" id="print_pickup_card" >
+		<div id="PickupCard" style="margin: 0 auto;width:100%;" >
+				<style>
+					.card-content-student-printpickup{
+						background-image: url('<?php echo $this->baseUrl().'/images/card/pickup-student-card.png';?>');
+						background-size: 100%;background-repeat: no-repeat;	
+						position: relative;			
+						display:inline-block;	
+						float:left;					
+						border:solid 1px #eee;
+						width: 14.5cm; 
+						height:10.3cm; 	
+					}
+					<?php 
+					$expiredDate = '';
+					if(!empty($this->groupByBranchAndSchool)) foreach($this->groupByBranchAndSchool as $bck){
+						$imagepick = $this->baseUrl().'/images/card/default_card_bg.jpg';
+						$bgpick = $_dbgb->getPickupCardBackground($bck['branch_id'],$bck['schoolOption']);
+						
+						if(!empty($bgpick['background'])){
+							$expiredDate = $bgpick['validate'];
+							if (file_exists(PUBLIC_PATH."/images/card/".$bgpick['background'])){
+							$imagepick = $this->baseUrl().'/images/card/'.$bgpick['background'];
+							}
+						}
+						?>
+					.card-content-student-printpickup <?php echo ".card".$bck['branch_id']."card".$bck['schoolOption'];?>{	
+						background-image: url('<?php echo $imagepick;?>');
+						background-size: 100%;background-repeat: no-repeat;					
+					}
+				<?php }?>
+				.profile-card-block .student-photo {
+					position: absolute;
+					top: 119px;
+					left: 34px;
+				}
+				.parent-card-block .father-photo {
+					position: absolute;
+					top: 137px;
+					left: 231px;
+				}
+				.parent-card-block .mother-photo {
+					position: absolute;
+					top: 137px;
+					left: 331px;
+				}
+				.parent-card-block .guardian-photo {
+					position: absolute;
+					top: 137px;
+					left: 433px;
+				}
+				img.photo-size {
+					width: 88px;
+					height: 109px;
+				}
+				.profile-card-block .stu_code_label {
+					position: absolute;
+					font-size: 16px;
+					top: 242px;
+					left: 80px;
+					line-height: 20px;
+					text-align: left;
+					font-weight: bold;
+				}
+					@page {
+					  size:A4 landscape;
+					  margin:0;
+					}
+						.expired_bg{
+							position: absolute;
+						    left: 50%;
+						    bottom: 16px;
+						    width: 200px;
+							transform:translate(-50%,0%);
+						}
+							.lblexpired{color:#f01a1a;font-weight: bold;}
+				</style>
+			<?php 			
+				$i=0;
+				if(!empty($this->rs)){foreach ($this->rs as $key => $row){?>
+				<div class="card-content-student-printpickup <?php echo "card".$row['branch_id']."card".$row['schoolOption'];?>" style=" <?php if($key==0 || $key==1){ echo "margin-top:-5px;";}else{ echo "margin-top:4px;";} ?> line-height: 16.285px;    color: #3f3f95; font-family: 'Times New Roman', sans-serif,'Kh Battambang','Khmer Battambang'; ">
+					<?php 
+						$image = $this->baseUrl().'/images/no-profile.png';
+						
+						if(!empty($row['photo'])){
+							if (file_exists(PUBLIC_PATH."/images/photo/".$row['photo'])){
+								$image = $this->baseUrl().'/images/photo/'.$row['photo'];
+							}
+							
+						}
+						$stuname = $row['stu_enname']." ".$row['last_name'];
+						$bgge = $_dbgb->getPickupCardBackground($row['branch_id'],$row['schoolOption']);
+						if (!empty($bgge)){
+							if ($bgge['display_by']==2){
+								$stuname = $row['stu_khname'];
+							}
+						}
+						?>
+					<div class="profile-card-block">
+						<div class="student-photo">
+							<img class="photo-size" <?php if(!empty($image)){echo 'src="'.$image.'"';}?>>
+						</div>
+						<div class="stu_code_label" >
+							<?php echo $row['stu_code']; ?> <br/>
+							<?php echo $row['stu_khname']; ?> <br/>
+							<?php echo $row['group_name']; ?> <br/>
+							<?php echo $row['stu_enname']; ?> <br/>
+							<?php echo $row['group_name']; ?> <br/>
+						</div>
+					</div>
+					<div class="parent-card-block">
+						<?php 
+							 $father_photo = "";
+							 if (!empty($row['father_photo'])){
+								if (file_exists(PUBLIC_PATH."/images/photo/".$row['father_photo'])){
+									$father_photo = $this->baseUrl().'/images/photo/'.$row['father_photo'];
+								}
+							 }
+							 //$mother_photo = $this->baseUrl().'/images/no-profile.png';
+							 $mother_photo = "";
+							 if (!empty($row['mother_photo'])){
+								if (file_exists(PUBLIC_PATH."/images/photo/".$row['mother_photo'])){
+									$mother_photo = $this->baseUrl().'/images/photo/'.$row['mother_photo'];
+								}
+							 }
+							 $guardian_photo = "";
+							 if (!empty($row['guardian_photo'])){
+								if (file_exists(PUBLIC_PATH."/images/photo/".$row['guardian_photo'])){
+									$guardian_photo = $this->baseUrl().'/images/photo/'.$row['guardian_photo'];
+								}
+							 }
+						?>
+						<div class="father-photo">
+							<img class="photo-size" <?php if(!empty($father_photo)){echo 'src="'.$father_photo.'"';}?> >
+						</div>
+						<div class="mother-photo">
+							<img class="photo-size" <?php if(!empty($mother_photo)){echo 'src="'.$mother_photo.'"';}?> >
+						</div>
+						<div class="guardian-photo">
+							<img class="photo-size" <?php if(!empty($guardian_photo)){echo 'src="'.$guardian_photo.'"';}?> >
+						</div>
+					</div>
+					<div class="expired_bg">
+						<div class="lblexpired">
+							Expiration Date: <?php echo date($expiredDate,strtotime("d-m-Y"));?>
+						</div>
+					</div>
+				</div>
+			<?php }}?>
+		</div>
+		<table width="100%">
+			<tr>
+				<td align="center">
+					<iframe name=print_frame width=0 height=0 frameborder=0 src=about:blank></iframe>
+					<button dojoType="dijit.form.Button" id="print_pickup" iconClass="dijitEditorIcon dijitEditorIconPrint"
+						type="button" onclick="print();">Print Pickup Card</button>
+				</td>
+			</tr>
+		</table>
+	</div>
+</div>
+<script type="text/javascript">
+	dojo.ready(function(){
+		print();
+	});
+	function print(){
+		loadingBlock();
+	  	 var contents = document.getElementById("PickupCard").innerHTML;
+	 	  var frame1 = document.createElement('iframe');
+	    frame1.name = "frame1";
+	    frame1.style.position = "absolute";
+	    frame1.style.top = "-1000000px";
+	    document.body.appendChild(frame1);
+	    var frameDoc = (frame1.contentWindow) ? frame1.contentWindow : (frame1.contentDocument.document) ? frame1.contentDocument.document : frame1.contentDocument; frameDoc.document.open();
+	    frameDoc.document.write('<html><head><title>Employee ID</title>');
+	    frameDoc.document.write('</head><body>');
+	    frameDoc.document.write(contents);
+	    frameDoc.document.write('</body></html>');
+	    frameDoc.document.close();
+	    setTimeout(function () {
+	        window.frames["frame1"].focus();
+	        window.frames["frame1"].print();
+	        document.body.removeChild(frame1);
+	        HideloadingBlock();
+			window.close();
+	    }, 5000);
+	   return false;
+	}
+</script>

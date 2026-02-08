@@ -1,0 +1,387 @@
+<?php
+	$tr = Application_Form_FrmLanguages::getCurrentlanguage();
+	
+	$pageTitle = $tr->translate('RPT_TELEGRAM_INFO');
+	echo $this->headTitle($pageTitle); 
+	$frm =  $this->form_search;
+	$moringTimeFrom = date("H:i",strtotime("5:00"));
+	$moringTimeTo = date("H:i",strtotime("12:30"));
+	
+	$afternoonFrom = date("H:i",strtotime("12:00"));
+	$afternoonTo = date("H:i",strtotime("18:00"));
+	
+	$dateFormat ="d/m/Y";
+?>	
+<div class="layout-wrapper-report">
+	<div id="mainContent" class="main-content-report">
+		<div class="report-preview">
+			<?php echo $this->controlReport?>
+			<div id="main-viewer" class="main-viewer portrait">
+				<div id="viewer" class="viewer portrait">
+					<div id="divPrint" class="content">
+						<link rel="stylesheet" href="<?php echo $this->baseUrl();?>/admin/build/css/report-style.css">
+						<link rel="stylesheet" href="<?php echo $this->baseUrl();?>/admin/build/css/report-style-screen.css">
+						<style>
+							@media print {
+								<?php if(!empty($this->printFormat)){ echo $this->printFormat; } ?>
+								i.cl-cursor{
+									display:none;
+								}
+							}
+							td span,
+							.content-data span{
+								 line-height: inherit;
+							}
+							i.cl-cursor {
+								cursor: pointer;
+							}
+						</style>
+					<?php if($this->search["reportLayout"]!=1){?>
+						<style>
+						.main-report{
+							page-break-before: always;
+						}
+						
+						</style>
+						<table border="0" style="background:#fff; margin: 0 auto; width: 100%; ">
+							<tr>
+								<td colspan="3"><?php echo $this->rsheader;?></td>
+							</tr>
+							<tr>
+								<td width="20%" align="right">
+								</td>
+								<td width="60%" align="center">
+									<span class="title-report" ><?php echo $pageTitle;?></span><br/>
+									<span ><?php //echo date($dateFormat,strtotime($this->search['end_date']));?></span>
+								</td>
+								<td width="20%" align="right">
+								</td>
+							</tr>
+							<tr>
+								<td colspan="3">
+									<div id="exportExcel">
+										<table class="content-data  bd-dark-grey text-color-black text-h16px text-size-12px" cellpadding="2" border="1" >
+											<tbody>
+												<tr class="styleheader bg-head text-bold hpx-20" align="center">
+													<th rowspan="2"><?php echo $tr->translate("NUM");?></th>
+													<th colspan="3"><?php echo $tr->translate("STUDENT_INFO");?></th>
+													<th rowspan="2"><?php echo $tr->translate("GROUP_CODE");?></th>
+													<th rowspan="2"><?php echo $tr->translate("AMT_CONNECTED");?></th>
+												</tr>
+												<tr class="styleheader bg-head text-bold" align="center">
+													<th ><?php echo $tr->translate("STUDENT_ID");?></th>
+													<th ><?php echo $tr->translate("STUDENT_NAMEKHMER");?></th>
+													<th ><?php echo $tr->translate("SEX");?></th>
+													
+												</tr>
+										<?php
+											if(!empty($this->absenteeRs)){
+											$i = 0;
+											 foreach($this->absenteeRs as $key => $rs){ 
+												$i++; 
+												$amtAccount=0;
+												$jsData="[]";
+												if(!empty($rs['jsDetail'])){
+													$jsData = $rs['jsDetail'];
+													$jsDetail = json_decode($jsData, TRUE);
+													$amtAccount = count($jsDetail);
+												}
+										?>
+										<tr class="style-rowdata">
+											<td align="center"><?php echo $i;?></td>
+											<td align="center" id="studentCode<?php echo $i;?>" style="white-space:nowrap;"><?php echo $rs['studentCode'];?></td>
+											<td style="white-space:nowrap;" id="stuNameKh<?php echo $i;?>"><?php echo $rs['stuNameKh'];?></td>
+											<td align="center" id="gender<?php echo $i;?>"><?php echo $rs['genderTitle'];?></td>
+											<td align="center" id="gender<?php echo $i;?>"><?php echo $rs['groupCode'];?></td>
+											<td align="center"  >
+												<?php echo sprintf('%02d', $amtAccount);?>
+												<?php if($amtAccount>0){?>
+													<i title="<?php echo $tr->translate("VIEW_DETAIL");?>" class="cl-cursor fa-solid fa-eye" onClick="showDetailInfo(<?php echo $i;?>,2);"></i>
+												<?php } ?>
+												<input type="hidden" name="jsData<?php echo $i; ?>" id="jsData<?php echo $i; ?>" value="<?php echo htmlspecialchars($jsData); ?>" dojoType="dijit.form.TextBox" />
+											</td>
+										</tr>
+							<?php } ?>
+										</table>	
+									</div>	
+								</td>
+							</tr>
+							<tr>
+								<td colspan="3">&nbsp;</td>
+							</tr>
+								<tr>
+									<td colspan="3" style="border:1px solid #fff;">
+										<?php echo $this->rsfooter;?>
+									</td>
+								</tr>
+							</table>
+						<?php } ?>
+					<?php }else {?>
+						<table border="0" style="background:#fff; margin: 0 auto; width: 100%; ">
+							<tr>
+								<td colspan="3"><?php echo $this->rsheader;?></td>
+							</tr>
+							<tr>
+								<td width="20%" align="right">
+								</td>
+								<td width="60%" align="center">
+									<span class="title-report" ><?php echo $pageTitle;?></span><br/>
+									<span ><?php //echo date($dateFormat,strtotime($this->search['end_date']));?></span>
+								</td>
+								<td width="20%" align="right">
+								</td>
+							</tr>
+							<tr>
+								<td colspan="3">
+									<div id="exportExcel">
+										<table class="content-data bd-dark-grey text-color-black text-h16px text-size-12px" cellpadding="2" border="1" >
+											<tbody>
+												<tr class="styleheader bg-head text-bold hpx-20" align="center">
+													<th ><?php echo $tr->translate("NUM");?></th>
+													<th ><?php echo $tr->translate("TELEGRAM_ACCOUNT");?></th>
+													<th ><?php echo $tr->translate("JOIN_DATE");?></th>
+													<th ><?php echo $tr->translate("AMT_CONNECTED");?></th>
+												</tr>
+												
+												<?php 
+												$i = 0;
+												if(!empty($this->absenteeRs)) foreach($this->absenteeRs as $key => $rs){ $i++; 
+													
+													$amtAccount=0;
+													$jsData="[]";
+													if(!empty($rs['jsDetail'])){
+														$jsData = $rs['jsDetail'];
+														$jsDetail = json_decode($jsData, TRUE);
+														$amtAccount = count($jsDetail);
+													}
+													
+													$accName = "";
+													$accName = empty($rs['firstName']) ? "" : $rs['firstName'];
+													$lastName = empty($rs['lastName']) ? "" : " ".$rs['lastName'];
+													if($lastName!=""){
+														$accName = $accName.$lastName;
+													}
+													if($accName==""){
+														$accName="N/A";
+													}
+													
+												?>
+												
+												<tr class="style-rowdata">
+													<td align="center"><?php echo $i;?></td>
+													<td id="accName<?php echo $i;?>" style="white-space:nowrap;"><?php echo $accName; ?></td>
+													<td align="center"><?php echo date($dateFormat,strtotime($rs['createDate']));?></td>
+													<td align="center" onClick="showDetailInfo(<?php echo $i;?>,1);" >
+														<?php echo sprintf('%02d', $amtAccount);?>
+														<?php if($amtAccount>0){?>
+															<i title="<?php echo $tr->translate("VIEW_DETAIL");?>" class="cl-cursor fa-solid fa-eye" onClick="showDetailInfo(<?php echo $i;?>,2);"></i>
+														<?php } ?>
+														<input type="hidden" name="jsData<?php echo $i; ?>" id="jsData<?php echo $i; ?>" value="<?php echo htmlspecialchars($jsData); ?>" dojoType="dijit.form.TextBox" />
+													</td>
+												</tr>
+												<?php 
+												} ?>
+											</tbody>	
+										</table>	
+									</div>	
+								</td>
+							</tr>
+							<tr>
+								<td colspan="3">&nbsp;</td>
+							</tr>
+							<tr>
+								<td colspan="3" style="border:1px solid #fff;">
+									<?php echo $this->rsfooter;?>
+								</td>
+							</tr>
+						</table>
+					<?php }?>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="right-panel-report" id="rightPanel">
+		<div class="card-box">
+			<div class="card-search-head col-sm-12 border-botom">
+				<div class="col-sm-6 text-left pd-0">
+					<h4 class="m-b-0">
+						<?php echo $tr->translate("SEARCH");?> 
+						<i class="fa fa-search "></i> 
+					</h4>
+				</div>
+				<div class="col-sm-6 text-right pd-0">
+					<button onclick="closeRightPanel()" title="<?php echo $tr->translate("CLOSED");?> " class="btn-close">
+						<i class="fa-solid fa-xmark"></i>
+					</button>
+				</div>
+			</div>
+			<form  id='foundation_class' action="" dojoType="dijit.form.Form" method="post" enctype="application/x-www-form-urlencoded">
+				<script type="dojo/method" event="onSubmit">
+					if(this.validate()) {
+						start_date=dijit.byId("start_date").get("value");
+						if(start_date=='' || start_date==null){
+							alert("Please select start date");
+							dijit.byId("start_date").focus();
+							return false;
+						}
+						return true;
+					}else {
+						return false;
+					}
+				</script>
+				<div class="card-box">
+					<div class="form-group">
+						<div class="col-md-12 col-sm-12 col-xs-12">
+							<?php echo $frm->getElement("adv_search");?>
+						</div>
+						<div class="col-md-12 col-sm-12 col-xs-12">
+							<?php echo $frm->getElement("branch_id");?>
+						</div>
+						<!--<div class="col-md-12 col-sm-12 col-xs-12">
+							<?php //echo $frm->getElement("academic_year");?>
+						</div>-->
+					</div>
+					
+					<div class="form-group">
+						<div class="col-md-12 col-sm-12 col-xs-12">
+							<?php echo $frm->getElement("reportLayout");?>
+						</div>
+					</div>
+					<!--
+					<div class="form-group">
+						<div class="col-md-6 col-sm-6 col-xs-12">
+							<?php //echo $frm->getElement("start_date");?>
+						</div>
+						<div class="col-md-6 col-sm-6 col-xs-12">
+							<?php //echo $frm->getElement("end_date");?>
+						</div>
+					</div>
+					-->
+					<div class="form-group">
+						<div class="col-md-12 col-sm-12 col-xs-12">
+							<button class="button-class button-primary fullside" iconClass="glyphicon glyphicon-search" dojoType="dijit.form.Button" showLabel="true" name="search"  type="submit"><?php echo $tr->translate("SEARCH");?></button>
+						</div>
+					</div>
+				 </div>
+			</form>
+		</div>
+	</div>
+</div>
+<div class="dijitHidden">
+	<div data-dojo-type="dijit.Dialog" style="width:700px;" id="popupStudentInfo" title="<?php echo $tr->translate("DETAIL_INFORMATION");?>" >
+		<div class="card-blogform">
+			<div class="card-body">
+			  <div class="form-group">
+					<div class="d-flex"> 
+						<div class="settings-main-icon ">
+							<i class="material-icons-outlined">
+							school
+							</i>
+						</div> 
+						<div class="col-md-10 col-sm-10 col-xs-12"> 
+							<h4 class="modal-title text-primary studentCode"></h4>
+							<small class="text-muted classInfo"></small>
+						</div> 
+					</div>
+				</div>
+				<div class="form-group" id="contentDetailPop" >
+					
+				</div>
+				
+				<div class="clearfix"></div>
+		
+			</div>
+		</div>
+	</div>
+</div>
+<script src="<?php echo $this->baseUrl();?>/js/help.js"></script>
+<script type="text/javascript">
+dojo.require("dojo.data.ItemFileWriteStore"); 
+
+var group_store  = getDataStorefromJSON('id','name',<?php print_r(Zend_Json::encode(array()));?> );
+var teacher_store  = getDataStorefromJSON('id','name',<?php print_r(Zend_Json::encode(array()));?> );
+dojo.ready(function(){
+	
+	
+	<?php if(!empty($this->search['reportLayout'])){?>
+	 dijit.byId('reportLayout').attr('value','<?php echo $this->search['reportLayout']?>'); 
+	<?php } ?> 
+	 setTimeout(function() {
+		setPrintOrientation('portrait');
+	}, 500);
+});
+
+var col = 0;
+tmp = '';
+temp='';
+function showDetailInfo(index,type=1){
+	var jsData = dijit.byId('jsData'+index).get('value');
+	var jsonArray = JSON.parse(jsData);
+	
+	if(jsonArray.length>0){
+		if(type==1){
+			$(".studentCode").html($("#accName"+index).html());
+			template='';
+			var no = 0;
+			var identity ="";
+			template+='<table class="content-data bd-dark-grey text-color-black text-h16px text-size-12px" border="1" cellspacing="5" width="100%">';
+						template+='<thead  id="head-title" >';
+							template+='<tr class="styleheader bg-head text-bold hpx-20" align="center">';
+								template+='<td width="4%" ><?php echo $tr->translate("NO");?></td>';
+								template+='<td ><?php echo $tr->translate("STUDENT_ID");?></td>';
+								template+='<td ><?php echo $tr->translate("STUDENT_NAME");?></td>';
+								template+='<td ><?php echo $tr->translate("GROUP_CODE");?></td>';
+							template+='</tr>';
+						template+='</thead>';
+			
+			for(var i=0;i<jsonArray.length;i++) {
+				no++;
+				template+='<tr class=" hover" >';
+					template+='<td align="center">'+no+'</td>';
+					template+='<td align="center">';
+					template+=jsonArray[i].code;
+					template+='</td>';
+					template+='<td >'+jsonArray[i].nameKh+'</td>';
+					template+='<td align="center">'+jsonArray[i].gCode+'</td>';
+					
+				template+="</tr>";
+				
+			}
+			template+="</table>";
+			$("#contentDetailPop").html(template);
+			dijit.byId("popupStudentInfo").show();
+		}else{
+			$(".studentCode").html($("#studentCode"+index).html());
+			template='';
+			var no = 0;
+			var identity ="";
+			template+='<table class="content-data bd-dark-grey text-color-black text-h16px text-size-12px" border="1" cellspacing="5" width="100%">';
+						template+='<thead  id="head-title" >';
+							template+='<tr class="styleheader bg-head text-bold hpx-20" align="center">';
+								template+='<td width="4%" ><?php echo $tr->translate("NO");?></td>';
+								template+='<td ><?php echo $tr->translate("TELEGRAM_ACCOUNT");?></td>';
+								template+='<td ><?php echo $tr->translate("JOIN_DATE");?></td>';
+							template+='</tr>';
+						template+='</thead>';
+			
+			for(var i=0;i<jsonArray.length;i++) {
+				no++;
+				template+='<tr class=" hover" >';
+					template+='<td align="center">'+no+'</td>';
+					template+='<td >'+jsonArray[i].fName+' '+jsonArray[i].lName+'</td>';
+					template+='<td align="center">'+jsonArray[i].jDate+'</td>';
+				template+="</tr>";
+			}
+			template+="</table>";
+			$("#contentDetailPop").html(template);
+			dijit.byId("popupStudentInfo").show();
+		}
+	}
+	
+}
+function hideDialogPopup(popupContentId) {		
+	dijit.byId(popupContentId).hide();
+}
+
+</script>

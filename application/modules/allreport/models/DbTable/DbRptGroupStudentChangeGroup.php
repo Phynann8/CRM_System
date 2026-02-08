@@ -1,0 +1,146 @@
+<?php
+
+class Allreport_Model_DbTable_DbRptGroupStudentChangeGroup extends Zend_Db_Table_Abstract
+{
+
+    protected $_name = 'rms_student';
+    public function getUserId(){
+    	$session_user=new Zend_Session_Namespace(SYSTEM_SES);
+    	return $session_user->user_id;
+    	 
+    }
+   
+
+    
+//     function getAllSession(){
+//     	$db=$this->getAdapter();
+//     	$sql="select key_code,name_en from rms_view where type=4";
+//     	return $db->fetchAll($sql);
+//     }
+    
+    function getAllStu($search){
+    	$db= $this->getAdapter();
+    	$_db = new Application_Model_DbTable_DbGlobal();
+    	$lang = $_db->currentlang();
+    	if($lang==1){// khmer
+    		$label = "name_kh";
+    		$title = "titleKh";
+    		$grade = "rms_itemsdetail.title";
+    		$degree = "rms_items.title";
+    		$branch = "b.branch_namekh";
+    	}else{ // English
+    		$label = "name_en";
+			$title = "title";
+    		$grade = "rms_itemsdetail.title_en";
+    		$degree = "rms_items.title_en";
+    		$branch = "b.branch_nameen";
+    	}
+    	$sql="SELECT 
+				  gscg.`id` AS changeId,
+				  gds.`stu_id`,
+				  gscg.`from_group`,				  
+				  st.stu_code,				 
+				  st.stu_khname,
+				  st.last_name,
+				  st.stu_enname,
+				  gscg.`moving_date`,
+				  (SELECT $label FROM rms_view WHERE rms_view.`type`=2 AND rms_view.`key_code`=st.sex Limit 1) AS sex,
+				  (SELECT CONCAT(ac.fromYear,'-',ac.toYear) FROM `rms_academicyear` AS ac WHERE ac.id = (SELECT rms_group.academic_year FROM rms_group WHERE rms_group.id=gscg.`from_group` LIMIT 1) LIMIT 1) AS academic_year,
+				  (SELECT $grade from rms_itemsdetail WHERE `rms_itemsdetail`.`items_type`=1 AND rms_itemsdetail.id=(SELECT rms_group.grade FROM rms_group WHERE rms_group.id=gscg.`from_group`) LIMIT 1) AS grade,
+				  (select pt.$title from rms_parttime_list AS pt where pt.id=(SELECT rms_group.session FROM rms_group WHERE rms_group.id=gscg.`from_group`) LIMIT 1) AS session,
+				  (SELECT group_code from rms_group WHERE rms_group.id=gscg.from_group limit 1) AS from_group_code,
+				  
+				  gscg.`to_group` ,
+				  (SELECT CONCAT(ac.fromYear,'-',ac.toYear) FROM `rms_academicyear` AS ac WHERE ac.id = g.academic_year LIMIT 1) AS to_academic_year,
+				  (SELECT $grade from rms_itemsdetail WHERE `rms_itemsdetail`.`items_type`=1 AND rms_itemsdetail.id=g.grade limit 1) AS to_grade,
+
+				  (select $title from rms_parttime_list AS pt where pt.id=g.session Limit 1) AS to_session,
+				  (select $label from rms_view where type=17 and key_code=gscg.change_type Limit 1) as change_type,
+				  (select user_name from rms_users where  id=gscg.user_id Limit 1) as user_name,
+				  g.group_code as to_group_code
+				FROM
+				   `rms_group_student_change_group` AS gscg JOIN `rms_group_detail_student` AS gds ON gds.itemType=1  AND gds.`group_id` = gscg.`to_group` AND gds.`old_group` = gscg.`from_group` 
+				   AND gscg.id = gds.changeGroupId
+					  LEFT JOIN rms_group AS g ON gscg.to_group=g.id
+					  LEFT JOIN rms_student AS st ON gds.stu_id=st.stu_id 
+				WHERE 
+					1  AND gscg.status = 1
+    	"; //and gscg.change_type=1
+    	
+    	$order=" ORDER BY gscg.`moving_date` DESC, gscg.id DESC";
+    	
+    	$where  = '';
+		
+		$from_date =(empty($search['start_date']))? '1': "gscg.moving_date >= '".$search['start_date']." 00:00:00'";
+		$to_date = (empty($search['end_date']))? '1': "gscg.moving_date <= '".$search['end_date']." 23:59:59'";
+		$where.= " AND ".$from_date." AND ".$to_date;
+		
+    	$dbp = new Application_Model_DbTable_DbGlobal();
+    	$where.=$dbp->getAccessPermission("gscg.branch_id");
+    	$where.=$dbp->getDegreePermission("gds.degree");
+    	
+   		 if(empty($search)){
+    		return $db->fetchAll($sql.$where.$order);
+    	}
+    	if(!empty($search['adv_search'])){
+    		$s_where = array();
+    		$s_search = addslashes(trim($search['adv_search']));
+    		$s_where[] = " (SELECT CONCAT(ac.fromYear,'-',ac.toYear) FROM `rms_academicyear` AS ac WHERE ac.id = g.academic_year LIMIT 1) LIKE '%{$s_search}%'";
+    		$s_where[] = " (SELECT rms_itemsdetail.title FROM rms_itemsdetail WHERE rms_itemsdetail.id=g.grade AND rms_itemsdetail.items_type=1 LIMIT 1) LIKE '%{$s_search}%'";
+    		$s_where[] = " (select name_en from rms_view where rms_view.type=4 and rms_view.key_code=g.session) LIKE '%{$s_search}%'";
+    		$where .=' AND ( '.implode(' OR ',$s_where).')';
+    	}
+    	if(!empty($search['branch_id'])){
+    		$where.=' AND gscg.branch_id='.$search['branch_id'];
+    	}
+    	if(!empty($search['academic_year'])){
+    		$where.=' AND gscg.academic_year='.$search['academic_year'];
+    		//$where.=' AND g.academic_year='.$search['academic_year'];
+    	}
+    	if(!empty($search['grade_bac'])){
+    		$where.=' AND g.grade='.$search['grade_bac'];
+    	}
+    	if(!empty($search['session'])){
+    		$where.=' AND g.session='.$search['session'];
+    	}
+    	if(!empty($search['change_type'])){
+    		$where.=' AND gscg.change_type='.$search['change_type'];
+    	}
+    	if(!empty($search['changegroup_id'])){
+    		$where.=' AND gscg.id='.$search['changegroup_id'];
+    	}
+    	
+    	$row = $db->fetchAll($sql.$where.$order);
+    	if($row){
+    		return $row;
+    	}
+    }
+    
+    
+    public function getChangeType(){
+    	$db=$this->getAdapter();
+    	$sql="SELECT key_code as id, name_kh as name from rms_view where type=17 and status=1 ";
+    	return $db->fetchAll($sql);
+    }
+    public function getAllChangeGroup($type){//1=ប្តូរក្រុម , 2=ឡើងថ្នាក់
+    	$db=$this->getAdapter();
+    	$sql="SELECT 
+    				id, 
+    				(select group_code from rms_group as g where g.id = from_group) as from_group,
+    				(select group_code from rms_group as g where g.id = to_group) as to_group
+    			from 
+    				rms_group_student_change_group 
+    			where 
+    				change_type=$type
+    				and status=1 
+    		";
+
+		$dbp = new Application_Model_DbTable_DbGlobal();
+    	$sql.=$dbp->getAccessPermission("branch_id");
+    	$sql.=$dbp->getDegreePermission('degree');
+
+    	return $db->fetchAll($sql);
+    }
+    
+}
+

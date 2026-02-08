@@ -1,0 +1,173 @@
+<?php
+class Foundation_StudentreturnController extends Zend_Controller_Action {
+	
+    public function init()
+    {    	
+     /* Initialize action controller here */
+    	header('content-type: text/html; charset=utf8');
+    	defined('BASE_URL')	|| define('BASE_URL', Zend_Controller_Front::getInstance()->getBaseUrl());
+	}
+	public function indexAction(){
+		
+		try{
+			if($this->getRequest()->isPost()){
+				$search=$this->getRequest()->getPost();
+			}
+			else{
+				$search=array(
+					'adv_search'	=>'',
+					'branch_id'=> '',
+					'academic_year'=> '',
+					'degree'=> '',
+					'grade'=> '',
+					'session'=> '',
+					'type'	=>'',
+					'start_date'=>date("Y-m-d"),
+					'end_date'=>date("Y-m-d")
+				);
+			}
+			$db_student= new Foundation_Model_DbTable_DbStudentReturn();
+			$rs_rows = $db_student->getAllStudentDropReturn($search);
+			
+			$list = new Application_Form_Frmtable();
+			$collumns = array("BRANCH","STUDENT_ID","ACADEMIC_YEAR","GRADE","GROUP","RETURN_GRADE","RETURN_GROUP","RETURN_STUDY_DATE","TYPE","USER","ROLLBACK","STATUS");
+			$link=array(
+					'module'=>'foundation','controller'=>'studentreturn','action'=>'edit',
+			);
+			$this->view->list=$list->getCheckList(10, $collumns, $rs_rows,array());
+	
+			$this->view->search = $search;
+		}catch(Exception $e){
+			
+			Application_Model_DbTable_DbUserLog::writeMessageError($e->getMessage());
+			Application_Form_FrmMessage::message("INSERT_FAIL");
+		}
+		$form=new Application_Form_FrmSearchGlobal();
+		$forms=$form->FrmSearch();
+		Application_Model_Decorator::removeAllDecorator($forms);
+		$this->view->form_search=$form;
+		
+	}
+	function addAction(){
+		try{
+			if($this->getRequest()->isPost()){
+				try{
+					$_data = $this->getRequest()->getPost();
+					$_add = new Foundation_Model_DbTable_DbStudentReturn();
+	 				$_add->addStudentDropReturn($_data);
+	 				Application_Form_FrmMessage::Sucessfull("INSERT_SUCCESS","/foundation/studentreturn");
+	 					
+				}catch(Exception $e){
+					Application_Model_DbTable_DbUserLog::writeMessageError($e->getMessage());
+					Application_Form_FrmMessage::message("INSERT_FAIL");
+				}
+			}
+			$tsub = new Foundation_Form_FrmStudentReturn();
+			$frm_student=$tsub->FrmStudentReturn();
+			Application_Model_Decorator::removeAllDecorator($frm_student);
+			$this->view->frm = $frm_student;			
+		}catch(Exception $e){
+			Application_Form_FrmMessage::message("INSERT_FAIL");
+			Application_Model_DbTable_DbUserLog::writeMessageError($e->getMessage());
+		}
+	}
+	public function editAction(){
+		try{	
+			$id=$this->getRequest()->getParam("id");
+			$id = empty($id)?0:$id;
+			$db= new Foundation_Model_DbTable_DbStudentReturn();
+			
+			if($this->getRequest()->isPost())
+			{
+				try{
+					$data = $this->getRequest()->getPost();
+					// print_r($data);
+					// exit();
+					$db->updateStudentDropReturn($data);
+					Application_Form_FrmMessage::Sucessfull("EDIT_SUCCESS","/foundation/studentreturn/index");
+				}catch(Exception $e){
+					Application_Form_FrmMessage::message("EDIT_FAIL");
+					Application_Model_DbTable_DbUserLog::writeMessageError($e->getMessage());
+				}
+			}	
+			
+			$row = $db->getStudentDropReturnById($id);
+			if (empty($row)){
+				Application_Form_FrmMessage::Sucessfull("NO_RECORD","/foundation/studentreturn/index");
+			}
+			if ($row['status']==0){
+				Application_Form_FrmMessage::Sucessfull("UNABLE_TO_EDIT_DEACTIVE_RECORD","/foundation/studentreturn/index");
+			}
+			$this->view->row =$row;
+			$tsub= new Foundation_Form_FrmStudentReturn();
+			$frm_student=$tsub->FrmStudentReturn($row);
+			Application_Model_Decorator::removeAllDecorator($frm_student);
+			$this->view->frm = $frm_student;
+			
+		}catch(Exception $e){
+			Application_Model_DbTable_DbUserLog::writeMessageError($e->getMessage());
+			Application_Form_FrmMessage::message("INSERT_FAIL");
+			
+		}
+			
+		
+	}
+
+	public function rollbackAction(){
+		
+		$id = $this->getRequest()->getParam("id");
+		$id = empty($id) ? 0 : $id;
+		
+		$dbUser = new Application_Model_DbTable_DbUsers();
+		$permission = $dbUser->getAccessUrl("foundation","studentreturn","rollback");
+		if (empty($permission)){
+			Application_Form_FrmMessage::Sucessfull("NO_PERMISSION_TO_ROLLBACK","/foundation/studentreturn/index");
+			exit();
+		}else{
+			$db= new Foundation_Model_DbTable_DbStudentReturn();
+			$result = $db->getStudentDropReturnById($id);
+			if(empty($result)){
+				Application_Form_FrmMessage::Sucessfull("NO_RECORD","/foundation/studentreturn/index");
+				exit();
+			}
+			if($result["status"]==0){
+				Application_Form_FrmMessage::Sucessfull("ALREADY_DEACTIVE","/foundation/studentreturn/index");
+				exit();
+			}
+			$data = [
+				"returnId" =>$id,
+			];
+			$rerurn = $db->rollBackStudentReturn($data);
+			if($rerurn){
+				Application_Form_FrmMessage::Sucessfull("SUCCESSFULLY_ROLLBACK","/foundation/studentreturn/index");
+				exit();
+			}else{
+				Application_Form_FrmMessage::Sucessfull("SAVE_FAIL","/foundation/studentreturn/index");
+				exit();
+			}
+		}
+	}
+	
+	
+	function getalldropstudentAction(){
+		if($this->getRequest()->isPost()){
+			$data = $this->getRequest()->getPost();
+			$db = new Foundation_Model_DbTable_DbStudentReturn();
+			$data['branch_id'] = !empty($data['branch_id'])?$data['branch_id']:null;
+			$rows = $db->getAllStudentDrop($data);
+			print_r(Zend_Json::encode($rows));
+			exit();
+		}
+	}
+	function getdropinfoAction(){
+		if($this->getRequest()->isPost()){
+			$data = $this->getRequest()->getPost();
+			$db = new Foundation_Model_DbTable_DbStudentReturn();
+			$data['drop_id'] = !empty($data['drop_id'])?$data['drop_id']:null;
+			$rows = $db->getStudentDropInfo($data);
+			print_r(Zend_Json::encode($rows));
+			exit();
+		}
+	}
+	
+}

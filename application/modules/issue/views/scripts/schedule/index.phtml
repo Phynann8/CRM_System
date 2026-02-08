@@ -1,0 +1,324 @@
+<?php
+	$tr = Application_Form_FrmLanguages::getCurrentlanguage();
+	echo $this->headTitle($tr->translate("RPT_RESCHEDULE_GROUP"));
+	
+	$formList = new Application_Form_Frmtable();
+    $frm =  $this->form_search;
+    $urlCopy = $this->baseUrl()."/issue/schedule/copy/id/";
+    $urlEdit = $this->baseUrl()."/issue/schedule/edit/id/";
+	$urlSchedule = $this->baseUrl()."/allreport/score/rpt-reschedulebygroup/scheduleId/";
+?>
+<div class="card pb-10 pt-10 pl-10 pr-10">
+	<div class="card-content collapse show">
+		<div class="card-box">
+               	<div class="col-sm-12 border-botom">
+		    		<div class="col-sm-8 pd-0">
+		    			<h4 class="m-b-0"><i class="glyphicon glyphicon-calendar" aria-hidden="true"></i>&nbsp;&nbsp;&nbsp;<?php echo $tr->translate('RPT_RESCHEDULE_GROUP');?></h4>
+    				</div>
+    			<div class="col-sm-4 text-right"></div>
+    		</div>
+    	</div>
+		<div class="card-box">
+			<form id="list" name="list" action="" dojoType="dijit.form.Form" method="post">
+				<div class="form-group">
+                   <div class="col-md-4 col-sm-4 col-xs-12">
+                   		<?php echo $frm->getElement("adv_search");?>
+                   </div>
+                   <div class="col-md-2 col-sm-2 col-xs-12">
+                   		<?php echo $frm->getElement("branch_id");?>
+                   </div>
+                   <div class="col-md-2 col-sm-2 col-xs-12">
+                   		<?php echo $frm->getElement("academic_year");?>
+                   </div>
+                   <div class="col-md-2 col-sm-2 col-xs-12">
+                   		 <input id="group" />
+                   </div>
+				   <div class="col-md-2 col-sm-2 col-xs-12">
+                   		<?php echo $frm->getElement('status');?>
+                   </div>
+			   </div>
+			   <div class="form-group">
+				   <div class="col-md-2 col-sm-2 col-xs-12">
+                   		<?php echo $frm->getElement('start_date');?>
+                   </div>
+                    <div class="col-md-2 col-sm-2 col-xs-12">
+                   		<?php echo $frm->getElement('end_date');?>
+                   </div>
+                   <div class="col-md-1 col-sm-1 col-xs-12">
+                   		<input type="hidden" name="recordcopy" id="recordcopy" dojoType="dijit.form.TextBox" />
+                   		<button class="button-class button-primary" iconClass="glyphicon glyphicon-search" dojoType="dijit.form.Button" showLabel="true" type="submit"><?php echo $tr->translate("SEARCH");?></button>
+						
+				   </div>
+				   <div class="col-md-1 col-sm-1 col-xs-12">
+						<button dojoType="dijit.form.Button" id="printselected" class="button-class button-warning" iconClass="glyphicon glyphicon-print" type="button" onclick="getSelectedValues();">
+							<?php echo $tr->translate('PRINT') ?>
+						</button>
+				   </div>
+                 </div>
+			</form>
+		</div>
+		<div class="card-box">
+			<?php echo $this->list?>
+		</div>
+		<div class="card-box">
+			<div class="dataTables_scrollBody" style="position: relative;  width: 100%; background:#fff;   ">
+    			<table border="1" id="datatable-responsive" style="  border-collapse: collapse;   border-color: #ddd;"  class="display nowrap dataTable dtr-inline collapsed" cellspacing="0" width="100%" >
+    				<thead>
+    					<tr>
+    						<th class="tdheader text-center">
+								<input type="checkbox" onchange="checkall();" class="checkbox" id="check_all" name="check_all">
+							</th>
+    						<th class="tdheader text-center"><?php echo $tr->translate("NUM");?></th>
+    						<th class="tdheader text-center"><?php echo $tr->translate("BRANCH");?></th>
+    						<th class="tdheader text-center"><?php echo $tr->translate("CLASS");?></th>
+    						<th class="tdheader text-center"><?php echo $tr->translate("SCHEDULE_SETTING");?></th>
+    						<th class="tdheader text-center"><?php echo $tr->translate("DATE");?></th>
+    						
+							<th class="tdheader text-center"><?php echo $tr->translate("USER");?></th>
+							<th class="tdheader text-center">
+								<div class="custom-control custom-checkbox ">
+									<input type="checkbox" class="checkbox custom-control-input" onchange="checkAllPublic();" class="checkbox" id="checkAllPublic"  name="checkAllPublic" >
+									<label class="custom-control-label" for="checkAllPublic">
+										<?php echo $tr->translate("STATUS");?>
+									</label>
+								</div>
+								<div class="publicBtn d-none">
+									<button dojoType="dijit.form.Button" class="button-class button-success" iconClass="glyphicon glyphicon-globe" type="button" onclick="setPublicSchedule();">
+										<?php echo $tr->translate('UPDATE_STATUS') ?>
+									</button>
+								</div>
+							</th>
+    					</tr>
+    				</thead>
+    				<tbody>
+    					<?php $r=0; if (!empty($this->row)) foreach ($this->row as $rs){ 
+    						if($r%2==0)$attb='normal';
+    						else $attb='alternate';
+    						$r++?>
+    					<tr class="context-menu-one"  oncontextmenu="setrowdata('<?php echo $rs['id']; ?>');return false;">
+							<td style="text-align:center;" >
+								<input type="checkbox" name="del[]" class="del" value="<?php echo $rs['id']; ?>">
+							</td>
+							<td style="text-align:center;" ><?php echo $r;?></td>
+							<td class="itesms text-center" id="branchValue<?php echo $rs['id']; ?>"><?php echo $rs['branch_name']?></td>
+							<td class="itesms text-center" >
+								<small class="subtitle-row text-secondary"><?php echo $rs['years']?></small>
+								<a href="<?php echo $urlEdit; ?>"><?php echo $rs['group_code']?></a>
+							</td>
+							<td class="itesms text-center" ><?php echo $rs['sch_setting']?></td>
+							<td class="itesms text-center" id="dateValue<?php echo $rs['id']; ?>" ><?php echo $rs['create_date']?></td>
+							<td class="itesms text-center" ><?php echo $rs['user_name']?></td>
+							<td class="itesms text-center" >
+								<?php if($rs['scheduleStatus']==0){ ?>
+								<label class="custom-switch"> 
+									<input type="checkbox" onchange="checkAllPublic(2);"   name="publicNow[]" value="<?php echo $rs['id'];?>"  class=" checkboxPublic custom-switch-input" <?php if($rs['scheduleStatus']==1){ echo "checked"; }else{ echo ""; } ?>> 
+									<span class="custom-switch-indicator custom-switch-small custom-radius"></span> 
+								</label>
+								<?php }else{ 
+									echo $rs['status']; 
+								}?>
+							</td>
+    					</tr>
+    					<?php }?>
+    				</tbody>
+    			</table>
+    		</div>		
+		</div>
+	</div>
+</div>
+
+<script src="<?php echo $this->baseUrl();?>/js/help.js"></script>
+<script type="text/javascript">
+	dojo.require("dojo.data.ObjectStore");
+	dojo.require("dojo.data.ItemFileWriteStore"); 
+	dojo.require("dijit.form.DateTextBox");
+	
+	var group_store  = getDataStorefromJSON('id','name',<?php print_r(Zend_Json::encode(array()));?> );
+	dojo.ready(function(){
+		new dijit.form.FilteringSelect({
+			store: group_store,
+		    queryExpr: "*${0}*",
+			autoComplete: false,                     
+			required: true,                      
+		    id: "group",
+		    name: "group",  
+		    class: 'fullside', 
+		    readonly:false,
+		    required:false,
+		    placeHolder:"<?php echo $tr->translate("SELECT_GROUP");?>",          
+		    onChange: function() {  
+		    }
+		}, "group");
+
+		var branch_id = dijit.byId('branch_id');
+		 branch_id.on('change', function(evt) {
+			 getAllGroup();
+		});
+		 var academic_year = dijit.byId('academic_year');
+		 academic_year.on('change', function(evt) {
+			 getAllGroup();
+	    });
+		 getAllGroup();
+});
+	var oldBranch = "<?php echo $this->search['branch_id']?>";
+	url_getallgroup = '<?php echo $this->url(array('module'=>'foundation','controller'=>'group','action'=>'getallgroup'));?>';
+	function getAllGroup(){
+		dijit.byId('group').reset();
+		branch_id = dijit.byId('branch_id').get('value');
+		if(branch_id=='' || branch_id==-1){
+			var group_store  = getDataStorefromJSON('id','name',<?php print_r(Zend_Json::encode(array()));?> );
+			dijit.byId('group').set('store',group_store);  
+			dijit.byId('branch_id').focus();
+			return false;
+		}
+		academic_year = dijit.byId('academic_year').get('value');
+		if(academic_year=='' || academic_year==-1){academic_year ="";}
+		dojo.xhrPost({
+			url: url_getallgroup,
+			content:{
+				'branch_id':branch_id,
+				'academic_year':academic_year,
+				'noaddnew':1
+			},
+			handleAs:"json",
+			load: function(data) {
+			    group_store  = getDataStorefromJSON('id','name', data);
+			    dijit.byId('group').set('store',group_store);  
+			    <?php if (!empty($this->search['group'])){?>
+				dijit.byId('group').attr('value','<?php echo $this->search['group']?>');  
+				<?php }?> 
+			},
+			error: function(err) {
+			}
+		});
+	}
+function copyRecord(url){
+	 id = dijit.byId('recordcopy').get('value');
+	 if(id!=''){
+		window.location.href = url+'/id/'+id;
+	 }else{
+		alert('Please select record you want to copy');
+		return false;
+	 }
+}
+function setValue(index){
+	var recordcopy = $('input[name=copy]:checked').val();
+	dijit.byId('recordcopy').attr('value',recordcopy);
+}
+	var row=0;
+	var url="";
+	$(function(){
+		$.contextMenu({
+			selector: '.context-menu-one', 
+			callback: function(key, options) {			
+				var m = "clicked: " + key;
+				if(key=="edit"){
+					url='<?php echo $urlEdit;?>';
+				}else if(key=="copy"){
+					url='<?php echo $urlCopy;?>';
+				}else if(key=="print"){
+					url='<?php echo $urlSchedule;?>';
+				}				
+				gotoAction();
+			},
+			items: {
+				"edit": {name: "<?php echo $tr->translate("EDIT");?>", icon: "edit", accesskey: "e"},
+				"copy": {name: "<?php echo $tr->translate("COPY");?>", icon: "copy"},
+				"print": {name: "<?php echo $tr->translate("PRINT");?>", icon: "fa-print"},
+			}
+		});
+	});
+	function setrowdata(index){
+		row = index;
+	}
+	var recordid ='';
+	function gotoAction(){
+		window.location.href =url+row;
+	}
+	
+	function getSelectedValues() {
+		let checkboxes = document.querySelectorAll('.del:checked'); // Select checked checkboxes
+		let values = [];
+		
+		checkboxes.forEach((checkbox) => {
+			values.push(checkbox.value); // Get value of each checked checkbox
+		});
+		select_id = values.join(",");
+		
+		if(select_id != '') {
+			
+			//addTab("<?php echo $tr->translate("RPT_RESCHEDULE_BYGROUP");?>",'<?php echo $urlSchedule; ?>'+ select_id+'?inFrame=true');
+			window.open('<?php echo $urlSchedule;?>'+select_id);
+			//window.location.href = '<?php echo $urlSchedule;?>'+select_id;
+  		} else if (select_id == '') {
+  			alert('Please select record you want to print');
+  			return false;
+  		}
+	}
+
+	function checkall(){
+		if ($('#check_all').is(':checked')) {
+			$(".del").prop('checked', true);
+		}else{
+			$(".del").prop('checked', false);
+		}
+	}
+	
+	function checkAllPublic(index=0){
+		if(index==0){
+			if($('#checkAllPublic').is(":checked")){
+				$(".checkboxPublic").prop('checked', true);
+			}else{
+				$(".checkboxPublic").prop('checked', false);
+			}
+		}
+		getSeletedPublic();
+	}
+	
+	function getSeletedPublic() {
+		
+		let checkboxes = document.querySelectorAll('.checkboxPublic:checked'); // Select checked checkboxes
+		let values = [];
+		
+		checkboxes.forEach((checkbox) => {
+			values.push(checkbox.value); // Get value of each checked checkbox
+		});
+		var selectId = values.join(",");
+		if(selectId!=''){
+			 $('.publicBtn').removeClass('d-none');
+		}else{
+			$('.publicBtn').addClass('d-none');
+		}
+	}
+	
+	var urlPublicSch = '<?php echo $this->url(array('module'=>'issue','controller'=>'schedule','action'=>'publicsch'));?>';
+	function setPublicSchedule(){
+		let checkboxes = document.querySelectorAll('.checkboxPublic:checked'); // Select checked checkboxes
+		let values = [];
+		
+		checkboxes.forEach((checkbox) => {
+			values.push(checkbox.value); // Get value of each checked checkbox
+		});
+		var selectId = values.join(",");
+		
+		if(selectId==''){
+			alert("<?php echo $tr->translate("EMPTY_SELETED_DATA_TO_UPDATE_STATUS");?>");
+			return false;
+		}
+		dojo.xhrPost({
+			url: urlPublicSch,
+			content:{
+				'selectId':selectId
+			},
+			handleAs:"json",
+			load: function(data) {
+			    if(data==1){
+					alert("<?php echo $tr->translate("UPDATE_STATUS_SUCCESS");?>");
+					location.reload();
+				}
+			},
+			error: function(err) {
+			}
+		});
+	}
+</script>

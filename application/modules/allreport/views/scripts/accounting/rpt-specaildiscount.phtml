@@ -1,0 +1,144 @@
+<?php
+	$tr = Application_Form_FrmLanguages::getCurrentlanguage();
+	$this->headTitle($tr->translate('RPT_SPECAIL_DISCOUNT')); 
+	echo $this->headTitle();
+	$base_url = Application_Form_FrmMessage::getUrl("/");
+	$frm = $this->form_search;
+	$str="";
+	$classHideHeight=classHideHeight;
+?>
+<div style="min-height:15cm; margin:0 auto; padding:0.5cm 0.5cm 0cm 0.5cm">
+	<div class="card-box">
+       	<div class="col-sm-12 border-botom">
+		   	<div class="col-sm-8 pd-0">
+	    		<h4 class="m-b-0"><i class="fa fa-file " aria-hidden="true"></i>&nbsp;&nbsp;&nbsp;<?php echo $tr->translate('RPT_SPECAIL_DISCOUNT');?></h4>
+    		</div>
+    		<div class="col-sm-4 text-right">
+    		</div>
+    	</div>
+    </div>
+	<form id='foundation_class' action="" dojoType="dijit.form.Form" method="post" enctype="application/x-www-form-urlencoded">
+		<div class="form-group">
+       		<div class="col-md-2 col-sm-2 col-xs-12">
+       			<?php echo $frm->getElement("title");?>
+       		</div>
+       		<div class="col-md-2 col-sm-2 col-xs-12">
+       			<?php echo $frm->getElement("dis_type");?>
+       		</div>
+       		<div class="col-md-2 col-sm-2 col-xs-12">
+       			<?php echo $frm->getElement("status_type");?>
+       		</div>
+       		<div class="col-md-2 col-sm-2 col-xs-12">
+       			<?php echo $frm->getElement("start_date");?>
+       		</div>
+       		<div class="col-md-2 col-sm-2 col-xs-12">
+       			<?php echo $frm->getElement("end_date");?>
+       		</div>
+       		<div class="col-md-2 col-sm-2 col-xs-12">
+       			<button class="button-class button-primary" iconClass="glyphicon glyphicon-search" dojoType="dijit.form.Button" showLabel="true" name="search"  type="submit"><?php echo $tr->translate("SEARCH");?></button>
+       		</div>
+       	</div>
+	</form>
+<style>
+#footer{display: none;}
+</style>	
+	<div id="divPrint">
+		<form action="<?php echo $this->url(array('module'=>'allreport','controller'=>'accounting','action'=>'submitlist')); ?>" dojoType="dijit.form.Form" method="post" enctype="application/x-www-form-urlencoded">	
+			<table style="background:#fff; margin: 0 auto; width: 100%; font-family:'Khmer OS Battambang';">
+				<tr>
+					<td colspan="3"><?php echo $this->rsheader;?></td>
+				</tr>
+				
+				<tr>
+					<td width="25%" align="left">
+					</td>
+					<td align="center" width="50%">
+						<strong style="font-weight:normal;font-family: Arial Black;color:#000; font-size: 12px;font-family:'khmer os muol light';"><?php echo $tr->translate('RPT_SPECAIL_DISCOUNT');?></strong><br >
+						<span style="color:#000; font-size: 12px;font-family:'Times New Roman','Khmer OS Muol Light';"><?php if(!empty($this->search['start_date'])){?>&nbsp; <?php echo date("d-M-Y",strtotime($this->search["start_date"]))?> <?php echo $tr->translate('TO')?> <?php echo date("d-M-Y",strtotime($this->search["end_date"]));}?></span>
+					</td>
+					<td align="right" width="25%">&nbsp;</td>
+				</tr>
+				<tr> 
+					<td colspan="3" id="exportExcel" >
+						<style type="text/css">
+							.style{
+									line-height: 20px;font-size: 11px !important;
+									font-family: 'Times New Roman','Khmer OS Battambang';
+								}
+								table.content-data { page-break-inside:auto }
+								tr.content-data{ page-break-inside:avoid; page-break-after:auto; }
+								#header{
+									display: table-header-group;
+									page-break-inside:avoid; page-break-after:auto;
+									margin-top: 100px;
+								}
+								table.content-data{
+									border-collapse:collapse;
+									border:1px solid #000; 
+									font-size:8px;
+								}
+								table.content-data thead tr.style {
+								line-height: 25px; font-size:10px !important; padding:1px 0px; white-space: nowrap;height: 22px; 
+									background: #c1d0f3;
+									font-weight:600;
+								}
+								table.content-data tr.style {
+								 white-space: nowrap;
+								}
+								table tr td{
+									padding:0 2px;
+								}
+								@media print{
+									<?php if(!empty($this->printFormat)){ echo $this->printFormat; } ?>
+								}
+						</style>
+						<table class="content-data" width="100%" border="1" align="center" >
+							  <thead>
+								  <tr class="style" align="center">
+								    <td scope="col">&nbsp;<?php echo $tr->translate('N_O');?>&nbsp;</td>
+								    <td scope="col">&nbsp;<?php echo $tr->translate('STUDENT_NAME');?>&nbsp;</td>
+									<td scope="col">&nbsp;<?php echo $tr->translate('REQUEST_NAME');?>&nbsp;</td>
+									<td scope="col">&nbsp;<?php echo $tr->translate('PHONE');?>&nbsp;</td>
+									<td scope="col">&nbsp;<?php echo $tr->translate('DISCOUNT_TYPE');?>&nbsp;</td>
+									<td scope="col">&nbsp;<?php echo $tr->translate('PERIOD');?>&nbsp;</td>
+									<td scope="col">&nbsp;<?php echo $tr->translate('EXPIRE_DATE');?>&nbsp;</td>
+									<td scope="col">&nbsp;<?php echo $tr->translate('TYPE');?>&nbsp;</td>
+									<td scope="col">&nbsp;<?php echo $tr->translate('NOTE');?>&nbsp;</td>
+									<td scope="col">&nbsp;<?php echo $tr->translate('USER');?>&nbsp;</td>
+								  </tr>
+							  </thead>
+							 <?php 
+							 		$i=0; $total=0;if(!empty($this->row)){foreach($this->row as $key=>$rs){$i++;
+									 if($key==0){
+									 	$str=$key+1;
+									 }else{
+									 	$str.=",".($key+1);
+									 }
+							 ?>
+							  <tr class="hover style" >
+								    <td data-label="<?php echo $tr->translate("N_O");?>"  ><?php echo $i;?></td>
+								    <td data-label="<?php echo $tr->translate("STUDENT_NAME");?>"  ><?php echo $rs['stu_name']; ?></td>
+								    <td data-label="<?php echo $tr->translate("REQUEST_NAME");?>"  ><?php echo $rs['request_name']; ?></td>
+								    <td data-label="<?php echo $tr->translate("PHONE");?>"  ><?php echo $rs['phone']; ?></td>
+								    <td data-label="<?php echo $tr->translate("DISCOUNT_TYPE");?>"  ><?php echo $rs['discount_type']; ?></td>
+								    <td data-label="<?php echo $tr->translate("PERIOD");?>"  ><?php echo $rs['duration_type']; ?></td>
+								    <td data-label="<?php echo $tr->translate("EXPIRE_DATE");?>"  ><?php echo $rs['expired_date']; ?></td>
+								    <td data-label="<?php echo $tr->translate("TYPE");?>"  ><?php echo $rs['status']; ?></td>
+								    <td data-label="<?php echo $tr->translate("NOTE");?>"  ><?php echo $rs['notes']; ?></td>
+								    <td data-label="<?php echo $tr->translate("USER");?>"  ><?php echo $rs['user_name']; ?></td>
+							  </tr>
+							  <?php 
+							  ?> 
+							  <?php }} ?>
+						</table>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="3" width="100%">
+						<?php echo $this->rsfooteracc;?>
+					</td>
+				</tr>
+			</table>
+		</form>
+	</div>	
+</div>

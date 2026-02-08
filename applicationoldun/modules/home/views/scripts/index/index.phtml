@@ -1,0 +1,18 @@
+ <?php
+	$tr=Application_Form_FrmLanguages::getCurrentlanguage();
+	$this->headTitle($tr->translate("Dashboard Student Registration Management System"));
+	echo $this->headTitle();
+?>
+<?php 
+		if($this->dashboardType==1){ 
+			echo $this->render('general-dashboard.phtml');
+		}else if($this->dashboardType==2){ 
+			echo $this->render('admin-dashboard.phtml');
+		}else if($this->dashboardType==3){ 
+			echo $this->render('account-dashboard.phtml');
+		}else if($this->dashboardType==4){ 
+			echo $this->render('attendance-dashboard.phtml');
+		}else if($this->dashboardType==5){ 
+			echo $this->render('crm-dashboard.phtml');
+		}
+	?>

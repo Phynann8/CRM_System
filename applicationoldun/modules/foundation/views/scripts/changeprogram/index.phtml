@@ -1,0 +1,75 @@
+<?php
+	$tr = Application_Form_FrmLanguages::getCurrentlanguage();
+	echo $this->headTitle($tr->translate("CHANGE_PROGRAM"));
+	$urlView = $this->baseUrl()."/foundation/changeprogram/view/id/";
+	$frm =  $this->frm_search;
+?>
+<div class="card pb-10 pt-10 pl-10 pr-10">
+	<div class="card-content collapse show">
+		<div class="card-box">
+               	<div class="col-sm-12 border-botom">
+		    		<div class="col-sm-8 pd-0">
+		    			<h4 class="m-b-0"><i class="fa fa-sitemap" aria-hidden="true"></i>&nbsp;&nbsp;&nbsp;<?php echo $tr->translate('CHANGE_PROGRAM');?></h4>
+	    			</div>
+	    			<div class="col-sm-4 text-right">
+	    			</div>
+	    		</div>
+	    	</div>
+		<div class="card-box">
+			<form  id='foundation_class' action="" dojoType="dijit.form.Form" method="post" enctype="application/x-www-form-urlencoded">
+				<div class="form-group">
+                   <div class="col-md-2 col-sm-2 col-xs-12">
+                   		<?php echo $frm->getElement("adv_search");?>
+                   </div>
+				   <div class="col-md-2 col-sm-3 col-xs-12">
+                   		<?php echo $frm->getElement("branch_id");?>
+                   </div>
+                   <div class="col-md-2 col-sm-2 col-xs-12">
+                  		<?php echo $frm->getElement("academic_year");?>
+                   </div>
+                   <div class="col-md-2 col-sm-2 col-xs-12">
+                   		<?php echo $frm->getElement('start_date');?>
+                   </div>
+                   <div class="col-md-2 col-sm-2 col-xs-12">
+                   		<?php echo $frm->getElement('end_date');?>
+                   </div>
+					<div class="col-md-2 col-sm-2 col-xs-12">
+                   		<button class="button-class button-primary" iconClass="glyphicon glyphicon-search" dojoType="dijit.form.Button" showLabel="true" type="submit"><?php echo $tr->translate("SEARCH");?></button>
+                   </div>
+                </div>
+			</form>
+		</div>
+		<div class="card-box">
+			<?php echo $this->list;?>
+		</div>
+	</div>
+</div>
+
+<script src="<?php echo $this->baseUrl();?>/js/help.js"></script>
+<script type="text/javascript">
+dojo.require("dijit.form.DateTextBox");
+var row=0;
+var url="";
+$(function(){
+	$.contextMenu({
+		selector: '.context-menu-one', 
+		callback: function(key, options) {
+			var newPageTitle="";
+			var actionType=1;
+			var m = "clicked: " + key;
+			if(key=="view"){
+				url='<?php echo $urlView;?>';
+				newPageTitle = "<?php echo $tr->translate("CHANGE_PROGRAM_DETAIL");?>";
+				addTab(newPageTitle,url+row+'?inFrame=true');
+			}
+			
+		},
+		items: {
+			"view": {name: "<?php echo $tr->translate("CHANGE_PROGRAM_DETAIL");?>", icon: "edit"},
+		}
+	});
+});
+function setrowdata(index){
+	row = index;
+}
+</script>

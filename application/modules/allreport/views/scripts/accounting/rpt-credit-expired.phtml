@@ -1,0 +1,283 @@
+<?php
+	$tr = Application_Form_FrmLanguages::getCurrentlanguage();
+	echo $this->headTitle($tr->translate('CREDIT_EXPIRED_REPORT'));
+	$base_url = Application_Form_FrmMessage::getUrl("/");
+	$frm = $this->frm_search;
+?>
+<div style="min-height: 10cm; margin: 0 auto; padding: 0.2cm 0.2cm 0cm 0.2cm">
+	<div class="card-box">
+		<div class="col-sm-12 border-botom">
+			<div class="col-sm-8 pd-0">
+				<h4 class="m-b-0">
+					<i class="fa fa-file-text"></i>&nbsp;&nbsp;&nbsp;<?php echo $tr->translate("CREDIT_EXPIRED_REPORT");?></h4>
+			</div>
+			<div class="col-sm-4 text-right"></div>
+		</div>
+	</div>
+	<form id="list" name="list" action="" dojoType="dijit.form.Form" method="post">
+	  	<div class="form-group">
+       		<div class="col-md-2 col-sm-2 col-xs-12">
+       			<?php echo $frm->getElement("adv_search");?>
+       		</div>
+       		<div class="col-md-2 col-sm-2 col-xs-12">
+       			<?php echo $frm->getElement('branch_id');?>
+       		</div>
+       		<div class="col-md-2 col-sm-2 col-xs-12">	
+       			<button class="button-class button-primary" iconClass="glyphicon glyphicon-search" dojoType="dijit.form.Button" showLabel="true" type="submit"><?php echo $tr->translate("SEARCH");?></button>
+       		</div>
+       	</div>
+	</form>
+	
+	<form id="frmUser" action="<?php echo $this->url(array('module'=>'allreport','controller'=>'accounting','action'=>'confirm-expired')); ?>" dojoType="dijit.form.Form" method="post" enctype="application/x-www-form-urlencoded">
+		<script type="dojo/method" event="onSubmit">				
+			if(this.validate()) {
+				 var identity = [];
+				 $('.checkbox:checked').each(function(i){
+					 identity[i] = $(this).val();
+				});
+				if(identity==""){
+					alert("<?php echo $tr->translate("PLEASE_CHECKED_RECORD");?>");
+					return false;
+				}		
+				loadingBlock();		
+				return true;
+			}
+			return false;
+		</script>
+		<div id="divPrint">
+			<style>
+				#footer{display: none;}
+					table.content-data {page-break-inside:auto; font-family:'Times New Roman','Khmer OS Battambang'; }
+					tr.content-data{ page-break-inside:avoid; page-break-after:auto; }
+					#header {
+					  display: table-header-group;
+					  page-break-inside:avoid; page-break-after:auto;
+					}	
+					td{ padding: 1px !important;}
+					tr.line td{ border-bottom: 2px solid #000;padding-top: 5px; }
+					table.content-data{
+						border-collapse:collapse;
+						width:100%;
+						border:1px solid #000; 
+						font-family:'Times New Roman','Khmer OS Battambang';
+						font-size:12px;
+						white-space: nowrap;
+						margin:0 auto;
+						color:#000;
+						margin:0 auto;
+					}
+					table.content-data  tr.style-head {
+					   line-height: 25px; padding:1px 0px; white-space: nowrap;height: 22px; 
+						background: #CCD9FF;
+						text-align: center;
+					}
+					table.content-data tr td{
+						padding: 2px;
+					}
+					table.content-data tr.style-rowdata {
+						font-size:12px; 
+						height: 23px;
+					}
+					
+					
+					.text-green {
+						color: #037d2d;
+					}
+					.text-red {
+						color: #f72929;
+					}
+					.text-bold{
+						font-weight:bold;
+					}
+					table.content-data td span {
+						line-height: inherit;
+					}
+					
+					.noted {
+						word-wrap: break-word;
+						word-break: break-all;
+						font-size: 8px;
+						line-height: 10px !important;
+						white-space: normal;
+						max-width: 100px;
+						display: block;
+					}
+				</style>	
+			<table  style="background:#fff; margin: 0 auto; ;white-space: nowrap;width: 100%">
+				<tr>
+					<td colspan="3"><?php echo $this->rsheader;?></td>
+				</tr>
+				<tr>
+					<td width="15%" align="center">
+					</td>
+					<td width="70%" align="center">
+						<span style="color:#000; font-size: 14px;font-family:'Times New Roman','Khmer OS Muol Light';"><?php echo $tr->translate('CREDIT_EXPIRED_REPORT')?></span><br />
+						<span style="color:#000; font-size: 14px;font-family:'Times New Roman','Khmer OS Muol Light';"><?php echo date("d-M-Y",strtotime($this->search["end_date"]));?></span>
+					</td>
+					<td width="15%" align="center"></td>
+				</tr>
+				<tr>
+					<td colspan="3" id="exportExcel">
+						<?php if(!empty($this->result)){?>
+							<table class="content-data" border="1">
+								<thead>
+									<tr class="style-head" align="center">
+										<td rowspan="2">
+											<div class="custom-control custom-checkbox">
+												<input type="checkbox" checked class="checkbox custom-control-input" id="checkAll" name="checkAll" onClick="checkAllTotal(0);" >
+												<label class="custom-control-label" for="checkAll">
+													<?php echo $tr->translate("ALL");?>
+												</label>
+												<input type="hidden" class="custom-control-input" id="currentDate" name="currentDate" value="<?php echo date("Y-m-d",strtotime($this->search["end_date"]));?>" >
+												
+											</div>
+										</td>
+										<td rowspan="2"><?php echo $tr->translate("N_O");?></td>
+										<td rowspan="2"><?php echo $tr->translate("BRANCH");?></td>
+										<td colspan="2"><?php echo $tr->translate("STUDENT_INFO");?></td>
+										<td colspan="6"><?php echo $tr->translate("CREDIT_INFO");?></td>
+										
+										<td rowspan="2"><?php echo $tr->translate("BY_USER");?></td>
+									</tr>
+									<tr class="style-head" align="center">
+										<td><?php echo $tr->translate("STUDENT_CODE");?></td>
+										<td><?php echo $tr->translate("STUDENT_NAME");?></td>
+										
+										<td><?php echo $tr->translate("#.Tran");?></td>
+										<td><?php echo $tr->translate("DATE");?></td>
+										<td><?php echo $tr->translate("TOTAL_AMOUNT");?></td>
+										<td><?php echo $tr->translate("VALIDATE");?></td>
+										<td><?php echo $tr->translate("FROM");?></td>
+										<td><?php echo $tr->translate("EXPIRED_DATE");?></td>
+										
+									</tr>
+								</thead>
+								<?php $num=1; $d_balance = 0;
+								if(!empty($this->result)){ 
+									foreach($this->result as $key=>$rs){ $key=$key+1; 
+									$cashType = empty($rs['cashType']) ? 1 : $rs['cashType'];
+									
+									$amountLabel=" <span class=\"text-red text-bold\"> ";
+									$amountLabel.=number_format($rs["total_amount"],2);
+									$amountLabel.=" </span> ";
+									$validate=$rs['creditTypeTitle'];
+									
+									$from=$tr->translate("deposit");
+									if($cashType ==1){
+										$amountLabel=" <span class=\"text-green text-bold\"> ";
+										$amountLabel.=number_format($rs["total_amount"],2);
+										$amountLabel.=" </span> ";
+										
+										
+										if( !empty($rs['fromStu']) ){								
+											$from= "TF - ".$rs['fromStudentNameKh'];
+										}
+										if( $rs['creditType']!=1 ){	
+											$validate=date("d-M-Y",strtotime($rs['end_date']));
+										}
+										$d_balance = $d_balance+$rs["total_amount"];
+									}else{
+										$validate="-";
+										if( !empty($rs['refTransaction']) ){								
+											$from= "ref #".$rs['refTransaction'];
+										}
+										$d_balance = $d_balance-$rs["total_amount"];
+									}
+									$incomeConnected="";
+									if($rs['depositIncomeId']>0){
+										$incomeConnected= "ref #".$rs['incInvoice'];
+									}
+									
+									$end_dat=date("d-M-Y",strtotime($this->search["end_date"]));
+									$total_day=strtotime($end_dat)-strtotime($rs['end_date']);
+									$totalLateDay=$total_day/(60*60*24);
+									
+								?>
+								<tr class="style-rowdata hover" align="center">
+									<td>
+										<div class="custom-control custom-checkbox">
+											<input type="checkbox" checked class="checkbox custom-control-input" value="<?php echo $rs['id'];?>" id="credit<?php echo $key; ?>" name="selector[]" onClick="checkAllTotal(1);" >
+											<label class="custom-control-label" for="credit<?php echo $key; ?>">
+											</label>
+										</div>
+									</td>
+									<td><?php echo $key; ?></td>
+									<td align="left"><?php echo $rs['branch_name']; ?></td>
+									<td align="left"><?php echo $rs['studentCode']; ?></td>
+									<td align="left"><?php echo $rs['studentNameKh']; ?></td>
+									<td align="center"><?php echo $rs['transaction_no']; ?></td>
+									<td><?php echo date("d-M-Y",strtotime($rs['date'])); ?></td>
+									<td align="right"><?php echo $amountLabel;?></td>
+									<td align="center"><?php echo $validate; ?></td>
+									<td align="center">
+										<?php echo $from; ?>
+										<?php if($incomeConnected!=""){ echo "<small>".$incomeConnected."</small>"; }?>
+									</td>
+									<td align="center" class="text-red">
+										<?php 
+											if($totalLateDay>0){
+												echo $tr->translate("EXPIRED")." : ".abs($totalLateDay)." ".$tr->translate("DAY");
+											}else{
+												echo "-";
+											}
+										?>
+									</td>
+									<td><?php echo $rs['user_name']; ?></td>
+								</tr>
+								<?php
+									
+								}}
+								?>
+							</table>
+							<table width="20%" align="right" style="margin-top: 5px;border-collapse: collapse;">
+								<tbody>			                
+									<tr style="font-size:14px; height: 30px;border: 1px solid #000;" align="center" >
+										<td style="border: 1px solid #fff;border-right: 1px solid #000;" colspan="6"></td>
+										<td bgcolor="#b0bdfd" style="border: 1px solid #000;white-space: nowrap;">ចំនួនទឹកប្រាក់សរុប</td>
+									</tr>
+									<tr style="font-size:14px; height: 30px;border: 1px solid #000;font-weight: bold;" align="center" >
+										<td style="border: 1px solid #fff;border-right: 1px solid #000;" colspan="6"></td>
+										<td style="border: 1px solid #000;"><?php echo "$ ".number_format($d_balance,2);?></td>
+									</tr>
+								</tbody>
+							</table>
+						<?php }?>								
+						
+					</td>
+				</tr>
+				<tr>
+					<td colspan="3" width="100%">
+						<?php echo $this->rsfooteracc;?>
+					</td>
+				</tr>
+			</table>
+			<div class="card-box">
+				<div class="col-md-12 col-sm-12 col-xs-12 border-top mt-20 ptb-10 text-center">
+					<input type="submit" class="button-class button-primary" iconClass="glyphicon glyphicon-floppy-disk" value="រក្សាទុក" label="<?php echo $tr->translate('CONFIRM_AS_EXPIRED');?>" id="submitButton" dojoType="dijit.form.Button" />
+				</div>
+			</div>
+		</div>	
+	</form>	
+</div>
+
+<script type="text/javascript">	
+function checkAllTotal(index){
+	if(index==0){
+		if($('#checkAll').is(":checked")){
+			$('.checkbox').each(function() { //loop through each checkbox
+				this.checked = true;  
+			});
+		}else{
+			$('.checkbox').each(function() { //loop through each checkbox
+				this.checked = false;  
+			});
+		}
+	}else{
+		var a = $("input:checked").val();
+		 var identity = [];
+	     $('.checkbox:checked').each(function(i){
+	    	 identity[i] = $(this).val();
+	     });
+	}
+}
+</script>

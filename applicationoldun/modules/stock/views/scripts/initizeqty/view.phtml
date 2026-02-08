@@ -1,0 +1,162 @@
+<?php
+	$tr = Application_Form_FrmLanguages::getCurrentlanguage ();
+	echo $this->headTitle($tr->translate('PRODUCT_MOVEMENT_HISTORY'));
+	// print_r($this->row);
+	// print_r($this->rowMovement);
+?>
+<div class="card pb-10 pt-10 pl-10 pr-10">
+	<div class="card-content collapse show">
+		<div class="card-box">
+               	<div class="col-sm-12 border-botom">
+		    		<div class="col-sm-8 pd-0">
+		    			<h4 class="m-b-0"><i class="fa fa-cubes " aria-hidden="true"></i>&nbsp;&nbsp;&nbsp;<?php echo $tr->translate('PRODUCT_DETAIL');?></h4>
+    				</div>
+    			<div class="col-sm-4 text-right"></div>
+    		</div>
+    	</div>
+		<div class="card-box">
+			<div style="min-height:22cm; margin:0 auto;">
+				<div id="divPrint">
+					<style>
+						table.content-data {
+							border-collapse: collapse;
+							font-size: 12px;
+							width: 100%;
+							font-family: 'Times New Roman', 'Khmer OS Battambang';
+							border: 1px solid #ccc;
+						}
+
+						table.content-data th,
+						table.content-data td {
+							padding: 5px 8px;
+							border: 1px solid #ccc;
+						}
+
+						thead tr {
+							background-color: #f0f0f0;
+						}
+
+						thead td span {
+							font-weight: bold;
+							text-decoration: underline;
+							text-align: center;
+						}
+
+						.font-14 {
+							font-size: 14px !important;
+						}
+
+						.font-bold {
+							font-weight: bold;
+						}
+
+						.text-left {
+							text-align: left;
+						}
+						.text-right {
+							text-align: right;
+						}
+
+						.product-info {
+							margin-bottom: 10px;
+							font-size: 13px;
+						}
+
+						.product-info td {
+							padding: 3px 10px;
+						}
+
+						@media print {
+							@page {
+								margin: 0.3cm 0.7cm;
+							}
+						}
+					</style>
+
+					<table style="width: 100%; margin: 0 auto; background: #fff;">
+						<tr>
+							<td colspan="3"><?php echo $this->rsheader; ?></td>
+						</tr>
+
+						<tr style="background-color:rgb(218 234 255);">
+							<td width="15%"></td>
+							<td align="center" width="70%">
+								<span <?php echo TITLE_REPORT; ?> style="font-size: 16px; font-weight: bold; ">
+									<?php echo $tr->translate('PRODUCT_MOVEMENT_HISTORY'); ?>
+								</span>
+							</td>
+							<td width="15%"></td>
+						</tr>
+
+						<!-- Product Information Table -->
+						<tr>
+							<td colspan="3">
+								<table class="product-info">
+									<tr>
+										<td class="font-bold"><?php echo $tr->translate('BRANCH'); ?></td>
+										<td>: <?php echo $this->row['branch_name']; ?></td>
+										<td class="font-bold"><?php echo $tr->translate('PRODUCT_CODE'); ?></td>
+										<td>: <?php echo $this->row['product_code']; ?></td>
+										
+									</tr>
+									<tr>
+										<td class="font-bold"><?php echo $tr->translate('PRODUCT_NAME'); ?></td>
+										<td>: <?php echo $this->row['title']; ?></td>
+										<td class="font-bold"><?php echo $tr->translate('COST'); ?></td>
+										<td>: <?php echo number_format($this->row['costing'], 2); ?> $</td>
+										
+									</tr>
+									<tr>
+										<td class="font-bold"><?php echo $tr->translate('PRICE'); ?></td>
+										<td>: <?php echo number_format($this->row['price'], 2); ?> $</td>
+										<td class="font-bold"><?php echo $tr->translate('PRICE_SET'); ?></td>
+										<td>: <?php echo $this->row['price_set']; ?> $</td>
+										
+									</tr>
+								</table>
+							</td>
+						</tr>
+
+						<!-- Movement History Table -->
+						<tr>
+							<td colspan="3" id="exportExcel">
+								<table class="content-data">
+									<thead>
+										<tr>
+											<td><span><?php echo $tr->translate("NUM"); ?></span></td>
+											<td><span><?php echo $tr->translate("MOVEMENT_DATE"); ?></span></td>
+											<td><span><?php echo $tr->translate("REFERENCE_NO"); ?></span></td>
+											<td><span><?php echo $tr->translate("MOVEMENT_TYPE"); ?></span></td>
+											<td class="text-right"><span><?php echo $tr->translate("QTY"); ?></span></td>
+										</tr>
+									</thead>
+									<tbody>
+										<?php
+										if (!empty($this->rowMovement)) {
+											$i = 1;
+											foreach ($this->rowMovement as $row) {
+										?>
+												<tr>
+													<td><?php echo $i++; ?></td>
+													<td><?php echo date("d-m-Y", strtotime($row['movement_date'])); ?></td>
+													<td class="text-left"><?php echo $row['referenceNo']; ?></td>
+													<td class="text-left"><?php echo $row['movementTitleEn']; ?></td>
+													<td class="text-right"><?php echo $row['quantity']; ?></td>
+												</tr>
+										<?php
+											}
+										} else {
+											echo "<tr><td colspan='5' style='text-align:center;'>" . $tr->translate("NO_RECORD") . "</td></tr>";
+										}
+										?>
+									</tbody>
+								</table>
+							</td>
+						</tr>
+					</table>
+				</div>
+			</div>
+
+		</div>
+	</div>
+</div>

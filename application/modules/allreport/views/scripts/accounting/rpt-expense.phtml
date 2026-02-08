@@ -1,0 +1,313 @@
+<?php
+	$tr = Application_Form_FrmLanguages::getCurrentlanguage();
+	echo $this->headTitle($tr->translate('RPT_OTHER_INCOME_EXPENSE')); 
+	$frm=$this->form_search;
+	$classHideHeight=classHideHeight;
+	
+	$dateFormat ="d/m/Y";
+	$dateFormatExp ="d/M/Y";
+?>
+<style>
+	.hover:hover{ background:#ccc;}
+	table.content-data tr.style-head,
+	table.tb-footer tr.style-head {
+	   font-weight: bold !important;
+	}
+</style>
+<div class="layout-wrapper-report">
+	<div id="mainContent" class="main-content-report">
+		<div class="report-preview">
+			<?php echo $this->controlReport?>
+			<div id="main-viewer" class="main-viewer portrait">
+				<div id="viewer" class="viewer portrait">
+					<div id="divPrint" class="content">
+						<link rel="stylesheet" href="<?php echo $this->baseUrl();?>/admin/build/css/report-style.css">
+						<link rel="stylesheet" href="<?php echo $this->baseUrl();?>/admin/build/css/report-style-screen.css">
+						<style>
+							@media print {
+								<?php if(!empty($this->printFormat)){ echo $this->printFormat; } ?>
+							}
+						</style>
+						<table  style="background:#fff; margin: 0 auto; ;white-space: nowrap;width: 100%">
+							<tr>
+								<td colspan="3"><?php echo $this->rsheader;?></td>
+							</tr>
+							<tr>
+								<td width="15%" align="center"></td>
+								<td width="70%" align="center">
+									<span style="color:#000; font-size: 12px;font-family:'Times New Roman','Khmer OS Muol Light';"><?php echo $tr->translate('RPT_OTHER_INCOME_EXPENSE')?></span><br />
+									<span style="color:#000; font-size: 12px;font-family:'Times New Roman','Khmer OS Muol Light';"><?php if(!empty($this->search['start_date'])){?>&nbsp; <?php echo date($dateFormat,strtotime($this->search["start_date"]))?> <?php echo $tr->translate('TO')?> <?php echo date($dateFormat,strtotime($this->search["end_date"]));}?></span>
+								</td>
+								<td width="15%" align="center"></td>
+							</tr>
+							<tr>
+								<td colspan="3" id="exportExcel">
+									<table class="content-data text-color-black text-h16px text-size-11px" cellpadding="5" border="1" width="100%" >
+										<thead>
+											<tr class="styleheader bg-ligt-blues text-bold hpx-25" align="center">
+												<td rowspan="2" scope="col"><?php echo $tr->translate('N_O')?></td>
+												<td rowspan="2" scope="col"><?php echo $tr->translate('BRANCH')?></td>
+												<td colspan="2" scope="col"><?php echo $tr->translate('EXPENSE_INFO')?></td>
+												<td colspan="6" scope="col"><?php echo $tr->translate('INVOICE_INFO')?></td>
+											</tr>
+											<tr class="styleheader bg-ligt-blues text-bold hpx-25" align="center">
+												<td scope="col" class="w-px-80"><?php echo $tr->translate('RECEIPT_NO')?></td>
+												<td scope="col" class="w-px-150"><?php echo $tr->translate('EXPENSE_TITLE')?></td>
+												
+												<td scope="col" class="w-px-70"><?php echo $tr->translate('INVOICE_NO')?></td>
+												<td scope="col" class="w-px-60"><?php echo $tr->translate('FOR_DATE')?></td>
+												<td scope="col" class="w-px-80"><?php echo $tr->translate('TOTAL')?></td>
+												<td scope="col" class="w-px-110"><?php echo $tr->translate('RECEIVER')?></td>
+												<td scope="col" class="w-px-100"><?php echo $tr->translate('DESCRIPTION')?></td>
+												<td scope="col"><?php echo $tr->translate('USER')?></td>
+											</tr>
+										</thead>
+							<?php 
+								$summaryInfoArray = array();
+								$amtRc=1; 
+								$i=0; 
+								
+								$recordCondiction="";
+								$oldMethodTitle="";
+								$totalExpenseByMethod = 0;
+								$gTotalExpense = 0;
+										if(!empty($this->row)){
+											foreach ($this->row AS $kerIndex => $row) { $i++;
+											
+											$headRecordTitle = $row['bank_name'];
+											$thisRecordId = $row['bank_name'];
+											if($row['paymentMethodId']==1){
+												$thisRecordId=$row['paymentMethodId'];
+												$headRecordTitle = $row['paymentMethodTitle'];
+											}
+										?>
+										<?php 
+											if($thisRecordId != $recordCondiction ){
+												if($kerIndex>0){ 
+													$arryTotal = array(
+														"methodTitle" =>$oldMethodTitle
+														,"totalRecord" =>$amtRc-1
+														,"totalPaidAmt" =>$totalExpenseByMethod
+													);
+													array_push($summaryInfoArray, $arryTotal);
+										?>
+												<tr class="bg-ligt-blues text-bold">
+													<td colspan="6" align="right"><strong><?php echo $tr->translate("TOTAL")." ".$oldMethodTitle;?></strong></td>
+												
+													<td align="right"><strong><?php echo number_format($totalExpenseByMethod,2);?></strong></td>
+													<td colspan="3"></td>
+												</tr>
+												<?php } 
+												$totalExpenseByMethod=0;
+												$amtRc=1;
+												?>
+											<tr>
+												<td colspan="11" align="left" class="text-bold"><?php echo $headRecordTitle;?></td>
+											</tr>
+										<?php } ?>
+											
+										<tr class="context-menu-one style hover" oncontextmenu="setrowdata(<?php echo $row['id'];?>);return false;" align="center" <?php if ($row['status']==0){?>style="background: #ffd9d9;"<?php }?> >
+											<td><?php echo $i;?></td>
+											<td><?php echo $row['branch_name']; ?></td>
+											<td><?php echo $row['invoice']; ?></td>
+											<td align="left"><div class="text-max-line2"><?php echo $row['title']; ?></div></td>
+											
+											<td><?php echo $row['external_invoice']; ?></td>
+											<td class="hideExport"><?php echo date($dateFormat,strtotime($row['date']));?></td>
+											<td class="showExport" style="display:none;" ><?php echo date($dateFormatExp,strtotime($row['date']));?></td>
+											
+											<td class="text-bold" align="right"><?php echo $row['total_amount'];?></td>
+											<td align="left"><div class="w-px-110 text-max-line2"><?php echo $row['receiver']; ?></div></td>
+											<td align="left"><div class="w-px-100 text-h10px text-size-9px text-max-line3 "><?php echo $row['description'];?></div></td>
+											<td><?php echo $row['first_name'];?></td>
+										</tr>	
+										<?php 
+												$amtRc++;
+												if ($row['status']==1){
+													$totalExpenseByMethod = $totalExpenseByMethod + $row['total_amount'];
+													$gTotalExpense = $gTotalExpense + $row['total_amount'];
+												}
+												
+												$oldMethodTitle = $row['bank_name'];
+												$recordCondiction = $row['bank_name'];
+												if($row['paymentMethodId']==1){
+													$recordCondiction=$row['paymentMethodId'];
+													$oldMethodTitle=$row['paymentMethodTitle'];
+												}
+											?>
+										<?php }?>
+										<tr class="bg-ligt-blues text-bold">
+											<td colspan="6" align="right"><strong><?php echo $tr->translate("TOTAL")." ".$oldMethodTitle;?></strong></td>
+										
+											<td align="right"><strong><?php echo number_format($totalExpenseByMethod,2);?></strong></td>
+											<td colspan="3"></td>
+										</tr>
+										<tr class="bg-ligt-blues text-bold">
+											<td colspan="6" align="right"><strong><?php echo $tr->translate("GRAND_TOTAL");?></strong></td>
+										
+											<td align="right"><strong><?php echo number_format($gTotalExpense,2);?></strong></td>
+											<td colspan="3"></td>
+										</tr>
+										
+										<?php }?>
+											
+									</table>
+									<div style="display: flex; text-align: right;align-content: end;flex-wrap: wrap;flex-direction: column;margin-top: 10px; ">
+											<table  class="content-data text-color-black text-h16px text-size-12px" style=" width:30%; text-align: center; margin: 0 auto; font-weight: bold; border: 0;">
+												<tr>
+													<td colspan="4" align="center" class="text-bold bg-ligt-blues"><strong><?php echo $tr->translate("Summary");?></strong></td>
+												</tr>
+												<tr>
+													<td width="25%" align="right" style="white-space:nowrap;"><?php echo $tr->translate("GRAND_TOTAL");?></td>
+													<td width="25%" align="right"><?php echo sprintf('%02d', count($this->row));?></td>
+													<td width="25%" align="right">$</td>
+													<td width="25%" align="right"><?php echo number_format($gTotalExpense,2);?></td>
+												</tr>
+												<?php if(!empty($summaryInfoArray)) foreach($summaryInfoArray as $sum){?>
+												<tr>
+													<td align="right" style="white-space:nowrap;"><?php echo $sum["methodTitle"];?></td>
+													<td align="right" ><?php echo sprintf('%02d', $sum["totalRecord"]);?></td>
+													<td align="right">$</td>
+													<td align="right"><?php echo number_format($sum["totalPaidAmt"],2);?></td>
+												</tr>
+												<?php } ?>
+											</table>
+										</div>
+								</td>
+							</tr>
+							<tr>
+								<td colspan="3" width="100%">
+									<?php echo $this->rsfooteracc;?>
+								</td>
+							</tr>
+						</table>
+		
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="right-panel-report" id="rightPanel">
+		<div class="card-box">
+			<div class="card-search-head col-sm-12 border-botom">
+				<div class="col-sm-6 text-left pd-0">
+					<h4 class="m-b-0">
+						<?php echo $tr->translate("SEARCH");?> 
+						<i class="fa fa-search "></i> 
+					</h4>
+				</div>
+				<div class="col-sm-6 text-right pd-0">
+					<button onclick="closeRightPanel()" title="<?php echo $tr->translate("CLOSED");?> " class="btn-close">
+						<i class="fa-solid fa-xmark"></i>
+					</button>
+				</div>
+			</div>
+			<form  id='foundation_class' action="<?php echo $this->url(array('module'=>'allreport','controller'=>'accounting','action'=>'rpt-expense')); ?>" dojoType="dijit.form.Form" method="post" enctype="application/x-www-form-urlencoded">
+				<div class="form-group">
+					<div class="col-md-12 col-sm-12 col-xs-12">
+						<input dojoType="dijit.form.TextBox" class="fullside" id="txtsearch" name="txtsearch" placeholder="<?php echo $tr->translate("SEARCH");?>....." value="<?php echo $this->search['txtsearch'];?>" type="text">
+					</div>
+					<div class="col-md-12 col-sm-12 col-xs-12">
+						<?php echo $frm->getElement("branch_id");?>
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="col-md-6 col-sm-6 col-xs-12">
+						<?php echo $frm->getElement("start_date");?>
+					</div>
+					<div class="col-md-6 col-sm-6 col-xs-12">
+						<?php echo $frm->getElement("end_date");?>
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="col-md-6 col-sm-6 col-xs-12">
+						<?php echo $frm->getElement("receiptStatus");?>
+					</div>
+					<div class="col-md-6 col-sm-6 col-xs-12">
+						<input id="userId" />
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="col-md-12 col-sm-12 col-xs-12">
+						<?php echo $frm->getElement("receipt_order");?>
+					</div>
+					<div class="col-md-12 col-sm-12 col-xs-12">
+						<button class="button-class button-primary fullside" iconClass="glyphicon glyphicon-search" dojoType="dijit.form.Button" showLabel="true" name="search"  type="submit"><?php echo $tr->translate("SEARCH");?></button>
+					</div>
+				</div>
+			</form>	
+		</div>
+	</div>
+</div>
+<script src="<?php echo $this->baseUrl();?>/js/help.js" type="text/javascript"></script>
+<script src="<?php echo $this->baseUrl();?>/admin/js/global.js" type="text/javascript"></script>
+<script type="text/javascript">
+dojo.require("dojo.data.ItemFileWriteStore"); 
+dojo.require("dijit.form.CheckBox"); 
+dojo.ready(function(){
+	new dijit.form.FilteringSelect({
+		queryExpr: "*${0}*",
+		autoComplete: false,                     
+		required: false,                        
+		id: "userId",
+		name: "userId",  
+		class: 'fullside',  
+		placeHolder:"<?php echo $tr->translate("SELECT_USER");?>",          
+		onChange: function() {  
+		}
+	}, "userId");
+
+	var branch_id = dijit.byId('branch_id');
+	branch_id.on('change', function(evt) {
+		 getAllStudentByBranch();
+		 getAllUser();
+	});
+	getAllUser();
+	
+	setTimeout(function() {
+		setPrintOrientation('portrait');
+	}, 500);
+});
+
+function getAllUser(){
+	branch_id = dijit.byId('branch_id').get('value');
+	if(branch_id=='' || branch_id==-1){
+		dijit.byId('branch_id').focus();
+		return false;
+	}
+	let url_user = '<?php echo $this->url(array('module'=>'rsvacl','controller'=>'user','action'=>'get-user')); ?>';
+	contentData = {
+			'branchId':branch_id
+		}
+		selectedId = '';
+		if('<?php echo $this->search['branch_id']?>'==branch_id){
+			selectedId = '<?php echo empty($this->search['userId']) ? 0 : $this->search['userId'];?>';
+		}
+		getAllUserByBranch(url_user,contentData,selectedId);
+}
+
+var row=0;
+var url="";
+$(function(){
+	$.contextMenu({
+		selector: '.context-menu-one', 
+		callback: function(key, options) {
+			var m = "clicked: " + key;
+			if(key=="receipt"){
+				url='<?php echo $this->baseUrl()."/allreport/accounting/rpt-expensedetail/id/";?>';
+			}
+			gotoAction();
+		},
+		items: {
+			"receipt": {name: "<?php echo $tr->translate("PAYMENT_VOUCHER");?>", icon: "fa-money-bill", accesskey: "c"},
+		}
+	});
+});
+function setrowdata(index){
+	row = index;
+}
+var recordid ='';
+function gotoAction(){
+	 window.open(url+row, '_blank');
+}
+</script>

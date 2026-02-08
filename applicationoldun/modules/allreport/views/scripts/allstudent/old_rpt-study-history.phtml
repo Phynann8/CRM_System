@@ -1,0 +1,225 @@
+<?php
+	$tr = Application_Form_FrmLanguages::getCurrentlanguage();
+	$this->headTitle($tr->translate('STUDENT_HISTORY_REPORT')); 
+	echo $this->headTitle(''); 
+	$frm =  $this->form_search;
+?>	
+<style>
+.hover:hover{ background:#ccc;}</style>
+<div class="reportblog">
+	<div class="card-box">
+       	<div class="col-sm-12 border-botom">
+		   	<div class="col-sm-8 pd-0">
+	    		<h4 class="m-b-0"><i class="fa fa-file " aria-hidden="true"></i>&nbsp;&nbsp;&nbsp;<?php echo $tr->translate('STUDENT_HISTORY_REPORT');?></h4>
+    		</div>
+    		<div class="col-sm-4 text-right">
+    		</div>
+    	</div>
+    </div>
+	<form  id='foundation_class' action="<?php echo $this->url(array('module'=>'allreport','controller'=>'allstudent','action'=>'rpt-study-history')); ?>" dojoType="dijit.form.Form" method="post" enctype="application/x-www-form-urlencoded">
+		<div class="form-group">
+            <div class="col-md-2 col-sm-2 col-xs-12">
+            	<?php echo $frm->getElement("title");?>
+           	</div>
+           	<div class="col-md-2 col-sm-2 col-xs-12">
+           		<?php echo $frm->getElement("branch_id");?>
+           	</div>
+           	<div class="col-md-2 col-sm-2 col-xs-12">
+           		<?php //echo $frm->getElement("study_year");?>
+           		<input id="study_year" />
+           	</div>
+           	<div class="col-md-2 col-sm-2 col-xs-12">
+           		<?php echo $frm->getElement("degree");?>
+           	</div>
+           	<div class="col-md-2 col-sm-2 col-xs-12">
+           		<?php echo $frm->getElement("grade_all");?>
+           	</div>
+           	<div class="col-md-2 col-sm-2 col-xs-12">
+           	</div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-2 col-sm-2 col-xs-12">
+            	<?php echo $frm->getElement("session");?>
+           	</div>
+           	<div class="col-md-2 col-sm-2 col-xs-12">
+           		<?php echo $frm->getElement("start_date");?>
+           	</div>
+           	<div class="col-md-2 col-sm-2 col-xs-12">
+           		<?php echo $frm->getElement("end_date");?>
+           	</div>
+           	<div class="col-md-2 col-sm-2 col-xs-12">
+           		<select name="stu_type" id="stu_type" type="text" class="fullside" dojoType="dijit.form.FilteringSelect" >
+						<option value="-1" <?php if($this->search['stu_type']==-1){echo 'selected="selected"';}?>> All Students </option>
+						<option value="0" <?php if($this->search['stu_type']==0){echo 'selected="selected"';}?>> Old Students </option>
+						<option value="1" <?php if($this->search['stu_type']==1){echo 'selected="selected"';}?>> New Students </option>
+					</select>
+           	</div>
+           	<div class="col-md-2 col-sm-2 col-xs-12">
+           		<button iconclass="dijitIconSearch" dojoType="dijit.form.Button" showLabel="true" name="search"  type="submit"><?php echo $tr->translate("SEARCH");?></button>
+           	</div>
+           	<div class="col-md-2 col-sm-2 col-xs-12">
+           	</div>
+        </div>
+	</form>
+<div id="divPrint">
+		<table  style="background:#fff; margin: 0 auto; width: 100%; ">
+			<tr>
+				<td colspan="3"><?php echo $this->rsheader;?></td>
+			</tr>
+			<tr>
+				<td>&nbsp;</td>
+			</tr>
+			<tr>
+				<td width="20%" align="right">
+				</td>
+				<td width="60%" align="center">
+					<strong style="font-weight:bold;font-family: Arial Black;color:#000; font-size: 17px;font-family:'Khmer MEF2';"><?php echo $tr->translate("STUDENT_HISTORY_REPORT");?></strong><br/>
+					<strong style=" font-weight:bold;font-family: Arial Black;color:#000; font-size: 14px;font-family:'Khmer MEF2';"><?php if(!empty($this->search['start_date'])){?><?php echo date('d-M-Y',strtotime($this->search['start_date']));?><?php echo $tr->translate("TO");?><?php echo date('d-M-Y',strtotime($this->search['end_date']));}?> </strong>
+				</td>
+				<td width="20%" align="right">
+				</td>
+			</tr>
+			<tr>
+				<td>&nbsp;</td>
+			</tr>
+		<style>
+			table tr th{
+				border: 1px solid #000;	
+				text-align: center;
+			}
+			table {page-break-inside:auto }
+			tr{ page-break-inside:avoid; page-break-after:auto; }
+			#header {
+			  display: table-header-group;
+			  page-break-inside:avoid; page-break-after:auto;
+			}
+			tr.line td{ border-bottom: 2px solid #000;padding-top: 5px; }
+		</style>
+			<tr>
+				<td colspan="3">
+					<div id="exportExcel">
+						<table cellpadding="4"​ style=";font-family:'Khmer OS Battambang' ; margin:0 auto;width:100%;border:1px solid #000; border-collapse: collapse;white-space: nowrap;"  border="1" >
+							<thead>
+							<tr style="font-size:12px; height: 25px;background:#ccd9ff;font-weight: bold;" align="center" >
+								<th><?php echo $tr->translate("NUM");?></th>
+								<th><?php echo $tr->translate("BRANCH");?></th>
+								<th><?php echo $tr->translate("STUDENT_ID");?></th>
+								<th><?php echo $tr->translate("STUDENT_NAME");?></th>
+								<th><?php echo $tr->translate("STUDENT_NAME");?></th>
+								<th><?php echo $tr->translate("GENDER");?></th>
+								<th><?php echo $tr->translate("ACADEMIC_YEAR");?></th>
+								<th>&nbsp;<?php echo $tr->translate("STUDY_GROUP");?>&nbsp;</th>
+								<th><?php echo $tr->translate("DEGREE");?></th>
+								<th><?php echo $tr->translate("GRADE");?></th>
+								<th><?php echo $tr->translate("SESSION");?></th>
+								<th><?php echo $tr->translate("END_DATE");?></th>
+								<th><?php echo $tr->translate("STATUS");?></th>
+							</tr>
+							</thead>
+							<?php $i=0;$degree=0; if(!empty($this->rs)){ foreach ($this->rs AS $row) { $i++;?>
+							<tr style="font-size:12px; height: 23px;" align="center" class="hover" >
+								<td ><?php echo $i;?></td>
+								<td ><?php echo $row['branch_name'];?></td>
+								<td ><?php echo $row['stu_code'];?></td>
+								<td align="left">&nbsp;&nbsp;&nbsp;<?php echo $row['stu_khname'];?>&nbsp;</td>
+								<td align="left">&nbsp;&nbsp;&nbsp;<?php echo $row['stu_enname'];?>&nbsp;</td>
+								<td align="center">&nbsp;<?php if ($row['sex']==1){ echo $tr->translate("MALE");}else if($row['sex']==2){ echo $tr->translate("FEMALE");}?>&nbsp;</td>
+								<td ><?php echo $row['academic_year'];?></td>
+								<td ><?php echo $row['group_code'];?></td>
+								<td ><?php echo $row['degree'];?></td>
+								<td align="left">&nbsp;<?php echo $row['grade'];?></td>
+								<td><?php echo $row['session'];?></td>	
+								<td><?php if(!empty($row['finished_date'])){echo date('d-m-Y',strtotime($row['finished_date']));}?></td>	
+								<?php if($row['is_finished']==1){$status="Finished";$style="style='color:red;'";}else{$status="Studying";$style="";}?>
+								<td <?php echo $style;?>><?php echo $status;?></td>	
+							</tr>
+						<?php }}?>	
+						</table>	
+					</div>	
+				</td>
+			</tr>
+			<tr>
+				<td colspan="3">&nbsp;</td>
+			</tr>
+			<tr>
+				<td colspan="3">&nbsp;</td>
+			</tr>
+			<tr >
+				<td colspan="3" width="100%">
+					<table width="100%" style="font-family:'Khmer OS Battambang';">
+						<tr>
+							<td  width="25%" align="center">
+								<span style=" font-size: 14px;"><?php echo $tr->translate('VERIFIED_BY')?></span>
+							</td>
+							<td  width="50%">
+								&nbsp;
+							</td>
+							<td align="center"  width="25%">
+								<span style="font-size: 14px;text-align: right;"><?php echo $tr->translate('PREPARED_BY')?></span>
+							</td>
+						</tr>
+					</table>
+				</td>
+			</tr>
+		</table>
+		</div>
+</div>
+<script src="<?php echo $this->baseUrl();?>/js/help.js"></script>
+<script src="<?php echo $this->baseUrl();?>/admin/js/global.js"  type="text/javascript"></script>
+<script type="text/javascript">
+dojo.require("dojo.data.ItemFileWriteStore"); 
+
+var academic_store= getDataStorefromJSON('id','name',<?php print_r(Zend_Json::encode(array()));?> );
+var group_store  = getDataStorefromJSON('id','name',<?php print_r(Zend_Json::encode(array()));?> );
+dojo.ready(function(){
+	new dijit.form.FilteringSelect({
+		store: academic_store,
+		queryExpr: "*${0}*",
+		autoComplete: false,                     
+		required: false,                     
+		id: "study_year",
+		name: "study_year",
+		class: "fullside", 		
+		placeHolder:"<?php echo $tr->translate("SELECT_ACADEMIC_YEAR");?>",          
+		onChange: function() {  
+			academic_year = dijit.byId('study_year').get('value');
+		}
+	}, "study_year");
+	
+	 var branch_id = dijit.byId('branch_id');
+	 branch_id.on('change', function(evt) {
+		 getAllAcademicByBranch();
+    });
+	 getAllAcademicByBranch();
+});
+url_getacademic= '<?php echo $this->url(array('module'=>'foundation','controller'=>'group','action'=>'get-academicyear'));?>';
+var oldBranch = "<?php echo $this->search['branch_id']?>";
+function getAllAcademicByBranch(){
+	dijit.byId('study_year').reset();
+	branch_id = dijit.byId('branch_id').get('value');
+	if(branch_id=='' || branch_id==-1){
+		var academic_store  = getDataStorefromJSON('id','name',<?php print_r(Zend_Json::encode(array()));?> );
+		dijit.byId('study_year').set('store',academic_store);  
+		dijit.byId('branch_id').focus();
+		return false;
+	}
+		contentData = {
+			'branch_id':branch_id
+		}
+		selectedId = '';
+		if(oldBranch==branch_id){
+			selectedId = '<?php echo $this->search['study_year']?>';
+		}
+		getAllYear(url_getacademic,contentData,selectedId);
+}
+
+	function setID(type){
+		if(type==1){
+			id = dijit.byId('stu_id').get('value');
+			dijit.byId('stu_name').attr('value',id);
+		}else{
+			id = dijit.byId('stu_name').get('value');
+			dijit.byId('stu_id').attr('value',id);
+		}
+	}
+</script>

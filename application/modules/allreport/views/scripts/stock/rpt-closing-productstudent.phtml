@@ -1,0 +1,297 @@
+<?php
+	$tr = Application_Form_FrmLanguages::getCurrentlanguage();
+	$this->headTitle($tr->translate('CLOSING_STUDENT_GOT_PRODUCT')); 
+	echo $this->headTitle(''); 
+	$frm = $this->frm_payment;
+	$classHideHeight=classHideHeight;
+?>	
+<style>
+.hover:hover{ background:#ccc;}</style>
+<div style="min-height:10cm; margin:0 auto; padding:0.5cm 0.5cm 0cm 0.5cm">	
+	<div class="card-box">
+       	<div class="col-sm-12 border-botom">
+		   	<div class="col-sm-8 pd-0">
+	    		<h4 class="m-b-0"><i class="fa fa-file " aria-hidden="true"></i>&nbsp;&nbsp;&nbsp;<?php echo $tr->translate('CLOSING_STUDENT_GOT_PRODUCT');?></h4>
+    		</div>
+    		<div class="col-sm-4 text-right">
+    		</div>
+    	</div>
+    </div>
+	<div class="card-box">
+		<form action=""	dojoType="dijit.form.Form" method="post">
+				<div class="form-group">
+                   <div class="col-md-3 col-sm-3 col-xs-12">
+                   		<?php echo $frm->getElement("adv_search");?>
+                   </div>
+                   <div class="col-md-3 col-sm-3 col-xs-12">
+                   		<?php echo $frm->getElement("branch_search");?>
+                   </div>
+                   <div class="col-md-3 col-sm-3 col-xs-12">
+                   		<input id="student_id" />
+                   </div>
+                	<div class="col-md-2 col-sm-2 col-xs-12">
+                   </div>
+                 </div>
+                 <div class="form-group">
+	                   <div class="col-md-3 col-sm-3 col-xs-12">
+                   		<?php echo $frm->getElement("start_date");?>
+                   	</div>
+                   <div class="col-md-3 col-sm-3 col-xs-12">
+                   		<?php echo $frm->getElement("end_date");?>
+                   </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12">
+                    	 	<input id="userId" />
+                    </div>
+                   	<div class="col-md-2 col-sm-2 col-xs-12">
+                   		<button class="button-class button-primary" iconClass="glyphicon glyphicon-search" dojoType="dijit.form.Button"
+								showLabel="true" type="submit"><?php echo $tr->translate("SEARCH");?></button>
+                   	</div>
+	            </div>
+		</form>
+	</div>
+	<div id="divPrint">
+		<table border="0" style="background:#fff; margin: 0 auto; width: 100%;font-family:'Times New Roman','Khmer OS Battambang' ">
+			<tr>
+				<td colspan="3"><?php echo $this->rsheader;?></td>
+			</tr>
+			<tr>
+				<td>&nbsp;</td>
+			</tr>
+			<tr>
+				<td width="15%" align="center">
+				</td>
+				<td width="70%"  align="center">
+					<span <?php echo TITLE_REPORT;?>><?php echo $tr->translate('CLOSING_STUDENT_GOT_PRODUCT');?></span><br>
+					<span style="font-size: 12px; "><?php if(!empty($this->search['start_date'])){?><?php echo date("d-M-Y",strtotime($this->search['start_date']));?> &nbsp;<?php echo $tr->translate('TO');?>&nbsp; <?php echo date("d-M-Y",strtotime($this->search['end_date']));}?></span>
+				</td>
+				<td width="15%" align="center">
+				</td>
+			</tr>
+		<style>
+			.style{
+						line-height: 20px;font-size: 11px !important;
+						font-family: 'Times New Roman','Khmer OS Battambang';
+					}
+					.hideblog{display: none;}
+					.hiddenblog{display: block !important;}
+					.style1:hover{ background: #ccc; }
+					table tr td ul li{text-align: center;list-style: none;line-height: 25px; }
+					table { page-break-inside:auto }
+					tr{ page-break-inside:avoid; page-break-after:auto; }
+					#header {
+					  display: table-header-group;
+					  page-break-inside:avoid; page-break-after:auto;
+					  margin-top: 100px;
+					}
+					.hide{visibility: hidden;}
+					@media print {
+					 div.divFooter {
+					    position: fixed;
+					    top: 0;
+					  	width: 100%;
+					  	height: 100px;
+					  	bottom:0px;
+						margin:0;
+					  }
+						.hide{visibility: visible; height: <?php echo $classHideHeight;?>;}
+						
+					}
+					.center{text-align: center !important;}
+					table.content-data{
+						border-collapse:collapse;
+						border:1px solid #000; 
+						font-size:8px;
+						width:100%;
+					}
+					table.content-data thead tr.style {
+					   line-height: 25px; font-size:10px !important; padding:1px 0px; white-space: nowrap;height: 22px; 
+						background: #c1d0f3;
+						font-weight:600;
+					}
+					table.content-data  tr.style {
+					 
+					   white-space: nowrap;
+						
+					}
+					table.tb-footer{
+						border-collapse:collapse;
+						border:1px solid #000; 
+						font-size:11px;
+						font-family: 'Times New Roman','Khmer OS Battambang';
+					}
+					table.tb-footer tr{
+					 line-height: 14px; font-size:11px; padding:2px 0px; height: 25px;
+					}
+					table tr td{
+						padding:0 2px;
+					}
+					tr.voidclass {
+						background: #fff7f7;
+					}
+					td.centerText{
+						text-align: center;
+					}
+					.redBold {
+						font-weight: 600;
+						color: #f80000;
+					}
+					table.content-data tr td{
+						padding: 2px;
+					}	
+					@media print {
+						@page {
+							page: A4;
+							size: landscape;
+							margin: 0.8cm;
+						}
+				}
+		
+		</style>
+			<tr>
+				<td colspan="3">
+					<form id="list" name="list" action="<?php echo $this->url(array('module'=>'allreport','controller'=>'stock','action'=>'closingstuproduct')); ?>" dojoType="dijit.form.Form" method="post">
+						<div id="exportExcel">
+							<table  cellpadding="4"​ class="content-data"  border="1">
+								<thead>
+									<tr class="style" align="center">
+										<td scope="col" rowspan="2">
+											<input  onchange="checkall();" type="checkbox"  class="checkbox" id="check_all"  name="check_all"/>
+										</td>
+										<td scope="col" rowspan="2">&nbsp;<?php echo $tr->translate("NUM");?>&nbsp;</td>
+										<td scope="col" rowspan="2">&nbsp;<?php echo $tr->translate("BRANCH");?>&nbsp;</td>
+										<td scope="col" colspan="4">&nbsp;<?php echo $tr->translate("GETPRODUCT_INFO");?>&nbsp;</td>
+										<td scope="col" colspan="5">&nbsp;<?php echo $tr->translate("STUDENT_INFO");?>&nbsp;</td>
+										<td scope="col" rowspan="2">&nbsp;<?php echo $tr->translate("USER");?>&nbsp;</td>
+									</tr>
+									<tr  class="style" align="center">
+										<td scope="col">&nbsp;<?php echo $tr->translate("Ref Receipt No");?>&nbsp;</td>
+										<td scope="col">&nbsp;<?php echo $tr->translate("Received Date");?>&nbsp;</td>
+										<td scope="col">&nbsp;<?php echo $tr->translate("Total Received");?>&nbsp;</td>
+										<td scope="col">&nbsp;<?php echo $tr->translate("Total Remain");?>&nbsp;</td>
+										<td scope="col">&nbsp;<?php echo $tr->translate("STUDENT_CODE");?>&nbsp;</td>
+										<td scope="col">&nbsp;<?php echo $tr->translate("STUDENT_NAME");?>&nbsp;</td>
+										<td scope="col">&nbsp;<?php echo $tr->translate("DEGREE");?>&nbsp;</td>
+										<td scope="col">&nbsp;<?php echo $tr->translate("GRADE");?>&nbsp;</td>
+										<td scope="col">&nbsp;<?php echo $tr->translate("PHONE");?>&nbsp;</td>
+									</tr>
+								</thead>
+								<?php $i=0; if (!empty($this->rs)) foreach ($this->rs as $key=> $row){$i++;?>
+								<tr class="hover style" >
+									<td data-label="<?php echo $tr->translate("CHECK");?>" align="center">
+										<input  style="height: 15px;margin-top: 5px;"  type="checkbox"  class="checkbox" id="close_<?php echo $row['id'];?>" value="<?php echo $row['id'];?>"  name="selector[]"/>
+									</td>
+									<td data-label="<?php echo $tr->translate("NUM");?>" align="center">&nbsp;<?php echo $i;?>&nbsp;</td>
+									<td data-label="<?php echo $tr->translate("BRANCH");?>" >&nbsp;<?php echo $row['branch_name'];?>&nbsp;</td>
+									<td data-label="<?php echo $tr->translate("Ref Receipt No");?>" align="center"><a style="text-decoration: none; color: #000;" href="<?php echo $this->baseUrl()."/stock/cutstock/receipt/id/".$row['id'];?>">&nbsp;<?php echo $row['serailno'];?>&nbsp;</a></td>
+									<td data-label="<?php echo $tr->translate("Received Date");?>" align="center">&nbsp;<?php echo date("d/M/Y",strtotime($row['received_date']))?>&nbsp;</td>
+									<td data-label="<?php echo $tr->translate("Total Received");?>" align="center">&nbsp;<?php echo $row['total_received'];?>&nbsp;</td>
+									<td data-label="<?php echo $tr->translate("Total Remain");?>" align="center">&nbsp;<?php echo $row['total_qty_due'];?>&nbsp;</td>
+									<td data-label="<?php echo $tr->translate("STUDENT_CODE");?>"  align="center">&nbsp;<?php echo $row['stu_code'];?></td>
+									<td data-label="<?php echo $tr->translate("STUDENT_NAME");?>" align="left">&nbsp;&nbsp;&nbsp;<?php echo $row['student_name'];?>&nbsp;</td>
+									<td data-label="<?php echo $tr->translate("DEGREE");?>" >&nbsp;<?php echo $row['degree'];?>&nbsp;</td>	
+									<td data-label="<?php echo $tr->translate("GRADE");?>" >&nbsp;<?php echo $row['grade'];?>&nbsp;</td>
+									<td data-label="<?php echo $tr->translate("PHONE");?>" >&nbsp;<?php echo $row['tel'];?>&nbsp;</td>
+									<td data-label="<?php echo $tr->translate("USER");?>" align="center">&nbsp;<?php echo $row['user_enter']; ?>&nbsp;</td>
+								</tr>
+								<?php }?>
+							</table>	
+						</div>	
+						<div class="card-box">
+							<div class="col-sm-12 border-top mt-20 ptb-10 text-center">
+								<button class="button-class button-primary" iconClass="glyphicon glyphicon-floppy-disk"  dojoType="dijit.form.Button" showLabel="true" type="submit"><?php echo $tr->translate("Closing Entry");?></button>
+							</div>
+						</div>
+					</form>
+				</td>
+			</tr>
+			<tr>
+				<td colspan="3" width="100%">
+					<?php echo $this->rsfooteracc;?>
+				</td>
+			</tr>
+		</table>
+	</div>
+</div>	
+<script src="<?php echo $this->baseUrl();?>/js/help.js"></script>
+<script src="<?php echo $this->baseUrl();?>/admin/js/global.js"></script>
+<script type="text/javascript">
+	
+	dojo.require("dojo.data.ItemFileWriteStore");  
+	dojo.require("dijit.form.Textarea");
+	
+	dojo.ready(function(){
+		new dijit.form.FilteringSelect({
+			autoComplete: false,
+			queryExpr: "*${0}*",                     
+			id: "student_id",
+			name: "student_id",   
+			value:"<?php echo $this->search['student_id'];?>",
+			required:false,        
+			class: 'fullside', 
+			placeHolder:"<?php echo $tr->translate("SELECT_STUDENT_NAME");?>",          
+		}, "student_id");
+
+		new dijit.form.FilteringSelect({
+			autoComplete: false,
+			queryExpr: "*${0}*",                     
+			id: "userId",
+			name: "userId",   
+			required:false,        
+			class: 'fullside', 
+			placeHolder:"<?php echo $tr->translate("SELECT_USER");?>",          
+		}, "userId");
+		
+		getallstudentname();
+		 var branch_id = dijit.byId('branch_search');
+		 	branch_id.on('change', function(evt) {
+				getallstudentname();
+		    });
+	});
+	function getallstudentname(){//
+		var url_data = '<?php echo $this->url(array('module'=>'registrar','controller'=>'register','action'=>'getliststudenturl')); ?>';
+		branch_id = dijit.byId("branch_search").attr("value");
+		if(branch_id==''){
+			dijit.byId("branch_search").focus();
+			return false;
+		}
+		getAllUser(branch_id);
+		dojo.xhrPost({
+			url:url_data,
+			content:{
+				'student_name':1,
+				'branchId':branch_id,
+				'customerType':1
+			},
+			handleAs:"json",
+			load: function(data) {
+				student_store  = getDataStorefromJSON('id','name', data);
+			    dijit.byId('student_id').set('store',student_store);  
+			    <?php if (!empty($this->search['student_id'])){?>
+			    dijit.byId('student_id').set('value','<?php echo $this->search['student_id'];?>'); 
+			   
+			    <?php }?>
+			},
+			error: function(err){
+			}
+		});
+	}
+	function getAllUser(branchId){
+		contentData={
+			'branchId':branchId,
+		}
+		let url_user = '<?php echo $this->url(array('module'=>'rsvacl','controller'=>'user','action'=>'get-user')); ?>';
+		selectedId = '';
+		if('<?php echo $this->search['branch_search'];?>'==branchId){
+			selectedId = '<?php echo $this->search['userId'];?>';
+		}
+		getAllUserByBranch(url_user,contentData,selectedId);
+	}
+
+	function checkall(){
+		if ($('#check_all').is(':checked')) {
+			$(".checkbox").prop('checked', true);
+		}else{
+			$(".checkbox").prop('checked', false);
+		}
+	}
+</script>

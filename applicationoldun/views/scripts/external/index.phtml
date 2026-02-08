@@ -1,0 +1,177 @@
+<?php 
+	$tr=Application_Form_FrmLanguages::getCurrentlanguage();
+	$baseUrl = $this->baseUrl()."/";
+	
+	$key = new Application_Model_DbTable_DbKeycode();
+	$dataInfo=$key->getKeyCodeMiniInv(TRUE);
+		
+	$clientTitle= $tr->translate("CUSTOMER_BRANCH");
+	if(!empty($dataInfo['schooolNameKh'])){
+		$clientTitle= $dataInfo['schooolNameKh'];
+	}
+	$clientTitleEn="";
+	if(!empty($dataInfo['schooolNameEng'])){
+		$clientTitleEn= $dataInfo['schooolNameEng'];
+	}
+	$defaultLogo = $this->baseUrl()."/images/Logo/Logo.png";
+	if(!empty($dataInfo['logo'])){
+		if (file_exists(PUBLIC_PATH."/images/logo/".$dataInfo['logo'])){
+			$defaultLogo = $this->baseUrl().'/images/logo/'.$dataInfo['logo'];
+		}
+	}
+?>
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <!-- Meta, title, CSS, favicons, etc. -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title><?php echo $clientTitle." | ".$tr->translate("LOGIN");?></title>
+	<link rel="shortcut icon" href="<?php echo $baseUrl;?>images/icon.ico" type="image/x-icon"/>
+	
+	<script src="<?php echo $baseUrl;?>js/dojo-1.6.1/dojo/dojo.js"  djConfig="isDebug: true,parseOnLoad: true"></script>
+	<script>dojoConfig = {parseOnLoad: true}</script>
+	<link rel="stylesheet" type="text/css" href="<?php echo $baseUrl;?>js/dojo-1.6.1/dijit/themes/soria/soria.css"/>
+	<script>	
+		require(["dojo/parser", "dijit/form/Form", "dijit/form/Button", "dijit/form/ValidationTextBox"]);
+	</script>
+    <!-- Bootstrap -->
+    <link href="<?php echo $baseUrl;?>admin/vendors/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="<?php echo $baseUrl;?>admin/vendors/font-awesome/css/font-awesome.min.css" rel="stylesheet">
+    <!-- NProgress -->
+
+    <!-- Custom Theme Style -->
+    <link href="<?php echo $baseUrl;?>admin/build/css/custom.min.css" rel="stylesheet">
+    <link href="<?php echo $baseUrl;?>admin/build/css/external-template.css" rel="stylesheet">
+  </head>
+<style type="text/css">
+		.container {
+		    padding: 0;
+		    width: auto;
+		}
+		.fullside {
+		    width: 99%;
+		    height: 30px;
+		}
+		.dijitArrowButtonInner, .dijitIconSearch {
+		    margin-top: 6px !important;
+		}
+		.dijitTextBox, .dijitValidationTextBox, .dijitInputField, .dijitInputContainer, .dijitInputInner, dijitReset, .dijitRight, .dijitButtonNode, .dijitArrowButton, .dijitDownArrowButton, .dijitArrowButtonContainer {
+		    height: 30px;
+		}
+		.login_wrapper.login-wrapper .login_content form .dijitValidationTextBoxError .dijitValidationIcon {
+			border: none !important;
+			box-shadow: none !important;
+			color: rgb(255 255 255 / 15%);
+			width: 16px !important;
+			margin: 0 !important;
+			border-radius: 0;
+		}
+		
+	</style>
+  <body class="soria login">
+    <div class="login-page">
+		<div class="main-title">
+			<p class="titlepage">ប្រព័ន្ធដាក់ពិន្ទុសិស្ស / <strong>Student Score System</strong></p>
+		</div>
+		<div class="login-content">
+			<div class="loginBlog">
+				<div class="login-box">
+					<div class="content">
+						<p  class="login-title">សូមស្វាគមន៍ /  <strong>Welcome</strong></p>
+						<div  class="instruction-box">
+							<h3 > ការណែនាំ ៖<small>Instruction :</small></h3>
+							<p class="instruction-note">
+								១. Link System នេះមិនអនុញ្ញតអោយអ្នកផ្សេងដឹងឬប្រើប្រាស់ឡើយ។
+								២. សូមបញ្ចូលប្រព័ន្ធពិន្ទុអោយទាន់ពេលវេលាតាមគោលការណ៍សាលាដែលបានកំណត់។
+								៣. ក្នុងករណីត្រូវការជំនួយសូមទាក់ទងមកកាន់ ផ្នែកគ្រប់គ្រងប្រព័ន្ធពិន្ទុ។
+							</p>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="loginFormBlog">
+				<div class="login_wrapper login-wrapper">
+					<div class="login-left">
+						<div class="logo">
+							<img src="<?php echo $defaultLogo;?>" alt="<?php echo $clientTitle;?> Logo">
+						</div> 
+						<div class="gdt-name-kh"><?php echo $clientTitle;?></div> 
+						<div class="gdt-name-en"><?php echo $clientTitleEn;?></div>
+					</div>
+					<div class="login-right">
+						<div class="login-right-wrapper">
+							<div class="loginTitle">
+							  <h4><i class="fa fa-lock" aria-hidden="true"></i> ប្រព័ន្ធសុវត្ថិភាព / <strong>Security System</strong></h4>
+							  <small>សូមបញ្ចូលឈ្មោះគណនី និងពាក្យសម្ងាត់​</small>
+							  <small>Please Enter Username And Password Below</small>
+							</div>
+							<div class="animate form login_form">
+								
+							  <section class="login_content">
+
+								<form dojoType="dijit.form.Form" method="post" action="">
+								  <h1>ចូលទៅកាន់ប្រព័ន្ធ / <strong>Log Into System</strong></h1>
+								  <div class="formControl-login">
+									<input class="fullside" type="text" required="true" name="userName" id="userName" placeholder="<?php echo $tr->translate("USER_NAME");?>​" data-dojo-type="dijit/form/ValidationTextBox" missingMessage="<?php echo $tr->translate("PLEASE_ENTER_USERNAME");?>" />
+								  </div>
+								  <div class="formControl-login">
+									<input class="fullside" type="password" required="true" name="passwordKey" id="passwordKey" placeholder="<?php echo $tr->translate("PASSWORD");?>" data-dojo-type="dijit/form/ValidationTextBox" missingMessage="<?php echo $tr->translate("PLEASE_ENTER_PASSWORD");?>!" />
+								  </div>
+								  <div class="formControl-login">
+									<input class="fullside button-class button-primary" iconClass="glyphicon glyphicon-log-in" type="submit" value="<?php echo $tr->translate("LOGIN");?>" label="ចូលប្រើប្រាស់ / LOG IN" data-dojo-type="dijit/form/Button" />
+								  </div>
+
+								  <div class="clearfix"></div>
+
+								</form>
+							  </section>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		
+		</div>
+		 
+					
+		<div  class="developing-box">
+			<p>
+				&copy បាន​បង្កើត​ឡើង​ដោយ
+				<a title="ខេម អ៊ែប តិចណូឡូជី" class="copyright" href="http://www.cam-app.com/" target="_blank">
+					<strong>ខេម អ៊ែប តិចណូឡូជី</strong>
+				</a> / Developed By
+				<a title="Cam App Technology" class="copyright" href="http://www.cam-app.com/" target="_blank">
+					<strong>Cam App Technology</strong>
+				</a>
+			</p>
+			</p>
+			<p>
+				
+		</div>
+    </div>
+  </body>
+  
+  <style>
+	.dijitTextBox, .dijitValidationTextBox, .dijitInputField, .dijitInputContainer, .dijitInputInner, dijitReset, .dijitRight, .dijitButtonNode, .dijitArrowButton, .dijitDownArrowButton, .dijitArrowButtonContainer {
+		    height: 30px;
+		}
+	.dijitInputInner {
+		color: #000;
+	}
+	.login-page {
+		    width: 99.0%;
+			height: 100vh;
+			background-image: url('<?php echo $baseUrl;?>/images/slide/Update_bg_login.jpg');
+			background-position: 50%;
+			background-repeat: no-repeat;
+			background-size: cover;
+			position: relative;
+	}
+	
+  </style>
+</html>

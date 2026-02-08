@@ -1,0 +1,486 @@
+<?php
+	$tr = Application_Form_FrmLanguages::getCurrentlanguage();
+	$this->headTitle($tr->translate("REPORT_TEACHING_CLASS")); 
+	echo $this->headTitle(''); 
+	$frm =  $this->formSearch;
+	$_dbgb = new Application_Model_DbTable_DbGlobal();
+	$classHideHeight=classHideHeight;
+?>	
+<style>
+.hover:hover{ background:#ccc;}
+.hidden{visibility: visible !important;
+display: table-cell !important;
+}
+table.content-data tr.style-head,
+table.tb-footer tr.style-head {
+   font-weight: bold !important;
+}
+</style>
+<div style="min-height:10cm; margin:0 auto; padding:0.5cm 0.5cm 0cm 0.5cm">	
+	<div class="card-box">
+       		<div class="col-sm-12 border-botom">
+		    	<div class="col-sm-8 pd-0">
+	    			<h4 class="m-b-0"><i class="fa fa-file-text " aria-hidden="true"></i>&nbsp;&nbsp;&nbsp;<?php echo $tr->translate('REPORT_TEACHING_CLASS');?></h4>
+    			</div>
+    			<div class="col-sm-4 text-right">
+    			</div>
+    		</div>
+    	</div>
+	<form  id='foundation_class' action="" dojoType="dijit.form.Form" method="post" enctype="application/x-www-form-urlencoded">
+		<script type="dojo/method" event="onSubmit">   
+			if(this.validate()){
+				branch_id = dijit.byId('branch_id').get('value');
+				if(branch_id==""){
+					alert("<?php echo $tr->translate("PLEASE_SELECT_BRANCH");?>");
+					dijit.byId("branch_id").focus();
+					return false;
+				}
+				academic_year = dijit.byId('academic_year').get('value');
+				if(academic_year==""){
+					alert("<?php echo $tr->translate("PLEASE_SELECT_YEAR");?>");
+					dijit.byId("academic_year").focus();
+					return false;
+				}
+				loadingBlock();
+				return true;
+			}else {
+				return false;
+			}
+		</script>
+		<div class="col-md-12 col-sm-12 col-xs-12 ">
+			<div class="card-blogform">
+				<div class="card-body"> 
+					<div class="row"> 
+						<div class="col-md-12 col-sm-12 col-xs-12 ">
+							<div class="form-group">
+								<div class="col-md-2 col-sm-2 col-xs-12">
+									<?php echo $frm->getElement("adv_search");?>
+								</div>
+								<div class="col-md-2 col-sm-2 col-xs-12">
+									<?php echo $frm->getElement("branch_id");?>
+								</div>
+								<div class="col-md-2 col-sm-2 col-xs-12">
+									<?php echo $frm->getElement("academic_year");?>
+								</div>
+								<div class="col-md-2 col-sm-2 col-xs-12">
+									<?php echo $frm->getElement("degree");?>
+								</div>
+								<div class="col-md-2 col-sm-2 col-xs-12">
+									<input id="grade" />
+								</div>
+							</div>	
+							<div class="form-group">
+								<div class="col-md-2 col-sm-2 col-xs-12">
+									<input id="group" />
+								</div>
+								<div class="col-md-2 col-sm-2 col-xs-12">
+									<button class="button-class button-primary" iconClass="glyphicon glyphicon-search" dojoType="dijit.form.Button" showLabel="true" name="search"  type="submit"><?php echo $tr->translate("SEARCH");?></button>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="col-md-12 col-sm-12 col-xs-12 ">
+			<div class="card-blogform">
+				<div class="card-body"> 
+					<div class="row"> 
+						<div class="col-md-12 col-sm-12 col-xs-12 ">
+							<div class="form-group" style=" background: #d8e0e2; padding: 5px 15px; margin: 0; border: solid 1px #697996; border-radius: 2px;">
+								<div class="col-md-3 col-sm-3 col-xs-12 text-center ">
+									<p class="tx-20 font-weight-semibold "><i class="glyphicon glyphicon-ok-sign" aria-hidden="true">&nbsp;</i><?php echo $tr->translate("SELECT_TEACHER");?> </p>
+								</div>
+								<div class="col-md-2 col-sm-2 col-xs-12 d-none">
+									<select name="optionSelect" id="optionSelect" dojoType="dijit.form.FilteringSelect" class="fullside" onchange="getBlogStaff();">
+										<option value="1"><?php echo $tr->translate("NORMAL_OPTION");?></option>
+										<option value="2"><?php echo $tr->translate("SELECTED_STAFF_OPTION");?></option>
+									</select>
+								</div>
+								<div class="col-md-2 col-sm-2 col-xs-12">
+									<input type="date" id="appointment_date" name="appointment_date" constraints="{datePattern:'dd-MM-yyyy'}" dojoType="dijit.form.DateTextBox" class="fullside" placeholder="<?php echo $tr->translate("APPOINTMENT_DATE");?>"> 
+								</div>
+								<div class="col-md-2 col-sm-2 col-xs-12">
+									<button dojoType="dijit.form.Button" id="print_appointment_letter" class="button-class button-primary" iconClass="glyphicon glyphicon-print" type="button" onclick="printAppointmentLetter();"><?php echo $tr->translate('APPOINTMENT_LETTER')?></button>
+								</div>
+								
+							</div>
+
+						</div>
+					</div>
+				</div>
+			</div>
+	</form>
+	<div id="divPrint">
+		<table class="NORMAL_OPTION"  style="background:#fff; margin: 0 auto; width: 100%; ">
+			<tr>
+				<td colspan="3"><?php echo $this->rsheader;?></td>
+			</tr>
+			<tr>
+				<td>&nbsp;</td>
+			</tr>
+			<tr>
+				<td width="10%" align="right">
+				</td>
+				<td width="60%" align="center">
+					<span style="color:#000; font-size: 13px;font-family:'Times New Roman','Khmer OS Muol Light';"><?php echo $tr->translate("REPORT_TEACHING_CLASS");?></span><br/>
+				</td>
+				<td width="5%" align="right">
+				</td>
+			</tr>
+			<tr>
+				<td>&nbsp;</td>
+			</tr>
+			<style>
+				.hideprintdate{
+					font-size: 9px ;
+					position: absolute;
+					right:20px;
+				}
+				.hidden-data{display: none;}
+				.solidborderdouble{ border:2px solid #000;}
+				.solidborder-leftdouble{ border-left:2px solid #000;}
+				.solidborder-rightdouble{ border-right:2px solid #000;}
+				.solidborder-topdouble{ border-top:2px solid #000;}
+				.solidborder-bottomdouble{ border-bottom:2px solid #000;}
+				
+				.solidborder-top{ border-top:1px solid #000;}
+				tr td.solidborderleft{
+					border-left:1px solid #000;
+				}
+				.btmdothborder{border-bottom:1px dashed #969696;}
+				.leftdothborder{border-left:1px dashed #969696;}
+				
+				table.content-data{
+					border-collapse:collapse;
+					border:1px solid #000; 
+					font-size:11px;
+					line-height: 16px;
+					width:100%;
+					font-family:'Times New Roman','Khmer OS Battambang';
+				}
+				table tr.style-head{
+					font-weight: bold !important;
+					background: #CCD9FF;
+					white-space: nowrap;
+				}
+				table tr.style-head td {
+					border: solid 1px #626262;
+				}
+				table.content-data td,
+				table.content-data td span,
+				table tr td{
+					padding:1px;
+					line-height : inherit;
+				}
+				table.content-data tr.footerTotal {
+					background: #ccd9ff;
+				}
+				.bold {
+					font-weight: 600;
+				}
+				.bg-category {
+					background: #e1e7f8;
+					line-height: 20px;
+				}
+				.wrapcontent {
+					width: 170px;
+					white-space:normal;
+					text-wrap: wrap;
+					display:block;
+					line-height:14px;
+				}
+				.widthCol-px-100{
+					width: 100px !important;
+				}
+				.widthCol-px-120{
+					width: 120px !important;
+				}
+				td small {
+					font-size:85%;
+				}
+				td .d-block {
+					display: block !important;
+					line-height: 14px;
+				}
+				a {
+					color:#07396e;
+					text-decoration: none;
+					font-weight:bold;
+				}
+				table.content-data tbody td span.text-truncate{
+					overflow: hidden;
+					text-overflow: ellipsis;
+					white-space: nowrap;
+					line-height: inherit;
+					width: 100px;
+					display: block;
+				}
+				.w-px-100 {
+					width: 100px !important;
+				}
+				.w-px-120 {
+					width: 120px !important;
+				}
+				.w-px-150 {
+					width: 150px !important;
+				}
+				.w-px-200 {
+					width: 200px !important;
+				}
+				@media print{
+					<?php if(!empty($this->printFormat)){ echo $this->printFormat; } ?>
+					.hidden{visibility: hidden; display: none;}
+				}
+		</style>
+			<tr>
+				<td colspan="3" id="exportExcel">
+						<table class="content-data ">
+							<thead>
+								<tr align="center" class="solidborder-bottomdouble solidborder-leftdouble solidborder-rightdouble style-head" >
+									<td class="hidden" scope="col">
+										<input class="checkBoxButton" type="checkBox" onclick="checkAllStudent();" name="checkall" id="checkall" />
+										<input type="hidden" name="id_selected" id="id_selected" dojoType="dijit.form.TextBox" />
+									</td>
+									<td scope="col"><?php echo $tr->translate("NUM");?></td>
+									<td scope="col"><?php echo $tr->translate("TEACHER");?></td>
+									<td scope="col"><?php echo $tr->translate("SUBJECT");?></td>
+									<td scope="col"><?php echo $tr->translate("GROUP");?></td>
+								</tr>
+							</thead>
+							<?php $i=0;$degree=0; 
+							$arrRow = $this->rs;
+							$teacherId ="";
+							if(!empty($this->rs)){ 
+								foreach ($this->rs AS $key =>  $row) { 
+									
+									$classTopRow="";
+									$classBottomRow="";
+									$stringFront="";
+									if ($teacherId != $row['teacherId']) {
+										$i++;
+										$strFilter =  (string) $row['teacherId'];
+										$resultOFTeacher = array_filter($arrRow, function ($item) use ($strFilter) {
+											if ($item['teacherId'] == $strFilter) {
+												return $item;
+											}
+											return;
+										});
+										
+										$amtRecord = count($resultOFTeacher);
+										$amtRecord = ($amtRecord ==0) ? 1 : $amtRecord;
+										$teacherName = $row['teacherNameKh'];
+										$teacherName = empty($teacherName) ? $row['teacherNameEng'] : $teacherName;
+										
+										$stringFront='
+											<td rowspan="'.$amtRecord.'" class="hidden" align="center">
+												<input class="checkBoxButton"  style="height: 15px;margin-top: 5px;" type="checkBox" value="'.$row['teacherId'].'"  onClick="checked_id('.$i.')" name="check_box'.$i.'" id="check_box'.$i.'" />
+											</td>
+											<td class="solidborderleft" rowspan="'.$amtRecord.'" data-label="'.$tr->translate("N_O").'" align="center" >'.$i.'</td>
+											<td class="leftdothborder" rowspan="'.$amtRecord.'" data-label="'.$tr->translate("TEACHER").'" align="left" >
+												<strong class="w-px-200 wrapcontent">'.$teacherName.'</strong>
+												<span class="w-px-200 wrapcontent">'.$row['tel'].'</span>
+												<span class="w-px-200 wrapcontent">'.$tr->translate("AMT_SUBJECT").' : <strong>'.sprintf('%02d', $row['amtSubject']).'</strong> / '.$tr->translate("AMT_CLASS").' : <strong>'.sprintf('%02d', $row['amtGroup']).'</strong></span>
+											</td>
+										';
+										if($key>0){
+											$classTopRow="solidborder-top";
+										}
+									}
+											
+											
+							?>
+							<tr class="<?php echo $classTopRow." ".$classBottomRow;?> btmdothborder solidborder-leftdouble solidborder-rightdouble hover context-menu-one " >
+								
+								<?php echo $stringFront; ?>	
+								<td class="solidborderleft" data-label="<?php echo $tr->translate("SUBJECT");?>" ><?php echo "<strong>".$row['subjectTitle']."</strong>"; echo empty($row['subjectTitle']) ? "" : " - ".$row['shortcut']."";?></td>	
+								<td class="leftdothborder" data-label="<?php echo $tr->translate("GROUP");?>" align="center" >
+									<?php echo $row['academicYearTtitle'];?>
+									<span class="bold "><?php echo $row['groupCode'];?></span>
+								</td>	
+							</tr>
+						<?php $teacherId = $row['teacherId'];   }
+						}?>	
+						</table>	
+				</td>
+			</tr>
+			<tr >
+				<td colspan="3" width="100%">
+					<?php echo $this->rsfooteracc;?>
+				</td>
+			</tr>
+		</table>
+		
+	</div>
+</div>
+<script src="<?php echo $this->baseUrl();?>/js/help.js"></script>
+<script type="text/javascript">
+dojo.require("dojo.NodeList-manipulate");
+dojo.require("dojo.data.ItemFileWriteStore"); 
+var academic_store= getDataStorefromJSON('id','name',<?php print_r(Zend_Json::encode(array()));?> );
+var group_store  = getDataStorefromJSON('id','name',<?php print_r(Zend_Json::encode(array()));?> );
+dojo.ready(function(){ 
+
+	new dijit.form.FilteringSelect({
+		store: group_store,
+	    queryExpr: "*${0}*",
+		autoComplete: false,                     
+	    id: "group",
+	    name: "group",  
+	    class: 'fullside', 
+	    readonly:false,
+	    required:false,
+	    placeHolder:"<?php echo $tr->translate("SELECT_GROUP");?>",          
+	    onChange: function() {  
+		    
+	    }
+	}, "group");
+	
+	new dijit.form.FilteringSelect({
+		queryExpr: "*${0}*",
+		autoComplete: false,                     
+		required: false,                        
+		id: "grade",
+		name: "grade",  
+		class: 'fullside',  
+		placeHolder:"<?php echo $tr->translate("SELECT_GRADE");?>",          
+		onChange: function() {  
+		}
+	}, "grade");
+	
+	 var branch_id = dijit.byId('branch_id');
+	 branch_id.on('change', function(evt) {
+		 getAllGroupByBranch();
+    });
+	 var academic_year = dijit.byId('academic_year');
+	 academic_year.on('change', function(evt) {
+		 getAllGroupByBranch();
+    });
+	 getallGrade();
+	 <?php if(!empty($this->search['grade'])){ ?>
+	  dijit.byId('academic_year').attr('value','<?php echo $this->search['academic_year']?>'); 
+	 <?php } ?>
+});
+var oldBranch = "<?php echo $this->search['branch_id']?>";
+url_getgroup = '<?php echo $this->url(array('module'=>'foundation','controller'=>'group','action'=>'getallgroup'));?>';
+function getAllGroupByBranch(){
+	dijit.byId('group').reset();
+	branch_id = dijit.byId('branch_id').get('value');
+	if(branch_id=='' || branch_id==-1){
+		var group_store  = getDataStorefromJSON('id','name',<?php print_r(Zend_Json::encode(array()));?> );
+		dijit.byId('group').set('store',group_store);  
+		dijit.byId('branch_id').focus();
+		return false;
+	}
+	degree = dijit.byId('degree').get('value');
+	if(degree=='' || degree==-1){degree ="";}
+	grade = dijit.byId('grade').get('value');
+	if(grade=='' || grade==-1){grade ="";}
+	academic_year = dijit.byId('academic_year').get('value');
+	if(academic_year=='' || academic_year==-1){academic_year ="";}
+	
+	dojo.xhrPost({
+		url: url_getgroup,
+		content:{
+			'branch_id':branch_id,
+			'degree':degree,
+			'grade':grade,
+			'academic_year':academic_year,
+			'noaddnew':1,
+			'forfilter':1
+			},
+		handleAs:"json",
+		load: function(data) {
+		    group_store  = getDataStorefromJSON('id','name', data);
+		    dijit.byId('group').set('store',group_store);   
+		    if(oldBranch==branch_id){
+		    	dijit.byId('group').set('value','<?php echo $this->search['group']?>');  
+		    }
+		},
+		error: function(err) {
+		}
+	});
+}
+var url_dept = '<?php echo $this->url(array('module'=>'global','controller'=>'grade','action'=>'get-grade')); ?>';
+function getallGrade(){
+	getAllGroupByBranch();  
+	dept_id = dijit.byId('degree').get('value');
+	if(dept_id=='' || dept_id==-1){return false;}
+		dojo.xhrPost({
+			url:url_dept,
+			content:{
+				'dept_id':dept_id,
+				'noaddnew':1
+				},
+			handleAs:"json",
+			load: function(data) {
+				dijit.byId('grade').attr('value','');
+				grade_store  = getDataStorefromJSON('id','name', data);
+			    dijit.byId('grade').set('store',grade_store); 
+			    dijit.byId('grade').attr('value','<?php echo $this->search['grade']?>');  
+			},
+			error: function(err) {
+			}
+		});
+}
+function checkAllStudent(array_length){
+	dijit.byId('id_selected').attr('value','');
+	if(dojo.byId('checkall').checked){
+		$('.checkBoxButton').each(function() { 
+			this.checked = true;  
+		});
+	}else{
+		$('.checkBoxButton').each(function() { 
+			this.checked = false;  
+		});
+	}
+}
+function printAppointmentLetter(){
+		<?php 
+			defined('BASE_URL')	|| define('BASE_URL', Zend_Controller_Front::getInstance()->getBaseUrl());
+    		$tr = Application_Form_FrmLanguages::getCurrentlanguage();
+    		$url_print =$this->url(array('module'=>'allreport','controller'=>'allstaff','action'=>'appointment-letter'));
+    	?>
+
+		$('.checkBoxButton').each(function() { 
+			var val = this.checked ? this.value : '';
+			if(val != "on" && val !=''){
+				if($("#id_selected").val()!="") {
+					var identity = $("#id_selected").val();
+					$("#id_selected").val(identity+','+val);
+				}else{
+					$("#id_selected").val(val);
+				}
+			}
+		});
+		
+    	 id_selected = dijit.byId('id_selected').get('value');
+		 appt_date = dijit.byId('appointment_date').attr('displayedValue');
+		 year_id = dijit.byId('academic_year').get('value');
+		 year_value = dijit.byId('academic_year').attr('displayedValue');
+		 if(id_selected!='' &&  appt_date!='' && year_id!=''){
+			if(appt_date!=''){
+				var urlDate="?appointment_date="+appt_date;
+			}
+			if(year_id!=''){
+				var urlYear="&year_id="+year_id+"&year_value="+year_value;
+			}
+			window.open(
+					'<?php echo $url_print;?>'+'/id/'+id_selected+urlDate+urlYear,
+					  '_blank' // <- This is what makes it open in a new window.
+					);
+		 }else if(id_selected ==''){
+			alert('Please select record you want to print');
+			return false;
+		 }else if(appt_date ==''){
+			alert('Please Select appointment Date!');
+			appt_date = dijit.byId('appointment_date').focus();
+			return false;
+		 }else if(year_id ==''){
+			alert('Please Select academic year !');
+			year_id = dijit.byId('academic_year').focus();
+			return false;
+		 }
+		 
+	}
+</script>

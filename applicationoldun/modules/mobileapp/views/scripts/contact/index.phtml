@@ -1,0 +1,293 @@
+<?php 
+$tr = Application_Form_FrmLanguages::getCurrentlanguage();
+echo $this->headTitle($tr->translate("contact"));
+$frm = $this->frm;
+$countlang = count($this->lang);
+
+$row = $this->contact;
+$id = $row['id'];
+$db = new Mobileapp_Model_DbTable_DbContact();
+?>
+<script type="text/javascript">
+    dojo.require('dijit.form.Textarea');
+</script>
+<div class="card pb-10 pt-10 pl-10 pr-10">
+	<div class="card-content collapse show">
+		<div class="card-box">
+        	<div class="col-sm-12 border-botom">
+		    	<div class="col-sm-8 pd-0">
+		    		<h4 class="m-b-0"><i class="fa fa-volume-control-phone" aria-hidden="true"></i>&nbsp;&nbsp;&nbsp;<?php echo $tr->translate('contact');?></h4>
+	    		</div>
+	    		<div class="col-sm-4 text-right">
+	    		</div>
+    		</div>
+    	</div>
+    	<form action="" dojoType="dijit.form.Form" method="post" enctype="multipart/form-data">
+    		<script type="dojo/method" event="onSubmit">			
+			if(this.validate()) {
+                 loadingBlock();
+				return true;
+			}else {
+				return false;
+			}
+			</script>
+	    	<div class="card-box">
+	    		<div class="col-md-6 col-sm-6 col-xs-12">
+	        		<?php if ($countlang>1){?>
+				    	<div class="card-box">
+				    		 <ul class="nav  md-pills pills-primary nav-tab" role="tablist">
+				    		 	<?php $alias=''; foreach($this->lang as $key=> $rs){
+			                      	$alias = str_replace(' ','',$rs['title']);?>
+					            <li class="nav-item <?php if ($key<1){echo "active";}?>">
+					                <a class="nav-link " data-toggle="tab" href="<?php echo "#".$alias;?>" role="tab"><i class="fa fa-flag ml-2"></i> <?php echo $tr->translate(strtoupper($rs['title']));?></a>
+					            </li>
+					            <?php }?>
+					        </ul>
+					    </div>
+					    <?php }?>
+					    <?php if ($countlang>1){?>
+					    <div class="col-md-12">
+					        <!-- Tab panels -->
+					        <div class="tab-content vertical">
+					         <?php $alias=''; foreach($this->lang as $key=> $rs){
+			                      	$alias = str_replace(' ','',$rs['title']);
+			                      	$lang = $db->getArticleTitleByLang($id, $rs['id']);
+			                  ?>
+						        <!--Panel <?php echo $key+1?>-->
+						        <div class="tab-pane fade <?php if ($key<1){echo "active in";}?>" id="<?php echo $alias;?>" role="tabpanel">
+						        	<div class="col-md-12 col-sm-12 col-xs-12">
+						                <div class="form-group">
+						                   <label class="control-label col-md-5 col-sm-5 col-xs-12" ><?php echo $tr->translate("TITLE_IN_".strtoupper($rs['title']));?> <span class="required">*</span>
+						                   </label>
+						                   <div class="col-md-7 col-sm-7 col-xs-12">
+						                   		<input   type="text" dojoType="dijit.form.ValidationTextBox" required="required" name="title<?php echo str_replace(' ','',$rs['title']);?>"  id="title<?php echo str_replace(' ','',$rs['title']);?>" value="<?php echo $lang['title']?>" class="fullside" placeholder="<?php echo $tr->translate("TITLE_IN_".strtoupper($rs['title']));?>" />
+						                  		<input type="hidden" dojoType="dijit.form.TextBox" name="iddetail<?php echo str_replace(' ','',$rs['title']);?>"  id="iddetail<?php echo str_replace(' ','',$rs['title']);?>" value="<?php echo $lang['id'];?>" class="fullside" />
+						                   </div>
+						                </div>
+						                <div class="form-group">
+						                   <label class="control-label col-md-12 col-sm-12 col-xs-12" ><?php echo $tr->translate('ADDRESS_'.strtoupper($rs['title']))?><span class="required">*</span>
+						                   </label>
+						                   <div class="col-md-12 col-sm-12 col-xs-12">
+						                 	  <textarea class="ckeditor"   style="min-height:400px; height:400px;" id="description<?php echo str_replace(' ','',$rs['title']);?>" name="description<?php echo str_replace(' ','',$rs['title']);?>"><?php echo $lang['description']?></textarea>
+						                   </div>
+						                </div>
+						          	</div>
+						          	
+						          	
+						        </div>
+						        <!--/ Panel <?php echo $key+1?>-->
+						        <?php }?>
+						   </div>
+						</div>
+						<?php }else{?>
+						<div class="col-md-12">
+								 <?php $alias=''; foreach($this->lang as $key=> $rs){
+			                      	$alias = str_replace(' ','',$rs['title']);
+			                      	$lang = $db->getArticleTitleByLang($id, $rs['id']);
+			                  ?>
+						        	<div class="col-md-12 col-sm-12 col-xs-12">
+						                <div class="form-group">
+						                   <label class="control-label col-md-5 col-sm-5 col-xs-12" ><?php echo $tr->translate("TITLE_IN_".strtoupper($rs['title']));?> <span class="required">*</span>
+						                   </label>
+						                   <div class="col-md-7 col-sm-7 col-xs-12">
+						                   		<input   type="text" dojoType="dijit.form.ValidationTextBox" required="required" name="title<?php echo str_replace(' ','',$rs['title']);?>"  id="title<?php echo str_replace(' ','',$rs['title']);?>" value="<?php echo $lang['title']?>" class="fullside" placeholder="<?php echo $tr->translate("TITLE_IN_".strtoupper($rs['title']));?>" />
+						                  		<input type="hidden" dojoType="dijit.form.TextBox" name="iddetail<?php echo str_replace(' ','',$rs['title']);?>"  id="iddetail<?php echo str_replace(' ','',$rs['title']);?>" value="<?php echo $lang['id'];?>" class="fullside" />
+						                   </div>
+						                </div>
+						                <div class="form-group">
+						                   <label class="control-label col-md-12 col-sm-12 col-xs-12" ><?php echo $tr->translate('ADDRESS_'.strtoupper($rs['title']))?><span class="required">*</span>
+						                   </label>
+						                   <div class="col-md-12 col-sm-12 col-xs-12">
+						                 	  <textarea class="ckeditor"   style="min-height:400px; height:400px;" id="description<?php echo str_replace(' ','',$rs['title']);?>" name="description<?php echo str_replace(' ','',$rs['title']);?>"><?php echo $lang['description']?></textarea>
+						                   </div>
+						                </div>
+						          	</div>
+						        <?php }?>
+						</div>
+						<?php }?>
+	            </div>
+	    		
+	    		<div class="col-md-3 col-sm-3 col-xs-12">
+	                
+	                <div class="form-group">
+	                   <label class="control-label col-md-5 col-sm-5 col-xs-12" ><?php echo $tr->translate("Latitude");?> :
+	                   </label>
+	                   <div class="col-md-7 col-sm-7 col-xs-12">
+	                   		<input type="hidden" dojoType="dijit.form.TextBox" name="id"  id="id" value="<?php echo $row['id'];?>" class="fullside" />
+	                   		<input type="text" value="<?php echo $row['latitude']?>"  name="latitude" id="latitude" dojoType="dijit.form.TextBox" class="fullside"  />
+	                   </div>
+	                </div>
+	                <div class="form-group">
+	                   <label class="control-label col-md-5 col-sm-5 col-xs-12" ><?php echo $tr->translate("Longitude");?> :
+	                   </label>
+	                   <div class="col-md-7 col-sm-7 col-xs-12">
+	                   		<input type="text" value="<?php echo $row['longitude']?>"  name="longitude" id="longitude" dojoType="dijit.form.TextBox" class="fullside"  />
+	                   </div>
+	                </div>
+	                <div class="form-group">
+	                   <label class="control-label col-md-5 col-sm-5 col-xs-12" ><?php echo $tr->translate("PHONE");?> :
+	                   </label>
+	                   <div class="col-md-7 col-sm-7 col-xs-12">
+	                   		<input type="text" value="<?php echo $row['phone']?>"  name="phone" id="phone" dojoType="dijit.form.TextBox" class="fullside"  />
+	                   </div>
+	                </div>
+	                <div class="form-group">
+	                   <label class="control-label col-md-5 col-sm-5 col-xs-12" ><?php echo $tr->translate("EMAIL");?> :
+	                   </label>
+	                   <div class="col-md-7 col-sm-7 col-xs-12">
+	                   		<input type="text" value="<?php echo $row['email']?>"  name="email" id="email" dojoType="dijit.form.TextBox" class="fullside"  />
+	                   </div>
+	                </div>
+	                 <div class="form-group">
+	                   <label class="control-label col-md-5 col-sm-5 col-xs-12" ><?php echo $tr->translate("WEBSITE");?> :
+	                   </label>
+	                   <div class="col-md-7 col-sm-7 col-xs-12">
+	                   		<input type="text" value="<?php echo $row['website']?>"  name="website" id="website" dojoType="dijit.form.TextBox" class="fullside"  />
+	                   </div>
+	                </div>
+	                <div class="form-group">
+	                   <label class="control-label col-md-5 col-sm-5 col-xs-12" ><?php echo $tr->translate("FACEBOOK");?> :
+	                   </label>
+	                   <div class="col-md-7 col-sm-7 col-xs-12">
+	                   		<input type="text" value="<?php echo $row['facebook']?>"  name="facebook" id="facebook" dojoType="dijit.form.TextBox" class="fullside"  />
+	                   </div>
+	                </div>
+	                <div class="form-group">
+	                   <label class="control-label col-md-5 col-sm-5 col-xs-12" ><?php echo $tr->translate("YOUTUBE");?> :
+	                   </label>
+	                   <div class="col-md-7 col-sm-7 col-xs-12">
+	                   		<input type="text" value="<?php echo $row['youtube']?>"  name="youtube" id="youtube" dojoType="dijit.form.TextBox" class="fullside"  />
+	                   </div>
+	                </div>
+	                 <div class="form-group">
+	                   <label class="control-label col-md-5 col-sm-5 col-xs-12" ><?php echo $tr->translate("TELEGRAM");?> :
+	                   </label>
+	                   <div class="col-md-7 col-sm-7 col-xs-12">
+	                   		<input type="text" value="<?php echo $row['instagram']?>"  name="instagram" id="instagram" dojoType="dijit.form.TextBox" class="fullside"  />
+	                   </div>
+	                </div>
+					<div class="form-group">
+	                   <label class="control-label col-md-5 col-sm-5 col-xs-12" ><?php echo $tr->translate("TIKTOK");?> :
+	                   </label>
+	                   <div class="col-md-7 col-sm-7 col-xs-12">
+	                   		<input type="text" value="<?php echo $row['tiktok']?>"  name="tiktok" id="tiktok" dojoType="dijit.form.TextBox" class="fullside"  />
+	                   </div>
+	                </div>
+	                <div class="form-group">
+	                   <label class="control-label col-md-5 col-sm-5 col-xs-12" ><?php echo $tr->translate("OTHER_SOCIAL");?> :
+	                   </label>
+	                   <div class="col-md-7 col-sm-7 col-xs-12">
+	                   		<input type="text" value="<?php echo $row['other_social']?>"  name="other_social" id="other_social" dojoType="dijit.form.TextBox" class="fullside"  />
+	                   </div>
+	                </div>
+	                <!-- 
+	                <div class="form-group">
+	                   <label class="control-label col-md-5 col-sm-5 col-xs-12" ><?php //echo $tr->translate("ADDRESS");?> :
+	                   </label>
+	                   <div class="col-md-7 col-sm-7 col-xs-12">
+	                   		<input style="min-height: 80px;" type="text" value="<?php //echo $row['address']?>"  name="address" id="address" dojoType="dijit.form.Textarea" class="fullside"  />
+	                   </div>
+	                </div>
+	                 -->
+	            </div>
+				<div class="col-md-3 col-sm-3 col-xs-12">
+					<div class="card-blogform">
+						<div class="card-body"> 
+							<div class="row"> 
+								<div class="col-md-12 col-sm-12 col-xs-12"> 
+									<div class="d-flex"> 
+										<div class="settings-main-icon ">
+											<i class="glyphicon glyphicon-picture" aria-hidden="true"></i>
+										</div> 
+										<div class="col-md-10 col-sm-10 col-xs-12"> 
+											<p class="tx-20 font-weight-semibold d-flex "><?php echo $tr->translate("SCHOOL_IMAGE");?></p>
+										</div> 
+									</div>
+									 <div class="form-group">
+										<div class="col-md-12 col-sm-12 col-xs-12">
+											<div class="account-image">
+												<div class="image-box">
+													<?php
+														$images = $this->baseUrl().'/images/noimage.jpg';
+														 if (!empty($this->contact['schoolImage'])){
+															if (file_exists(PUBLIC_PATH."/images/logo/".$this->contact['schoolImage'])){
+																$images = $this->baseUrl().'/images/logo/'.$this->contact['schoolImage'];
+															}
+														}										 
+													?>
+													<img id="profile_wiew" src="<?php echo $images;?>" alt=""  />
+												</div>
+												<p style="padding: 10px 0;text-align: center;margin-bottom: 0;/* background: #454545; */margin-top: 10px;color: #000;">រូបភាព (2000 X 1700px)</p>
+												<div class="button_browse">
+													<div id='preview'></div>	
+													<span>Upload <span ><i class="fa fa-camera" aria-hidden="true"></i></span></span>
+													<input class="btn_borwse_image" type="file" id="photo" name="photo" >
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+	       </div>
+	       <div class="clearfix"></div>
+		    <div class="card-box">
+               	<div class="col-md-12 col-sm-12 col-xs-12 border-top mt-20 ptb-10 text-center">
+					<input class="button-class button-primary" iconClass="glyphicon glyphicon-floppy-disk" type="submit" value="save_new" name="save_new" id="save_new" label="<?php echo $tr->translate('SAVE');?>" dojoType="dijit.form.Button"  />
+               	</div>
+            </div>
+	    </form>
+    </div>
+</div>
+<style>
+.account-image {
+    border: solid 1px #eee;
+    width: 100%;
+    margin: 0 auto;
+}
+.image-box {
+    text-align: center;
+    height: 260px;
+}
+.image-box img {
+    height: 260px;
+    width: 100%;
+}
+.button_browse {
+    
+    cursor: pointer;
+}
+.button_browse span {
+    line-height: 33px;
+    font-weight: 600;
+    cursor: pointer;
+}
+input.btn_borwse_image {
+    position: absolute;
+    width: 100%;
+    height: 38px;
+    top: 0;
+    left: 0;
+    z-index: 2;
+    opacity: 0;
+   cursor: pointer;
+}
+</style>
+<script>
+$("#photo").change(function(){
+    readURL(this);
+});
+
+function readURL(input) {
+    if (input.files && input.files[0]) {
+        var reader = new FileReader();
+        
+        reader.onload = function (e) {
+            $('#profile_wiew').attr('src', e.target.result);
+        }
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+</script>

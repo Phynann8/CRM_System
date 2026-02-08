@@ -1,0 +1,317 @@
+ <?php
+	$tr=Application_Form_FrmLanguages::getCurrentlanguage();
+	$db = new Allreport_Model_DbTable_DbRptAllStudent();
+      $rsamountstudent =$db->getAmountStudent();
+      $rsnewstudent = $db->getAmountNewStudent();
+      $rsdropstudent = 0;//$db->getAmountDropStudent();
+      $rsteststudent = 0;//$db->getAmountStudentTest();
+      $rsteststuregistered = 0;//$db->getAmountStudentTestRegistered();
+      $rsupdateresult = 0;//$db->getAmountStudentUpdateresult();
+      
+      
+	  $date = new DateTime();
+	$currentDate =  $date->format("Y-m-d");
+		
+	$search = array(
+				'currentDate' =>$currentDate,
+				'academic_year' =>'',
+				'degree'=>'',
+				'grade'=>'',
+				'branch_id'=>0,
+		);
+	$dbGb = new Application_Model_DbTable_DbGlobal();
+	$last = $dbGb->getLatestAcadmicYear();
+	if(!empty($last)){
+		$search["academic_year"] = empty($last["id"]) ? 0 : $last["id"];
+	}
+	  $db = new Allreport_Model_DbTable_DbAttendanceReport();
+		$allClass = $db->getCountingAllClass($search);
+		$allClassIssuedAtt = $db->getCountingAllClassHasIssuedAtt($search);
+		
+		$tr = Application_Form_FrmLanguages::getCurrentlanguage();
+		$allClass = empty($allClass) ? 0  : $allClass;
+		$allClassIssuedAtt = empty($allClassIssuedAtt) ? 0  : $allClassIssuedAtt;
+		$notYetClassIssuedAtt = $allClass - $allClassIssuedAtt;
+	
+		$classInfo = array(
+			array("label"=>$tr->translate("ALL_CLASS_ISSUED_ATT"),"value"=>$allClassIssuedAtt,"color"=>"#279742"),
+			array("label"=>$tr->translate("CLASS_NOT_YET_ISSUED_ATT"),"value"=>$notYetClassIssuedAtt,"color"=>"#c3cfd2"),
+			
+		);
+		
+		$countingAttedanceSummary = $db->getCountingAttedanceSummary($search);
+		$totalAbsent = empty($countingAttedanceSummary["totalAbsent"]) ? 0  : $countingAttedanceSummary["totalAbsent"];
+		$totalPermission = empty($countingAttedanceSummary["totalPermission"]) ? 0  : $countingAttedanceSummary["totalPermission"];
+		$totalLate = empty($countingAttedanceSummary["totalLate"]) ? 0  : $countingAttedanceSummary["totalLate"];
+		$totalEarlyLate = empty($countingAttedanceSummary["totalEarlyLate"]) ? 0  : $countingAttedanceSummary["totalEarlyLate"];
+		$attendanceSummary = array(
+			array("label"=>$tr->translate("ABSENT"),"value"=>$totalAbsent,"color"=>"#db3434"),
+			array("label"=>$tr->translate("PERMISSION"),"value"=>$totalPermission,"color"=>"#1c4085"),
+			array("label"=>$tr->translate("LATE"),"value"=>$totalLate,"color"=>"#ed9c18"),
+			array("label"=>$tr->translate("EARLY_LEAVE"),"value"=>$totalEarlyLate,"color"=>"#9b59b6"),
+		);
+			
+    $arrFilter = [
+		"limitRecord"=>10,
+		"countToday"=>1
+	];  
+    $reqResult = $db->getStudentRequestPermission($arrFilter);
+	$amtReqPermission = empty($reqResult["totalRecord"]) ? 0 : $reqResult["totalRecord"];
+	$latestReqPer = empty($reqResult["result"]) ? [] : $reqResult["result"];
+	
+	$arrFilter = [
+		"limitRecord"=>10,
+		"countToday"=>1
+	];  
+    $scannResult = $db->getStudentScanActivity($arrFilter);
+	$amtStuScan = empty($scannResult["totalRecord"]) ? 0 : $scannResult["totalRecord"];
+	$latestScan = empty($scannResult["result"]) ? [] : $scannResult["result"];
+	 
+?>
+<link rel="stylesheet" href="<?php echo $this->baseUrl()."/"?>dashboard/plugins/morris/morris.css">
+<!-- Icons CSS -->
+<link href="<?php echo $this->baseUrl()."/"?>dashboard/css/icons.css" rel="stylesheet">
+<!-- Custom styles for this template -->
+<link href="<?php echo $this->baseUrl()."/"?>dashboard/css/style.css" rel="stylesheet">
+<style>
+ul.list-att-status {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+}
+
+ul.list-att-status li {
+    margin-bottom: 5px;
+}
+ul.list-att-status li span, ul.list-att-status li div {
+    font-size: 16px;
+}
+.latest-record {
+    min-height: 265px;
+    max-height: 265px;
+    padding: 10px;
+    overflow-y: auto;
+    margin-bottom: 10px;
+    margin-top: 5px;
+}
+svg text {
+    font-family: 'Khmer Os Battambang' !important;
+}
+
+.title-list-record {
+    display: flex;
+    flex-wrap: nowrap;
+    align-content: center;
+    justify-content: space-between;
+}
+.detail-row {
+    display: block;
+    color: #918e8e;
+}
+</style>
+<div id="page-wrapper">
+	<!-- Page content start -->
+	<div class="page-contentbar">
+		<!-- START PAGE CONTENT -->
+		<div id="page-right-content">
+			<div class="container">
+				<h3 class="fw-normal" style=" color: #17418e;"><i class="glyphicon glyphicon-education"></i> <?php  echo empty($last["academicYear"]) ? "" : $last["academicYear"];?></h3>
+				
+				 <div class="row" style="margin-top: 15px;">
+					<div class="col-lg-8">
+						<div class="row top_tiles">
+							<div  class="animated flipInY col-lg-3 col-md-3 col-sm-6 col-xs-12">
+								<div class="tile-stats">
+								  <div class="icon"><i class="fa fa-user"></i></div>
+								  <div class="count"><?php echo sprintf('%02d',$rsamountstudent); ?></div>
+								  <h3><?php echo $tr->translate("STUDENT_TOTAL");?></h3>
+								</div>
+							</div>
+							<div class="animated flipInY col-lg-3 col-md-3 col-sm-6 col-xs-12">
+								<div class="tile-stats">
+								  <div class="icon"><i class="glyphicon glyphicon-education"></i></div>
+								  <div class="count"><?php echo sprintf('%02d',$rsnewstudent); ?></div>
+								  <h3><?php echo $tr->translate("NEW_STUDENT");?></h3>
+								</div>
+							</div>
+							<div class="animated flipInY col-lg-3 col-md-3 col-sm-6 col-xs-12">
+								<div class="tile-stats">
+								  <div class="icon"><i class="glyphicon glyphicon-blackboard"></i></div>
+								  <div class="count"><?php echo sprintf('%02d',$allClass); ?></div>
+								  <h3><?php echo $tr->translate("Total Class");?></h3>
+								</div>
+							</div>
+							<div class="animated flipInY col-lg-3 col-md-3 col-sm-6 col-xs-12">
+								<a style=" color: #17418e;" title="<?php echo $tr->translate("FINDING_ALL_STUDENT_INFORMATION")?>" href="<?php echo $this->url(array('module'=>'home','controller'=>'searchstudentinfo','action'=>'index'), null, true);?>">
+									<div class="tile-stats">
+									  <div class="icon"><i class="glyphicon glyphicon-search"></i></div>
+									  <div class="count"><i class="glyphicon glyphicon-search"></i></div>
+									  <h3><?php echo $tr->translate("FINDING_ALL_STUDENT_INFORMATION");?></h3>
+									</div>
+								</a>
+							</div>
+						</div>
+						<div class="divider"></div>
+						
+						<div class="card-box" style="  margin: 0;">
+							<div class="row">
+								<div class="col-md-8 col-sm-8 col-xs-12 text-center">
+									<span style=" color: #17418e;" href="<?php echo $this->url(array('module'=>'home','controller'=>'searchstudentinfo','action'=>'index'), null, true);?>">
+											<span data-bind="text: txnRecorded"><h3><?php echo $tr->translate("ATTENDANCE_SUMMARY")?></h3></span>
+											<p class="month" style="text-align: center; margin: 0 auto;" data-bind="text: lang.lang.transactions_recorded"><?php echo date("d-M-Y",strtotime($currentDate))?></p>
+										</span>
+									<div id="donutStudent" class="morris-donut-inverse" style="width:100%; height:300px;"></div>
+								</div>
+								<div class="col-md-4 col-sm-4 col-xs-12" style="height:250px;display: flex;justify-content: center;align-items: center;align-content: center;">
+									
+									<ul class="list-att-status">
+										<li>
+											<div class="row">
+												<div class="col-md-12 col-sm-12 col-xs-12"> 
+													<span class=""><i class="fa fa-sliders "></i> <?php echo $tr->translate("TYPE");?> </span>
+							
+												</div>
+											</div>
+										</li>
+									<?php if(!empty($attendanceSummary)) foreach($attendanceSummary as $attSum ){ ?>
+										<li>
+											<div class="row">
+												<div class="col-md-8 col-sm-8 col-xs-12"> 
+													<i class="fa fa-square " style="color:<?php echo empty($attSum["color"]) ? "blue" : $attSum["color"]; ?>;"></i> <?php echo $attSum["label"];?> 
+												</div>
+												<div class="col-md-4 col-sm-4 col-xs-12">
+												<?php echo empty($attSum["value"]) ? "00" : sprintf('%02d',$attSum["value"])?>
+												</div>
+											</div>
+										</li>
+									<?php } ?>
+									</ul>
+								</div>
+							</div>
+						</div>
+							
+					</div> <!-- end col -->	  
+					<div class="col-lg-4">
+					 	<div class="card-box" style="padding: 0;  margin: 0;">
+							<ul class="list-inline count2" style=" color: #17418e; font-weight: bold;">
+                                <li style="width:100%;">
+                                  <h3 style=" color: #17418e; font-weight: bold;"><i class="fa fa-laptop"></i> <?php echo sprintf('%02d',$amtReqPermission);?></h3>
+                                  <span><?php echo $tr->translate("AMT_REQ_PER_FOR_TODAY");?></span>
+                                </li>
+							</ul>
+							<span class="title-list-record" data-bind="text: lang.lang.performance">
+								<span><i class="fa fa-laptop" ></i> <?php echo $tr->translate("latestReqPermission");?></span>
+								<a title="<?php echo $tr->translate("SHOW_ALL");?>" href="<?php echo $this->baseUrl()."/allreport/studentattendance/rpt-req-permission"; ?>"><small><?php echo $tr->translate("SHOW_ALL");?></small></a>
+							</span>
+							<div class="latest-record">
+								<?php if(!empty($latestReqPer) ){?>
+								<ul class="top_profiles list-inline widget_tally">
+									<?php foreach($latestReqPer AS $reqRow){?>
+									<li>
+									  <p>
+										<span class="month">
+											<span class="text-muted"><?PHP echo $reqRow["stuCode"]; ?></span>
+											<span class="text-muted"><?PHP echo $reqRow["stuNameKh"]; ?></span>
+											<?php if($reqRow["amountDay"]>1){  ?>
+												<small class="detail-row">
+													<?php echo $reqRow["amountDay"]." ".$tr->translate("DAY"); ?>,
+													<?php echo date("d-m-Y",strtotime($reqRow["fromDate"])); ?>
+													-
+													<?php echo date("d-m-Y",strtotime($reqRow["toDate"])); ?>
+												</small>
+											<?php }else{?>
+												<small class="detail-row"><?php echo $reqRow["amountDay"]." ".$tr->translate("DAY"); ?>, <?php echo date("d-m-Y",strtotime($reqRow["fromDate"])); ?></small>
+											<?php } ?>
+											<small class="detail-row">
+												<i><?PHP echo $reqRow["reason"]; ?></i>
+											</small>
+										</span>
+										<span class="count">
+											<?PHP echo $reqRow["groupCode"]; ?>
+											<small class="detail-row">
+											<?PHP echo $reqRow["academicYear"]; ?>
+											</small>
+										</span>
+									  </p>
+									</li>
+									<?php } ?>
+									
+								</ul>
+								<?php } ?>
+							</div>
+						</div>
+						<div class="clearfix"></div>
+						
+						<div class="card-box" style="padding: 0;  margin: 0;">
+							<ul class="list-inline count2" style=" color: #17418e; font-weight: bold;">
+                                <li style="width:100%;">
+                                  <h3 style=" color: #17418e; font-weight: bold;"><i class="glyphicon glyphicon-qrcode" ></i> <?php echo sprintf('%02d',$amtStuScan);?></h3>
+                                  <span><?php echo $tr->translate("AMT_SCAN_ATT_FOR_TODAY");?></span>
+                                </li>
+							</ul>
+							<span class="title-list-record" data-bind="text: lang.lang.performance">
+								<span><i class="glyphicon glyphicon-qrcode" ></i> <?php echo $tr->translate("latestScanAtt");?></span>
+								<a title="<?php echo $tr->translate("SHOW_ALL");?>" href="<?php echo $this->baseUrl()."/allreport/studentattendance/rpt-pre-attendance"; ?>">
+									<small>
+									<?php echo $tr->translate("SHOW_ALL");?>
+									</small>
+								</a>
+							</span>
+							<div class="latest-record">
+								<?php if(!empty($latestScan) ){?>
+								<ul class="top_profiles list-inline widget_tally">
+									<?php foreach($latestScan AS $scanRow){?>
+									<li>
+									  <p>
+										<span class="month">
+											<span class="text-muted"><?PHP echo $scanRow["stuCode"]; ?></span>
+											<span class="text-muted"><?PHP echo $scanRow["stuNameKh"]; ?></span>
+											<?PHP echo $scanRow["groupCode"]; ?>
+											<small class="detail-row">
+												<?php echo date("l d-M-Y",strtotime($scanRow["createDate"])); ?>
+											</small>
+										</span>
+										<span class="count">
+											<?PHP echo ($scanRow["attendanceStatus"]!=1) ? $scanRow["attStatus"] : $scanRow["titleSetting"]; ?>
+											<small class="detail-row">
+											<?php echo date("H:i:s A",strtotime($scanRow["createDate"])); ?>
+											</small>
+										</span>
+									  </p>
+									</li>
+									<?php } ?>
+									
+								</ul>
+								<?php } ?>
+							</div>
+						</div>
+						<div class="clearfix"></div>
+						
+						
+						
+					</div> <!-- end col -->	  
+				</div> <!-- end row -->
+				     
+			</div>
+		</div>
+		<!-- END PAGE CONTENT -->
+	</div>
+	<div class="row-fluid">
+					<div style="margin-top: 10px; margin-left: 0;" align="center">
+						<p>© 2018<span data-bind="text: lang.lang.all_rights_reserved"><a href="http://www.cam-app.com" target="_blank" > Cam App Teachnology</a>. All rights reserved.</span></p>
+					</div>	
+				</div>  
+</div>
+
+
+<script src="<?php echo $this->baseUrl()."/"?>dashboard/plugins/morris/morris.min.js"></script>
+<script src="<?php echo $this->baseUrl()."/"?>dashboard/plugins/raphael/raphael-min.js"></script>
+<script>
+var colorDanger = "#FF1744";
+Morris.Donut({
+  element: 'donutStudent',
+  resize: true,
+  data: <?php  echo Zend_Json::encode($attendanceSummary);?>
+});
+</script>

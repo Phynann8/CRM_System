@@ -1,0 +1,128 @@
+<?php 
+	$tr = Application_Form_FrmLanguages::getCurrentlanguage();
+	echo $this->headTitle($tr->translate('STUDENT_TEST'));
+	$frm =  $this->form_search;
+	$inframe = empty($this->inFrame)?"":$this->inFrame;
+
+	$urlEnterResult = $this->baseUrl()."/test/index/createtestexam?type=2&id=";
+	$urlCreateExamKh = $this->baseUrl()."/test/index/createtestexam?type=1&id=";
+	$urlCreateExamUniver = $this->baseUrl()."/test/index/createtestexam?type=3&id=";
+	$urlProfile = $this->baseUrl()."/test/index/profile?id=";
+	$urledit = $this->baseUrl()."/test/index/edit?id=";
+
+	$_dbgb = new Application_Model_DbTable_DbGlobal();
+	$userinfo = $_dbgb->getUserInfo();
+	$testCondiction = TEST_CONDICTION;
+?>
+<div class="card pb-10 pt-10 pl-10 pr-10">
+	<div class="card-content collapse show">
+		<div class="card-box">
+       		<div class="col-sm-12 border-botom">
+		    	<div class="col-sm-8 pd-0">
+	    			<h4 class="m-b-0"><i class="fa fa-graduation-cap" aria-hidden="true"></i>&nbsp;&nbsp;&nbsp;<?php echo $tr->translate('STUDENT_TEST');?></h4>
+    			</div>
+    			<div class="col-sm-4 text-right">
+    			</div>
+    		</div>
+    	</div>
+		<div class="card-box">
+			<form id="list" name="list" action="" dojoType="dijit.form.Form" method="post">
+  				<div class="form-group">
+                   <div class="col-md-2 col-sm-2 col-xs-12">
+                   		<input type="text" name="txtsearch" id="txtsearch" dojoType="dijit.form.TextBox" value="<?php echo $this->adv_search['txtsearch']; ?>" placeholder="<?php echo $tr->translate('SEARCH');?>" class="fullside" />
+                   </div>
+                   <?php if ($testCondiction!=2){?>
+                    <div class="col-md-2 col-sm-2 col-xs-12">
+                   		<?php echo $frm->getElement("branch_search");?>
+                   </div>
+                   <?php }?>
+                   <div class="col-md-2 col-sm-2 col-xs-12">
+                   		<?php echo $frm->getElement("degree_search");?>
+                   </div>
+                   <div class="col-md-2 col-sm-2 col-xs-12">
+                   		<?php echo $frm->getElement("start_date");?>
+                   </div>
+                   <div class="col-md-2 col-sm-2 col-xs-12">
+                   		<?php echo $frm->getElement("end_date");?>
+                   </div>
+                	<div class="col-md-2 col-sm-2 col-xs-12">
+			   			<button style="width: 30%;display: inline-block;"  class="button-class button-primary" iconClass="glyphicon glyphicon-search" dojoType="dijit.form.Button" showLabel="true" type="submit"><?php echo $tr->translate("SEARCH");?></button>
+                   </div>
+                </div>
+  			</form>
+		</div>
+		<div class="card-box">
+			<?php echo $this->list;?>
+		</div>
+	</div>
+</div>
+<script type="text/javascript">
+	dojo.require("dijit.form.DateTextBox");
+	var row=0;
+	var url="";
+	var inframe='<?php echo $inframe;?>';
+	
+	$(function(){
+		$.contextMenu({
+			selector: '.context-menu-one', 
+			callback: function(key, options) {
+				var newPageTitle="";
+				var actionType=1;
+				var m = "clicked: " + key;
+				if(key=="enterresult"){
+					url='<?php echo $urlEnterResult;?>';
+					actionType=(inframe=="true")?1:2;
+					newPageTitle=(inframe=="true")?"<?php echo $tr->translate("TEST_RESULT_EN");?>":"";
+				}else if(key=="enterresultkh"){
+					url='<?php echo $urlCreateExamKh;?>';
+					actionType=(inframe=="true")?1:2;
+					newPageTitle=(inframe=="true")?"<?php echo $tr->translate("TEST_RESULT");?>":"";
+				}
+				else if(key=="edit"){
+					actionType=(inframe=="true")?1:2;
+					url='<?php echo $urledit;?>';
+					newPageTitle=(inframe=="true")?"<?php echo $tr->translate("EDIT");?>":"";
+				}
+				else if(key=="profile"){
+					actionType=(inframe=="true")?1:2;
+					url='<?php echo $urlProfile;?>';
+					newPageTitle=(inframe=="true")?"<?php echo $tr->translate("STUDENT_PROFILE");?>":"";
+				}
+				if(actionType==1){
+					addTab(newPageTitle,url+row+'&inFrame=true');
+				}else{
+					gotoAction();
+				}
+			},
+			items: {
+				<?php if($userinfo['level']==1){ ?>
+				//"enterresult": {name: "<?php echo $tr->translate("CREATE_TEST_EXAM_EN");?>", icon: "fa-laptop  "},
+				"enterresultkh": {name: "<?php echo $tr->translate("TEST_RESULT");?>", icon: "fa-laptop  "},
+				<?php }else{ 
+					if(!empty($userinfo['schoolOption'])){
+						$schoolOption = explode(",",$userinfo['schoolOption']);
+						foreach($schoolOption as $scp){
+						?>
+							<?php if($scp==1){ ?>
+							"enterresultkh": {name: "<?php echo $tr->translate("TEST_RESULT");?>", icon: "fa-laptop  "},
+							<?php }else if($scp==2){ ?>
+							//"enterresult": {name: "<?php //echo $tr->translate("CREATE_TEST_EXAM_EN");?>", icon: "fa-laptop"},
+							<?php }else if($scp==3){ ?>
+							<?php }?>
+						
+						<?php }?>
+				<?php } 
+				}?>
+				"profile": {name: "<?php echo $tr->translate("STUDENT_PROFILE");?>", icon: "fa-user"},
+				"edit": {name: "<?php echo $tr->translate("EDIT");?>", icon: "edit"},
+			}
+		});
+	});
+	function setrowdata(index){
+		row = index;
+	}
+	var recordid ='';
+	function gotoAction(){
+	 	window.open(url+row, '_self');
+	}
+</script> 

@@ -1,0 +1,113 @@
+<?php
+	$tr = Application_Form_FrmLanguages::getCurrentlanguage();
+	echo $this->headTitle('ប័ណ្ណផ្ទេរស្តុកទំនិញ');
+	$base_url = Application_Form_FrmMessage::getUrl("/");
+		
+?>	
+<style>
+	button#portraitBtn,
+	button#landscapeBtn,
+	button.btn-search {
+		display: none !important;
+	}
+</style>
+<div class="layout-wrapper-report">
+	<div id="mainContent" class="main-content-report">
+		<div class="report-preview">
+			<?php echo $this->controlReport?>
+			<div id="main-viewer" class="main-viewer portrait">
+				<div id="viewer" class="viewer portrait">
+					<div id="divPrint" class="content">
+						<link rel="stylesheet" href="<?php echo $this->baseUrl();?>/admin/build/css/report-style.css">
+						<link rel="stylesheet" href="<?php echo $this->baseUrl();?>/admin/build/css/report-style-screen.css">
+						<style>
+							table.collape.tablesorter {
+								white-space: nowrap;
+							}
+						</style>
+						<?php  echo $this->officailTransferVoucher;?>
+						<?php if(AMOUNT_RECEIPT>1){?>
+							<div id="printblog2" class="content"></div>
+						 <?php }?>
+					</div>	
+				</div>	
+			</div>	
+		</div>	
+	</div>	
+</div>	
+<script type="text/javascript">
+dojo.ready(function(){
+	initiLizeData();
+	getbranchinfo();
+	cloneReceipt();
+	setTimeout(function() {
+		setPrintOrientation('landscape',"A5");
+	}, 500);
+});	
+function cloneReceipt(){
+	loadingBlock();
+	setTimeout(function () {
+		 <?php if(AMOUNT_RECEIPT>1){?>
+		 	dojo.byId('printblog2').innerHTML = dojo.byId('divPrint').innerHTML;
+		 <?php }?>
+        HideloadingBlock();
+    }, 500);
+}
+
+function initiLizeData(){
+	dojo.byId("lb_f_branch").innerHTML = '<?php echo preg_replace( "/\r|\n/", "", strip_tags(htmlspecialchars($this->row['from_location_name'])));?>';
+	dojo.byId("lb_t_branch").innerHTML =  '<?php echo preg_replace( "/\r|\n/", "", strip_tags(htmlspecialchars($this->row['to_location_name'])));?>';
+	dojo.byId("lb_transfer_no").innerHTML =  '<?php echo preg_replace( "/\r|\n/", "", strip_tags(htmlspecialchars($this->row['transfer_no'])));?>';
+	dojo.byId("lb_transfer_date").innerHTML =  '<?php echo preg_replace( "/\r|\n/", "", strip_tags(htmlspecialchars($this->row['transfer_date'])));?>';
+	temp='';
+	 temp='<table class="collape tablesorter"  align="center" style=" width: 100%; padding: 0px; margin: 0px; border-collapse: collapse; border: 1px solid #000; font-size:12px;font-family:Khmer OS Battambang !important;  " id="table">'
+		  temp+='<tr class="" style="text-align:center; height:25px;">';
+			  temp+='<td><strong>លរ/No.</div></strong></td>';
+			  temp+='<td><strong>ផលិតផល/Product</strong></td>';
+			  temp+='<td><strong>ចំនួនផ្ទេរ/Transfer Qty</strong></td>';
+			  temp+='<td><strong>សម្គាល់/Note</strong></td>';
+		  temp+='</tr>';
+	<?php if(!empty($this->detail)){
+			foreach($this->detail as $key=> $rs){
+	?>
+	var productName<?php echo $key; ?> = <?php echo json_encode(addslashes($rs['pro_name'])); ?>;
+	var productNote<?php echo $key; ?> = <?php echo json_encode(addslashes($rs['note'])); ?>;
+	  temp+='<tr class="" style="text-align:center; height:25px;">';
+		  temp+='<td><?php echo $key+1;?></td>';
+		  temp+='<td align="left">'+productName<?php echo $key; ?>+'</td>';
+		  temp+='<td><?php echo $rs['qty'];?></td>';
+		  temp+='<td>'+productNote<?php echo $key; ?>+'</td>';
+     temp+='</tr>';
+	<?php }
+		for($index=count($this->detail);$index<3;$index++){
+	?>
+	temp+='<tr class="" style="text-align:center; height:25px;">';
+	  temp+='<td><?php echo $index+1;?>&nbsp;</td>';
+	  temp+='<td></td>';
+	  temp+='<td></td>';
+	  temp+='<td></td>';
+temp+='</tr>';
+		
+	<?php }}?>
+
+	dojo.byId('t_amountmoneytype').innerHTML = temp;
+}
+var url_getbranch = "<?php echo $this->url(array('module'=>'registrar','controller'=>'register','action'=>'getbranchinfo')); ?>";
+function getbranchinfo(){
+	branch_id = '<?php echo $this->row['from_location'];?>';
+	if(branch_id != ""){
+		dojo.xhrPost({
+			url:url_getbranch,
+			content:{
+				'branch_id':branch_id,
+				},
+			handleAs:"json",
+			load: function(data){
+				dojo.byId('lbl_header').innerHTML=data;
+			},
+			error: function(err) {
+			}
+		});	
+	} 
+}
+</script>

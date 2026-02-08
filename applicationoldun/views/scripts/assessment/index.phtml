@@ -1,0 +1,244 @@
+<?php
+	$tr = Application_Form_FrmLanguages::getCurrentlanguage();
+	
+	$pageTitle = $tr->translate("ASSESSMENT_LIST");
+	echo $this->headTitle($pageTitle);
+	$base_url = Application_Form_FrmMessage::getUrl("/");
+	
+	//$pageTitle = '<i class="fa fa-file-text"></i> '.$pageTitle;
+$frm =  $this->form_search;
+?>	
+<style>
+
+	a.mini-button-edit {
+		padding: 8px;
+		font-size: 12px;
+		color: #fff;
+		background-color: #d8a304;
+		border-color: #004b9c;
+		border-radius: 6px;
+		width: 160px !important;
+		display: block;
+	}
+	span.mini-button-success {
+		padding: 8px;
+		font-size: 12px;
+		color: #fff;
+		background-color: #16941a;
+		border-color: #004b9c;
+		border-radius: 6px;
+		width: 160px !important;
+		display: block;
+	}
+</style>
+<?php 
+	echo $this->render('externalHead.phtml');
+?>
+	<div class="row"> 
+		<div class="col-md-12 col-sm-12 col-xs-12">
+			<div class="card mb-1 ">
+				<div class="card-header pb-1"> 
+					<h3 class="card-title mb-1 "><?php echo $tr->translate("SEARCH"); ?></h3> 
+				</div>
+				<div class="card-content">
+					<div class="card-body">
+						<form id="list" name="list" action="" dojoType="dijit.form.Form" method="post">
+							<div class="form-group">
+								<div class="col-md-2 col-sm-2 col-xs-12">
+									<?php echo $frm->getElement("adv_search");?>
+								</div>
+								
+							   <div class="col-md-2 col-sm-2 col-xs-12">
+									<?php echo $frm->getElement("academic_year");?>
+							   </div>
+							   <div class="col-md-2 col-sm-2 col-xs-12">
+									<?php echo $frm->getElement("degree");?>
+							   </div>
+							   <div class="col-md-2 col-sm-2 col-xs-12">
+									<input id="grade" />
+							   </div>
+							   <div class="col-md-2 col-sm-3 col-xs-12">
+									<?php echo $frm->getElement("exam_type");?>
+								</div>
+						   </div>
+							<div class="form-group"> 
+								<div class="col-md-2 col-sm-2 col-xs-12">
+									<?php echo $frm->getElement("for_semester");?>
+								</div>
+								<div class="col-md-2 col-sm-2 col-xs-12">
+									<?php echo $frm->getElement("for_month");?>
+								</div>
+									<div class="col-md-2 col-sm-2 col-xs-12">
+									<?php echo $frm->getElement("for_term");?>
+								</div>
+								<div class="col-md-2 col-sm-2 col-xs-12"> <?php echo $frm->getElement("start_date");?></div>
+								<div class="col-md-2 col-sm-2 col-xs-12"> <?php echo $frm->getElement("end_date");?></div>
+								<div class="col-md-2 col-sm-2 col-xs-12">
+									<button class="button-class button-primary" iconClass="glyphicon glyphicon-search" dojoType="dijit.form.Button" showLabel="true" type="submit"><?php echo $tr->translate("SEARCH");?></button>
+								</div>
+							</div>
+					   </form>
+				   </div>
+			   </div>
+			   
+			   <div class="row"> 
+				<?php
+					//print_r($this->row);
+
+				 if(!empty($this->row)) foreach($this->row as $row){ 
+					$cardClass = "border-top-primary border-top-darken-1";
+					$bgClass = "border-primary bg-gradient-directional-primary";
+					if($row['exam_type']==2){
+						$cardClass = "border-top-warnings border-top-darken-1";
+						$bgClass = "border-warnings bg-gradient-directional-warnings";
+					}
+				?>
+								<div class="col-md-6 col-sm-12 col-xs-12"> 
+									<div class="card mb-1 border-bottom-primary border-bottom-darken-1 border-bottom-5">
+										<div class="card-content">
+											<div class="row d-flex">
+												<div class="col-md-3 col-sm-2 col-xs-4 pr-0">
+													<div class="d-flex align-items-center h-100 border-primary bg-gradient-directional-primary">
+														<span class="mt-0 mb-0 mr-auto ml-auto font-large-1 text-white text-center ">
+															<?php echo $row['group_code']; ?>
+														</span>
+													</div>
+												</div>
+												<div class="col-md-9 col-sm-10 col-xs-8 pl-0">
+													<!-- <ul class="nav navbar-right panel_toolbox stusearch">
+													  <li class="dropdown">
+														<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-ellipsis-v"></i></a>
+													  </li>
+													</ul> -->
+													<div class="p-1">
+														<div class="col-md-8 col-sm-8 col-xs-12">
+															<p class="mb-0 mt-0"><small class="text-muted float-right"><?php echo $tr->translate('STUDENT_SCORE_REPORT');?> </small></p>
+															<div class="text-left">
+															  	<strong> <?php //echo $row['examTypeTitle']; ?> <?php echo $row['title_score']."/".$row['title_score_en']; ?></strong> 
+																<p class="mb-0">
+																	<div class="col-md-5 col-sm-5 col-xs-12">
+																		<i class="fa fa-map-marker" aria-hidden="true"></i>&nbsp; <?php echo $row['branchName']; ?><br>
+																		<i class="fa fa-graduation-cap" aria-hidden="true"></i> <?php echo $row['academicYear']; ?><br>
+																		<i class="fa fa-calendar" aria-hidden="true"></i> <?php echo $row['date_input']; ?>
+																	</div>
+																	<div class="col-md-3 col-sm-3 col-xs-12">
+																		<i class="glyphicon glyphicon-blackboard" aria-hidden="true"></i>  <?php echo $row['roomName']; ?>
+																	</div>
+																</p>
+															</div>
+														</div>
+														<div class="col-md-4 col-sm-4 col-xs-12">
+															<ul class="listSmallBtn ">
+																<?php if($row['IsAssesment']>0){ 
+																	if($row['islisLock']== 1){ 
+																?>
+																	<li>
+																		<div class="form-group">
+																			<span  class="mini-button-success" >
+																				<i class="glyphicon glyphicon-ok-sign" aria-hidden="true"></i> <?php echo $tr->translate('Assessment Completed');?>
+																			</span>
+																		</div>
+																	</li>
+																	<li>
+																		<div class="form-group">
+																			<a  class="small-button-class" href="<?php echo $this->baseUrl()."/extreport/rpt-assessment-list/id/".$row['IsAssesment'];?>">
+																				<i class="glyphicon glyphicon-list-alt" aria-hidden="true"></i> <?php echo $tr->translate('STUDENT_ASSESSMENT_REPORT');?>
+																			</a>
+																		</div>
+																	</li>
+
+																<?php }else{ ?>
+																	<li>
+																		<div class="form-group">
+																			<a  class="mini-button-edit" href="<?php echo $this->baseUrl()."/assessment/edit/id/".$row['IsAssesment']."/groupId/".$row['groupId']."/scoreId/".$row['scoreId'];?>">
+																				<i class="glyphicon glyphicon-edit" aria-hidden="true"></i> <?php echo $tr->translate('EDIT_STUDENT_ASSESSMENT');?>
+																			</a>
+																		</div>
+																	</li>
+																	<li>
+																		<div class="form-group">
+																			<a  class="small-button-class" href="<?php echo $this->baseUrl()."/extreport/rpt-assessment-list/id/".$row['IsAssesment'];?>">
+																				<i class="glyphicon glyphicon-list-alt" aria-hidden="true"></i> <?php echo $tr->translate('STUDENT_ASSESSMENT_REPORT');?>
+																			</a>
+																		</div>
+																	</li>
+																<?php } }else{ ?>
+																	<li>
+																		<div class="form-group">
+																			<a  class="small-button-class" href="<?php  echo $this->baseUrl()."/assessment/add/id/".$row['groupId']."/scoreId/".$row['scoreId'];?>">
+																				<i class="glyphicon glyphicon-sort-by-alphabet" aria-hidden="true"></i> <?php echo $tr->translate('ISSUE_STUDENT_ASSESSMENT');?>
+																			</a>
+																		</div>
+																	</li>
+																<?php } ?>
+															</ul>
+														</div>
+														
+													</div>
+												</div>
+											</div>
+										</div>
+									</div>
+						
+								</div>
+			
+				<?php } ?>
+			</div>
+	
+			</div>
+		</div>
+	</div>
+	
+<script src="<?php echo $this->baseUrl();?>/js/help.js"  type="text/javascript"></script>
+<script type="text/javascript">
+
+$( document ).ready(function() {
+   setPageTitle('<?php echo $pageTitle; ?>');
+});
+
+dojo.require("dojo.data.ItemFileWriteStore"); 
+dojo.ready(function(){
+
+	new dijit.form.FilteringSelect({
+		queryExpr: "*${0}*",
+		autoComplete: false, 
+		required: false,
+		id: "grade",
+		name: "grade",           
+		class: 'fullside',  
+		placeHolder:"<?php echo $tr->translate("SELECT_GRADE");?>",          
+		onChange: function() {  
+		}
+	}, "grade");
+	
+	getallGrade();
+	<?php if(!empty($this->search['academic_year'])){?>
+	 dijit.byId('academic_year').attr('value','<?php echo $this->search['academic_year'];?>'); 
+	<?php } ?>
+});
+
+var url_dept = '<?php echo $this->url(array('module'=>'global','controller'=>'grade','action'=>'get-grade')); ?>';
+function getallGrade(){
+	dept_id = dijit.byId('degree').get('value');
+	if(dept_id=='' || dept_id==-1){return false;}
+		dojo.xhrPost({
+			url:url_dept,
+			content:{
+				'dept_id':dept_id,
+				'noaddnew':1
+				},
+			handleAs:"json",
+			load: function(data) {
+				dijit.byId('grade').attr('value','');
+				grade_store  = getDataStorefromJSON('id','name', data);
+			    dijit.byId('grade').set('store',grade_store); 
+			    dijit.byId('grade').attr('value','<?php echo $this->search['grade']?>');    
+			},
+			error: function(err) {
+			}
+		});
+}
+</script>
+<?php 
+	echo $this->render('externalFoot.phtml');
+?>

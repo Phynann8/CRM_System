@@ -1,0 +1,689 @@
+<?php
+	$_dbgb = new Application_Model_DbTable_DbGlobal();
+	$tr = Application_Form_FrmLanguages::getCurrentlanguage();
+	$this->headTitle($tr->translate('RPT_STUDNET_CARD')); 
+	echo $this->headTitle(''); 
+	$frm =  $this->form_search;
+	$base_url = Application_Form_FrmMessage::getUrl("/");
+?>	
+<style>
+.hover:hover{ background:#ccc;}
+.hidden{visibility: visible !important;
+display: table-cell !important;
+}
+
+tbody#table_row tr {
+    line-height: 24px;
+    color: #000;
+}
+
+</style>
+<div class="reportblog" >	
+	<div class="card-box">
+       		<div class="col-sm-12 border-botom">
+		    	<div class="col-sm-8 pd-0">
+	    			<h4 class="m-b-0"><i class="fa fa-file " aria-hidden="true"></i>&nbsp;&nbsp;&nbsp;<?php echo $tr->translate('RPT_STUDNET_CARD');?></h4>
+    			</div>
+    			<div class="col-sm-4 text-right">
+    			</div>
+    		</div>
+    	</div>
+	<form  id='foundation_class' action="<?php echo $this->url(array('module'=>'allreport','controller'=>'allstudent','action'=>'rpt-studentcard')); ?>" dojoType="dijit.form.Form" method="post" enctype="application/x-www-form-urlencoded">
+			
+			 <div class="col-md-12 col-sm-12 col-xs-12 ">
+				<div class="card-blogform">
+					<div class="card-body"> 
+						<div class="row"> 
+							<div class="col-md-12 col-sm-12 col-xs-12 ">
+								<div class="form-group">
+									<div class="col-md-2 col-sm-2 col-xs-12">
+											<?php echo $frm->getElement("adv_search");?>
+									</div>
+									<div class="col-md-2 col-sm-2 col-xs-12">
+											<?php echo $frm->getElement("branch_id");?>
+									</div>
+										<div class="col-md-2 col-sm-2 col-xs-12">
+											<?php echo $frm->getElement("academic_year");?>
+									</div>
+										<div class="col-md-2 col-sm-2 col-xs-12">
+											<input id="group" />
+									</div>
+										<div class="col-md-2 col-sm-2 col-xs-12">
+											<?php echo $frm->getElement("degree");?>
+									</div>
+									<div class="col-md-2 col-sm-2 col-xs-12">
+											<input id="grade" />
+									</div>
+								</div>
+								<div class="form-group">
+									<div class="col-md-2 col-sm-2 col-xs-12">
+											<?php echo $frm->getElement("session");?>
+									</div>
+										<div class="col-md-2 col-sm-2 col-xs-12">
+											<?php echo $frm->getElement("start_date");?>
+									</div>
+										<div class="col-md-2 col-sm-2 col-xs-12">
+											<?php echo $frm->getElement("end_date");?>
+									</div>
+										<div class="col-md-2 col-sm-2 col-xs-12">
+											<?php echo $frm->getElement("stu_type");?>
+									</div>
+										<div class="col-md-2 col-sm-2 col-xs-12">
+											<?php echo $frm->getElement("study_type");?>
+									</div>
+										<div class="col-md-2 col-sm-2 col-xs-12">
+											<button class="button-class button-primary" iconClass="glyphicon glyphicon-search" dojoType="dijit.form.Button" showLabel="true" name="search"  type="submit"><?php echo $tr->translate("SEARCH");?></button>
+									</div>
+									<div class="col-md-2 col-sm-2 col-xs-12">
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			 
+			<div class="col-md-12 col-sm-12 col-xs-12 ">
+				<div class="card-blogform">
+					<div class="card-body"> 
+						<div class="row"> 
+							<div class="col-md-12 col-sm-12 col-xs-12 ">
+								<div class="form-group" style=" background: #d8e0e2; padding: 5px 15px; margin: 0; border: solid 1px #697996; border-radius: 2px;">
+									<div class="col-md-3 col-sm-3 col-xs-12 text-center ">
+										<p class="tx-20 font-weight-semibold "><i class="glyphicon glyphicon-ok-sign" aria-hidden="true">&nbsp;</i><?php echo $tr->translate("SELECT_STUDENT");?> </p>
+									</div>
+									<div class="col-md-3 col-sm-3 col-xs-12">
+										<input id="cardSetting" />
+									</div>
+									<div class="col-md-3 col-sm-3 col-xs-12">
+										<select name="optionSelect" id="optionSelect" dojoType="dijit.form.FilteringSelect" class="fullside" onchange="getBlogStudent();">
+											<option value="2"><?php echo $tr->translate("SELECTED_STUDENT_OPTION");?></option>
+											<option value="1"><?php echo $tr->translate("NORMAL_OPTION");?></option>
+										</select>
+									</div>
+									<div class="col-md-3 col-sm-3 col-xs-12">
+										<input id="studentID" />
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+	</form>
+	<div id="divPrint">
+		<table class="NORMAL_OPTION" border="0" style="background:#fff; margin: 0 auto; width: 100%;height:auto; ">
+			<tr>
+				<td colspan="3"><?php echo $this->rsheader;?></td>
+			</tr>
+			<tr>
+				<td colspan="3" align="center">
+					<strong style=" font-weight:200;font-family: Arial Black;color:#000; font-size: 12px;font-family:Times New Roman,'Khmer OS Muol Light';"><?php echo $tr->translate("RPT_STUDNET_CARD");?></strong><br />
+					<strong  style=" font-weight:200;font-family: Arial Black;color:#000; font-size: 12px;font-family:Times New Roman,'Khmer OS Battambang';"><?php if(!empty($this->search['start_date'])){?><?php echo date('d-M-Y',strtotime($this->search['start_date']));?> <?php echo $tr->translate("TO");?> <?php echo date('d-M-Y',strtotime($this->search['end_date']));}?> </strong>
+				</td>
+			</tr>
+			<style>
+				table tr th{
+					border: 1px solid #000;	
+					text-align: center;
+				}
+				table {page-break-inside:auto }
+				tr{ page-break-inside:avoid; page-break-after:auto; }
+				#header {
+				  display: table-header-group;
+				  page-break-inside:avoid; page-break-after:auto;
+				}
+				.hidden{visibility: hidden; display: none;}
+				tr.line td{ border-bottom: 2px solid #000;padding-top: 5px; }
+				.bg-red {
+					background-color: #fef1f1 !important;
+					color: #070707;
+				}
+				@media print{
+						@page{
+								margin:0.3cm 0.7cm 0cm 0.7cm;
+								page-break-before: avoid;
+								-webkit-transform: scale(0.5);  /* Chrome, Safari 3.1+  */
+								-moz-transform: scale(0.5);  /* Firefox 3.5-15 */
+								-ms-transform: scale(0.5);   /* IE 9 */
+								-o-transform: scale(0.5);    /* Opera 10.50-12.00 */
+								transform: scale(0.5);
+								page: A4;
+								size: portrait;
+						}
+				}
+			</style>
+			<tr>
+				<td colspan="3">
+				<div id="exportExcel">
+					<table cellpadding="4" style="font-family:'Khmer OS Battambang' ; margin:0 auto;width:100%;border:1px solid #000; border-collapse: collapse;white-space: nowrap;color:#080808;"  border="1" >
+						<thead>
+							<tr style="font-size:12px; height: 20px;background: #f8ccaf; font-weight: bold" align="center" >
+								<th rowspan="2" class="hidden"><input type="checkBox" onclick="checkAllStudent('<?php echo count($this->rs);?>');" name="checkall" id="checkall" /></th>
+								<th rowspan="2"><?php echo $tr->translate("NUM");?></th>
+								<th rowspan="2"><?php echo $tr->translate("BRANCH");?></th>
+								<th rowspan="2"><?php echo $tr->translate("STUDENT_CODE");?></th>
+								<th rowspan="3"><?php echo $tr->translate("STUDENT_NAME");?></th>
+								<th rowspan="2"><?php echo $tr->translate("SEX");?></th>
+								<th rowspan="2"><?php echo $tr->translate("PHONE");?></th>
+								<th colspan="5"><?php echo $tr->translate("STUDY_INFO");?></th>
+							</tr>
+							<input type="hidden" name="id_selected" id="id_selected" dojoType="dijit.form.TextBox" />
+							<tr style="font-size:12px; height: 20px;background: #f8ccaf; font-weight: bold;" align="center" >
+								<th><?php echo $tr->translate("ACADEMIC_YEAR");?></th>
+								<th><?php echo $tr->translate("DEGREE");?></th>
+								<th><?php echo $tr->translate("GRADE");?></th>
+								<th><?php echo $tr->translate("SESSION");?></th>
+								<th><?php echo $tr->translate("STATUS");?></th>
+							</tr>
+						</thead>
+					<?php 
+					$i=0;
+					$degree=0;
+					$bgClass="";
+					foreach ($this->rs AS $row) { 
+							$i++;
+							$degree=$row['degree'];
+							if(!empty($row['photo']) AND file_exists(PUBLIC_PATH."/images/photo/".$row['photo'])){
+							}else{
+								$bgClass="bg-red";
+							}
+						?>
+						<tr style="font-size:12px;line-height:18px;" align="center" class="hover <?php echo $bgClass; ?>" >
+							<td class="hidden">
+								<input style="height: 15px;margin-top: 5px;" type="checkBox" onClick="checked_id(<?php echo $i?>)" name="check_box<?php echo $i?>" id="check_box<?php echo $i?>" />
+								<input type="hidden" name="stu_id<?php echo $i;?>" id="stu_id<?php echo $i;?>" value="<?php echo $row['stu_id'];?>" dojoType="dijit.form.TextBox" />
+							</td>
+							<td >&nbsp;<?php echo $i;?>&nbsp;</td>
+							<td >&nbsp;<?php echo $row['branch_name'];?>&nbsp;</td>
+							<td >&nbsp;<?php echo $row['stu_code'];?></td>
+							<td align="left">&nbsp;&nbsp;&nbsp;<?php echo $row['stu_khname']." - ".$row['last_name']." ".$row['stu_enname'];?>&nbsp;</td>
+							<td >&nbsp;<?php echo $row['sex'];?>&nbsp;</td>	
+							<td >&nbsp;<?php echo $row['tel'];?>&nbsp;</td>
+							<td >&nbsp;<?php echo $row['academic_year'];?>&nbsp;</td>
+							<td >&nbsp;<?php echo $row['degree'];?>&nbsp;</td>
+							<td align="left">&nbsp;<?php echo $row['grade'];?>&nbsp;</td>
+							<td >&nbsp;<?php echo $row['session'];?>&nbsp;</td>	
+							<td>&nbsp;<?php echo $row['status'];?>&nbsp;</td>	
+						</tr>
+					<?php }?>	
+					</table>	
+				</div>	
+				</td>
+			</tr>
+		</table>
+		<div class="card-box SELECTED_STUDENT_OPTION">
+			<div class="col-md-12 col-sm-12 col-xs-12" style=" padding: 0;">
+					<div class="card-blogform">
+						<div class="card-body"> 
+							<div class="row"> 
+								<div class="col-md-12 col-sm-12 col-xs-12 ">
+									<div class="form-group">
+										<table  border="1px" style="border-collapse: collapse; width:100%; border:1px solid #ccc; line-height: 30px;">
+											<thead>
+												<tr id="head-title" class="head-td" align="right" style="width: 100%;">
+													<th width="5%"><?php echo $tr->translate("DEL");?></th>
+													<th width="5%"><?php echo $tr->translate("N_O");?></th>
+													<th ><?php echo $tr->translate("STUDENT");?></th>
+												</tr>
+											</thead>
+											<tbody id="table_row">
+											</tbody>
+											<input type="hidden" name="identity" id="identity" dojoType="dijit.form.TextBox" value="" >
+										</table>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+			</div>
+		</div>
+	</div>
+	<br />
+	<table style="margin:0 auto;padding-top:20px;border-spacing: 30px">
+		<tr>
+			<td align="center">
+				<button dojoType="dijit.form.Button" id="printselected"
+				class="button-class button-primary" iconClass="glyphicon glyphicon-print"
+					type="button" onclick="printSelected('');"><?php echo $tr->translate("SINGLE_IDPRINT");?></button>
+			</td>
+			<td align="center">
+				&nbsp;<button dojoType="dijit.form.Button" id="printselectedTray"
+					class="button-class button-primary" iconClass="glyphicon glyphicon-print"
+					type="button" onclick="printSelectedTray('');"><?php echo $tr->translate("SINGLE_IDPRINT_TRAY");?></button>
+				&nbsp;
+			</td>
+			<td align="center">
+				<button dojoType="dijit.form.Button" id="printpickupselected" 
+				class="button-class button-primary" iconClass="glyphicon glyphicon-print"
+					type="button" onclick="printPickupCardSelected();"><?php echo $tr->translate("SINGLE_PICKUP_PRINT");?></button>
+			</td>
+		</tr>
+	</table>
+</div>
+	
+<script src="<?php echo $this->baseUrl();?>/js/help.js"></script>
+<script type="text/javascript">
+ dojo.require("dojo.NodeList-manipulate");
+dojo.require("dojo.data.ItemFileWriteStore"); 
+var group_store  = getDataStorefromJSON('id','name',<?php print_r(Zend_Json::encode(array()));?> );
+dojo.ready(function(){
+	new dijit.form.FilteringSelect({
+		store: group_store,
+	    queryExpr: "*${0}*",
+		autoComplete: false,                     
+	    id: "cardSetting",
+	    name: "cardSetting",  
+	    class: 'fullside', 
+	    readonly:false,
+	    required:false,
+	    placeHolder:"<?php echo $tr->translate("Card Type");?>",          
+	    onChange: function() {  
+		    addRow();
+	    }
+	}, "cardSetting");
+	
+	new dijit.form.FilteringSelect({
+		store: group_store,
+	    queryExpr: "*${0}*",
+		autoComplete: false,                     
+	    id: "studentID",
+	    name: "studentID",  
+	    class: 'fullside', 
+	    readonly:false,
+	    required:false,
+	    placeHolder:"<?php echo $tr->translate("SELECT_STUDENT");?>",          
+	    onChange: function() {  
+			getStudentInfo();
+		   
+	    }
+	}, "studentID");
+	
+	new dijit.form.FilteringSelect({
+		store: group_store,
+	    queryExpr: "*${0}*",
+		autoComplete: false,                     
+	    id: "group",
+	    name: "group",  
+	    class: 'fullside', 
+	    readonly:false,
+	    required:false,
+	    placeHolder:"<?php echo $tr->translate("SELECT_GROUP");?>",          
+	    onChange: function() {  
+		    getAllStudent();
+	    }
+	}, "group");
+	
+	new dijit.form.FilteringSelect({
+		queryExpr: "*${0}*",
+		autoComplete: false,                     
+		required: false,                        
+		id: "grade",
+		name: "grade",  
+		class: 'fullside',  
+		placeHolder:"<?php echo $tr->translate("SELECT_GRADE");?>",          
+		onChange: function() {  
+			 getAllGroupByBranch();
+			 getAllStudent();
+		}
+	}, "grade");
+	
+	 var branch_id = dijit.byId('branch_id');
+	 branch_id.on('change', function(evt) {
+		 getAllGroupByBranch();
+		 getAllStudent();
+		 getAllCardType();
+    });
+	 var academic_year = dijit.byId('academic_year');
+	 academic_year.on('change', function(evt) {
+		 getAllGroupByBranch();
+    });
+	 getAllGroupByBranch();
+	 getallGrade();
+	 getBlogStudent();
+	 getAllStudent();
+	 getAllCardType();
+});
+var oldBranch = '<?php echo $this->search['branch_id']?>'
+url_getgroup = '<?php echo $this->url(array('module'=>'foundation','controller'=>'group','action'=>'getallgroup'));?>';
+function getAllGroupByBranch(){
+	dijit.byId('group').reset();
+	branch_id = dijit.byId('branch_id').get('value');
+	if(branch_id=='' || branch_id==-1){
+		var group_store  = getDataStorefromJSON('id','name',<?php print_r(Zend_Json::encode(array()));?> );
+		dijit.byId('group').set('store',group_store);  
+		dijit.byId('branch_id').focus();
+		return false;
+	}
+	degree = dijit.byId('degree').get('value');
+	if(degree=='' || degree==-1){degree ="";}
+	grade = dijit.byId('grade').get('value');
+	if(grade=='' || grade==-1){grade ="";}
+	academic_year = dijit.byId('academic_year').get('value');
+	if(academic_year=='' || academic_year==-1){academic_year ="";}
+	
+	dojo.xhrPost({
+		url: url_getgroup,
+		content:{
+			'branch_id':branch_id,
+			'degree':degree,
+			'grade':grade,
+			'academic_year':academic_year,
+			'noaddnew':1,
+			'forfilter':1
+			},
+		handleAs:"json",
+		load: function(data) {
+		    group_store  = getDataStorefromJSON('id','name', data);
+		    dijit.byId('group').set('store',group_store);   
+		    if(oldBranch==branch_id){
+		    	dijit.byId('group').set('value','<?php echo $this->search['group']?>');  
+		    }
+		},
+		error: function(err) {
+		}
+	});
+}
+
+var url_dept = '<?php echo $this->url(array('module'=>'global','controller'=>'grade','action'=>'get-grade')); ?>';
+function getallGrade(){
+	getAllGroupByBranch();  
+	dept_id = dijit.byId('degree').get('value');
+	if(dept_id=='' || dept_id==-1){return false;}
+		dojo.xhrPost({
+			url:url_dept,
+			content:{
+				'dept_id':dept_id,
+				'noaddnew':1
+				},
+			handleAs:"json",
+			load: function(data) {
+				dijit.byId('grade').attr('value','');
+				grade_store  = getDataStorefromJSON('id','name', data);
+			    dijit.byId('grade').set('store',grade_store); 
+			    dijit.byId('grade').attr('value','<?php echo $this->search['grade']?>');  
+			},
+			error: function(err) {
+			}
+		});
+}
+
+var urlGetStudent = '<?php echo $this->url(array('module'=>'foundation','controller'=>'register','action'=>'getstudentlist')); ?>';
+function getAllStudent(){
+	var branch_id = dijit.byId('branch_id').get('value');
+	if(branch_id==-1 || branch_id=="" ){
+		branch_id = 0;
+	}
+	var studentStore  = getDataStorefromJSON('id','name',<?php print_r(Zend_Json::encode(array()));?> );
+	dijit.byId('studentID').set('store',studentStore); 
+	
+	var academic_year = dijit.byId('academic_year').get('value');
+	var group = dijit.byId('group').get('value');
+	var degree = dijit.byId('degree').get('value');
+	var grade = dijit.byId('grade').get('value');
+	
+	dojo.xhrPost({
+		url: urlGetStudent,
+		content:{
+			'branchId'		:branch_id,
+			'academicYear' :academic_year,
+			'groupId'			:group,
+			'degree'		:degree,
+			'grade'			:grade,
+			'joinGroup'		:1,
+			'activeStudent'		:1,
+			},
+		handleAs:"json",
+		load: function(data) {
+			dijit.byId('studentID').attr('value','');
+			var studentStore  = getDataStorefromJSON('id','name', data);
+			dijit.byId('studentID').set('store',studentStore); 
+		},
+		error: function(err) {
+		}
+	});
+}
+
+var urlGetCard = '<?php echo $this->url(array('module'=>'setting','controller'=>'cardmg','action'=>'allcardst')); ?>';
+function getAllCardType(){
+	var branch_id = dijit.byId('branch_id').get('value');
+	if(branch_id==-1 || branch_id=="" ){
+		branch_id = 0;
+	}
+	var degree = dijit.byId('degree').get('value');
+	var studentStore  = getDataStorefromJSON('id','name',<?php print_r(Zend_Json::encode(array()));?> );
+	dijit.byId('studentID').set('store',studentStore); 
+	dojo.xhrPost({
+		url: urlGetCard,
+		content:{
+			'branchId'		:branch_id,
+			'degree'		:degree,
+			},
+		handleAs:"json",
+		load: function(data) {
+			dijit.byId('cardSetting').attr('value','');
+			var studentStore  = getDataStorefromJSON('id','name', data);
+			dijit.byId('cardSetting').set('store',studentStore); 
+		},
+		error: function(err) {
+		}
+	});
+		
+		
+}
+
+	
+	function printSelected(typecard){
+		<?php 
+			defined('BASE_URL')	|| define('BASE_URL', Zend_Controller_Front::getInstance()->getBaseUrl());
+    		$tr = Application_Form_FrmLanguages::getCurrentlanguage();
+    		$url_copy =$this->url(array('module'=>'allreport','controller'=>'allstudent','action'=>'print-idcard'));
+    	?>
+    	var urlink="";
+    	var urlSetting="";
+		if(typecard==1){
+			var urlink="?front_card=1";
+		}
+    	 id_selected = dijit.byId('id_selected').get('value');
+    	 cardSetting = dijit.byId('cardSetting').get('value');
+		 
+		 if(id_selected!=''){
+			window.open(
+					'<?php echo $url_copy;?>'+'/id/'+id_selected+urlink+'?cardSetting='+cardSetting,
+					  '_blank' // <- This is what makes it open in a new window.
+					);
+		 }else{
+			alert('Please select record you want to print');
+			return false;
+		 }
+	}
+	
+	
+	function printPickupCardSelected(){
+		<?php 
+			defined('BASE_URL')	|| define('BASE_URL', Zend_Controller_Front::getInstance()->getBaseUrl());
+    		$tr = Application_Form_FrmLanguages::getCurrentlanguage();
+    		$url_copy =$this->url(array('module'=>'allreport','controller'=>'allstudent','action'=>'print-pickupcard'));
+    	?>
+
+    	 id_selected = dijit.byId('id_selected').get('value');
+		 if(id_selected!=''){
+			window.open(
+					'<?php echo $url_copy;?>'+'/id/'+id_selected,
+					  '_blank' // <- This is what makes it open in a new window.
+					);
+		 }else{
+			alert('Please select record you want to print');
+			return false;
+		 }
+	}
+	function checkAllStudent(array_length){
+		dijit.byId('id_selected').attr('value','');
+		if(dojo.byId('checkall').checked){
+			for(var j=1;j<=array_length;j++){
+				$("#check_box"+j).attr('checked', 'checked');
+				checked_id(j);
+			}
+		}else{
+			for(var j=1;j<=array_length;j++){
+				$("#check_box"+j).removeAttr("checked");
+				checked_id(j);
+			}
+		}
+	}
+	function checked_id(index){
+		stu_id = dijit.byId('stu_id'+index).get('value');
+		if(dojo.byId('check_box'+index).checked){
+			if($("#id_selected").val()!="") {
+				var identity = $("#id_selected").val();
+				$("#id_selected").val(identity+','+stu_id);
+			}else{
+				$("#id_selected").val(stu_id);
+			}
+		}else{
+			var identity = $('#id_selected').val();
+			var arrays = identity.split(',');
+			for(var i=0;i<arrays.length;i++) {
+			if(arrays[i] == stu_id) arrays.splice(i,1);
+			}
+			var strings = arrays.join(',');
+			$('#id_selected').val(strings);
+		}
+	}
+	
+	function getBlogStudent(){
+		optionSelect=dijit.byId("optionSelect").get("value");
+		if(optionSelect==1){
+			dijit.byId('studentID').attr('value',0);
+			$("#id_selected").val('');
+			$(".NORMAL_OPTION").css("display", "table");
+			$(".SELECTED_STUDENT_OPTION").css("display", "none");
+		}else{
+			$("#id_selected").val('');
+			dojo.query("#table_row").append("");
+			$(".NORMAL_OPTION").css("display", "none");
+			$(".SELECTED_STUDENT_OPTION").css("display", "block");
+		}
+		
+	}
+	var template = '';
+	var col = 0;
+	var no = 0;
+	var title = 0;
+	tmp = '';
+	temp='';
+	let goHomeType ='';
+	let studentCode ='';
+	let studentName ='';
+	let bgRed ='';
+function addRow(data=null){ 
+	
+	studentID=dijit.byId("studentID").get("value");
+	if(studentID=='' || studentID==0){return false;}
+	var iden = $("#id_selected").val();
+	var arrays = iden.split(',');
+	 if(arrays!=""){
+		 for(var i=0;i< arrays.length;i++) {
+			 readychoose = dijit.byId('class_'+arrays[i]).get('value');
+			 if(readychoose==studentID){
+					alert("<?php echo $tr->translate("Choosen ready")?>");
+				 	return false;
+			 }
+		}
+	}
+		col++;no++;
+		studentCode = data.stu_code;
+		studentName = data.stu_khname+" - "+data.last_name+" "+data.stu_enname;
+		bgRed =(data.photo!='')?'':'bg-red';
+		goHomeType = data.goHomeType;
+		template='';
+		if(title!=1){
+			$("#head-title").html("");    
+			temp+='<th with="5%"><?php echo $tr->translate("DEL");?></th>';
+			temp+='<th with="5%"><?php echo $tr->translate("N_O");?></th>';
+			temp+='<th><?php echo $tr->translate("STUDENT_CODE");?></th>';
+			temp+='<th><?php echo $tr->translate("STUDENT_NAME");?></th>';
+			temp+='<th><?php echo $tr->translate("STUDENT_TYPE");?></th>';
+			dojo.query("#head-title").append(temp);
+			title=1;
+		}
+			template+='<td width="47px"align="center"><img onclick="deleteRecord('+studentID+')" src="<?php echo $this->baseUrl();?>/images/Delete_16.png"></td>';
+			template+='<td width="10px" align="center">'+no+'</td>';
+			template+='<td>&nbsp;'+studentCode+'<input type="hidden" dojoType="dijit.form.TextBox" required="true" id="class_'+studentID+'" name="class_'+studentID+'" value="'+studentID+'" /></td>';
+			template+='<td>&nbsp;'+studentName+'</td>';
+			template+='<td>&nbsp;'+goHomeType+'</td>';
+		tmp='<tr id="row'+studentID+'" class="'+bgRed+'">';
+		tmp+="</tr>";
+		dojo.query("#table_row").append(tmp);
+
+		if($("#id_selected").val()!="") {
+			var identity = $("#id_selected").val();
+			$("#id_selected").val(identity+','+studentID);
+		} else {$("#id_selected").val(studentID);}
+		dojo.html.set(dojo.byId("row"+studentID),template , {
+		     parseContent: true,
+		});
+ }
+  function deleteRecord(index){
+	var identity = $('#id_selected').val();
+	var arrays = identity.split(',');
+	for(var i=0;i<arrays.length;i++) {
+	if(arrays[i] == index) arrays.splice(i,1);
+	}
+	var strings = arrays.join(',');
+	$('#id_selected').val(strings);
+	dojo.query("#row"+index).remove();
+}
+
+
+function printSelectedTray(typecard){
+		<?php 
+			defined('BASE_URL')	|| define('BASE_URL', Zend_Controller_Front::getInstance()->getBaseUrl());
+    		$tr = Application_Form_FrmLanguages::getCurrentlanguage();
+    		$url_copy =$this->url(array('module'=>'allreport','controller'=>'allstudent','action'=>'print-idcard-trayprint'));
+    	?>
+    	var urlink="";
+		if(typecard==1){
+			var urlink="?front_card=1";
+		}
+    	 id_selected = dijit.byId('id_selected').get('value');
+		 cardSetting = dijit.byId('cardSetting').get('value');
+		 if(id_selected!=''){
+			window.open(
+					'<?php echo $url_copy;?>'+'/id/'+id_selected+urlink+'?cardSetting='+cardSetting,
+					  '_blank' // <- This is what makes it open in a new window.
+					);
+		 }else{
+			alert('Please select record you want to print');
+			return false;
+		 }
+	}
+
+function getStudentInfo(){
+	optionSelect=dijit.byId("optionSelect").get("value");
+	if(optionSelect!=2){
+		dijit.byId('studentID').attr('value',0);
+		dijit.byId('optionSelect').focus();
+		return false;
+	}
+	var url_student = '<?php echo $this->url(array('module'=>'foundation','controller'=>'register','action'=>'getstudentstudyinfo')); ?>';
+	studentid = dijit.byId('studentID').get('value');
+ 	if(studentid==''){
+ 		alert("Please Select Student");
+ 		return false;
+ 	}
+	dojo.xhrPost({
+ 		url:url_student,
+ 		content:{
+ 			'study_id':studentid
+ 			},
+ 		handleAs:"json",
+ 		load: function(data) { 
+			addRow(data);
+ 			//dijit.byId('degree').set('value',data.degree);
+		},
+		error: function(err) {
+		}
+	});
+}
+</script>

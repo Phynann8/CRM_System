@@ -1,0 +1,191 @@
+<?php
+	$tr = Application_Form_FrmLanguages::getCurrentlanguage();
+	echo $this->headTitle($tr->translate('STUDNET_TRANDSFORMATION')); 
+	$base_url = Application_Form_FrmMessage::getUrl("/");
+	$ac = null;
+	$ad = null;
+	$i=null;
+	$session='';
+	$grade='';
+	
+	$to_ad = null;
+	$to_session='';
+	$to_grade='';
+	$frm =  $this->form_search;
+	$dateFormat ="d/m/Y";
+	$dateFormatExport ="d/M/Y";
+?>
+<div class="layout-wrapper-report">
+	<div id="mainContent" class="main-content-report">
+		<div class="report-preview">
+			<?php echo $this->controlReport?>
+			<div id="main-viewer" class="main-viewer portrait">
+				<div id="viewer" class="viewer portrait">
+					<div id="divPrint" class="content">
+						<link rel="stylesheet" href="<?php echo $this->baseUrl();?>/admin/build/css/report-style.css">
+						<link rel="stylesheet" href="<?php echo $this->baseUrl();?>/admin/build/css/report-style-screen.css">
+						<style>
+							@media print {
+								<?php if(!empty($this->printFormat)){ echo $this->printFormat; } ?>
+							}
+						</style>
+						<table style="width:100%;  border-collapse: collapse;">
+							<tr>
+								<td colspan="3"><?php echo $this->rsheader;?></td>
+							</tr>
+							<tr>
+								<td width="28%" >
+								</td>
+								<td width="44%" align="center">
+									<span style="color:#000; font-size: 14px;font-family:'Times New Roman','Khmer OS Muol Light';"><?php echo $tr->translate("STUDNET_TRANDSFORMATION");?></span><br />
+								</td>
+								<td width="28%" align="right"></td>
+							</tr>
+							<tr>
+								<td></td>
+							</tr>
+							<tr>
+								<td colspan="4" id="exportExcel">								
+									<table border="1" cellpadding="5" style="margin:0 auto;width:100%;border:1px solid #000; border-collapse: collapse;padding-buttom: 10px;font-family:'Times New Roman','Khmer OS Battambang';"  border="1" >																			
+									<?php $total_stu=0; 
+									$changeId = 0;
+									if(!empty($this->rs))foreach ($this->rs as $key =>$stu){										
+									?>
+										<?php if( ($changeId!=$stu["changeId"]) AND  $key>0 ){?>											
+										<tr class="hover" style="font-size:12px;height: 25px;">
+											<td align="right" colspan="4" ><?php echo $tr->translate("TOTAL_STUDENT");?></td>
+											<td align="center"><strong><?php echo number_format($i,0);?></strong> <?php echo $tr->translate("STUDENT_UNIT");?></td>
+										</tr>
+									</table>
+									<br/>
+									<table class="content-data bd-dark-grey text-color-black text-h16px text-size-12px" cellpadding="5" style="margin:0 auto;width:100%; padding-bottom: 10px;"  border="1" >
+										<?php }$i++;?>
+										<?php 
+											if( ($changeId!=$stu["changeId"])){
+												$ac=0;$i=1;
+										?>
+										<tr style="font-size:12px; height: 45px;" align="center" >
+											<td colspan="5" style="border: 1px solid white;border-bottom: 1px solid black;">
+												<span>
+													<span style="background-color: rgba(249,249,249,1);white-space: nowrap;color: red;padding: 10px 5px;border: 1px solid #efefef;border-radius: 5px;">
+													&#128197; <?php echo date($dateFormat,strtotime($stu["moving_date"]));?>
+													</span>&nbsp;
+													<span style="background-color: rgba(249,249,249,1);white-space: nowrap;color: red;padding: 10px 5px;border: 1px solid #efefef;border-radius: 5px;"><?php echo $stu["academic_year"]?>  <?php echo $stu["from_group_code"];?>  <?php echo $stu["session"];?></span>  To  <span style="color: red;background-color: rgba(249,249,249,1);padding: 10px 5px;border: 1px solid #efefef;border-radius: 5px;"><?php echo $stu["to_academic_year"]?>  <?php echo $stu["to_group_code"];?>  <?php echo $stu["to_session"];?> </span>  
+													<?php echo $tr->translate("TYPE")?> : <span style="background-color: rgba(249,249,249,1);white-space: nowrap;color: red;padding: 10px 5px;border: 1px solid #efefef;border-radius: 5px;"><?php echo $stu["change_type"];?> </span> 
+													<?php echo $tr->translate("USER")?> : <span style="background-color: rgba(249,249,249,1);white-space: nowrap;color: red;padding: 10px 5px;border: 1px solid #efefef;border-radius: 5px;"><?php echo $stu["user_name"];?> </span>         
+												</span>
+												<br>
+											</td>
+										</tr>
+										<tr class="style-head bd-black bd-w1px style-head bg-head" align="center" >
+											<td style="width: 10%;"><?php echo $tr->translate("N_O");?></td>
+											<td style="width: 15%;"><?php echo $tr->translate("STUDENT_ID");?></td>
+											<td style="width: 30%;"><?php echo $tr->translate("STUDENT_NAMEKHMER");?></td>
+											<td style="width: 30%;"><?php echo $tr->translate("NAME_ENGLISH");?></td>
+											<td style="width: 15%;"><?php echo $tr->translate("SEX");?></td>
+										</tr>
+										<?php }?>
+										<?php 
+											  $ad=$stu["academic_year"];
+											  $session=$stu["session"];
+											  $grade=$stu["grade"];
+											  $to_ad=$stu["to_academic_year"];
+											  $to_session=$stu["to_session"];
+											  $to_grade=$stu["to_grade"];
+											  $changeId=$stu["changeId"];
+										?>
+										<tr class="hover" style="font-size:12px;height: 22px;" align="center">
+											<td><?php echo $i;?></td>
+											<td align="left"><?php echo $stu['stu_code'];?></td>
+											<td align="left"><?php echo $stu['stu_khname'];?></td>
+											<td align="left"><?php echo $stu['last_name']." ".$stu['stu_enname'];?></td>
+											<td><?php echo $stu['sex'];?></td>
+										</tr>
+									<?php }?>
+									<?php if(!empty($this->rs)){?>
+										<tr class="hover" style="font-size:12px;height: 30px;font-weight: bold;">
+											<td align="right" colspan="4" ><?php echo $tr->translate("TOTAL_STUDENT");?></td>
+											<td align="center"><?php echo number_format($i,0);?> <?php echo $tr->translate("STUDENT_UNIT");?></td>
+										</tr>
+									<?php }?>
+									</table>	
+								</td>
+							</tr>
+							<tr><td></td></tr>
+							<tr>
+								<td colspan="3"></td>
+							</tr>
+							<tr>
+								<td colspan="3" style="border:1px solid #fff;">
+									<?php echo $this->rsfooter; ?>
+								</td>
+							</tr>
+						</table>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="right-panel-report" id="rightPanel">
+		<div class="card-box">
+			<div class="card-search-head col-sm-12 border-botom">
+				<div class="col-sm-6 text-left pd-0">
+					<h4 class="m-b-0">
+						<?php echo $tr->translate("SEARCH");?> 
+						<i class="fa fa-search "></i> 
+					</h4>
+				</div>
+				<div class="col-sm-6 text-right pd-0">
+					<button onclick="closeRightPanel()" title="<?php echo $tr->translate("CLOSED");?> " class="btn-close">
+						<i class="fa-solid fa-xmark"></i>
+					</button>
+				</div>
+			</div>
+			<form  id='foundation_class' action="<?php echo $this->url(array('module'=>'allreport','controller'=>'allstudent','action'=>'rptgroupstudentchangegroup')); ?>" dojoType="dijit.form.Form" method="post" enctype="application/x-www-form-urlencoded">
+				<div class="form-group">
+					<div class="col-md-12 col-sm-12 col-xs-12">
+						<?php echo $frm->getElement("adv_search");?>
+					</div>
+					<div class="col-md-12 col-sm-12 col-xs-12">
+						<?php echo $frm->getElement("branch_id");?>
+					</div>
+					<div class="col-md-12 col-sm-12 col-xs-12">
+						<?php echo $frm->getElement("academic_year");?>
+					</div>
+					<div class="col-md-12 col-sm-12 col-xs-12">
+						<?php echo $frm->getElement("changegroup_id");?>
+					</div>
+					<div class="col-md-12 col-sm-12 col-xs-12">
+						<?php echo $frm->getElement("change_type");?>
+					</div>
+					
+				</div>
+				<div class="form-group">
+					<div class="col-md-12 col-sm-12 col-xs-12">
+						<?php echo $frm->getElement("start_date");?>
+					</div>
+					<div class="col-md-12 col-sm-12 col-xs-12">
+						<?php echo $frm->getElement("end_date");?>
+					</div>
+					<div class="col-md-12 col-sm-12 col-xs-12">
+						<button class="button-class button-primary fullside" iconClass="glyphicon glyphicon-search" dojoType="dijit.form.Button" showLabel="true" name="search"  type="submit"><?php echo $tr->translate("SEARCH");?></button>
+					</div>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
+
+<script src="<?php echo $this->baseUrl();?>/js/help.js"></script>
+<script type="text/javascript">
+document.addEventListener("DOMContentLoaded", function(e) {
+  setTimeout(function() {
+		setPrintOrientation('portrait');
+	}, 500);
+});
+dojo.ready(function(){
+	<?php if (!empty($this->search['academic_year'])){?>
+		dijit.byId('academic_year').set('value','<?php echo $this->search['academic_year']; ?>');  
+	<?php }?>
+});
+</script>

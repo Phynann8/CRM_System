@@ -1,0 +1,430 @@
+<?php
+
+class GradingController extends Zend_Controller_Action
+{
+
+	const REDIRECT_URL = '/external';
+	
+    public function init()
+    {
+        /* Initialize action controller here */
+    	header('content-type: text/html; charset=utf8');  
+    }
+	public function indexAction()
+	{
+		$this->_helper->layout()->disableLayout();
+		$id=0;
+		
+		$dbExternal = new Application_Model_DbTable_DbExternal();
+		
+		$teacherInfo = $dbExternal->getCurrentTeacherInfo();
+		$currentAcademic = empty($teacherInfo['currentAcademic'])?0:$teacherInfo['currentAcademic'];
+
+		$groupId=$this->getRequest()->getParam("id");
+		$groupId = empty($groupId)?0:$groupId;
+		$this->view->groupId = $groupId;
+
+		$criteriaId=$this->getRequest()->getParam("criteriaId");
+		$criteriaId = empty($criteriaId)?'':$criteriaId;
+		$this->view->criteriaId = $criteriaId;
+
+		$subjectId=$this->getRequest()->getParam("subjectId");
+		$subjectId = empty($subjectId)?'':$subjectId;
+		$this->view->subjectId = $subjectId;
+
+		$settingEntryId=$this->getRequest()->getParam("settingEntryId");
+		$this->view->settingEntryId = $settingEntryId;
+
+		$examType = 0;
+		$forMonth = 0;
+		$forSemester = 0;
+		$forTerm = 0;
+        if(!empty($settingEntryId)){ 
+			$dbScoreSetting = new Issuesetting_Model_DbTable_DbScoreEntrySetting();
+    		$rs = $dbScoreSetting->getScoreEntrySettingById($settingEntryId);
+			if(!empty($rs)){
+				$examType = $rs["examType"];
+				$forMonth = $rs["forMonth"];
+				$forSemester = $rs["forSemester"];
+				$forTerm = $rs["forTerm"];
+			}
+			$this->view->settingEntryRow= $rs;
+		}
+		
+		
+		if($this->getRequest()->isPost()){
+			$search=$this->getRequest()->getPost();
+			$search['externalAuth']=1;
+		}
+		else{
+			
+			$search = array(
+				'adv_search'=>'',
+				'externalAuth'=>1,//for teacher access
+				'academic_year'=> $currentAcademic,
+				'exam_type'=>$examType,
+				'for_semester'=>$forSemester ,
+				'for_month'=>$forMonth,
+				'for_term'=>$forTerm,
+				'degree'=>0,
+				'grade'=> 0,
+				'group'=> $groupId ,
+				'subjectId'=> $subjectId ,
+				'criteriaId'=>$criteriaId,
+				'start_date'=> '',
+				'end_date'=>date('Y-m-d')
+			);
+		}
+		$this->view->search = $search;
+		$db = new Application_Model_DbTable_DbGradingScore();
+		$row = $db->getAllGradingScore($search);
+		$this->view->row = $row;
+		$form=new Application_Form_FrmSearchGlobal();
+		$forms=$form->FrmSearch();
+		Application_Model_Decorator::removeAllDecorator($forms);
+		$this->view->form_search=$form;
+		
+	}
+    public function addAction()
+	{
+		$this->_helper->layout()->disableLayout();
+		$key = new Application_Model_DbTable_DbKeycode();
+		$dbset=$key->getKeyCodeMiniInv(TRUE);
+		$db = new Application_Model_DbTable_DbGradingScore();
+		$dbg = new Application_Model_DbTable_DbExternal();
+
+		if($this->getRequest()->isPost()){
+			$_data = $this->getRequest()->getPost();
+			
+			$checkTeachSesion=  $dbg->checkSessionTeacherExpireBeforeSubmit();
+			if(empty($checkTeachSesion)){
+				$dbg->reloadPageTecherExpireSession();
+				exit();
+			}
+
+			try {
+				$maxSubjectScore = empty($_data['maxSubjectScore']) ? "0" : $_data['maxSubjectScore'];
+				$arrGetSubInfo = [
+					"groupId" =>$_data['group'],
+					"examType" =>$_data['examType'],
+					"subjectId" =>$_data['subjectId'],
+				];
+				$rowSubjectInfo = $dbg->getSubjectGroupInfoExternal($arrGetSubInfo);
+				$queryCheckMaxSubjectScore = empty($rowSubjectInfo['maxSubjectscore']) ? "0" : $rowSubjectInfo['maxSubjectscore'];
+				
+				if($queryCheckMaxSubjectScore != $maxSubjectScore){
+					Application_Form_FrmMessage::Sucessfull("Incompleted Data For Saving, Please try again.","/grading/index");
+				}else{
+					
+					$rs = $db->addScoreGradingByClass($_data);
+					if (!empty($_data["push_notify"])) {
+						$dbPush = new Api_Model_DbTable_DbPushNotification();
+						$gradingTmpId = empty($rs) ? 0 : $rs;
+						$notify = array(
+							"typeNotify" => "criteriaStudentScore",
+							"optNotification" => 3,
+							"notificationId" => $gradingTmpId,
+							"studentId" => 3,
+						);
+						
+						$stTmpScore = $dbPush->getGradingTmpStudentList($gradingTmpId);
+						if(!empty($stTmpScore)) foreach($stTmpScore as $st){
+							$notify["studentId"] = empty($st["studentId"]) ? 0 : $st["studentId"];
+							
+							$title = $st["criteriaTitleKh"]." / ".$st["criteriaTitle"];
+							$subTitle = $st["subjectTitleKh"]." / ".$st["subjectTitle"];
+							
+							$createDate = empty($st["createDate"]) ? "" : $st["createDate"];
+							$description = "ពិន្ទូទទូលបាន ".$st["totalGrading"]." ពិន្ទុ លើ".$st["criteriaTitleKh"]." នៃមុខវិជ្ជា ".$st["subjectTitleKh"]."។";
+							$descriptionI = " Score ".$st["totalGrading"]." Pt(s) for ".$st["criteriaTitle"]." Of ".$st["subjectTitle"].".";
+							
+							$notify["title"] = $title;
+							$notify["subTitle"] = $subTitle;
+							$notify["description"] = $description;
+							$notify["descriptionI"] = $descriptionI;
+							$notify["createDate"] = $createDate;
+							
+							$dbPush->pushNotificationAPI($notify);	
+						}
+					}
+					
+					
+					
+					if(isset($_data['save_new'])){
+						Application_Form_FrmMessage::Sucessfull("INSERT_SUCCESS","/grading/add");
+					}else {
+						Application_Form_FrmMessage::Sucessfull("INSERT_SUCCESS","/grading/index");
+					}
+				}
+			}catch(Exception $e){
+				Application_Form_FrmMessage::message("INSERT_FAIL");
+				Application_Model_DbTable_DbUserLog::writeMessageError($e->getMessage());
+			}
+		}
+		$id=$this->getRequest()->getParam("id");
+		$id = empty($id)?0:$id;
+
+		$criteriaId=$this->getRequest()->getParam("criteriaId");
+		$criteriaId = empty($criteriaId)?0:$criteriaId;
+		$this->view->criteriaId = $criteriaId;
+
+		$subjectId=$this->getRequest()->getParam("subjectId");
+		$subjectId = empty($subjectId)?'':$subjectId;
+		$this->view->subjectId = $subjectId;
+
+		$settingEntryId=$this->getRequest()->getParam("settingEntryId");
+		$this->view->settingEntryId = $settingEntryId;
+		if(!empty($settingEntryId)){
+			$dbScoreSetting = new Issuesetting_Model_DbTable_DbScoreEntrySetting();
+			$rs = $dbScoreSetting->getScoreEntrySettingById($settingEntryId);
+			$this->view->settingEntryRow= $rs;
+		}
+		
+		$dbExternal = new Application_Model_DbTable_DbExternal();
+		$row = $dbExternal->getGroupDetailByIDExternal($id,1);
+		
+		if(empty($settingEntryId)){
+			$this->_redirect("/external/group");
+		}
+		
+		$this->view->row = $row;
+		if(empty($row)){
+			$this->_redirect("/external/group");
+		}
+		$arrayChecking = array(
+				'settingEntryId'=>$settingEntryId,
+				'groupId'=>$id,
+				'subjectId'=>$subjectId
+				);
+		$checking = $dbExternal->checkingExaminationSubject($arrayChecking);
+		if(!empty($checking)){
+			Application_Form_FrmMessage::Sucessfull("Issued Examination Ready","/external/group");
+		}
+		
+		$this->view-> month = $dbExternal->getAllMonth();
+	
+		$gradingId = $row['gradingId'];
+		$array = array(
+				'gradingId'=>$gradingId,
+				'subjectId'=>$subjectId
+				);
+		$result = $dbExternal->getGradingCriteriaItems($array);
+
+		$this->view->criteria = $result;
+
+	}
+	public function editAction()
+	{
+		$tr = Application_Form_FrmLanguages::getCurrentlanguage();
+		$this->_helper->layout()->disableLayout();
+		$key = new Application_Model_DbTable_DbKeycode();
+		$dbg = new Application_Model_DbTable_DbGlobal();
+		$dbset=$key->getKeyCodeMiniInv(TRUE);
+		$db = new Application_Model_DbTable_DbGradingScore();
+		$dbexnternal = new Application_Model_DbTable_DbExternal();
+
+		$gradingRowId=$this->getRequest()->getParam("gradingRowId");
+		$gradingRowId = empty($gradingRowId)?0:$gradingRowId;
+
+		$fullControlID=$this->getRequest()->getParam("fullcontrol");
+    	$fullControlID =empty($fullControlID)?0:$fullControlID;
+		$this->view->fullControlID = $fullControlID;
+
+		if($this->getRequest()->isPost()){
+			$_data = $this->getRequest()->getPost();
+
+			if(empty($fullControlID)){
+				$checkTeachSesion=  $dbexnternal->checkSessionTeacherExpireBeforeSubmit();
+				if(empty($checkTeachSesion)){
+					$dbexnternal->reloadPageTecherExpireSession();
+					exit();
+				}
+			}
+			
+			try{
+				$maxSubjectScore = empty($_data['maxSubjectScore']) ? "0" : $_data['maxSubjectScore'];
+				$arrGetSubInfo = [
+					"groupId" =>$_data['group'],
+					"examType" =>$_data['examType'],
+					"subjectId" =>$_data['subjectId'],
+				];
+				$rowSubjectInfo = $dbexnternal->getSubjectGroupInfoExternal($arrGetSubInfo);
+				$queryCheckMaxSubjectScore = empty($rowSubjectInfo['maxSubjectscore']) ? "0" : $rowSubjectInfo['maxSubjectscore'];
+				
+				if($queryCheckMaxSubjectScore != $maxSubjectScore){
+					Application_Form_FrmMessage::Sucessfull("Incompleted Data For Saving, Please try again.","/grading/index");
+				}else{
+					//$rs = $db->UpdateScoreGradingByClass($_data);
+					$rs = $db->UpdateGradingScore($_data);
+
+					if (!empty($_data["push_notify"])) {
+						$dbPush = new Api_Model_DbTable_DbPushNotification();
+						$gradingTmpId = empty($_data['recordId']) ? 0 : $_data['recordId'];
+						$notify = array(
+							"typeNotify" => "criteriaStudentScore",
+							"optNotification" => 3,
+							"notificationId" => $gradingTmpId,
+							"studentId" => 3,
+						);
+						
+						$stTmpScore = $dbPush->getGradingTmpStudentList($gradingTmpId);
+						if(!empty($stTmpScore)) foreach($stTmpScore as $st){
+							$notify["studentId"] = empty($st["studentId"]) ? 0 : $st["studentId"];
+							$title = $st["criteriaTitleKh"]." / ".$st["criteriaTitle"];
+							$subTitle = $st["subjectTitleKh"]." / ".$st["subjectTitle"];
+							
+							$createDate = empty($st["createDate"]) ? "" : $st["createDate"];
+							$description = "ពិន្ទូទទូលបាន ".$st["totalGrading"]." ពិន្ទុ លើ".$st["criteriaTitleKh"]." នៃមុខវិជ្ជា ".$st["subjectTitleKh"]."។";
+							$descriptionI = " Score ".$st["totalGrading"]." Pt(s) for ".$st["criteriaTitle"]." Of ".$st["subjectTitle"].".";
+							
+							$notify["title"] = $title;
+							$notify["subTitle"] = $subTitle;
+							$notify["description"] = $description;
+							$notify["descriptionI"] = $descriptionI;
+							$notify["createDate"] = $createDate;
+							$dbPush->pushNotificationAPI($notify);	
+						}
+					}
+					if(!empty($fullControlID)){
+						$alert = $tr->translate("INSERT_SUCCESS");
+						echo "<script> alert('".$alert."');</script>";
+						echo "<script>window.close();</script>";
+					}else{
+						Application_Form_FrmMessage::Sucessfull("INSERT_SUCCESS","/grading/index");	
+					}
+				}
+				
+							
+			}catch(Exception $e){
+				Application_Form_FrmMessage::message("INSERT_FAIL");
+				Application_Model_DbTable_DbUserLog::writeMessageError($e->getMessage());
+			}
+		}
+		
+		
+
+		
+		
+		$resultRecord = $db->getGradingScoreById($gradingRowId,$fullControlID);
+		if(empty($resultRecord)){
+			Application_Form_FrmMessage::Sucessfull("NO_RECORD", "/grading/index");
+		}
+
+		if($resultRecord['examType'] != 4){
+
+			$rscoreType = $dbg->checkScoreType($resultRecord);
+			if(!empty($rscoreType)){
+				
+				if($rscoreType['isLock']==1){
+
+					if(!empty($fullControlID)){
+						$alert = $tr->translate("Can not Edit, Already Used !");
+						echo "<script> alert('".$alert."');</script>";
+						echo "<script>window.close();</script>";
+					}else{
+						Application_Form_FrmMessage::Sucessfull("Can not Edit, Already Used !","/grading/index");
+					}
+					
+				}elseif($resultRecord['criteriaType'] != 2 ){
+
+					if(!empty($fullControlID)){
+						$alert = $tr->translate("Can not Edit, Already Used !");
+						echo "<script> alert('".$alert."');</script>";
+						echo "<script>window.close();</script>";
+					}else{
+						Application_Form_FrmMessage::Sucessfull("Can not Edit, Already Used !","/grading/index");
+					}
+				}
+				
+			}
+
+		}else{
+			if($resultRecord['isLock']==1){
+				if(!empty($fullControlID)){
+					$alert = $tr->translate("Can not Edit, Already Used !");
+					echo "<script> alert('".$alert."');</script>";
+					echo "<script>window.close();</script>";
+				}else{
+					Application_Form_FrmMessage::Sucessfull("Can not Edit, Already Used !","/grading/index");
+				}
+			}
+
+		}
+	
+		
+
+		$this->view->resultRecord = $resultRecord;
+		$this->view->gradingRowId = $gradingRowId;
+		
+		
+		$id=$this->getRequest()->getParam("id");
+		$id = empty($id)?0:$id;
+	
+		$dbExternal = new Application_Model_DbTable_DbExternal();
+		$row = $dbExternal->getGroupDetailByIDExternal($id,1);
+	
+		if(empty($row)){
+			Application_Form_FrmMessage::Sucessfull("NO_RECORD", self::REDIRECT_URL."/dashboard");
+			exit();
+		}
+	
+		$this->view->row = $row;
+		if(empty($row)){
+			$this->_redirect("/external/group");
+		}
+		$this->view-> month = $dbExternal->getAllMonth();
+	
+	
+		$degreeId = empty($row['degree_id']) ? 0 : $row['degree_id'];
+		$criterialType = empty($resultRecord['criteriaType']) ? 0 : $resultRecord['criteriaType'];
+		$groupId = empty($resultRecord['groupId']) ? 0 : $resultRecord['groupId'];
+		$subjectId = empty($resultRecord['subjectId']) ? 0 : $resultRecord['subjectId'];
+		$teacherId = empty($resultRecord['teacherId']) ? 0 : $resultRecord['teacherId'];
+		$arrayFaa = array(
+				'degreeId'=>$degreeId,
+				'criterialType'=>$criterialType,
+				'teacherId'=>$teacherId,
+				'groupId'=>$groupId,
+				'subjectId'=>$subjectId,
+				);
+		$result = $dbExternal->checkTecherEntrySetting($arrayFaa);
+		if(empty($result)){
+			if(!empty($fullControlID)){
+				$alert = $tr->translate("NO_PERMISSION_TO_ENTRY");
+				echo "<script> alert('".$alert."');</script>";
+				echo "<script>window.close();</script>";
+			}else{
+				Application_Form_FrmMessage::Sucessfull("NO_PERMISSION_TO_ENTRY","/grading/index");
+			}
+		}
+		
+		$gradingId = $row['gradingId'];
+		$array = array(
+				'gradingId'=>$gradingId
+		);
+		$result = $dbExternal->getGradingCriteriaItems($array);
+		$this->view->criteria = $result;
+	}
+	function getStudentsingleengryAction(){//single entry by criteria
+		if($this->getRequest()->isPost()){
+			$data = $this->getRequest()->getPost();
+			$db = new Application_Model_DbTable_DbGradingScore();
+			$data['sortStundent']=empty($data['sortStundent'])?0:$data['sortStundent'];
+			$rs=$db->getStudentForGradingScore($data);
+			print_r(Zend_Json::encode($rs));
+			exit();
+		}
+	}
+	
+	function getStudentscoreeditAction(){//single entry by criteria
+		if($this->getRequest()->isPost()){
+			$data = $this->getRequest()->getPost();
+			$db = new Application_Model_DbTable_DbGradingScore();
+			$data['sortStundent']=empty($data['sortStundent'])?0:$data['sortStundent'];
+			$rs=$db->getStudentForGradingScoreEdit($data);
+			print_r(Zend_Json::encode($rs));
+			exit();
+		}
+	}
+
+}

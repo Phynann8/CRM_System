@@ -1,0 +1,54 @@
+<?php 
+$tr = Application_Form_FrmLanguages::getCurrentlanguage();
+echo $this->headTitle($tr->translate('Letter of praise'));
+$_dbgb = new Application_Model_DbTable_DbGlobal();
+
+?>
+<style>
+	button#portraitBtn,
+	button#landscapeBtn,
+	button.btn-export,
+	button.btn-search {
+		display: none !important;
+	}
+</style>
+<div class="layout-wrapper-report">
+	<div id="mainContent" class="main-content-report">
+		<div class="report-preview">
+			<?php echo $this->controlReport?>
+			<div id="main-viewer" class="main-viewer portrait">
+				<div id="viewer" class="viewer portrait">
+					<div id="divPrint" class="content">
+						<link rel="stylesheet" href="<?php echo $this->baseUrl();?>/admin/build/css/report-style.css">
+						<link rel="stylesheet" href="<?php echo $this->baseUrl();?>/admin/build/css/report-style-screen.css">
+						
+						<?php echo $this->rsData["template"];?>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<script src="<?php echo $this->baseUrl();?>/admin/js/extra-plug.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function(e) {
+  setTimeout(function() {
+		setPrintOrientation('landscape','A4',true);
+		$(".end").append('<button class="btn-print" title="<?php echo $tr->translate('DOWNLOAD');?>" onclick="downloadImage();"><span class="fa fa-download"></span></button>');
+	}, 500);
+});	
+
+function downloadImage(){
+	loadingBlock();
+	let pages = document.querySelectorAll('.html-content-holder');
+	var index=0;
+	for (let node of pages) { 
+		captureAndDownloadImage(node,index,'letter-praise');
+		index++;
+	}
+	setTimeout(function() {
+		HideloadingBlock();
+	}, 1400);
+}
+</script>

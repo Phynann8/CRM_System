@@ -1,0 +1,494 @@
+<?php
+	$tr = Application_Form_FrmLanguages::getCurrentlanguage();
+	echo $this->headTitle($tr->translate('STUDENT_PAYMENT_BY_TYPE_REPORT'));
+	$frm = $this->form_search;
+?>
+<style>
+	.hover:hover{ background:#ccc;}
+	table.content-data tr.style-head,
+	table.tb-footer tr.style-head {
+	   font-weight: bold !important;
+	}
+	.hideprintdate{display:none !important;}
+</style>
+<div style="min-height:15cm; margin:0 auto; padding:0.2cm 0.2cm 0cm 0.2cm">
+	<div class="card-box">
+		<div class="col-sm-12 border-botom">
+			<div class="col-sm-8 pd-0">
+				<h4 class="m-b-0"><i class="fa fa-file " aria-hidden="true"></i>&nbsp;&nbsp;&nbsp;<?php echo $tr->translate('STUDENT_PAYMENT_BY_TYPE_REPORT');?></h4>
+			</div>
+			<div class="col-sm-4 text-right"></div>
+		</div>
+	</div>
+	<form id='foundation_class' action="" dojoType="dijit.form.Form" method="post" enctype="application/x-www-form-urlencoded">
+		<div class="form-group">
+        	<div class="col-md-2 col-sm-2 col-xs-12">
+        		<?php echo $frm->getElement("title");?>
+        	</div>
+        	<div class="col-md-2 col-sm-2 col-xs-12">
+        		<?php echo $frm->getElement("branch_id");?>
+        	</div>
+        	<div class="col-md-2 col-sm-2 col-xs-12">
+        		<input id="study_year" />
+        	</div>
+        	<div class="col-md-2 col-sm-2 col-xs-12">
+        		<input id="group" />
+        	</div>
+        	<div class="col-md-2 col-sm-2 col-xs-12">
+        		<?php echo $frm->getElement("degree");?>
+        	</div>
+        	<div class="col-md-2 col-sm-2 col-xs-12">
+        		<input id="grade_all" />
+        	</div>
+        </div>
+	   <div class="form-group">
+        	<div class="col-md-2 col-sm-2 col-xs-12">
+        		<?php echo $frm->getElement("session");?>
+        	</div>
+        	<div class="col-md-2 col-sm-2 col-xs-12">
+        		<?php echo $frm->getElement("service_type");?>
+        	</div>
+        	<div class="col-md-2 col-sm-2 col-xs-12">
+        		<select required="false" type="text" name="item" id="item" placeHolder="<?php echo $tr->translate('SELECT_CATEGORY');?>" class="fullside" dojoType="dijit.form.FilteringSelect"  autoComplete="false" queryExpr="*${0}*" onchange="getgradebyDegree();" >
+					<option value="-1"><?php echo $tr->translate('SELECT_CATEGORY');?></option>
+					<?php if(!empty($this->rs_type)){foreach ($this->rs_type as $rs){?>
+					<option value="<?php echo $rs['id']?>"><?php echo $rs['name']?></option>
+					<?php }}?>
+                </select>
+        	</div>
+        	<div class="col-md-2 col-sm-2 col-xs-12">
+        		<?php //echo $frm->getElement("service");?>
+        		<input id="service" name="service" />
+        	</div>
+			<div class="col-md-2 col-sm-2 col-xs-12">
+        		<?php echo $frm->getElement("pay_term");?>
+        	</div>
+        	<div class="col-md-2 col-sm-2 col-xs-12">
+        		<?php echo $frm->getElement("user");?>
+        	</div>
+        	
+        </div>
+        <div class="form-group">
+        	<div class="col-md-2 col-sm-2 col-xs-12">
+        		<?php echo $frm->getElement("start_date");?>
+        	</div>
+        	<div class="col-md-2 col-sm-2 col-xs-12">
+        		<?php echo $frm->getElement("end_date");?>
+        	</div>
+        	<div class="col-md-2 col-sm-2 col-xs-12">
+        		<button class="button-class button-primary" iconClass="glyphicon glyphicon-search" dojoType="dijit.form.Button" showLabel="true" type="submit"><?php echo $tr->translate("SEARCH");?></button>
+        	</div>
+        </div>
+	</form>
+	<div id="divPrint">
+		<style> 
+			.hideprintdate{display:block;}
+			th,td{ padding:0 1px;}
+			table{ border-collapse:collapse; margin:0 auto;
+			border-color:#000; }
+			.padd tr td{  text-align:center}
+			table{ page-break-inside:auto;font-family:'Times New Roman','Khmer OS Battambang'; }
+			tr{ page-break-inside:avoid; page-break-after:auto }
+			#header {
+			  display: table-header-group;
+			  page-break-inside:avoid; page-break-after:auto;
+			}
+			tr.line td{ border-bottom: 2px solid #000;padding-top: 5px; }	
+			table.content-data{
+				border-collapse:collapse;
+				width:100%;
+				font-family:'Times New Roman','Khmer OS Battambang';
+				font-size:13px;
+				white-space: nowrap;
+				margin:0 auto;
+				color:#000;
+				margin:0 auto;
+			}
+			table.content-data  tr.style-head {
+			   line-height: 25px; padding:1px 0px; white-space: nowrap;height: 22px; 
+				background: #CCD9FF;
+				text-align: center;
+			}
+			table.content-data tr td{
+				padding: 2px;
+			}
+			table.content-data tr.style-rowdata {
+				font-size:12px; 
+				height: 23px;
+			}	
+			.bold {
+					font-weight: 600;				
+			}								
+		</style>
+		<table style="background:#fff; margin: 0 auto; width: 100%;">
+			<tr>
+				<td colspan="3"><?php echo $this->rsheader;?></td>
+			</tr>
+			<tr>
+				<td width="25%">
+				</td>
+				<td align="center" width="50%">
+					<span style="color:#000; font-size: 14px;font-family:'Times New Roman','Khmer OS Muol Light';"><?php echo $tr->translate('STUDENT_PAYMENT_BY_TYPE_REPORT');?></span><br />
+					<span style="color:#000; font-size: 12px;font-family:'Times New Roman','Khmer OS Muol Light';"><?php if(!empty($this->search['start_date'])){?><?php echo date("d-M-Y",strtotime($this->search["start_date"]))?><?php echo $tr->translate('TO');?><?php echo date("d-M-Y",strtotime($this->search["end_date"]));}?></span>
+				</td>
+				<td width="25%">
+					<label class='hideprintdate'>Print Date <?php echo date("d-m-Y h:i");?></label>
+				</td>
+			</tr>
+			<tr>			
+				 <td colspan="3" id="exportExcel">
+						<style> td{padding:0 3px; }</style>
+						  <?php 
+							$grand_total =0;  
+							$all_grandtotal =0;
+							$i=0; 
+							$type='';
+							$other_income = 0;
+							$payment_term=array("1"=>"Month","2"=>"Term","3"=>"Semester","4"=>"Annual","5"=>"Other",);
+						  ?>
+						   <table class="content-data"  width="100%"  align="center" >
+								<tr class="style-head" style="font-size:10px;" align="center">
+									<td>&nbsp;<?php echo $tr->translate('N_O');?>&nbsp;</td>
+									<td>&nbsp;<?php echo $tr->translate('STUDENT');?>&nbsp;</td>
+									<td><?php echo $tr->translate('PAID_DATE');?></td>
+									<td><?php echo $tr->translate('RECEIPT_NO');?></td>
+									<td>&nbsp;<?php echo $tr->translate('TYPE');?>&nbsp;</td>
+									<td><?php echo $tr->translate('SERVICE_NAME');?></td>
+									<td><?php echo $tr->translate('PAYMENT_TERM');?></td>
+									<td><?php echo $tr->translate('QTY');?></td>
+									<td><?php echo $tr->translate('PRICE');?></td>
+									<td><?php echo $tr->translate('Deduct/Extra');?></td>
+									<td><?php echo $tr->translate('Disc Type');?></td>
+									<td><?php echo $tr->translate('DISCOUND');?></td>
+									<td><?php echo $tr->translate('PAID_AMOUNT');?></td>
+									<td><?php echo $tr->translate('PERIOD');?></td>
+									<td><?php echo $tr->translate('REMARK');?></td>
+									<td><?php echo $tr->translate('STATUS');?></td>
+									<td><?php echo $tr->translate('USER');?></td>
+								</tr>
+								<?php if(!empty($this->row_detail)){ foreach($this->row_detail as $key => $rs){ $i++;?>
+								<tr class="hover" style=" <?php if ($rs['is_void']==1){echo "background: #ffd9d9;"; }?> font-size:11px; color:#000; height: 18px; border-bottom: 1px solid #000;font-family: 'Times New Roman','Khmer OS Battambang';"​ align="center">
+									<td align="center"><?php echo $i;?></td>
+									<td style="text-align:left">
+									<?php 
+									echo $rs['stu_code'];
+									echo !empty($rs['stu_khname'])?"/".$rs['stu_khname']:"/".$rs['stu_enname']; 
+									?>
+									</td>
+									<td><?php echo date('d/m/Y', strtotime($rs['create_date']));?></td>
+									<td align="center" <?php if($rs['is_void']==1){echo 'style="color:red;"'; }?>><?php echo $rs['receipt_number']; ?></td>
+									<td style="text-align:left"><?php echo $rs['category']; ?></td>
+									<td style="text-align:left"><?php echo $rs['service_name']; ?></td>
+									<?php 
+										$total_day=strtotime($rs['validate'])-strtotime($rs['start_date']);
+										$day=(int)($total_day/(60*60*24));
+										$qty_month = number_format($day/30);
+										$qty_day = $day%30;
+									?>
+									<td align="center">
+										<?php 
+											/*if($rs['payment_id']>0){
+												if($rs['payment_id']==5){
+													if($qty_month>0){
+														echo $qty_month." month+".$qty_day." days";
+													}else{
+														echo $qty_day." days";
+													}
+												}else{
+													echo $payment_term[$rs['payment_id']];
+												}
+											}*/
+										?>
+										<?php echo $rs['payment_term'];?>
+									</td>
+									<td><?php echo $rs['qty'];?></td>
+									<td><?php echo number_format($rs['fee'],2); ?></td>
+									<td><?php echo $rs['extra_fee'];?></td>
+									<td><?php echo $rs['discount_type']; ?> </td>
+									<td><?php if($rs['discount_percent']>0){echo $rs['discount_percent'].' %';}
+										  if($rs['discount_amount']>0){
+											echo $rs['discount_amount'];
+										   }
+										?>
+									</td>
+									<td align="right" <?php if($rs['is_void']==1){echo 'style="color:red;"'; }?>><?php echo $rs['paidamount'];?></td>
+									<td><?php if($rs['is_onepayment']==0){
+											echo date('d/m/Y', strtotime($rs['start_date']));
+											echo "-".date('d/m/Y', strtotime($rs['validate']));
+										}?>
+									</td>
+									<td style="font-size: 9px;"><?php echo $rs['note'];?></td>
+									<td <?php if($rs['is_void']==1){echo 'style="color:red;"'; }?>><?php echo $rs['void_status'];?></td>
+									<td><?php echo $rs['user']; ?></td>
+								</tr>
+						  <?php 
+							if($rs['is_void']==0){
+								$grand_total = $grand_total+$rs['paidamount'];
+								$all_grandtotal = $all_grandtotal+$rs['paidamount'];
+							}
+						  ?>
+						<?php }}?>
+						<tr style="font-size:13px; color:#000; height: 18px;"​ align="right">
+							<td class="bold" colspan="18" >&nbsp;<?php echo $tr->translate('STUDENT_PAYMENT_INCOME');?>&nbsp;$ <?php echo number_format($grand_total,2);?></td>
+						</tr>
+						<tr style="font-size:13px; color:#000; height: 18px;"​ align="center">
+							<td colspan="18">&nbsp;</td>
+						</tr>
+					</table>
+				</td>
+			</tr>
+			<?php if(!empty($this->rsincome)){?>
+			<tr>
+				<td colspan="3">
+					<strong><?php echo $tr->translate('OTHER_INCOME')?></strong>
+				</td>
+			</tr>
+			<tr>
+				<td colspan="3" >
+					<table class="content-data" cellpadding="5"​ align="center">
+						<tr class="style-head" style="font-size:10px;" align="center">
+							<td><?php echo $tr->translate('N_O')?></td>
+							<td><?php echo $tr->translate('CATEGORY')?></td>
+							<td><?php echo $tr->translate('INCOME_TITLE')?></td>
+							<td><?php echo $tr->translate('INVOICE_NO')?></td>
+							<td><?php echo $tr->translate('PAID_DATE')?></td>
+							<td><?php echo $tr->translate('TOTAL')?></td>
+							<td><?php echo $tr->translate('USER')?></td>
+						</tr>
+					<?php $i=0;
+					$other_income = 0;
+					foreach ($this->rsincome AS $row) { $i++;
+						if ($row['status']==1){
+							$other_income = $other_income + $row['total_amount'];
+						}
+					?>
+						<tr class="style-rowdata hover" style="<?php if ($row['status']==0){echo "background: #ffd9d9;"; }?> font-size:11px; height: 20px;border-bottom: 1px solid #000;" align="center" >
+							<td><?php echo $i;?></td>
+							<td><?php echo $row['income_category'];?></td>	
+							<td align="left"><?php echo $row['title'];?></td>
+							<td><?php echo $row['invoice'];?></td>
+							<td><?php echo date('d-m-Y',strtotime($row['date']));?></td>
+							<td align="right"><?php echo number_format($row['total_amount'],2);?></td>
+							<td><?php echo $row['name'];?></td>
+						</tr>
+					<?php }?>	
+					</table>
+				</td>
+			</tr>	
+			<?php 
+			  }
+				$credit_memo=0;
+				$penalty=0;
+				if(!empty($this->row)){
+					foreach ($this->row as $payment){
+						$credit_memo = $credit_memo + $payment['credit_memo'];
+						$penalty = $penalty + $payment['penalty'];
+					}
+				}
+			?>
+			<tr>
+				<td colspan="1"></td>
+				<td >
+					<div>&nbsp;</div>
+					<table   align="right" style="width:100%; margin-right:0.5%; white-space:nowrap;">
+						<tr style="font-size:12px; background:#ccd9ff; height: 20px;" align="center">
+							<td><?php echo $tr->translate('STUDENT_PAYMENT_INCOME');?>(+)</td>
+							<td><?php echo $tr->translate('FINE');?>(+)</td>
+							<td><?php echo $tr->translate('OTHER_INCOME');?>(+)</td>
+							<td><?php echo $tr->translate('Credit Memo');?>(-)</td>
+							<td><?php echo $tr->translate('NET_AMOUNT');?>(=)</td>
+						</tr>
+						<tr align="center" style=" height:18px; font-size:12px; padding: 1px;" >
+							<td><span style="color: red;border-bottom:3px double #000;">$ <?php echo number_format($all_grandtotal,2)?></span></td>
+							<td><span style="color: red;border-bottom:3px double #000;">$ <?php echo number_format($penalty,2)?></span></td>
+							<td><span style="color: red;border-bottom:3px double #000;">$ <?php echo number_format($other_income,2)?></span></td>
+							<td><span style="color: red;border-bottom:3px double #000;">$ <?php echo number_format($credit_memo,2)?></span></td>
+							<td><div style="color: red;border-bottom:3px double #000;font-weight: bold;font-size: 14px;">$ <?php echo number_format($all_grandtotal+$penalty+$other_income-$credit_memo,2)?></div></td>
+						</tr>
+					</table>
+				</td>
+			</tr>
+			<tr>
+				<td colspan="3" width="100%">
+					<?php echo $this->rsfooteracc;?>
+				</td>
+			</tr>
+		</table>
+	</div>	
+</div>
+<script src="<?php echo $this->baseUrl();?>/js/help.js"></script>
+<script src="<?php echo $this->baseUrl();?>/admin/js/global.js"  type="text/javascript"></script>
+<script type="text/javascript">
+	
+	dojo.require("dojo.data.ItemFileWriteStore"); 
+	
+
+	var service_store = getDataStorefromJSON('id','name');
+	var academic_store= getDataStorefromJSON('id','name',<?php print_r(Zend_Json::encode(array()));?> );
+	var group_store  = getDataStorefromJSON('id','name',<?php print_r(Zend_Json::encode(array()));?> );
+	dojo.ready(function(){
+		new dijit.form.FilteringSelect({
+			store: service_store,
+			autoComplete: false,
+			queryExpr: "*${0}*",                     
+			id: "service",
+			name: "service",   
+			required:false,        
+			class: 'fullside',
+			placeHolder:'<?php echo $tr->translate('SERVICE');?>',
+			onChange: function() {  
+			}
+		}, "service");
+		
+		new dijit.form.FilteringSelect({
+			store: academic_store,
+			queryExpr: "*${0}*",
+			autoComplete: false,                     
+			required: false,                     
+			id: "study_year",
+			name: "study_year",
+			class: "fullside", 		
+			placeHolder:"<?php echo $tr->translate("SELECT_ACADEMIC_YEAR");?>",          
+			onChange: function() {  
+				academic_year = dijit.byId('study_year').get('value');
+			}
+		}, "study_year");
+		new dijit.form.FilteringSelect({
+			store: group_store,
+			queryExpr: "*${0}*",
+			autoComplete: false,                     
+			required: true,                      
+			id: "group",
+			name: "group",  
+			class: 'fullside', 
+			readonly:false,
+			required:false,
+			placeHolder:"<?php echo $tr->translate("SELECT_GROUP");?>",          
+			onChange: function() {  
+				
+			}
+		}, "group");
+		
+		new dijit.form.FilteringSelect({
+			queryExpr: "*${0}*",
+			autoComplete: false,                     
+			required: false,                        
+			id: "grade_all",
+			name: "grade_all",  
+			class: 'fullside',  
+			placeHolder:"<?php echo $tr->translate("SELECT_GRADE");?>",          
+			onChange: function() {  
+
+			}
+		}, "grade_all");
+		getallGrade();
+		
+		 var branch_id = dijit.byId('branch_id');
+		 branch_id.on('change', function(evt) {
+			 getAllAcademicByBranch();
+			 getAllGroupByBranch();
+		});
+		 getAllAcademicByBranch();
+		 getAllGroupByBranch();
+		 getgradebyDegree();
+
+		 dijit.byId('item').set('value','<?php echo $this->search['item']?>');  	
+	});
+	url_getacademic= '<?php echo $this->url(array('module'=>'foundation','controller'=>'group','action'=>'get-academicyear'));?>';
+	var oldBranch = "<?php echo $this->search['branch_id']?>";
+	function getAllAcademicByBranch(){
+		dijit.byId('study_year').reset();
+		branch_id = dijit.byId('branch_id').get('value');
+		if(branch_id=='' || branch_id==-1){
+			var academic_store  = getDataStorefromJSON('id','name',<?php print_r(Zend_Json::encode(array()));?> );
+			dijit.byId('study_year').set('store',academic_store);  
+			dijit.byId('branch_id').focus();
+			return false;
+		}
+		
+		contentData = {
+			'branch_id':branch_id
+		}
+		selectedId = '';
+		if(oldBranch==branch_id){
+			selectedId = '<?php echo $this->search['study_year']?>';
+		}
+		getAllYear(url_getacademic,contentData,selectedId,'study_year');
+		
+	}
+	url_getgroup = '<?php echo $this->url(array('module'=>'foundation','controller'=>'group','action'=>'getallgroup'));?>';
+	function getAllGroupByBranch(){
+		dijit.byId('group').reset();
+		branch_id = dijit.byId('branch_id').get('value');
+		if(branch_id=='' || branch_id==-1){
+			var group_store  = getDataStorefromJSON('id','name',<?php print_r(Zend_Json::encode(array()));?> );
+			dijit.byId('group').set('store',group_store);  
+			dijit.byId('branch_id').focus();
+			return false;
+		}
+		dojo.xhrPost({
+			url: url_getgroup,
+			content:{
+				'branch_id':branch_id,
+				'noaddnew':1
+				},
+			handleAs:"json",
+			load: function(data) {
+				group_store  = getDataStorefromJSON('id','name', data);
+				dijit.byId('group').set('store',group_store);   
+				if(oldBranch==branch_id){
+					dijit.byId('group').set('value','<?php echo $this->search['group']?>');  
+				}
+			},
+			error: function(err) {
+				alert(err);
+			}
+		});
+	}
+	var grade_store  = getDataStorefromJSON('id','name', <?php print_r(array())?> );
+	var url_dept = '<?php echo $this->url(array('module'=>'global','controller'=>'grade','action'=>'get-grade')); ?>';
+	function getallGrade(){
+		dept_id = dijit.byId('degree').get('value');
+		if(dept_id==''){return false;}
+		dojo.xhrPost({
+			url:url_dept,
+			content:{
+				'dept_id':dept_id,
+				'noaddnew':1
+				},
+			handleAs:"json",
+			load: function(data) {
+				grade_store  = getDataStorefromJSON('id','name', data);
+				dijit.byId('grade_all').set('store',grade_store);   
+				dijit.byId('grade_all').attr('value','<?php echo $this->search['grade_all']?>');  
+			},
+			error: function(err) {
+				alert(err);
+			}
+		});
+	}
+
+	var oldItems = '<?php echo $this->search['item']?>';
+	var url_degree = '<?php echo $this->url(array('module'=>'global','controller'=>'grade','action'=>'get-grade')); ?>';
+	function getgradebyDegree(){
+		dept_id = dijit.byId("item").get("value");
+		dojo.xhrPost({
+			url:url_degree,
+			content:{
+				'dept_id':dept_id,
+				'noaddnew':1
+				},
+			handleAs:"json",
+			load: function(data) {
+				service_store  = getDataStorefromJSON('id','name', data);
+				dijit.byId('service').set('store',service_store);  	
+				if(oldItems==dept_id){
+					dijit.byId('service').set('value','<?php echo $this->search['service']?>');  	
+				}
+			},
+			error: function(err) {
+			}
+		});
+	}
+	
+</script>

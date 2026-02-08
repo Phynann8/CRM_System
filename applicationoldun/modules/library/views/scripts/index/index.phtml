@@ -1,0 +1,180 @@
+
+  <link rel="stylesheet" href="<?php echo $this->baseUrl();?>/css/dashboardstyle/AdminLTE.min.css">
+  <link rel="stylesheet" href="<?php echo $this->baseUrl();?>/css/dashboardstyle/ionicons.min.css">
+ 
+  <style>
+		hr {
+		    margin-top: 0px; 
+		    margin-bottom: 0px; 
+		    border: 0;
+		    border-top: 1px solid #deb2b2;
+		}
+		.content-header {
+		    position: relative;
+		    padding: 0px 0px 0 15px; 
+		}
+  </style>
+   
+  <?php 
+		$tr=Application_Form_FrmLanguages::getCurrentlanguage();
+		$near_day_return=$this->url(array('module'=>'allreport','controller'=>'library','action'=>'rpt-nealydayreturn'), null, true);
+		$rpt_borrowdetail=$this->url(array('module'=>'allreport','controller'=>'library','action'=>'rpt-borrowdetail'), null, true);
+		$rpt_returndetail=$this->url(array('module'=>'allreport','controller'=>'library','action'=>'rpt-returndetail'), null, true);
+		$rpt_purchasedetail=$this->url(array('module'=>'allreport','controller'=>'library','action'=>'rpt-purchasedetail'), null, true);
+		$rpt_brokendetail=$this->url(array('module'=>'allreport','controller'=>'library','action'=>'rpt-brokendetail'), null, true);
+    
+		$total_book = $this->total_book;
+		$total_broken_book = $this->total_broken;
+	    $book_not_return = $this->book_not_return;
+	    $borrow_today = $this->borr_today;
+	    $return_today = $this->return_today;
+	    
+	    $puchase_today = $this->puchase_today;
+	    $broken_today = $this->broken_today;
+	    $book_near_return = $this->book_near_return;
+		$baseurl = $this->baseUrl();
+	?>
+<script src="<?php echo $baseurl;?>/js/help.js"></script>
+<?php 
+    $s_num=0;
+    if(!empty($this->rs_studen)) foreach($this->rs_studen As $key=>$rs){
+    	$s_num=$s_num+1;
+    }
+?>
+ <title>  <?php echo $tr->translate('BOOK_LIST_DASHBOARD');?></title>
+</head>
+<body class="hold-transition skin-blue sidebar-mini" >
+<div class="wrapper">
+<!-- Content Wrapper. Contains page content -->
+  <div class="">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+      <h5 align="center"​​ style="font-weight:900;font-family: 'khmer os battambang';">
+        <?php echo $tr->translate('BOOK_LIST_DASHBOARD');?>
+         
+      </h5><hr>
+      <ol class="breadcrumb">
+        <li><a href="#"></a></li>
+         
+      </ol>
+    </section>
+
+    <!-- Main content -->
+    <section class="content">
+      <!-- Small boxes (Stat box) -->
+      <div class="row" style="font-family: 'khmer os battambang' !important;">
+        <div class="col-lg-3 col-xs-6">
+          <!-- small box -->
+          <div class="small-box bg-aqua">
+            <div class="inner">
+              <h4 style="font-family: 'khmer os battambang' !important;"><?php echo $tr->translate('BOOK');?> : <?php echo $total_book;?> &nbsp;<?php echo $tr->translate('BOOK_QTY');?></h4>
+              
+              <p style="font-family: 'khmer os battambang' !important;color:red"><?php echo $tr->translate('BROKEN_BOOK');?> : <?php echo $total_broken_book;?> &nbsp;<?php echo $tr->translate('BOOK_QTY');?></p>
+            </div>
+            <div class="icon">
+              <i class="fa fa-book"></i>
+            </div>
+            <a target="_blank" href="<?php echo $this->url(array('module'=>'allreport','controller'=>'library','action'=>'rpt-book-list'), null, true);?>" class="small-box-footer"><?php echo $tr->translate('TOTAL_BOOK_UNAVAILABLE');?> <i  class="fa fa-arrow-circle-right"></i></a>
+          </div>
+        </div>
+        <!-- ./col -->
+        
+        <div class="col-lg-3 col-xs-6">
+          <!-- small box -->
+          <div class="small-box bg-green">
+            <div class="inner">
+              <h4 style="font-family: 'khmer os battambang' !important;"><?php echo $book_not_return;?> &nbsp;<?php echo $tr->translate('BOOK_QTY');?><sup style="font-size: 20px"></sup></h4>
+
+              <p><br></p>
+            </div>
+            <div class="icon">
+               <i class="fa fa-book"></i>
+            </div>
+            <a target="_blank" href="<?php echo $rpt_borrowdetail;?>" class="small-box-footer"><?php echo $tr->translate('TOTAL_BOOK_NOT_RETURN');?> <i class="fa fa-arrow-circle-right"></i></a>
+          </div>
+        </div>
+        
+        <!-- ./col -->
+        <div class="col-lg-3 col-xs-6">
+          <!-- small box -->
+          <div class="small-box bg-aqua">
+            <div class="inner">
+              <h4 style="font-family: 'khmer os battambang' !important;"><?php echo $borrow_today?>&nbsp;<?php echo $tr->translate('BOOK_QTY');?></h4>
+
+              <p><br></p>
+            </div>
+            <div class="icon">
+              <i class="fa fa-book"></i>
+            </div>
+            <a  target="_blank" href="<?php echo $rpt_borrowdetail;?>" class="small-box-footer"><?php echo $tr->translate('STUDENT_BORROWED_TODAY');?><i class="fa fa-arrow-circle-right"></i></a>
+          </div>
+        </div>
+        
+          <div class="col-lg-3 col-xs-6">
+          <!-- small box -->
+          <div class="small-box bg-yellow">
+            <div class="inner">
+              <h4 style="font-family: 'khmer os battambang' !important;"><?php echo $return_today;?> &nbsp;<?php echo $tr->translate('BOOK_QTY');?></h4>
+
+              <p><br></p>
+            </div>
+            <div class="icon">
+              <i class="fa fa-book"></i>
+            </div>
+            <a target="_blank" href="<?php echo $rpt_returndetail;?>" class="small-box-footer"><?php echo $tr->translate('STUDENT_RETURNED_TODAY');?> <i class="fa fa-arrow-circle-right"></i></a>
+          </div>
+        </div>
+        
+        
+        <div class="col-lg-3 col-xs-6">
+          <!-- small box -->
+          <div class="small-box bg-red">
+            <div class="inner">
+              <h4 style="font-family: 'khmer os battambang' !important;"><?php echo $book_near_return;?> &nbsp;<?php echo $tr->translate('BOOK_QTY');?></h4>
+
+              <p><br></p>
+            </div>
+            <div class="icon">
+              <i class="fa fa-book"></i>
+            </div>
+            <a  target="_blank" href="<?php echo $near_day_return;?>" class="small-box-footer"><?php echo $tr->translate('BOOK_NEAR_DAY_RETURN_BOOK');?><i class="fa fa-arrow-circle-right"></i></a>
+          </div>
+        </div>
+        
+        <div class="col-lg-3 col-xs-6">
+          <!-- small box -->
+          <div class="small-box bg-yellow">
+            <div class="inner">
+              <h4 style="font-family: 'khmer os battambang' !important;"><?php echo $puchase_today;?> &nbsp;<?php echo $tr->translate('BOOK_QTY');?></h4>
+
+              <p><br></p>
+            </div>
+            <div class="icon">
+              <i class="fa fa-book"></i>
+            </div>
+            <a  target="_blank" href="<?php echo $rpt_purchasedetail;?>" class="small-box-footer"><?php echo $tr->translate('TOTAL_PURCHASE_BOOK_TO_DAY');?><i class="fa fa-arrow-circle-right"></i></a>
+          </div>
+        </div>
+        
+        <div class="col-lg-3 col-xs-6">
+          <!-- small box -->
+          <div class="small-box bg-red">
+            <div class="inner">
+              <h4 style="font-family: 'khmer os battambang' !important;"><?php echo $broken_today;?> &nbsp;<?php echo $tr->translate('BOOK_QTY');?></h4>
+
+              <p><br></p>
+            </div>
+            <div class="icon">
+              <i class="fa fa-book"></i>
+            </div>
+            <a  target="_blank" href="<?php echo $rpt_brokendetail;?>" class="small-box-footer"><?php echo $tr->translate('TOTAL_BROKEN_BOOK_TO_DAY');?><i class="fa fa-arrow-circle-right"></i></a>
+          </div>
+        </div>
+        
+      </div>
+    </section>
+    
+  </div>
+  
+</div>
+ 

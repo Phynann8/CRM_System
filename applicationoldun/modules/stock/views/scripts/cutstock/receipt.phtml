@@ -1,0 +1,229 @@
+<meta charset="utf-8">
+<script>
+dojo.require("dijit.form.DateTextBox");
+</script>
+<style>
+.hover:hover{background: #ccc;}
+img.view{height: 70px !important;}
+</style>
+<?php $tr = Application_Form_FrmLanguages::getCurrentlanguage();?>
+<title><?php echo $tr->translate("RECIEVED_NOTED");?></title>
+ <div style="min-height:26cm; margin:0 auto; padding:0.5cm 0.5cm 0cm 0.5cm">
+	<div id="divPrint" style="width: 100%;">
+			<style>
+				.style{
+					font-family: 'Times New Roman','Khmer OS Battambang' !important;
+					font-size:8px !important;
+					white-space:nowrap;
+				}
+				.conten_data{
+					width: 100%; padding: 0px;
+					margin-top: 2px !important;
+					border-collapse: collapse;
+					border: 1px solid #000;
+					font-size:8px;
+					font-family:'Khmer OS Battambang','Times New Roman' !important;
+					white-space:nowrap;
+				}
+				.print tr td{
+					padding:0px 2px 0px 2px; 
+				}
+				tr.rowlist td {
+				    padding: 0px;
+					font-size:8px; 
+				}
+				tr.hearder_table td {
+				    padding: 5px;
+					font-size:8px; 
+					text-align:center;
+					background:#f2f2f2;
+					font-weight:bold;
+					line-height:10px;
+				}
+				table span.small{
+					display: block;
+					line-height: 10px;
+					width: 100%;
+				}
+				@media print {
+					@page {
+						page: A5 landscape;
+						margin: 0.0cm 0.5cm;
+					}
+				}
+			</style>
+			
+			<?php
+				$receive_note_setting=1;
+
+			for($i=0; $i<$receive_note_setting; $i++){ ?>		
+			<table width="100%" height="45%"  class="style print" cellspacing="0"  cellpadding="0">
+					<tr>
+						<td colspan="4" align="center">
+							<strong style="font-family:'Khmer OS Muol';">បង្កាន់ដៃទទួលទំនិញ<span class="small">RECIEVED NOTED</span></strong>
+						</td>
+					</tr>
+					<tr>
+						<td colspan="2" align="left"><span style="text-align:left; min-width: 100px; display: inline-block;">Student ID </span> : <span style="text-align:left; min-width: 100px; display: inline-block;font-weight:bold;"><?php echo $this->row['stu_code'];?></span></td>
+						<td colspan="2" align="right"><span style="text-align:left; min-width: 100px; display: inline-block;">Serial No.</span> : <span style="text-align:left; min-width: 100px; display: inline-block;font-weight:bold;"><?php echo $this->row['serailno'];?><?php if($this->row['status']==0){echo "<span style='color:red;'>&nbsp;&nbsp;(Void)</span>";};?></span></td>
+					</tr>
+					<tr>
+						<td colspan="2" align="left"><span style="text-align:left; min-width: 100px; display: inline-block;">Student Name</span> : <span style="text-align:left; min-width: 100px; display: inline-block;font-weight:bold;"><?php echo $this->row['stu_khname'].'/'.$this->row['last_name']." ".$this->row['stu_enname'];?></span></td>
+						<td colspan="2" align="right"><span style="text-align:left; min-width: 100px; display: inline-block;">Ref Receipt No.</span> : <span style="text-align:left; min-width: 100px; display: inline-block;font-weight:bold;"><?php echo $this->row['refReceiptNum'];?></span></td>
+					</tr>
+					<tr>
+						<td colspan="2" align="left"><span style="text-align:left; min-width: 100px; display: inline-block;">Tel</span> : <span style="text-align:left; min-width: 100px; display: inline-block;"><?php echo $this->row['tel'];?></span></td>
+						<td colspan="2" align="right"><span style="text-align:left; min-width: 100px; display: inline-block;">Received Date</span> : <span style="text-align:left; min-width: 100px; display: inline-block;"><?php echo date("d/M/Y",strtotime($this->row['received_date']));?></span></td>
+						</td>
+					</tr>
+					<tr>
+						<td  colspan="4">
+							<table border="1" align="center" class="conten_data">
+							  	<tr class="hearder_table">
+								  	<td>លរ<span class="small">No.</span></td>
+								  	<td>លេខកូដទំនិញ <span class="small">Product Code</span></td>
+								  	<td>ឈ្មោះទំនិញ<span class="small">Item Name</span></td>
+								  	<td>ចំនួនទិញ<span class="small">Buy Qty</span></td>
+								  	<td>ចំនួនទទួល<span class="small">Received Qty</span></td>
+								  	<td>ចំនួនជំពាក់<span class="small">Remain Qty</span></td>
+							  	</tr>
+							  	<?php $key=0; if (!empty($this->rowdetail)) foreach ($this->rowdetail as $key=> $row){?>
+							  	<tr class="rowlist">
+
+							  		<td align="center">&nbsp;<?php echo $key+1?>&nbsp;</td>
+							  		<td align="center">&nbsp;<?php echo $row['code']?>&nbsp;</td>
+							  		<td>&nbsp;<?php echo $row['items_name']?>&nbsp;</td>
+							  		<td align="center">&nbsp;<?php echo $row['qty']?>&nbsp;</td>
+							  		<td align="center">&nbsp;<?php echo $row['qty_receive']?>&nbsp;</td>
+							  		<td align="center"> &nbsp;<?php echo $row['remain']?>&nbsp;</td>
+							  		<!-- <td align="center">&nbsp;<?php if (!empty($row['remain']) OR $row['remain']>0){ echo date("d/M/Y",strtotime($row['remide_date']));}else{ echo '-';}?>&nbsp;</td> -->
+							  	</tr>
+							  	<?php }?>
+								<?php for($record=$key+1;$record<=5;$record++){?>
+								<tr>
+									<td align="center">&nbsp;<?php echo $record + 1; ?></td>
+									<td></td>
+									<td></td>
+									<td></td>
+									<td></td>
+									<td></td>
+								</tr>
+								<?php } ?>
+							  	<tr class="rowlist">
+									<td colspan="5" align="right" style=" border-bottom: #fff 1px solid; border-left: 1px solid #fff;">ទទួលបានសរុប Total Qty Received </td>
+									<td align="center"><strong><?php echo $this->row['totalQtyReceive'];?></strong></td>
+								</tr>
+								<tr class="rowlist">
+									<td colspan="5" align="right" style=" border-bottom: #fff 1px solid; border-left: 1px solid #fff;">ជំពាក់សរុប  Total Qty Remain </td>
+									<td align="center"><strong><?php echo $this->row['totalQtyRemain'];?></strong></td>
+								</tr>
+							 </table>
+						</td>
+					</tr>
+					<tr>
+						<td colspan="2" width="50%" align="center">
+							<div style="font-size:8px;"></div>
+							<strong>អ្នកប្រគល់ Stock Controller </strong>
+						</td>
+						<td colspan="2" width="50%" align="center">
+							<div style="font-size:8px;"></div>
+							<strong>អ្នកទទួល Customer</strong>
+						</td>
+					</tr>
+					<tr>
+						<td colspan="2" width="50%" align="center">
+							<div style="margin-top:50px;font-size:8px;"></div>
+							<?php echo $this->row['user_name'];?>
+						</td>
+						<td colspan="2" width="50%" align="center">
+							<div style="margin-top:50px;font-size:8px;"></div>
+							<?php echo $this->row['stu_enname']." ".$this->row['last_name'];?>
+						</td>
+					</tr>
+					
+				</table>	
+				<?php if($i==0 AND $receive_note_setting==2 ){?>
+						<div height="10%" style="margin-top: 5px;">
+							<div style="width: 100%;border-bottom:2px dashed #000; "></div>
+						</div>
+				<?php } ?>
+
+			<?php } ?>
+	</div>
+</div>
+<div class="ptss-frame  js-ptss-frame "><!-- is-opened -->
+	<div class="ptss__toggle-btn  js-ptss-toggle-btn ">
+		<i class="fa fa-print"></i>
+	</div>
+	<div class="ptss__header"><?php echo $tr->translate("PRINT");?></div>
+	<div class="ptss__settings">
+		<div class="ptss__single-setting" id="ptss__layout">
+			<div class="ptss__setting-control">
+				<div class="ptss__layout-wrapper">
+					<a class="qButton" title="<?php echo $tr->translate("Preview");?>" href="#" onclick="preview();"><i class="fa fa-search" aria-hidden="true"></i></a>
+					<a class="qButton print" href="#" title="<?php echo $tr->translate("PRINT");?>" onclick="doPrintData();" ><i class="fa fa-print" aria-hidden="true"></i></a>
+					<a class="qButton excel" href="#"  title="<?php echo $tr->translate("Export");?>"  onclick="exportExcel();"><i class="fa fa-file-excel-o" aria-hidden="true"></i></a>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<script type="text/javascript">
+dojo.ready(function(){
+	getbranchinfo();
+	<?php if($this->autoPrint){ ?>
+	doPrintData();
+	<?php } ?>
+});
+var url_getbranch = "<?php echo $this->url(array('module'=>'registrar','controller'=>'register','action'=>'getbranchinfo')); ?>";
+function getbranchinfo(){
+		branch_id = '<?php echo $this->row['branch_id'];?>';
+		
+		if(branch_id != ""){
+			loadingBlock();
+			dojo.xhrPost({
+				url:url_getbranch,
+				content:{
+					'branch_id':branch_id,
+					},
+				handleAs:"json",
+				load: function(data){
+					$(".lbl_header").html(data);
+					HideloadingBlock();
+				},
+				error: function(err) {
+					alert(err);
+				}
+			});	
+		} 
+	}
+
+function doPrintData() {
+	window.frames["print_frame"].document.body.innerHTML=dojo.byId('divPrint').innerHTML;
+    window.frames["print_frame"].window.focus();
+    window.frames["print_frame"].window.print();
+    <?php if($this->autoPrint){ ?>
+	window.close();
+	<?php } ?>
+}
+function hideleft(){
+	(dojo.style("leftmenu","display") == "none") ? 'show':'hide'();
+}
+function preview()
+{ 
+  var disp_setting="toolbar=no,status=no,resizable=no,location=no,directories=yes,menubar=no,"; 
+      disp_setting+="scrollbars=no,fullscreen=yes, height=700, left=100, top=25"; 
+  var content_vlue = document.getElementById("divPrint").innerHTML; 
+  var docprint=window.open("","",disp_setting); 
+   docprint.document.open(); 
+   docprint.document.write('<html><head>'); 
+   docprint.document.write('</head><div style=" font-size:16px !important; margin:0px; font-family:Verdana;"><style>table th {font-size:14px !important;} table td{font-size:12px !important;}</style><center>');          
+   docprint.document.write(content_vlue);          
+   docprint.document.write('</center></div></html>'); 
+   docprint.document.close(); 
+   docprint.focus(); 
+}
+function exportExcel(){
+	$('#exportExcel').tableExport({type:'excel',escape:'false'});
+}
+</script>

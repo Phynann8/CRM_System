@@ -1,0 +1,911 @@
+<?php
+	$tr = Application_Form_FrmLanguages::getCurrentlanguage();
+	echo $this->headTitle($tr->translate('STUDENT_NEARLY_END_REPORT')); 
+	$frm =  $this->form_search;
+	$classHideHeight=classHideHeight;
+	$nearlyPaymetySort = empty($this->search["nearlyPaymetySort"]) ? 1 : $this->search["nearlyPaymetySort"];
+	
+	$monthlyDayShow = 10;
+	$generalDayShow = 20;
+	
+?>	
+<style>
+	.hideprintdate{display: none;}
+</style>
+<style>
+*, *:before, *:after {
+    box-sizing: border-box;
+}
+
+*, button, input,select {
+    text-rendering: optimizeLegibility;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+.multi-select-container {/*using */
+    display: inline-block;
+    position: relative;
+	width: 98%;
+}
+
+.multi-select-menu {
+    position: absolute;
+    left: 0;
+    top: 0.8em;
+    z-index: 1;
+    float: left;
+    min-width: 100%;
+    background: #fff;
+    margin: 1em 0;
+    border: 1px solid #aaa;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    display: none;
+}
+
+.multi-select-menuitem {
+    display: block;
+    font-size: 0.875em;
+    padding: 0.6em 1em 0.6em 30px;
+    white-space: nowrap;
+}
+
+.multi-select-menuitem + .multi-select-menuitem {
+    padding-top: 0;
+}
+.multi-select-menuitem input {
+    position: absolute;
+    margin-top: 0.25em;
+    margin-left: -20px;
+}
+
+.multi-select-button {
+    display: inline-block;
+    font-size: 0.95em;
+    padding: 0.3em 0.2em;
+    max-width: 15em;
+	width:100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    vertical-align: -0.5em;
+    background-color: #fff;
+    border: 1px solid #b1badf;
+    border-radius: 2px;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+    cursor: default;
+}
+
+.multi-select-button:after {
+    content: "";
+    display: inline-block;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 0.4em 0.4em 0 0.4em;
+    border-color: #999 transparent transparent transparent;
+    margin-left: 0.4em;
+    vertical-align: 0.1em;
+}
+.multi-select-container--open .multi-select-menu {
+    display: block;
+}
+.multi-select-container--open .multi-select-button:after {
+    border-width: 0 0.4em 0.4em 0.4em;
+    border-color: transparent transparent #999 transparent;
+}
+
+.multi-select-container--positioned .multi-select-menu {
+    box-sizing: border-box;
+}
+
+.multi-select-container--positioned .multi-select-menu label {
+    white-space: normal;
+}
+
+</style>
+<script type="text/javascript" src="<?php echo $this->baseUrl();?>/jsmultiselect/src/jquery.multi-select.js"></script>
+
+<div style="min-height:15cm; margin:0 auto; padding:0.2cm 0.2cm 0cm 0.2cm">
+	<div class="card-box">
+       	<div class="col-sm-12 border-botom">
+		   	<div class="col-sm-8 pd-0">
+	    		<h4 class="m-b-0"><i class="fa fa-file " aria-hidden="true"></i>&nbsp;&nbsp;&nbsp;<?php echo $tr->translate('STUDENT_NEARLY_END_REPORT');?></h4>
+    		</div>
+    		<div class="col-sm-4 text-right">
+    		</div>
+    	</div>
+    </div>
+	<form  id='foundation_class' action="<?php echo $this->url(array('module'=>'allreport','controller'=>'accounting','action'=>'rptstudentnearlyendservice')); ?>" dojoType="dijit.form.Form" method="post" enctype="application/x-www-form-urlencoded">
+		<script type="dojo/method" event="onSubmit">
+		   if(this.validate()) {
+			year = dijit.byId('study_year').get('value');
+			   if(year==-1 || year==""){
+				 dijit.byId("study_year").focus();
+				 alert("<?php echo $tr->translate('PLEASE_SELECT_ACADEMIC_YEAR');?>")
+				return false;
+			}
+			loadingBlock();
+			return true;
+		   }else {
+			return false;
+		   }
+		</script>
+		<div class="form-group">
+       		<div class="col-md-2 col-sm-2 col-xs-12">
+       			<?php echo $frm->getElement("adv_search");?>
+       		</div>
+       		<div class="col-md-2 col-sm-2 col-xs-12">
+       			<?php echo $frm->getElement("branch_id");?>
+       		</div>
+       		<div class="col-md-2 col-sm-2 col-xs-12">
+       			<input id="study_year" />
+       		</div>
+       		<div class="col-md-2 col-sm-2 col-xs-12">
+       			<input id="group" />
+       		</div>
+       		<div class="col-md-2 col-sm-2 col-xs-12">
+       			<?php echo $frm->getElement("multiDegree");?>
+       		</div>
+       		<div class="col-md-2 col-sm-2 col-xs-12">
+       			<input type="text" id="grade_all" />
+       		</div>
+       	</div>
+       	<div class="form-group">
+			<div class="col-md-2 col-sm-2 col-xs-12">
+       			<?php echo $frm->getElement("service_type");?>
+       		</div>
+       		<div class="col-md-2 col-sm-2 col-xs-12">
+       			<select required="false" type="text" name="item" id="item" placeHolder="<?php echo $tr->translate('SELECT_CATEGORY');?>" class="fullside" dojoType="dijit.form.FilteringSelect"  autoComplete="false" queryExpr="*${0}*" onchange="getgradebyDegree();" >
+					<option value="-1"><?php echo $tr->translate('SELECT_CATEGORY');?></option>
+					<?php if(!empty($this->rs_type)){foreach ($this->rs_type as $rs){?>
+					<option value="<?php echo $rs['id']?>" <?php if($rs['id']== $this->search['item']){echo "selected";}?>><?php echo $rs['name']?></option>
+					<?php }}?>
+                </select>
+       		</div>
+       		<div class="col-md-2 col-sm-2 col-xs-12">
+       			<input id="service" name="service" />
+       		</div>
+			<div class="col-md-2 col-sm-2 col-xs-12">
+       			<?php echo $frm->getElement("pay_term");?>
+       		</div>
+			
+			<div class="col-md-2 col-sm-2 col-xs-12">
+       			<button class="button-class button-primary" iconClass="glyphicon glyphicon-search" dojoType="dijit.form.Button" showLabel="true" name="search"  type="submit"><?php echo $tr->translate("SEARCH");?></button>
+       		</div>
+       	</div>
+		<div class="form-group">
+			<div class="col-md-2 col-sm-2 col-xs-12">
+       			<?php echo $frm->getElement("periodDay");?>
+       		</div>
+       		<div class="col-md-2 col-sm-2 col-xs-12">
+       			<?php echo $frm->getElement("end_date");?>
+       		</div>
+			<div class="col-md-2 col-sm-2 col-xs-12">
+       			<?php echo $frm->getElement("nearlyFilterType");?>
+       		</div>
+			<div class="col-md-2 col-sm-2 col-xs-12">
+       			<?php echo $frm->getElement("nearlyPaymetySort");?>
+       		</div>
+       	</div>
+		  
+	</form>	
+	<div id="divPrint">
+			<table style="width:100%; white-space: nowrap;">
+				<tr>
+					<td colspan="2"><?php echo $this->rsheader;?></td>
+				</tr>
+				<tr>
+					<td align="center" width="100%" colspan="2">
+						<div style="width:100%; margin-top: -5px;">
+							<strong style="font-weight:normal; font-family: Arial Black;color:#000; font-size: 12px;font-family:'khmer os muol light';"><?php echo $tr->translate('STUDENT_NEARLY_END_REPORT');?></strong><br />
+							<span style="color:#000; font-size: 12px;font-family:'Times New Roman','Khmer OS Battambang';">
+								<span class="titleReportDatePrefix"></span>
+								<span class="titleReportDate"><?php if(!empty($this->search['end_date'])){?><?php echo date('d-M-Y',strtotime($this->search['end_date']));}?></span>
+								<label id="lblBranchId"></label>
+							</span>
+							<label class='hideprintdate'>Print Date <?php echo date("d-m-Y H:i");?></label>
+						</div>
+						
+					</td>			
+				</tr>
+				<style>
+					.hideprintdate{
+						font-size: 9px ;
+						position: absolute;
+						right:20px;
+					}
+					.hidden-data{display: none;}
+					.solidborderdouble{ border:2px solid #000;}
+					.solidborder-leftdouble{ border-left:2px solid #000;}
+					.solidborder-rightdouble{ border-right:2px solid #000;}
+					.solidborder-topdouble{ border-top:2px solid #000;}
+					.solidborder-bottomdouble{ border-bottom:2px solid #000;}
+					
+					.solidborder-top{ border-top:1px solid #000;}
+					tr td.solidborderleft{
+						border-left:1px solid #000;
+					}
+					.btmdothborder{border-bottom:1px dashed #969696;}
+					.leftdothborder{border-left:1px dashed #969696;}
+					
+					table.content-data{
+						border-collapse:collapse;
+						border:1px solid #000; 
+						font-size:11px;
+						line-height: 16px;
+						width:100%;
+						font-family:'Times New Roman','Khmer OS Battambang';
+					}
+					table tr.style-head{
+						font-weight: bold !important;
+						background: #CCD9FF;
+						white-space: nowrap;
+					}
+					table tr.style-head td {
+						border: solid 1px #626262;
+					}
+					table.content-data td,
+					table.content-data td span,
+					table tr td{
+						padding:1px;
+						line-height : inherit;
+					}
+					table.content-data tr.footerTotal {
+						background: #ccd9ff;
+					}
+					.bold {
+						font-weight: 600;
+					}
+					.bg-category {
+						background: #e1e7f8;
+						line-height: 20px;
+					}
+					.wrapcontent {
+						width: 170px;
+						white-space:normal;
+						text-wrap: wrap;
+						display:block;
+						line-height:14px;
+					}
+					.widthCol-px-100{
+						width: 100px !important;
+					}
+					.widthCol-px-120{
+						width: 120px !important;
+					}
+					td small {
+						font-size:85%;
+					}
+					td .d-block {
+						display: block !important;
+						line-height: 14px;
+					}
+					a {
+						color:#07396e;
+						text-decoration: none;
+						font-weight:bold;
+					}
+					table.content-data tbody td span.text-truncate{
+						overflow: hidden;
+						text-overflow: ellipsis;
+						white-space: nowrap;
+						line-height: inherit;
+						width: 100px;
+						display: block;
+					}
+					.w-px-100 {
+						width: 100px !important;
+					}
+					.w-px-120 {
+						width: 120px !important;
+					}
+					.w-px-150 {
+						width: 150px !important;
+					}
+					.w-px-200 {
+						width: 200px !important;
+					}
+					@media print{
+						<?php if(!empty($this->printFormat)){ echo $this->printFormat; } ?>
+					}
+				</style>
+				<tr>
+					<td colspan="2" id="exportExcel" >
+						<?php if($nearlyPaymetySort == 1){?>
+							<table class="content-data ">
+								<thead>
+										<tr class="solidborder-topdouble solidborder-rightdouble solidborder-leftdouble style-head" align="center" >
+											<td scope="col" rowspan="2">No.</td>
+											<td scope="col" colspan="3">Student Information</td>
+											<td scope="col" class="w-px-200" rowspan="2">Service</td>
+											<td class="solidborderleft" scope="col" colspan="6">Previous Payment </td>
+											<td scope="col" rowspan="2">Late(Days)</td>
+										</tr>
+										<tr align="center" class="solidborder-bottomdouble solidborder-leftdouble solidborder-rightdouble style-head" >
+											<td scope="col">Student Id</td>
+											<td scope="col" class="text-truncate w-px-150">Name</td>
+											<td scope="col" class="text-truncate w-px-120">Tel</td>
+											<td class="solidborderleft" scope="col">Receipt</td>
+											<td scope="col">Date</td>
+											<td scope="col">Paid</td>
+											<td scope="col">Pay For</td>
+											<td scope="col">Start</td>
+											<td scope="col">Validate</td>
+										</tr>
+								</thead>
+								<?php  
+								
+								
+									$studentId="";
+									$i=0;
+									$oldRow=0;
+									$totalPmt = 0;
+								if (!empty($this->row)) {
+									foreach ($this->row as $key => $row) {
+										$end_dat = $row['endDate'];
+										$total_day = strtotime($end_dat) - strtotime($this->search['end_date']);
+										$day = (int) ($total_day / (60 * 60 * 24));
+										$daylate = "";
+										$lateColor="inherit";
+										if ($day >= 0) {
+											if($row['paymentTermId']==1){
+												if(abs($day)<=$monthlyDayShow){
+													$daylate = "E " . sprintf('%02d',abs($day));
+												}
+											}else{
+												if(abs($day)<=$generalDayShow){
+													$daylate = "E " . sprintf('%02d',abs($day));
+												}
+											}
+											
+										} else {
+											$lateColor="red";
+											$daylate = "L " . sprintf('%02d',abs($day));
+										}
+										
+										
+										$classTopRow="";
+										$classBottomRow="";
+										$stringFront="";
+										if ($studentId != $row['studentId']) {
+											$i++;
+											$strFilter =  (string) $row['studentId'];
+											$arrRow = $this->row;
+											$resultOFStudent = array_filter($arrRow, function ($item) use ($strFilter) {
+												if ($item['studentId'] == $strFilter) {
+													return $item;
+												}
+												return;
+											});
+											
+											$amtRecord = count($resultOFStudent);
+											$amtRecord = ($amtRecord ==0) ? 1 : $amtRecord;
+											$stuName = $row['stuNameKh'];
+											$stuName = empty($stuName) ? $row['stuNameEn'] : $stuName;
+											$stringFront='
+												<td rowspan="'.$amtRecord.'" data-label="'.$tr->translate("N_O").'" align="center" >'.$i.'</td>
+												<td class="leftdothborder" rowspan="'.$amtRecord.'" data-label="'.$tr->translate("Student Id").'" align="center" >
+												'.$row['stuCode'].'
+												</td>
+												
+												<td class="leftdothborder" rowspan="'.$amtRecord.'" data-label="'.$tr->translate("Name").'" align="left" >
+													<span class="w-px-150 wrapcontent">'.$stuName.'</span>
+												</td>
+												<td class="leftdothborder" rowspan="'.$amtRecord.'" data-label="'.$tr->translate("Tel").'" align="left" >
+													<span class="w-px-120 wrapcontent">'.$row['tel'].'</span>
+												</td>
+											';
+											if($key>0){
+												$classTopRow="solidborder-top";
+											}
+										}
+										$row['paidamount'] = empty($row['paidamount']) ? 0 : $row['paidamount'];
+										$totalPmt = $totalPmt+$row['paidamount'];
+									?>
+									<tr class="<?php echo $classTopRow." ".$classBottomRow;?> btmdothborder solidborder-leftdouble solidborder-rightdouble hover context-menu-one" <?php if (!empty($row['pmtDetailId'])) { ?> oncontextmenu="setrowdata(<?php echo $row['pmtDetailId']; ?>,<?php echo $row['paymentId']; ?>,<?php echo $row['studentId']; ?>);return false;" <?php } ?>  style="white-space:nowrap;">
+										<?php echo $stringFront; ?>	
+										<td class="leftdothborder" data-label="<?php echo $tr->translate("Service"); ?>" align="center" >
+											<span class="bold text-truncate w-px-200 service_<?php echo $row['pmtDetailId']; ?>">
+												<?php echo $row['serviceTitle']; ?>
+											</span>
+										</td>
+										<td class="solidborderleft" data-label="<?php echo $tr->translate("RECEIPT_NO"); ?>"  align="center"><a onClick="addTab('<?php echo $tr->translate("RECEIPT"); ?>','<?php echo $this->baseUrl() . "/allreport/accounting/rptreceiptdetail/id/" . $row['paymentId'] . "?inFrame=true"; ?>')"; href="javascript:void(0);"><?php echo $row['receiptNo']; ?></a></td>
+										<td class="leftdothborder" data-label="<?php echo $tr->translate("PAID_DATE"); ?>"  align="center"><?php echo date("d-m-y", strtotime($row['paymentDate'])); ?></td>
+										<td class="leftdothborder" data-label="<?php echo $tr->translate("PAID"); ?>"  align="center"><?php echo $row['paidamount']; ?></td>
+										<td class="leftdothborder" data-label="<?php echo $tr->translate("TERM"); ?>"  align="center"><?php echo $row['paymentTerm']; ?></td>
+										<td data-label="<?php echo $tr->translate("START_DATE"); ?>" align="center">
+											<?php echo date("d-M-y", strtotime($row['startDate'])); ?>  
+											<input type="hidden" dojoType="dijit.form.TextBox" name="start_date_<?php echo $row['pmtDetailId']; ?>" id="start_date_<?php echo $row['pmtDetailId']; ?>" value="<?php echo $row['startDate']; ?>" />
+											<input type="hidden" name="studentId_<?php echo $row['pmtDetailId']; ?>" id="studentId_<?php echo $row['studentId']; ?>" value="<?php echo $row['studentId']; ?>" />
+											<input type="hidden" name="stuCode_<?php echo $row['pmtDetailId']; ?>" id="stuCode_<?php echo $row['pmtDetailId']; ?>" value="<?php echo $row['stuCode']; ?>" />
+											<input type="hidden" name="stuNameEn_<?php echo $row['pmtDetailId']; ?>" id="stuNameEn_<?php echo $row['pmtDetailId']; ?>" value="<?php echo $row['stuNameEn']; ?>" />
+											<input type="hidden" name="stuNameKh_<?php echo $row['pmtDetailId']; ?>" id="stuNameKh_<?php echo $row['pmtDetailId']; ?>" value="<?php echo $row['stuNameKh']; ?>" />
+											<input type="hidden" name="groupCode_<?php echo $row['pmtDetailId']; ?>" id="groupCode_<?php echo $row['pmtDetailId']; ?>" value="<?php echo $row['groupCode']; ?>" />
+											<input type="hidden" name="categoryName_<?php echo $row['pmtDetailId']; ?>" id="categoryName_<?php echo $row['pmtDetailId']; ?>" value="<?php echo $row['categoryName']; ?>" />
+											<input type="hidden" name="serviceName_<?php echo $row['pmtDetailId']; ?>" id="serviceName_<?php echo $row['pmtDetailId']; ?>" value="<?php echo $row['serviceTitle']; ?>" />
+											<input type="hidden" name="gradeId_<?php echo $row['pmtDetailId']; ?>" id="gradeId_<?php echo $row['pmtDetailId']; ?>" value="<?php echo $row['grade']; ?>" />
+										</td>
+										<td data-label="<?php echo $tr->translate("VALIDATE"); ?>" align="center"><?php echo date("d-M-y", strtotime($row['endDate'])); ?>  <input type="hidden" dojoType="dijit.form.TextBox" name="validate_<?php echo $row['pmtDetailId']; ?>" id="validate_<?php echo $row['pmtDetailId']; ?>" value="<?php echo $row['endDate']; ?>" /></td>
+										<td data-label="<?php echo $tr->translate("REMAIN_DAY"); ?>"  align="center" style="color: <?php echo $lateColor;?>;font-weight: bold;"><?php echo $daylate; ?></td>
+									</tr>
+									<?php 
+										$studentId = $row['studentId'];  
+									} 
+									?>
+									<tr class="footerTotal solidborder-topdouble solidborder-bottomdouble solidborder-rightdouble solidborder-leftdouble" style="white-space:nowrap;">
+										<td colspan="7" align="center">
+																				
+										</td>
+										<td align="center"><span class="bold"><?php echo  number_format($totalPmt,2);?></span></td>
+										<td colspan="4" align="center"></td>
+									</tr>
+								<?php 
+
+								} ?>
+							</table>
+						<?php }else{?>
+							<table cellpadding="2" class="content-data">
+								<thead>
+									<tr class="solidborder-topdouble solidborder-rightdouble solidborder-leftdouble style-head" align="center" >
+										<td scope="col" rowspan="2">No.</td>
+										<td scope="col" colspan="3">Student Information</td>
+										<td scope="col" rowspan="2">Class</td>
+										<td class="solidborderleft" scope="col" colspan="6">Previous Payment </td>
+										<td scope="col" rowspan="2">Late(Days)</td>
+									</tr>
+									<tr align="center" class="solidborder-bottomdouble solidborder-leftdouble solidborder-rightdouble style-head" >
+										<td scope="col">Student Id</td>
+										<td scope="col" class="w-px-150">Name</td>
+										<td scope="col" class="w-px-100">Tel</td>
+										<td class="solidborderleft" scope="col">Receipt</td>
+										<td scope="col">Date</td>
+										<td scope="col">Paid</td>
+										<td scope="col">Pay For</td>
+										<td scope="col">Start</td>
+										<td scope="col">Validate</td>
+									</tr>
+								</thead>
+							<?php  
+								$serviceId="";
+								$i=0;
+								$totalPmt=0;
+								$totalbalance=0; 
+								if(!empty($this->row)){foreach ($this->row AS $row) { $i++;
+								$end_dat=$row['endDate'];
+								$total_day=strtotime($end_dat)-strtotime($this->search['end_date']);
+								$day=(int)($total_day/(60*60*24));
+								$daylate ="";
+								$lateColor="inherit";
+								if($day>=0){
+									if($row['paymentTermId']==1){
+										if(abs($day)<=$monthlyDayShow){
+											$daylate = "E " . sprintf('%02d',abs($day));
+										}
+									}else{
+										if(abs($day)<=$generalDayShow){
+											$daylate = "E " . sprintf('%02d',abs($day));
+										}
+									}
+								}else{
+									$lateColor="red";
+									$daylate ="L ".sprintf('%02d',abs($day));
+								}
+								
+								$row['paidamount'] = empty($row['paidamount']) ? 0 : $row['paidamount'];
+								$totalPmt = $totalPmt+$row['paidamount'];
+							?>
+								<?php if($serviceId != $row['grade']){?>
+								<tr class="bg-category solidborder-leftdouble solidborder-rightdouble solidborder-topdouble solidborder-bottomdouble"  >
+									<td  colspan="12" align="center">
+										<?php echo $row['categoryName'];?>: <strong><?php  echo $row['serviceTitle'];?></strong>
+									</td>
+								</tr>
+								<?php } ?>
+								<tr  class="hover context-menu-one btmdothborder solidborder-leftdouble solidborder-rightdouble" <?php if(!empty($row['pmtDetailId'])){ ?> oncontextmenu="setrowdata(<?php echo $row['pmtDetailId'];?>,<?php echo $row['paymentId'];?>,<?php echo $row['studentId'];?>);return false;" <?php } ?>  style="white-space:nowrap;">
+									<td class=" leftdothborder" data-label="<?php echo $tr->translate("N_O");?>" align="center" ><?php echo $i;?></td>
+									<td class="leftdothborder" data-label="<?php echo $tr->translate("STUDENT_ID");?>" align="center"><span class="hidden-data branchName_<?php echo $row['pmtDetailId'];?>"><?php echo $row['branchName'];?></span><span class="hidden-data stuNameEn_<?php echo $row['pmtDetailId'];?> "><?php echo $row['stuNameEn'];?></span><span class="stuCode_<?php echo $row['pmtDetailId'];?>"><?php echo $row['stuCode'];?></span></td>
+									<td class="leftdothborder" data-label="<?php echo $tr->translate("STUDENT_NAME");?>"><span class="w-px-120 stuName_<?php echo $row['pmtDetailId'];?> wrapcontent"><?php echo $row['stuNameKh'];?></span></td>	
+									<td class="leftdothborder" data-label="<?php echo $tr->translate("PHONE");?>"  align="left"><span class="w-px-120 phone_<?php echo $row['pmtDetailId'];?> wrapcontent widthCol-px-120 small"><?php echo $row['tel'];?></span></td>
+									<td class="leftdothborder" data-label="<?php echo $tr->translate("GROUP");?>"  align="center"  ><span class="bold groupCode_<?php echo $row['pmtDetailId'];?>"><?php echo $row['groupCode'];?></span></td>
+									<td class="solidborderleft" data-label="<?php echo $tr->translate("RECEIPT_NO");?>"  align="center"><a onClick="addTab('<?php echo $tr->translate("RECEIPT");?>','<?php echo $this->baseUrl()."/allreport/accounting/rptreceiptdetail/id/".$row['paymentId']."?inFrame=true";?>')"; href="javascript:void(0);"><?php echo $row['receiptNo'];?></a></td>
+									<td class="leftdothborder" data-label="<?php echo $tr->translate("PAID_DATE");?>"  align="center"><?php echo date("d-m-y",strtotime($row['paymentDate']));?></td>
+									<td class="leftdothborder" data-label="<?php echo $tr->translate("PAID"); ?>"  align="center"><?php echo $row['paidamount'];?></td>
+									<td class="leftdothborder" data-label="<?php echo $tr->translate("TERM");?>"  align="center"><?php echo $row['paymentTerm'];?></td>
+									<td class="leftdothborder" data-label="<?php echo $tr->translate("START_DATE");?>" align="center"><?php echo date("d-m-y",strtotime($row['startDate']));?>  
+										<input type="hidden" dojoType="dijit.form.TextBox" name="start_date_<?php echo $row['pmtDetailId']; ?>" id="start_date_<?php echo $row['pmtDetailId']; ?>" value="<?php echo $row['startDate'];?>" />
+										<input type="hidden" name="studentId_<?php echo $row['pmtDetailId']; ?>" id="studentId_<?php echo $row['studentId']; ?>" value="<?php echo $row['studentId'];?>" />
+										<input type="hidden" name="stuCode_<?php echo $row['pmtDetailId']; ?>" id="stuCode_<?php echo $row['pmtDetailId']; ?>" value="<?php echo $row['stuCode'];?>" />
+										<input type="hidden" name="stuNameEn_<?php echo $row['pmtDetailId']; ?>" id="stuNameEn_<?php echo $row['pmtDetailId']; ?>" value="<?php echo $row['stuNameEn'];?>" />
+										<input type="hidden" name="stuNameKh_<?php echo $row['pmtDetailId']; ?>" id="stuNameKh_<?php echo $row['pmtDetailId']; ?>" value="<?php echo $row['stuNameKh'];?>" />
+										<input type="hidden" name="groupCode_<?php echo $row['pmtDetailId']; ?>" id="groupCode_<?php echo $row['pmtDetailId']; ?>" value="<?php echo $row['groupCode'];?>" />
+										<input type="hidden" name="categoryName_<?php echo $row['pmtDetailId']; ?>" id="categoryName_<?php echo $row['pmtDetailId']; ?>" value="<?php echo $row['categoryName'];?>" />
+										<input type="hidden" name="serviceName_<?php echo $row['pmtDetailId']; ?>" id="serviceName_<?php echo $row['pmtDetailId']; ?>" value="<?php echo $row['serviceTitle'];?>" />
+										<input type="hidden" name="gradeId_<?php echo $row['pmtDetailId']; ?>" id="gradeId_<?php echo $row['pmtDetailId']; ?>" value="<?php echo $row['grade'];?>" />
+									</td>
+									<td class="leftdothborder" data-label="<?php echo $tr->translate("VALIDATE");?>" align="center"><?php echo date("d-m-y",strtotime($row['endDate']));?><input type="hidden" dojoType="dijit.form.TextBox" name="validate_<?php echo $row['pmtDetailId']; ?>" id="validate_<?php echo $row['pmtDetailId']; ?>" value="<?php echo $row['endDate'];?>" /></td>
+									<td class="solidborderright" data-label="<?php echo $tr->translate("REMAIN_DAY");?>"  align="center" style="color: <?php echo $lateColor; ?>;font-weight: bold;"><?php echo $daylate;?></td>
+								</tr>
+								<?php $serviceId =$row['grade']; ?>	 
+								<?php }?>	 
+								<tr class="footerTotal solidborder-topdouble solidborder-bottomdouble solidborder-rightdouble solidborder-leftdouble" style="white-space:nowrap;">
+									<td colspan="7" align="center">						
+									</td>
+									<td align="center"><span class="bold"><?php echo  number_format($totalPmt,2);?></span></td>
+									<td colspan="4" align="center"></td>
+								</tr>
+								<?php }?>	 
+							</table>
+						<?php }?>
+					</td>
+				</tr>
+		</table>		
+	</div>		
+</div>
+<div class="dijitHidden">
+	<div data-dojo-type="dijit.Dialog" data-dojo-props="title:'<?php echo $tr->translate('EDIT_VALIDATE');?>'"  id="updateForm" style="width:550px;" >
+		<div class="card pb-10 pt-10 pl-10 pr-10">
+			<div class="d-flex justify-content-between align-items-center mb-1">
+				<h6 class="fw-normal mb-0 ">
+					<i class="fa fa-university  ti-26px me-1"></i>
+					<span class="modal-top-left"></span>
+				</h6>
+				<div>
+					<span class="d-block rounded bg-label-primary  p-1 mb-2">
+						<i class="fa fa-briefcase ti-26px me-1"></i>
+						<span class="modal-top-right"></span>
+					</span>
+				</div>
+			</div>
+			<div class="text-center mb-6">
+			  <h4 class="modal-title text-primary mb-1"></h4>
+			  <h4 class="modal-title-sub mb-1"></h4>
+			  <p class="modal-title-desc"></p>
+			</div>
+			<form id="validateFormInfo"  name="data" action="" dojoType="dijit.form.Form" method="post">
+				<div class="card-box">
+					<div class="form-group">
+					   <label class="control-label col-md-5 col-sm-5 col-xs-12" ><?php echo $tr->translate('START_DATE');?> :
+					   </label>
+					   <div class="col-md-7 col-sm-7 col-xs-12">
+							<input  class="fullside" type="text" dojoType="dijit.form.DateTextBox" name="start_date" id="start_date" placeholder="<?php echo $tr->translate("START_DATE");?>" />
+					   </div>
+					</div>
+					<div class="form-group">
+					   <label class="control-label col-md-5 col-sm-5 col-xs-12" ><?php echo $tr->translate('VALIDATE');?> :
+					   </label>
+					   <div class="col-md-7 col-sm-7 col-xs-12">
+							<input  class="fullside" type="text" dojoType="dijit.form.DateTextBox" name="validate" id="validate" placeholder="<?php echo $tr->translate("VALIDATE");?>" />
+					   </div>
+					   <input type="hidden" dojoType="dijit.form.TextBox" name="id" id="id"  />
+					   <input type="hidden" dojoType="dijit.form.TextBox" name="paymentId" id="paymentId"  />
+					   <input type="hidden" dojoType="dijit.form.TextBox" name="studentId" id="studentId"  />
+					   <input type="hidden" dojoType="dijit.form.TextBox" name="gradeId" id="gradeId"  />
+					</div>
+					<div class="form-group">
+						<div class="col-sm-12 border-top mt-20 ptb-10 text-center">
+							<input onclick="updateValidate();" type="button" value="1" label="<?php echo $tr->translate('EDIT');?>" id="busyButton" dojoType="dijit.form.Button" 
+							class="button-class button-primary" iconClass="glyphicon glyphicon-floppy-disk" /> 
+						</div>
+					</div>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
+<script type="text/javascript">
+$(function(){
+	<?php if(!empty($this->search['multiDegree'])){ ?>
+		var valSelectedList = <?php echo json_encode($this->search['multiDegree']); ?>;
+		 $('#multiDegree').val(valSelectedList);
+	<?php } ?>
+	$('#multiDegree').multiSelect({
+		noneText: '<?php echo $tr->translate("DEGREE");?>',
+		}
+	);
+	//$('#multiDegree').multiSelect('select', [1, 2]);
+
+});
+</script>
+<script src="<?php echo $this->baseUrl();?>/js/help.js"></script>
+<script src="<?php echo $this->baseUrl();?>/admin/js/global.js"  type="text/javascript"></script>
+<script type="text/javascript">
+dojo.require("dojo.data.ItemFileWriteStore"); 
+var academic_store= getDataStorefromJSON('id','name',<?php print_r(Zend_Json::encode(array()));?> );
+var group_store  = getDataStorefromJSON('id','name',<?php print_r(Zend_Json::encode(array()));?> );
+var service_store = getDataStorefromJSON('id','name');
+require(["dojo/ready"], function (ready) {
+	ready(function () {
+		var branch_id = dijit.byId('branch_id');
+		branch_id.on('change', function(evt) {
+			getAllAcademicByBranch();
+			getAllGroupByBranch();
+		});
+		dijit.byId('study_year').on('change', function(evt) {
+			getAllGroupByBranch();
+		});
+
+		dijit.byId('nearlyFilterType').on('change', function(evt) {
+			let filterOption = this.get('value'); // Correct way to get value in Dijit
+			if (filterOption == 3) {
+				dijit.byId('periodDay').set('value', 0); // Remove the `#` and use `set`
+				dijit.byId('periodDay').set('readOnly', true);
+			} else {
+				dijit.byId('periodDay').set('readOnly', false);
+			}
+		});
+
+		getAllAcademicByBranch();
+		getAllGroupByBranch();
+		getgradebyDegree();
+		initialData();
+
+		let branchLable = "-"+dijit.byId("branch_id").attr('displayedValue');
+		$('#lblBranchId').html(branchLable);
+	});
+	new dijit.form.FilteringSelect({
+		store: academic_store,
+		queryExpr: "*${0}*",
+		autoComplete: false,                     
+		required: false,                     
+		id: "study_year",
+		name: "study_year",
+		class: "fullside", 		
+		placeHolder:"<?php echo $tr->translate("SELECT_ACADEMIC_YEAR");?>",          
+		onChange: function() {  
+			academic_year = dijit.byId('study_year').get('value');
+		}
+	}, "study_year");
+	new dijit.form.FilteringSelect({
+		store: group_store,
+	    queryExpr: "*${0}*",
+		autoComplete: false,                     
+	    id: "group",
+	    name: "group",  
+	    class: 'fullside', 
+	    readonly:false,
+	    required:false,
+	    placeHolder:"<?php echo $tr->translate("SELECT_GROUP");?>",          
+	    onChange: function() {  
+	    }
+	}, "group");
+
+	new dijit.form.FilteringSelect({
+		store: service_store,
+		autoComplete: false,
+		queryExpr: "*${0}*",                     
+		id: "service",
+		name: "service",   
+		required:false,        
+		class: 'fullside',
+		placeHolder:'<?php echo $tr->translate('SERVICE');?>',
+		onChange: function() {  
+		}
+	}, "service");
+	 
+});
+
+function initialData(){
+	<?php if(!empty($this->search['end_date'])){ ?>
+		dijit.byId('end_date').set('value','<?php echo $this->search['end_date']?>');  	
+	<?php } ?>	
+	<?php if(!empty($this->search['study_year'])){ ?>
+		dijit.byId('study_year').set('value','<?php echo $this->search['study_year']?>');  	
+	<?php } ?>
+	<?php if(!empty($this->search['periodDay'])){ ?>
+		dijit.byId('periodDay').set('value','<?php echo $this->search['periodDay']?>');  	
+	<?php } ?>
+	periodDay = dijit.byId('periodDay').get('value');
+	$(".titleReportDatePrefix").html("");
+	if(periodDay!=0){
+		var periodDayLabel = dijit.byId("periodDay").attr('displayedValue');
+		$(".titleReportDatePrefix").html(periodDayLabel+" : ");
+	}
+}
+url_getacademic= '<?php echo $this->url(array('module'=>'foundation','controller'=>'group','action'=>'get-academicyear'));?>';
+var oldBranch = "<?php echo $this->search['branch_id']?>";
+function getAllAcademicByBranch(){
+	dijit.byId('study_year').reset();
+	branch_id = dijit.byId('branch_id').get('value');
+	if(branch_id=='' || branch_id==-1){
+		var academic_store  = getDataStorefromJSON('id','name',<?php print_r(Zend_Json::encode(array()));?> );
+		dijit.byId('study_year').set('store',academic_store);  
+		dijit.byId('branch_id').focus();
+		return false;
+	}
+	
+		contentData = {
+			'branch_id':branch_id
+		}
+		selectedId = '';
+		if(oldBranch==branch_id){
+			selectedId = '<?php echo $this->search['study_year']?>';
+		}
+		getAllYear(url_getacademic,contentData,selectedId,'study_year');
+}
+url_getgroup = '<?php echo $this->url(array('module'=>'foundation','controller'=>'group','action'=>'getgroupbybranch'));?>';
+function getAllGroupByBranch(){
+	dijit.byId('group').reset();
+	branch_id = dijit.byId('branch_id').get('value');
+	if(branch_id=='' || branch_id==-1){
+		var group_store  = getDataStorefromJSON('id','name',<?php print_r(Zend_Json::encode(array()));?> );
+		dijit.byId('group').set('store',group_store);  
+		dijit.byId('branch_id').focus();
+		return false;
+	}
+	dojo.xhrPost({
+		url: url_getgroup,
+		content:{
+			'branch_id':branch_id,
+			'academic_year':dijit.byId('study_year').get('value'),
+			'noaddnew':1,
+			'forfilter':1
+			},
+		handleAs:"json",
+		load: function(data) {
+		    group_store  = getDataStorefromJSON('id','name', data);
+		    dijit.byId('group').set('store',group_store);   
+		    if(oldBranch==branch_id){
+		    	dijit.byId('group').set('value','<?php echo $this->search['group']?>');  
+		    }
+		},
+		error: function(err) {
+		}
+	});
+}
+</script>
+<script type="text/javascript">
+	dojo.require("dojo.data.ItemFileWriteStore"); 
+	dojo.require("dijit.form.Textarea");
+	dojo.require("dojo.data.ItemFileWriteStore");  
+	dojo.require("dijit.form.DateTextBox");
+	
+	dojo.ready(function(){
+		new dijit.form.FilteringSelect({
+			queryExpr: "*${0}*",
+			autoComplete: false,                     
+			required: false,                        
+			id: "grade_all",
+			name: "grade_all",  
+			class: 'fullside',  
+			placeHolder:"<?php echo $tr->translate("SELECT_GRADE");?>",          
+			onChange: function() {  
+			}
+		}, "grade_all");
+		getallGrade();
+	});
+	var url_dept = '<?php echo $this->url(array('module'=>'global','controller'=>'grade','action'=>'get-grade')); ?>';
+	function getallGrade(){
+		dept_id = $('#multiDegree').val();
+		if(dept_id==null || !dept_id || dept_id.length === 0){
+			return false;
+		}
+		dojo.xhrPost({
+			url:url_dept,
+			content:{
+				'dept_id':JSON.stringify(dept_id),
+				'noaddnew':1
+				},
+			handleAs:"json",
+			load: function(data) {
+				grade_store  = getDataStorefromJSON('id','name', data);
+				dijit.byId('grade_all').set('store',grade_store);   
+				dijit.byId('grade_all').attr('value','<?php echo $this->search['grade_all']?>');  
+			},
+			error: function(err) {
+			}
+		});
+	}
+	
+var oldItems = '<?php echo $this->search['item']?>';
+var url_degree = '<?php echo $this->url(array('module'=>'global','controller'=>'grade','action'=>'get-grade')); ?>';
+function getgradebyDegree(){
+		dept_id = dijit.byId("item").get("value");
+		if(dept_id==-1){
+			return false;
+		}
+		dojo.xhrPost({
+			url:url_degree,
+			content:{
+				'dept_id':dept_id,
+				'noaddnew':1
+				},
+			handleAs:"json",
+			load: function(data) {
+				service_store  = getDataStorefromJSON('id','name', data);
+				dijit.byId('service').set('store',service_store);  	
+				if(oldItems==dept_id){
+					dijit.byId('service').set('value','<?php echo $this->search['service']?>');  	
+				}
+			},
+			error: function(err) {
+			}
+	});
+}
+
+
+var row=0;
+var pmtId=0;
+var stuId=0;
+var url="";
+$(function(){
+	$.contextMenu({
+		selector: '.context-menu-one', 
+		callback: function(key, options) {
+			var m = "clicked: " + key;
+			if(key=="edit"){
+				dijit.byId('id').set('value',row);
+				dijit.byId('paymentId').set('value',pmtId);
+				dijit.byId('studentId').set('value',stuId);
+				
+				var stuCode = $("#stuCode_"+row).val();
+				var stuNameEn = $("#stuNameEn_"+row).val();
+				var stuNameKh = $("#stuNameKh_"+row).val();
+				
+				
+				$(".modal-title").html(stuCode);
+				$(".modal-title-sub").html(stuNameKh+" "+stuNameEn);
+				$(".modal-title-desc").html($( "#categoryName_"+row).val() +': <strong>'+$( "#serviceName_"+row).val()+'</strong>');
+				
+				$(".modal-top-left").html($(".branchName_"+row).html());
+				$(".modal-top-right").html($( "#groupCode_"+row).val());
+
+				
+				var oldStartDate = dijit.byId("start_date_"+row).get("value");
+				var oldValidate = dijit.byId("validate_"+row).get("value");
+				dijit.byId('start_date').set('value',oldStartDate);
+				dijit.byId('validate').set('value',oldValidate);
+				dijit.byId('updateForm').show();
+			}else if(key=="receipt"){
+				url='<?php echo $this->baseUrl()."/allreport/accounting/rptreceiptdetail/id/";?>';
+				addTab("<?php echo $tr->translate("RECEIPT");?>",url+pmtId+'?inFrame=true');
+			}
+		},
+		items: {
+			"receipt": {name: "<?php echo $tr->translate("RECEIPT");?>", icon: "fa-print",},
+			"edit": {name: "<?php echo $tr->translate("EDIT_VALIDATE");?>", icon: "fa-calendar"},
+		}
+	});
+});
+function setrowdata(index,pmtIdRow,stuIdRow){
+	row = index;
+	pmtId = pmtIdRow;
+	stuId = stuIdRow;
+}
+
+
+var recordid ='';
+function gotoAction(){
+	window.open(url+row);
+}
+var voidReciept = '<?php echo $this->url(array('module'=>'allreport','controller'=>'accounting','action'=>'updatevalidate')); ?>';
+	function updateValidate(){
+		if(dijit.byId('validateFormInfo').validate()){
+			if(confirm("<?php echo $tr->translate("Do you want to edit validate");?>")){
+		}else{
+			dijit.byId('validateFormInfo').reset();
+			dijit.byId('updateForm').hide();
+			return false;
+		}
+			loadingBlock();
+			dojo.xhrPost({
+				url: voidReciept,
+				form: dojo.byId("validateFormInfo"),
+				handleAs:"json",
+				load: function(data){
+					dijit.byId('validateFormInfo').reset();
+					dijit.byId('updateForm').hide();
+					if(data==1){
+						alert("<?php echo $tr->translate("SUCCESS");?>");
+					}
+					location.reload();
+					HideloadingBlock();
+				},
+				error: function(err){
+					dijit.byId('validateFormInfo').reset();
+					dijit.byId('updateForm').hide();
+					HideloadingBlock();
+				}
+			});
+		}
+	}
+</script>
