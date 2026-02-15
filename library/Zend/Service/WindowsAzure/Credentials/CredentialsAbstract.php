@@ -41,7 +41,8 @@ abstract class Zend_Service_WindowsAzure_Credentials_CredentialsAbstract
      * Development storage account and key
      */
     const DEVSTORE_ACCOUNT       = "devstoreaccount1";
-    const DEVSTORE_KEY           = "***REMOVED***";
+    const DEVSTORE_KEY           = ""; // Key removed. Set via constructor or setAccountKey
+
     
     /**
      * HTTP header prefixes
@@ -88,7 +89,8 @@ abstract class Zend_Service_WindowsAzure_Credentials_CredentialsAbstract
 	 */
 	public function __construct(
 		$accountName = Zend_Service_WindowsAzure_Credentials_CredentialsAbstract::DEVSTORE_ACCOUNT,
-		$accountKey  = Zend_Service_WindowsAzure_Credentials_CredentialsAbstract::DEVSTORE_KEY,
+		$accountKey  = '',
+
 		$usePathStyleUri = false
 	) {
 		$this->_accountName = $accountName;

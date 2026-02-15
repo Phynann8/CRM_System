@@ -2,7 +2,8 @@
 class Mobileapp_Model_DbTable_DbDashboard extends Zend_Db_Table_Abstract
 {
 	protected $_name = 'mobile_about';
-	const DEFAULT_PASSWORD='***REMOVED***';
+	// const DEFAULT_PASSWORD removed, using global constant DEFAULT_PASSWORD
+
 	
 	public function getUserId(){
 		$session_user=new Zend_Session_Namespace(SYSTEM_SES);
@@ -11,8 +12,8 @@ class Mobileapp_Model_DbTable_DbDashboard extends Zend_Db_Table_Abstract
 	
 	function getLastActiveDeviceInfo($data){
 		
-		//$apiKey = "***REMOVED***";
-		//$appId = "***REMOVED***";
+		// Secrets removed
+
 		
 		$apiKey = APP_API_KEY;
 		$appId = APP_ID;
@@ -301,7 +302,7 @@ class Mobileapp_Model_DbTable_DbDashboard extends Zend_Db_Table_Abstract
 			$grade = "title";
 		}
 		
-		$defaultPass=self::DEFAULT_PASSWORD;
+		$defaultPass = defined('DEFAULT_PASSWORD') ? DEFAULT_PASSWORD : '';
 		
 		$stringJsonQue="
 		CONCAT(

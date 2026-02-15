@@ -6,6 +6,21 @@ defined('APPLICATION_PATH')
 
 // Define path to public directory
 defined('PUBLIC_PATH') || define('PUBLIC_PATH', realpath(dirname(__FILE__)));
+
+// Load local configuration for secrets
+$localConfigPath = APPLICATION_PATH . '/configs/local_config.php';
+if (file_exists($localConfigPath)) {
+    $localConfig = include $localConfigPath;
+} else {
+    $localConfig = array();
+}
+
+// Define secrets from config or environment
+defined('SECRET_KEY') || define('SECRET_KEY', isset($localConfig['api']['secret_key']) ? $localConfig['api']['secret_key'] : getenv('SECRET_KEY'));
+defined('DEFAULT_PASSWORD') || define('DEFAULT_PASSWORD', isset($localConfig['db']['password']) ? $localConfig['db']['password'] : getenv('DEFAULT_PASSWORD'));
+defined('APP_API_KEY') || define('APP_API_KEY', isset($localConfig['api']['key']) ? $localConfig['api']['key'] : getenv('APP_API_KEY'));
+defined('AZURE_STORAGE_KEY') || define('AZURE_STORAGE_KEY', isset($localConfig['api']['azure_storage_key']) ? $localConfig['api']['azure_storage_key'] : getenv('AZURE_STORAGE_KEY'));
+
 defined('TITLE_REPORT') || define('TITLE_REPORT', "style='color:#000; font-size:12px;font-family:Times New Roman,Khmer OS Muol Light;white-space:nowrap;'");
 defined('OTHER_LANG_REQUIRED') || define('OTHER_LANG_REQUIRED', 'false');
 defined('SYSTEM_SES') || define('SYSTEM_SES', "authtest");
@@ -17,7 +32,8 @@ defined('APPLICATION_ENV')
     || define('APPLICATION_ENV', (getenv('APPLICATION_ENV') ? getenv('APPLICATION_ENV') : 'production'));
 
 defined('HEADER_REPORT_TYPE') || define('HEADER_REPORT_TYPE', 3); // 1,2,3
-defined('SECRET_KEY') || define('SECRET_KEY', '***REMOVED***');
+// SECRET_KEY defined above
+defined('SECRET_KEY') || define('SECRET_KEY', 'replaced_by_local_config');
 defined('PICKUP_TYPE') || define('PICKUP_TYPE', 1); // type=1 for ELT and psis , type=2 for good will
 defined('CARD_TYPE') || define('CARD_TYPE', 1); // type=1 for ELT , type=2 for good will , type=3 for New World
 defined('BRANCHES') || define('BRANCHES', '1');
