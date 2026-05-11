@@ -202,7 +202,7 @@ class Zend_Gdata_App
      */
     public function getFeed($uri, $className='Zend_Gdata_App_Feed')
     {
-        return $this->importUrl($uri, $className, null);
+        return $this->importUrl($uri, $className);
     }
 
     /**
@@ -217,7 +217,7 @@ class Zend_Gdata_App
      */
     public function getEntry($uri, $className='Zend_Gdata_App_Entry')
     {
-        return $this->importUrl($uri, $className, null);
+        return $this->importUrl($uri, $className);
     }
 
     /**
@@ -734,7 +734,7 @@ class Zend_Gdata_App
             $requestData['method'], $requestData['url']);
 
         $feedContent = $response->getBody();
-        if (!$this->_useObjectMapping) {
+        if (!$app->_useObjectMapping) {
             return $feedContent;
         }
         $feed = self::importString($feedContent, $className);
@@ -1073,11 +1073,11 @@ class Zend_Gdata_App
             } else {
                 require_once 'Zend/Gdata/App/Exception.php';
                 throw new Zend_Gdata_App_Exception(
-                        "Unable to find '${class}' in registered packages");
+                        "Unable to find '{$class}' in registered packages");
             }
         } else {
             require_once 'Zend/Gdata/App/Exception.php';
-            throw new Zend_Gdata_App_Exception("No such method ${method}");
+            throw new Zend_Gdata_App_Exception("No such method {$method}");
         }
     }
 

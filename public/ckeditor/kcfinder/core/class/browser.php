@@ -157,7 +157,7 @@ class browser extends uploader {
             $this->sendDefaultThumb();
 
         $dir = $this->getDir();
-        $file = "{$this->thumbsTypeDir}/{$_GET['dir']}/${_GET['file']}";
+        $file = "{$this->thumbsTypeDir}/{$_GET['dir']}/{$_GET['file']}";
 
         // Create thumbnail
         if (!is_file($file) || !is_readable($file)) {
@@ -745,7 +745,7 @@ class browser extends uploader {
             $type = $img->getType();
 
             if ($type !== false) {
-                $size = $img->getSize($file);
+                $size = $img->getSize();
                 if (is_array($size) && count($size)) {
                     $thumb_file = "$thumbDir/" . basename($file);
                     if (!is_file($thumb_file))
@@ -772,7 +772,7 @@ class browser extends uploader {
                 'name' => stripcslashes($name),
                 'size' => $stat['size'],
                 'mtime' => $stat['mtime'],
-                'date' => @strftime($this->dateTimeSmall, $stat['mtime']),
+                'date' => date("m/d/Y h:i A", $stat['mtime']),
                 'readable' => is_readable($file),
                 'writable' => file::isWritable($file),
                 'bigIcon' => $bigIcon,
@@ -915,7 +915,7 @@ class browser extends uploader {
     }
 
     protected function htmlData($str) {
-        return htmlentities($str, null, strtoupper($this->charset));
+        return htmlentities($str, ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401, strtoupper($this->charset));
     }
 }
 

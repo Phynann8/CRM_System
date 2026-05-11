@@ -149,11 +149,11 @@ class Zend_Gdata_Gapps extends Zend_Gdata
      * XML document is contained within the original exception's HTTP
      * response. If conversion fails, throw the original error.
      *
-     * @param Zend_Gdata_Exception $e The exception to convert.
+     * @param Zend_Gdata_App_Exception $e The exception to convert.
      * @throws Zend_Gdata_Gapps_ServiceException
      * @throws mixed
      */
-    public static function throwServiceExceptionIfDetected($e) {
+    public static function throwServiceExceptionIfDetected(Zend_Gdata_App_Exception $e) {
         // Check to make sure that there actually response!
         // This can happen if the connection dies before the request
         // completes. (See ZF-5949)
@@ -201,6 +201,7 @@ class Zend_Gdata_Gapps extends Zend_Gdata
             return parent::import($uri, $client, $className);
         } catch (Zend_Gdata_App_HttpException $e) {
             self::throwServiceExceptionIfDetected($e);
+            throw $e; // Fallback to satisfy IDE
         }
     }
 
@@ -222,6 +223,7 @@ class Zend_Gdata_Gapps extends Zend_Gdata
             return parent::get($uri, $extraHeaders);
         } catch (Zend_Gdata_App_HttpException $e) {
             self::throwServiceExceptionIfDetected($e);
+            throw $e; // Fallback to satisfy IDE
         }
     }
 
@@ -234,7 +236,7 @@ class Zend_Gdata_Gapps extends Zend_Gdata
      * @param string $uri (optional) POST URI
      * @param integer $remainingRedirects (optional)
      * @param string $contentType Content-type of the data
-     * @param array $extraHaders Extra headers to add tot he request
+     * @param array $extraHeaders Extra headers to add to the request
      * @return Zend_Http_Response
      * @throws Zend_Gdata_App_HttpException
      * @throws Zend_Gdata_App_InvalidArgumentException
@@ -247,6 +249,7 @@ class Zend_Gdata_Gapps extends Zend_Gdata
             return parent::post($data, $uri, $remainingRedirects, $contentType, $extraHeaders);
         } catch (Zend_Gdata_App_HttpException $e) {
             self::throwServiceExceptionIfDetected($e);
+            throw $e; // Fallback to satisfy IDE
         }
     }
 
@@ -259,7 +262,7 @@ class Zend_Gdata_Gapps extends Zend_Gdata
      * @param string $uri (optional) PUT URI
      * @param integer $remainingRedirects (optional)
      * @param string $contentType Content-type of the data
-     * @param array $extraHaders Extra headers to add tot he request
+     * @param array $extraHeaders Extra headers to add to the request
      * @return Zend_Http_Response
      * @throws Zend_Gdata_App_HttpException
      * @throws Zend_Gdata_App_InvalidArgumentException
@@ -272,6 +275,7 @@ class Zend_Gdata_Gapps extends Zend_Gdata
             return parent::put($data, $uri, $remainingRedirects, $contentType, $extraHeaders);
         } catch (Zend_Gdata_App_HttpException $e) {
             self::throwServiceExceptionIfDetected($e);
+            throw $e; // Fallback to satisfy IDE
         }
     }
 
@@ -293,6 +297,7 @@ class Zend_Gdata_Gapps extends Zend_Gdata
             return parent::delete($data, $remainingRedirects);
         } catch (Zend_Gdata_App_HttpException $e) {
             self::throwServiceExceptionIfDetected($e);
+            throw $e; // Fallback to satisfy IDE
         }
     }
 
@@ -879,7 +884,7 @@ class Zend_Gdata_Gapps extends Zend_Gdata
             } else {
                 require_once 'Zend/Gdata/App/Exception.php';
                 throw new Zend_Gdata_App_Exception(
-                        "Unable to find '${class}' in registered packages");
+                        "Unable to find '{$class}' in registered packages");
             }
         } else {
             return parent::__call($method, $args);
@@ -1538,7 +1543,7 @@ class Zend_Gdata_Gapps extends Zend_Gdata
     /**
      * Retrieve all email lists associated with a recipient.
      *
-     * @param string $username The recipient whose associated email lists
+     * @param string $recipient The recipient whose associated email lists
      *          should be returned.
      * @return Zend_Gdata_Gapps_EmailListFeed The list of email lists found as
      *          Zend_Gdata_EmailListEntry objects.
@@ -1556,7 +1561,7 @@ class Zend_Gdata_Gapps extends Zend_Gdata
      * Retrieve a page of email lists in alphabetical order, starting with the
      * provided email list.
      *
-     * @param string $startEmailListName (optional) The first list to
+     * @param string $startNickname (optional) The first list to
      *              retrieve. If null or not defined, the page will begin
      *              with the first email list in the domain.
      * @return Zend_Gdata_Gapps_EmailListFeed Collection of Zend_Gdata_EmailListEntry
@@ -1565,9 +1570,9 @@ class Zend_Gdata_Gapps extends Zend_Gdata
      * @throws Zend_Gdata_App_HttpException
      * @throws Zend_Gdata_Gapps_ServiceException
      */
-    public function retrievePageOfEmailLists ($startNickname = null) {
+    public function retrievePageOfEmailLists ($startEmailListName = null) {
         $query = $this->newEmailListQuery();
-        $query->setStartEmailListName($startNickname);
+        $query->setStartEmailListName($startEmailListName);
         return $this->getEmailListFeed($query);
     }
 
@@ -1627,7 +1632,7 @@ class Zend_Gdata_Gapps extends Zend_Gdata
      * Retrieve a page of email list recipients in alphabetical order,
      * starting with the provided email list recipient.
      *
-     * @param string $emaiList The email list which should be searched.
+     * @param string $emailList The email list which should be searched.
      * @param string $startRecipient (optinal) The address of the first
      *              recipient, or null to start with the first recipient in
      *              the list.
@@ -1652,7 +1657,7 @@ class Zend_Gdata_Gapps extends Zend_Gdata
      * signifigant amount of time to complete. On larger domains this may
      * may cause execution to timeout without proper precautions in place.
      *
-     * @param string $emaiList The email list which should be searched.
+     * @param string $emailList The email list which should be searched.
      * @return Zend_Gdata_Gapps_EmailListRecipientFeed The list of email lists
      *              found as Zend_Gdata_Gapps_EmailListRecipientEntry objects.
      * @throws Zend_Gdata_App_Exception

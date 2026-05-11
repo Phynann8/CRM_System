@@ -85,6 +85,8 @@ class PHPExcel_Style_Fill extends PHPExcel_Style_Supervisor implements PHPExcel_
 	 * @var PHPExcel_Style_Color
 	 */
 	protected $_endColor;
+	public $startcolorIndex;
+	public $endcolorIndex;
 
 	/**
 	 * Create a new PHPExcel_Style_Fill
